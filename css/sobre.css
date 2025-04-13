@@ -1,19 +1,24 @@
 /* KAUÃ */
 @media (min-width: 350px) {
     #sobre_nos{
-        width: auto;
-        height: auto;
+        width: 100%;
     }
-    #green_line{
+}
+
+@media (min-width: 992px) {
+    .green_line{
         height: 100vh;
     }
 }
 
-@media (min-width: 1200px) {}
-
 @media (min-width: 1400px) {}
 
-body{
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    position: relative; /* Garante o contexto relativo */
     overflow-x: hidden;
 }
 
@@ -32,11 +37,7 @@ body{
     text-align: justify;
 }
 
-#sobre_nos_pagina .background-nossa-equipe {
-    background-color: #f5f5a9;
-    color: #2F4F4F;
-}
-
-#sobre_nos_pagina .text-justify {
-    text-align: justify;
+.background-nossa-equipe {
+    background-color: #F5F5DC;
+    color: #111111;
 }
