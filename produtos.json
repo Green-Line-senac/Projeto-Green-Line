@@ -1,0 +1,23 @@
+[
+    {
+      "nome": "Camisa Preta",
+      "imagem": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-Apd-5qaDSGuKucXJMEhmqPELT7w_7ywxPA&s",
+      "descricao": "Camisa 100% algodão",
+      "preco": 59.99,
+      "avaliacoes": 4.5,
+      "freteGratis": true,
+      "promocao": true,
+      "estoque": true
+    },
+    {
+      "nome": "Tênis Branco",
+      "imagem": "https://via.placeholder.com/300",
+      "descricao": "esportivo confortável",
+      "preco": 199.9,
+      "avaliacoes": 3.7,
+      "freteGratis": false,
+      "promocao": false,
+      "estoque": false
+    }
+  ]
+  
