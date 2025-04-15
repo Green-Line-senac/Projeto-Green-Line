@@ -18,6 +18,226 @@
       "freteGratis": false,
       "promocao": false,
       "estoque": false
-    }
+    },
+
+    {
+      "nome": "Escova de Dentes de Bambu",
+      "imagem": "nulo",
+      "descricao": "Feita com bambu 100% biodegradável, essa escova é uma alternativa ecológica às tradicionais de plástico. Além de linda, ela cuida dos seus dentes e do planeta ao mesmo tempo.",
+      "preco": 14.90,
+      "avaliacoes": 4.6,
+      "freteGratis": false,
+      "promocao": false,
+      "estoque": false
+    },
+    
+    {
+      "nome": "Shampoo Sólido Natural",
+      "imagem": "nulo",
+      "descricao": "Sem plástico, sem químicas pesadas. O shampoo sólido é prático, durável e perfeito para todos os tipos de cabelo. Com óleos essenciais e ingredientes naturais.",
+      "preco": 32.00,
+      "avaliacoes": 4.8,
+      "freteGratis": false,
+      "promocao": false,
+      "estoque": false
+    },
+    
+    {
+      "nome": "Canudos Reutilizáveis de Inox",
+      "imagem": "nulo",
+      "descricao": "Chega de plástico descartável! Leve com você esse kit com canudos de inox e escovinha de limpeza. Ideal para bebidas geladas e um estilo de vida consciente.",
+      "preco": 19.90,
+      "avaliacoes": 4.5,
+      "freteGratis": false,
+      "promocao": false,
+      "estoque": false
+    },
+   
+    {
+      "nome": "Bee Wrap (Embalagem de Cera de Abelha)",
+      "imagem": "nulo",
+      "descricao": "Substitua o plástico filme com esse pano de algodão coberto com cera de abelha. Reutilizável, lavável e perfeito para conservar alimentos de forma natural.",
+      "preco": 29.90,
+      "avaliacoes": 4.3,
+      "freteGratis": false,
+      "promocao": false,
+      "estoque": false
+    },
+    
+    {
+      "nome": "Garrafa Térmica Sustentável",
+      "imagem": "nulo",
+      "descricao": "Design moderno, construção resistente e zero plástico. Essa garrafa mantém sua bebida quente ou fria por horas e ainda evita centenas de garrafas descartáveis por ano.",
+      "preco": 89.90,
+      "avaliacoes": 4.7,
+      "freteGratis": false,
+      "promocao": false,
+      "estoque": false
+    },
+   
+    {
+      "nome": "Desodorante Natural em Barra",
+      "imagem": "nulo",
+      "descricao": "Livre de alumínio e parabenos, esse desodorante oferece proteção natural com fragrâncias suaves. Embalagem biodegradável e ingredientes naturais.",
+      "preco": 24.90,
+      "avaliacoes": 4.2,
+      "freteGratis": false,
+      "promocao": false,
+      "estoque": false
+    },
+  
+    {
+      "nome": "Sacola Reutilizável de Algodão Orgânico",
+      "imagem": "nulo",
+      "descricao": "Ideal para compras, feira ou dia a dia. Essa sacola é durável, lavável e feita com algodão cultivado sem agrotóxicos. Estilo e consciência ecológica em um só produto.",
+      "preco": 17.50,
+      "avaliacoes": 4.4,
+      "freteGratis": false,
+      "promocao": false,
+      "estoque": false
+    },
+    
+    {
+      "nome": "Copo Retrátil de Silicone",
+      "imagem": "nulo",
+      "descricao": "",
+      "preco": 21.90,
+      "avaliacoes": 4.1,
+      "freteGratis": false,
+      "promocao": false,
+      "estoque": false
+    },
+  
+    {
+      "nome": "Sabonetes Artesanais Veganos",
+      "imagem": "nulo",
+      "descricao": "",
+      "preco": 15.90,
+      "avaliacoes": 4.0,
+      "freteGratis": false,
+      "promocao": false,
+      "estoque": false
+    },
+    
+    {
+      "nome": "Kits de Higiene Pessoal Sustentável",
+      "imagem": "nulo",
+      "descricao": "",
+      "preco": 59.90,
+      "avaliacoes": 4.3,
+      "freteGratis": false,
+      "promocao": false,
+      "estoque": false
+    },
+   
+    {
+      "nome": "Esponja de Lavar Louça Biodegradável",
+      "imagem": "nulo",
+      "descricao": "",
+      "preco": 12.00,
+      "avaliacoes": 3.9,
+      "freteGratis": false,
+      "promocao": false,
+      "estoque": false
+    },
+    
+    {
+      "nome": "Embalagens de Cera de Abelha (Kit Extra)",
+      "imagem": "nulo",
+      "descricao": "",
+      "preco": 38.00,
+      "avaliacoes": 4.2,
+      "freteGratis": false,
+      "promocao": false,
+      "estoque": false
+    },
+   
+    {
+      "nome": "Panos Multiuso Reutilizáveis",
+      "imagem": "nulo",
+      "descricao": "",
+      "preco": 19.00,
+      "avaliacoes": 4.1,
+      "freteGratis": false,
+      "promocao": false,
+      "estoque": false
+    },
+    
+    {
+      "nome": "Roupas de Algodão Orgânico",
+      "imagem": "nulo",
+      "descricao": "",
+      "preco": 119.90,
+      "avaliacoes": 3.8,
+      "freteGratis": false,
+      "promocao": false,
+      "estoque": false
+    },
+   
+    {
+      "nome": "Cadernos de Papel Reciclado",
+      "imagem": "nulo",
+      "descricao": "",
+      "preco": 22.90,
+      "avaliacoes": 4.0,
+      "freteGratis": false,
+      "promocao": false,
+      "estoque": false
+    },
+    
+    {
+      "nome": "Carregadores Solares Portáteis",
+      "imagem": "nulo",
+      "descricao": "",
+      "preco": 149.90,
+      "avaliacoes": 4.5,
+      "freteGratis": false,
+      "promocao": false,
+      "estoque": false
+    },
+    
+    {
+      "nome": "Velas Ecológicas de Cera Vegetal",
+      "imagem": "nulo",
+      "descricao": "",
+      "preco": 27.90,
+      "avaliacoes": 3.7,
+      "freteGratis": false,
+      "promocao": false,
+      "estoque": false
+    },
+    
+    {
+      "nome": "Talheres Reutilizáveis de Bambu",
+      "imagem": "nulo",
+      "descricao": "",
+      "preco": 18.00,
+      "avaliacoes": 3.9,
+      "freteGratis": false,
+      "promocao": false,
+      "estoque": false
+    },
+    
+    {
+      "nome": "Filtros de Café de Pano",
+      "imagem": "nulo",
+      "descricao": "",
+      "preco": 9.90,
+      "avaliacoes": 3.5,
+      "freteGratis": false,
+      "promocao": false,
+      "estoque": false
+    },
+   
+    {
+      "nome": "Brinquedos de Madeira Sustentável",
+      "imagem": "nulo",
+      "descricao": "",
+      "preco": 69.90,
+      "avaliacoes": 4.2,
+      "freteGratis": false,
+      "promocao": false,
+      "estoque": false
+    }   
   ]
   
