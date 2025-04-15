@@ -27,3 +27,8 @@
     margin-top: 100px !important;
 
 }
+
+.carousel-inner img {
+    height: 200px; /* altura fixa */
+    object-fit: cover; /* cobre o espaço sem distorcer */
+  }
