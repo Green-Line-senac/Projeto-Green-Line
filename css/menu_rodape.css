@@ -34,7 +34,6 @@ body {
     background: white;
     color: black;
     padding: 1rem 0;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
     z-index: 1000;
     top: 0;
     overflow: visible;
@@ -112,14 +111,13 @@ body {
 .menu_green_line .nav-link:hover {
     color: gray !important;
     transform: translateY(-3px) scale(1.05);
-    text-shadow: 0 0 15px rgba(52, 211, 153, 0.9), 0 4px 10px rgba(0, 0, 0, 0.4);
+   
 }
 
 .menu_green_line .dropdown-menu {
     background: rgba(6, 78, 59, 0.9);
     border: none;
     border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     z-index: 1100;
     position: absolute;
     /* Garante que o dropdown se posicione corretamente */
@@ -181,7 +179,7 @@ body {
     cursor: pointer;
 }
 
-.menu_green_line .icon-btn:hover {
+.menu_green_line .icon-btn:hover { 
     color: gray !important;
     transform: translateY(-3px) scale(1.1);
     text-shadow: 0 0 15px rgba(52, 211, 153, 0.9);
@@ -191,13 +189,12 @@ body {
     color: black !important;
     font-size: 2rem;
     font-weight: 700;
-    text-shadow: 0 0 15px rgba(52, 211, 153, 0.8), 0 4px 10px rgba(0, 0, 0, 0.4);
     transition: all 0.3s ease;
     cursor: pointer;
 }
 
 .menu_green_line .navbar-brand:hover {
-    text-shadow: 0 0 25px rgba(52, 211, 153, 1), 0 6px 15px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 0 25px rgba(52, 211, 153, 0.233), 0 6px 15px rgba(0, 0, 0, 0.5);
     transform: scale(1.05);
 }
 
