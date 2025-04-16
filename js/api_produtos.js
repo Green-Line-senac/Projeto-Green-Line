@@ -1,6 +1,7 @@
-let todosProdutos = [];
+let todosProdutos = []; //armazenamos todos os produtos recuperados do arquivo produtos.json.
 
-function renderizarProdutos(produtos) {
+
+function renderizarProdutos(produtos) { //Essa função exibi os produtos no DOM
   const container = document.getElementById('container-produtos');
   container.innerHTML = '';
 
@@ -24,6 +25,8 @@ function renderizarProdutos(produtos) {
   });
 }
 
+
+
 function aplicarFiltros() {
   const promocao = document.getElementById('checkPromocao').checked;
   const frete = document.getElementById('checkFrete').checked;
@@ -40,6 +43,11 @@ function aplicarFiltros() {
 
   renderizarProdutos(filtrados);
 }
+/* Verifica quais filtros estão ativados nos checkboxes e filtra os produtos de acordo com:
+- promocao: Se o produto está em promoção.
+- freteGratis: Se o produto tem frete grátis.
+- estoque: Se o produto está disponível no estoque.
+- avaliacoes: Se o produto tem pelo menos 4 estrelas de avaliação.*/
 
 fetch('produtos.json')
   .then(res => res.json())
@@ -47,6 +55,17 @@ fetch('produtos.json')
     todosProdutos = data;
     renderizarProdutos(todosProdutos);
   });
+
+  /*SE FOSSE NO JAVA 
+        fetch('produtos.json')
+          .then(function(res) {
+          return res.json();
+        })
+        .then(function(data) {
+          todosProdutos = data;
+          renderizarProdutos(todosProdutos);
+        });
+  */
 
 // Ativa filtro sempre que mudar
 document.addEventListener('DOMContentLoaded', () => {
