@@ -49,7 +49,7 @@ function aplicarFiltros() {
 - estoque: Se o produto está disponível no estoque.
 - avaliacoes: Se o produto tem pelo menos 4 estrelas de avaliação.*/
 
-fetch('produtos.json')
+fetch('../json/produtos.json')
   .then(res => res.json())
   .then(data => {
     todosProdutos = data;
