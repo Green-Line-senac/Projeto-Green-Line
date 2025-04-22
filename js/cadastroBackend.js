@@ -8,6 +8,7 @@ app.use(express.json());
 app.use(cors()); // Ativar o CORS para permitir requisições de outras origens
 
 app.post("/cadastrar", (req, res) => {
+    console.log("Recebendo dados:", req.body);
     const { nome, email, cpf, telefone } = req.body;
     const sql = "INSERT INTO pessoa(nome, email, cpf_cnpj, telefone, tipo_pessoa) VALUES (?, ?, ?, ?, 'F')";
 
@@ -21,6 +22,6 @@ app.post("/cadastrar", (req, res) => {
     });
 });
 
-app.listen(3000, () => {
-    console.log("🚀 Servidor rodando em http://localhost:3000");
+app.listen(4000, () => {
+    console.log("🚀 Servidor rodando em http://localhost:4000");
 });

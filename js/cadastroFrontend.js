@@ -62,7 +62,7 @@ formularioCadastro.addEventListener('submit', function (e) {
 
     if (infoVal) {
         dadosUsuario = {nome, email, cpf, telefone};
-        fetch("http://localhost:3000/cadastrar", { // URL correta do backend
+        fetch("http://localhost:4000/cadastrar", { // URL correta do backend
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(dadosUsuario)

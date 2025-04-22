@@ -4,9 +4,9 @@ class Conexao {
     constructor() {
         this.connection = mysql.createConnection({
             host: '127.0.0.1',
-            port: 3306, // Ajuste a porta se necessário
+            port: 3307, // Ajuste a porta se necessário
             user: 'root',
-            password: 'SUASENHA',
+            password: 'senac',
             database: 'green_line'
         });
 
