@@ -1,5 +1,6 @@
 const formularioCadastro = document.getElementById('formularioCadastro');
-const senha = document.getElementById('password');
+const senha = document.getElementById('password').value;
+let dadosUsuario = [];
 formularioCadastro.addEventListener('submit', function (e) {
     e.preventDefault();
 
@@ -11,7 +12,7 @@ formularioCadastro.addEventListener('submit', function (e) {
     const emailErro = document.getElementById('emailErro');
     const telefone = document.getElementById('telefone').value;
     const telefoneErro = document.getElementById('telefoneErro');
-    senha = document.getElementById('password').value;
+    //senha = document.getElementById('password').value;
     const senhaErro = document.getElementById('senhaErro');
 
     let infoVal = true;
@@ -51,17 +52,25 @@ formularioCadastro.addEventListener('submit', function (e) {
         cpfErro.textContent = `Cadastro de Pessoa Física Inválido`;
         infoVal = false;
     }
-
+/*
     const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%?&])[A-Za-z\d@$!%?&]{8,}$/;
     if (!passRegex.test(senha)) {
         senhaErro.textContent =
             "A senha deve ter pelo menos 8 caracteres, incluindo 1 letra maiúscula, 1 número e 1 caractere especial.";
         infoVal = false;
-    }
+    }*/
 
     if (infoVal) {
-        alert("Cadastro realizado com sucesso!");
-        formularioCadastro.submit();
+        dadosUsuario = {nome, email, cpf, telefone};
+        fetch("http://localhost:3000/cadastrar", { // URL correta do backend
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(dadosUsuario)
+        })
+        .then(response => response.json())
+        .then(data => console.log("Resposta do servidor:", data))
+        .catch(error => console.error("Erro ao cadastrar:", error));
+
     }
 });
 
