@@ -16,7 +16,7 @@
     "preco": 199.9,
     "avaliacoes": 3.7,
     "freteGratis": false,
-    "promocao": false,
+    "promocao": true,
     "estoque": false
   },
 
@@ -71,7 +71,7 @@
     "preco": 89.90,
     "avaliacoes": 4.7,
     "freteGratis": false,
-    "promocao": false,
+    "promocao": true,
     "estoque": false
   },
  

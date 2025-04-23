@@ -14,27 +14,26 @@ function renderizarProdutos(produtos) {
     const card = document.createElement('div');
     card.className = 'col-12 col-sm-6 col-md-4 col-lg-3 mb-4';
     card.innerHTML = `
-      <a href="#" class="text-decoration-none text-dark">
-        <div class="card">
-          <img src="${produto.imagem}" class="card-img-top" alt="${produto.nome}">
-          <div class="card-body p-2">
-            <h6 class="card-title mb-1">${produto.nome}</h6>
-            <p class="text-warning mb-1">★★★★☆ <span class="text-secondary">${produto.avaliacoes} avaliações</span></p>
-            <small class="text-secondary">${produto.descricao}</small>
-            <div class="d-flex justify-content-between align-items-center">
-              ${produto.promocao ? `
-                <p class="fw-bold text-dark mb-0">
-                  <span style="text-decoration: line-through; font-size: 0.9rem;">R$ ${produto.preco.toFixed(2)}</span> 
-                  <span class="fs-5">R$ ${(produto.preco * 0.8).toFixed(2)}</span> <!-- Supondo 20% de desconto -->
-                </p>
-              ` : `
-                <p class="fw-bold text-dark mb-0">R$ ${produto.preco.toFixed(2)}</p>
-              `}
-            </div>
-          </div>
+  <a href="#" class="text-decoration-none text-dark h-100">
+    <div class="card h-100">
+      <img src="${produto.imagem}" class="card-img-top" alt="${produto.nome}">
+      <div class="card-body p-2 d-flex flex-column justify-content-between">
+        <h6 class="card-title mb-1">${produto.nome}</h6>
+        <p class="text-warning mb-1">★★★★☆ <span class="text-secondary">${produto.avaliacoes} avaliações</span></p>
+        <small class="text-secondary">${produto.descricao}</small>
+        <div class="mt-auto">
+          ${produto.promocao ? `
+            <p class="fw-bold text-dark mb-0">
+              <span style="text-decoration: line-through; font-size: 0.9rem;">R$ ${produto.preco.toFixed(2)}</span>
+              <span class="fs-5">R$ ${(produto.preco * 0.8).toFixed(2)}</span>
+            </p>
+          ` : `
+            <p class="fw-bold text-dark mb-0">R$ ${produto.preco.toFixed(2)}</p>
+          `}
         </div>
-      </a>
-    `;
+      </div>
+    </div>
+  </a>`;
     container.appendChild(card);
   });
 
