@@ -75,27 +75,3 @@ formularioCadastro.addEventListener('submit', function (e) {
 
     }
 });
-
-//INPUT SENHA
-const botaoVerSenha = document.getElementById('togglePassword');
-const olho = document.getElementById('olho');
-contador = 0;
-botaoVerSenha.addEventListener('click', function (e) {
-
-    if (contador == 0) {
-        olho.classList.remove('bi-eye');
-        olho.classList.remove('text-white');
-        olho.classList.add('bi-eye-slash');
-        olho.classList.add('text-dark');
-        senha.type = 'text';
-        contador = 1;
-    }
-    else {
-        olho.classList.remove('bi-eye-slash');
-        olho.classList.add('bi-eye');
-        olho.classList.add('text-white');
-        olho.classList.remove('text-dark');
-        senha.type = 'password';
-        contador = 0;
-    }
-});
