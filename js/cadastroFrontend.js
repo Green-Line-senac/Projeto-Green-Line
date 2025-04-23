@@ -29,13 +29,11 @@ formularioCadastro.addEventListener('submit', function (e) {
     if (!nameRegex.test(nome)) {
         nomeErro.classList.remove('d-none');
         nomeErro.classList.add('d-block');
-        nomeErro.textContent = `Nome Inválido`;
         infoVal = false;
     }
 
     const emailRegex = /^([a-zA-Z0-9._%+-]+)@([a-zA-Z0-9.-]+)\.([a-zA-Z]{2,})$/;
     if (!emailRegex.test(email)) {
-        emailErro.textContent = `E-mail inválido`;
         emailErro.classList.remove('d-none');
         emailErro.classList.add('d-block');
         infoVal = false;
@@ -43,35 +41,55 @@ formularioCadastro.addEventListener('submit', function (e) {
 
     const phoneRegex = /^[1-9]{2}9\d{8}$/;
     if (!phoneRegex.test(telefone)) {
-        telefoneErro.textContent = `Telefone Inválido`;
+        telefoneErro.classList.remove('d-none');
+        telefoneErro.classList.add('d-block');
         infoVal = false;
     }
 
     const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$|^\d{11}$/;
     if (!cpfRegex.test(cpf)) {
-        cpfErro.textContent = `Cadastro de Pessoa Física Inválido`;
+        cpfErro.classList.remove('d-none');
+        cpfErro.classList.add('d-block');
         infoVal = false;
     }
-/*
-    const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%?&])[A-Za-z\d@$!%?&]{8,}$/;
+    // Expressão regular para pelo menos 1 letra e 1 número
+    const passRegex = /^(?=.*[a-zA-Z])(?=.*\d).+$/;
+
     if (!passRegex.test(senha)) {
-        senhaErro.textContent =
-            "A senha deve ter pelo menos 8 caracteres, incluindo 1 letra maiúscula, 1 número e 1 caractere especial.";
-        infoVal = false;
-    }*/
+        senhaErro.classList.remove('d-none');
+        senhaErro.classList.add('d-block');
+    } else {
+       senhaErro.classList.add('d-none');
+    }
+
 
     if (infoVal) {
-        dadosUsuario = {nome, email, cpf, telefone};
+        dadosUsuario = { nome, email, cpf, telefone, senha };
         fetch("http://localhost:3000/cadastrar", { // URL correta do backend
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(dadosUsuario)
         })
-        .then(response => response.json())
-        .then(data => console.log("Resposta do servidor:", data))
-        .catch(error => console.error("Erro ao cadastrar:", error));
-
-        nome.value = " ";
-
+            .then(response => response.json())
+            .then(data => console.log("Resposta do servidor:", data))
+            .catch(error => console.error("Erro ao cadastrar:", error));
     }
 });
+
+//MÁSCARAS
+//CPF
+document.getElementById('cpf').addEventListener('input', function (e) {
+    let value = e.target.value.replace(/\D/g, '');
+    value = value.replace(/(\d{3})(\d)/, '$1.$2');
+    value = value.replace(/(\d{3})(\d)/, '$1.$2');
+    value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    e.target.value = value;
+});
+//TELEFONE
+document.getElementById('telefone').addEventListener('input', function (e) {
+    let value = e.target.value.replace(/\D/g, ''); // Remove caracteres não numéricos
+    value = value.replace(/(\d{2})(\d)/, '($1) $2'); // Adiciona parênteses e espaço após DDD
+    value = value.replace(/(\d{5})(\d)/, '$1-$2'); // Adiciona hífen no meio do número
+    e.target.value = value;
+});
+
