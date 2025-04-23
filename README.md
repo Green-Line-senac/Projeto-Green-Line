@@ -4,7 +4,7 @@ Este repositório contém a versão web do projeto **Green Line**, desenvolvida 
 
 ## Sobre o Projeto
 
-A **Green Line** é uma empresa fictícia idealizada pelos colaboradores deste projeto com o propósito de promover o **consumo consciente e sustentável* * por meio do comércio eletrônico. Nosso e-commerce é especializado na venda de produtos ecologicamente corretos, com foco em itens reutilizáveis, biodegradáveis e produzidos de forma ética.
+A **Green Line** é uma empresa fictícia idealizada pelos colaboradores deste projeto com o propósito de promover o **consumo consciente e sustentável** por meio do comércio eletrônico. Nosso e-commerce é especializado na venda de produtos ecologicamente corretos, com foco em itens reutilizáveis, biodegradáveis e produzidos de forma ética.
 
 O site foi desenvolvido com tecnologias web modernas, priorizando desempenho, segurança e acessibilidade. Conta com uma interface responsiva, amigável e intuitiva, garantindo uma excelente experiência de navegação.
 
