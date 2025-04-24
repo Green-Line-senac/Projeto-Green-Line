@@ -113,8 +113,8 @@ Quer colaborar?
 
 Dúvidas ou sugestões? Fale com a gente:
 
-- 📩 Email: [contato@greenline.com](mailto:contato@greenline.com)
+- 📩 Email: [greenline.ecologic@gmail.com](mailto:contato@greenline.com)
 
 ---
 
-<h2 align="center">🌎 Juntos por um consumo mais consciente! 🌱</h2>
+<h2 align="center">🌎 Faça do meio ambiente o seu meio de vida! 🌱</h2>
