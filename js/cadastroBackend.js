@@ -38,7 +38,7 @@ app.post("/cadastrar", async (req, res) => {
                 secure: true,
                 auth: {
                     user: 'greenline.ecologic@gmail.com',
-                    pass: 'Greendev01senac'
+                    pass: 'htvm cxka omdi tcoa'
                 }
             });
 

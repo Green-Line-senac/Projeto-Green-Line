@@ -5,102 +5,131 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro</title>
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
+    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- CSS Personalizados -->
     <link rel="stylesheet" href="css/login_cadastro.css">
+    <!-- JavaScript personalizado -->
     <script src="js/cadastroFrontend.js" defer></script>
 </head>
 
-<body id="cadastro" class="p-0 m-0">
-    <div class="d-md-flex half">
-        <div class="bg d-none d-md-block" style="background-image: url('img/wallpaper_cadastro.jpg')!important;">
-            <button class="mt-2 ms-3 btn btn-warning d-flex justify-content-center align-items-center rounded-circle"
-                style="width: 48px; height: 48px;">
-                <a href="index.html" class="text-decoration-none text-white">
-                    <i class="bi bi-arrow-left"></i>
-                </a>
-            </button>
-        </div>
-        <div class="contents">
-            <div class="container p-0">
-                <div class="row justify-content-center align-items-center align-items-md-center">
-                    <div class="col-md-12">
-                        <button class="btn d-block d-md-none text-start">
-                            <a href="index.html" class="text-dark">
-                                <i class="bi bi-arrow-bar-left"></i>
-                            </a>
-                        </button>
-                        <div class="form-block mx-auto">
+<body>
+    <!-- Estrutura principal dividida em duas partes -->
+    <div id="cadastro" class="p-0 m-0">
+        <div class="d-md-flex half">
 
-                            <div class="text-center mb-sm-3">
-                                <h3>Torne-se um <strong>Green Line</strong></h3>
-                                <!-- <p class="mb-4">Lorem ipsum dolor sit amet elit. Sapiente sit aut eos consectetur adipisicing.</p> -->
+            <!-- Lado esquerdo com imagem de fundo -->
+            <div class="bg d-none d-md-block" style="background-image: url('img/wallpaper_cadastro.jpg')!important;">
+                <button
+                    class="mt-2 ms-3 btn btn-warning d-flex justify-content-center align-items-center rounded-circle"
+                    style="width: 48px; height: 48px;">
+                    <a href="index.html" class="text-decoration-none text-white">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                </button>
+            </div>
+
+            <!-- Lado direito com formulário -->
+            <div class="contents">
+                <div class="container p-0">
+                    <div class="row justify-content-center align-items-center align-items-md-center">
+                        <div class="col-md-12">
+
+                            <!-- Botão para voltar (visível em telas menores) -->
+                            <button class="btn d-block d-md-none text-start">
+                                <a href="index.html" class="text-dark">
+                                    <i class="bi bi-arrow-bar-left"></i>
+                                </a>
+                            </button>
+
+                            <!-- Bloco do formulário -->
+                            <div class="form-block mx-auto">
+                                <div class="text-center mb-sm-3">
+                                    <h3>Torne-se um <strong>Green Line</strong></h3>
+                                </div>
+
+                                <!-- Formulário de cadastro -->
+                                <form id="formularioCadastro">
+
+                                    <!-- Campo Nome -->
+                                    <div class="form-group mb-2">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" placeholder="Nome" id="username"
+                                                pattern="[a-zA-Z\s]+" maxlength="60"
+                                                title="Somente letras e espaços são permitidos.">
+                                            <span
+                                                class="alert alert-danger d-none bi bi-exclamation-circle-fill text-danger span-height"
+                                                id="nomeErro"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Campo CPF -->
+                                    <div class="form-group last mb-2">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" placeholder="CPF" id="cpf"
+                                                pattern="\d{3}\.\d{3}\.\d{3}-\d{2}" maxlength="14"
+                                                title="Digite o CPF no formato 123.456.789-00">
+                                            <span
+                                                class="alert alert-danger d-none bi bi-exclamation-circle-fill text-danger span-height"
+                                                id="cpfErro"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Campo E-mail -->
+                                    <div class="form-group mb-2">
+                                        <div class="input-group">
+                                            <input type="email" class="form-control" placeholder="E-mail" id="email"
+                                                maxlength="60">
+                                            <span
+                                                class="alert alert-danger d-none bi bi-exclamation-circle-fill text-danger span-height"
+                                                id="emailErro"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Campo Telefone -->
+                                    <div class="form-group mb-2">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" placeholder="Telefone" id="telefone"
+                                                pattern="\(\d{2}\)\s9\d{4}-\d{4}" maxlength="15"
+                                                title="Digite o telefone no formato brasileiro: (11) 99999-9999">
+                                            <span
+                                                class="alert alert-danger d-none bi bi-exclamation-circle-fill text-danger span-height"
+                                                id="telefoneErro"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Campo Senha -->
+                                    <div class="form-group input-group mb-2">
+                                        <input type="password" class="form-control" id="password" placeholder="Senha"
+                                            pattern="(?=.*\d)(?=.*[a-zA-Z]).{5,}"
+                                            title="A senha deve ter pelo menos 5 caracteres, incluindo ao menos 1 número e 1 letra."
+                                            maxlength="5">
+                                        <span
+                                            class="alert alert-danger d-none bi bi-exclamation-circle-fill text-danger span-height"
+                                            id="senhaErro"></span>
+                                    </div>
+
+                                    <!-- Link para login -->
+                                    <div class="d-sm-flex mb-2 align-items-center justify-content-end">
+                                        <span class="ms-2 ml-auto"><a href="login.html"
+                                                class="forgot-pass text-decoration-none">Já possui conta?
+                                                <u>Entre</u></a></span>
+                                    </div>
+
+                                    <!-- Botão de envio -->
+                                    <button type="submit" class="btn btn-block btn-success">
+                                        Cadastrar
+                                    </button>
+
+                                </form>
                             </div>
-                            <form id="formularioCadastro">
-                                <div class="form-group mb-2">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" placeholder="Nome" id="username"
-                                            pattern="[a-zA-Z\s]+" maxlength="60"
-                                            title="Somente letras e espaços são permitidos.">
-                                        <span
-                                            class="alert alert-danger d-none bi bi-exclamation-circle-fill text-danger span-height"
-                                            id="nomeErro"></span>
-                                    </div>
-                                </div>
-
-                                <div class="form-group last mb-2">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" placeholder="CPF" id="cpf"
-                                            pattern="\d{3}\.\d{3}\.\d{3}-\d{2}" maxlength="14"
-                                            title="Digite o CPF no formato 123.456.789-00">
-                                        <span
-                                            class="alert alert-danger d-none bi bi-exclamation-circle-fill text-danger span-height"
-                                            id="cpfErro"></span>
-                                    </div>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <div class="input-group">
-                                        <input type="email" class="form-control" placeholder="E-mail" id="email"
-                                            maxlength="60">
-                                        <span
-                                            class="alert alert-danger d-none bi bi-exclamation-circle-fill text-danger span-height"
-                                            id="emailErro"></span>
-                                    </div>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" placeholder="Telefone" id="telefone"
-                                            pattern="\(\d{2}\)\s9\d{4}-\d{4}" maxlength="15"
-                                            title="Digite o telefone no formato brasileiro: Código de área seguido de número. Exemplo: (11) 999999999">
-                                        <span
-                                            class="alert alert-danger d-none bi bi-exclamation-circle-fill text-danger span-height"
-                                            id="telefoneErro"></span>
-                                    </div>
-                                </div>
-                                <div class="form-group input-group mb-2">
-                                    <input type="password" class="form-control" id="password" placeholder="Senha"
-                                        pattern="(?=.*\d)(?=.*[a-zA-Z]).{5,}"
-                                        title="A senha deve ter pelo menos 5 caracteres, incluindo ao menos 1 número e 1 letra."
-                                        maxlength="5">
-                                    <span
-                                        class="alert alert-danger d-none bi bi-exclamation-circle-fill text-danger span-height"
-                                        id="senhaErro"></span>
-                                </div>
-                                <div class="d-sm-flex mb-2 align-items-center justify-content-end">
-                                    <span class="ms-2 ml-auto"><a href="login.html"
-                                            class="forgot-pass text-decoration-none">Já possui conta?
-                                            <u>Entre</u></a></span>
-                                </div>
-
-                                <button type="submit" class="btn btn-block btn-success">
-                                    Cadastrar
-                                </button>
-
-                            </form>
                         </div>
                     </div>
                 </div>

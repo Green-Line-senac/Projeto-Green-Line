@@ -13,4 +13,3 @@ function criarPessoa(nome, email, telefone, cpf) {
             console.error('Erro ao criar pessoa:', err.message);
         });
 }
-criarPessoa('Kauã', 'kaua@email.com', '123456789', '12345678900');

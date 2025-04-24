@@ -1,14 +1,17 @@
-/* GABRIEL */
-#body {
-    justify-content: space-evenly;
+/* Estilo geral do corpo da página */
+body {
+    font-family: "Roboto", sans-serif; /* Define a fonte principal como Roboto, com fallback para sans-serif */
+    background-color: #fff; /* Define a cor de fundo como branco */
+    overflow-x: hidden; /* Remove o deslocamento horizontal caso o conteúdo exceda a largura */
 }
 
+/* Classe para margens personalizadas */
 .margem {
-    margin-top: 100px !important;
-
+    margin-top: 100px !important; /* Adiciona uma margem superior de 100px, com prioridade devido ao uso de !important */
 }
 
+/* Estilo para imagens dentro do carrossel */
 .carousel-inner img {
-    height: 200px; /* altura fixa */
-    object-fit: cover; /* cobre o espaço sem distorcer */
-  }
+    height: 200px; /* Define uma altura fixa para as imagens */
+    object-fit: cover; /* Faz com que as imagens ocupem todo o espaço, mantendo suas proporções */
+}
