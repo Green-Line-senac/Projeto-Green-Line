@@ -5,8 +5,9 @@
 </p>
 
 <p align="center">
-  <a href="#"><img src="https://img.shields.io/badge/Status-Concluído-success?style=flat-square" alt="Status: Concluído"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Status-Em%20Desenvolvimento-FFA500?style=flat-square" alt="Status: Em Desenvolvimento"></a>
 </p>
+
 
 ---
 
