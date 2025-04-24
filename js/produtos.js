@@ -9,7 +9,7 @@ function renderizarProdutos(produtos) {
   const inicio = (paginaAtual - 1) * produtosPorPagina;
   const fim = inicio + produtosPorPagina;
   const produtosPagina = produtos.slice(inicio, fim);
-//Produtos
+
   produtosPagina.forEach(produto => {
     const card = document.createElement('div');
     card.className = 'col-12 col-sm-6 col-md-4 col-lg-3 mb-4';
@@ -39,27 +39,30 @@ function renderizarProdutos(produtos) {
 
   criarPaginacao(produtos.length);
 }
-//Filtros 
+
 function aplicarFiltros(resetPagina = true) {
   if (resetPagina) {
     paginaAtual = 1;
   }
-  const promocao = document.getElementById('checkPromocao').checked;
-  const frete = document.getElementById('checkFrete').checked;
-  const estoque = document.getElementById('checkEstoque').checked;
-  const avaliacao = document.getElementById('checkAvaliacao').checked;
+
+  const promocao = document.getElementById('checkPromocao')?.checked;
+  const frete = document.getElementById('checkFrete')?.checked;
+  const estoque = document.getElementById('checkEstoque')?.checked;
+  const avaliacao = document.getElementById('checkAvaliacao')?.checked;
+  const textoBusca = document.getElementById('inputBusca')?.value.toLowerCase() || '';
 
   let filtrados = todosProdutos.filter(produto => {
     if (promocao && !produto.promocao) return false;
     if (frete && !produto.freteGratis) return false;
     if (estoque && !produto.estoque) return false;
     if (avaliacao && produto.avaliacoes < 4) return false;
+    if (textoBusca && !produto.nome.toLowerCase().includes(textoBusca)) return false;
     return true;
   });
 
   renderizarProdutos(filtrados);
 }
-//Paginação
+
 function criarPaginacao(totalProdutos) {
   const paginacao = document.querySelector('.pagination');
   paginacao.innerHTML = '';
@@ -72,21 +75,27 @@ function criarPaginacao(totalProdutos) {
     li.addEventListener('click', (e) => {
       e.preventDefault();
       paginaAtual = i;
-      aplicarFiltros(false); // NÃO reseta página
+      aplicarFiltros(false);
     });
     paginacao.appendChild(li);
   }
 }
+
 document.addEventListener('DOMContentLoaded', () => {
   const filtros = document.querySelectorAll('.form-check-input');
   filtros.forEach(filtro => {
-    filtro.addEventListener('change', () => aplicarFiltros(true)); // Resetar ao mudar filtro
+    filtro.addEventListener('change', () => aplicarFiltros(true));
   });
+
+  const inputBusca = document.getElementById('inputBusca');
+  if (inputBusca) {
+    inputBusca.addEventListener('input', () => aplicarFiltros(true));
+  }
 
   fetch('../json/produtos.json')
     .then(res => res.json())
     .then(data => {
       todosProdutos = data;
-      aplicarFiltros(); // Inicializa com todos os produtos
+      aplicarFiltros();
     });
 });
