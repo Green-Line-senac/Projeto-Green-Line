@@ -90,11 +90,11 @@ O Green Line é ideal para quem:
 
 Este projeto foi desenvolvido com dedicação por:
 
-- [Kauã Nunes](https://github.com/KauaNca)
-- [Gabriel](https://github.com/gabriel-reiss)
-- [Edenilson](https://github.com/Edenilson-Nascimento)
+- [Kauã Nunes](https://github.com/KauaNca)  
 - [Fabrício](https://github.com/fabricioribdev)
-- [Guilherme](https://github.com/soaresCP)
+- [Gabriel](https://github.com/gabriel-reiss)
+- [Edenilson](https://github.com/Edenilson-Nascimento) 
+- [Guilherme](https://github.com/soaresCP)  
 
 ---
 
@@ -114,7 +114,7 @@ Quer colaborar?
 
 Dúvidas ou sugestões? Fale com a gente:
 
-- 📩 Email: [greenline.ecologic@gmail.com](mailto:contato@greenline.com)
+- 📩 Email: [greenline.ecologic@gmail.com](mailto:greenline.ecologic@gmail.com)
 
 ---
 
