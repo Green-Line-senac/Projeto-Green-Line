@@ -1,5 +1,4 @@
 const formularioCadastro = document.getElementById('formularioCadastro');
-const senha = document.getElementById('password').value;
 let dadosUsuario = [];
 formularioCadastro.addEventListener('submit', function (e) {
     e.preventDefault();
@@ -12,7 +11,7 @@ formularioCadastro.addEventListener('submit', function (e) {
     const emailErro = document.getElementById('emailErro');
     const telefone = document.getElementById('telefone').value;
     const telefoneErro = document.getElementById('telefoneErro');
-    //senha = document.getElementById('password').value;
+    const senha = document.getElementById('password').value;
     const senhaErro = document.getElementById('senhaErro');
 
     let infoVal = true;
@@ -39,7 +38,7 @@ formularioCadastro.addEventListener('submit', function (e) {
         infoVal = false;
     }
 
-    const phoneRegex = /^[1-9]{2}9\d{8}$/;
+    const phoneRegex = /^\(\d{2}\)\s9\d{4}-\d{4}$/;
     if (!phoneRegex.test(telefone)) {
         telefoneErro.classList.remove('d-none');
         telefoneErro.classList.add('d-block');
@@ -53,13 +52,12 @@ formularioCadastro.addEventListener('submit', function (e) {
         infoVal = false;
     }
     // Expressão regular para pelo menos 1 letra e 1 número
-    const passRegex = /^(?=.*[a-zA-Z])(?=.*\d).+$/;
-
+    const passRegex = /^(?=.*[a-zA-Z])(?=.*\d).{5,}$/;
     if (!passRegex.test(senha)) {
         senhaErro.classList.remove('d-none');
         senhaErro.classList.add('d-block');
     } else {
-       senhaErro.classList.add('d-none');
+        senhaErro.classList.add('d-none');
     }
 
 
@@ -71,9 +69,14 @@ formularioCadastro.addEventListener('submit', function (e) {
             body: JSON.stringify(dadosUsuario)
         })
             .then(response => response.json())
-            .then(data => console.log("Resposta do servidor:", data))
+            .then(data => {
+                console.log("Resposta do servidor:", data);
+                // Redireciona após o sucesso do cadastro
+                window.location.href = "../login.html";
+            })
             .catch(error => console.error("Erro ao cadastrar:", error));
     }
+
 });
 
 //MÁSCARAS

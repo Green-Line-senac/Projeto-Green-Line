@@ -74,8 +74,8 @@
                                 <div class="form-group mb-2">
                                     <div class="input-group">
                                         <input type="text" class="form-control" placeholder="Telefone" id="telefone"
-                                            pattern="[1-9]{2}9\d{8}" maxlength="15"
-                                            title="Digite o telefone no formato brasileiro: Código de área seguido de número. Exemplo: 11999999999">
+                                            pattern="\(\d{2}\)\s9\d{4}-\d{4}" maxlength="15"
+                                            title="Digite o telefone no formato brasileiro: Código de área seguido de número. Exemplo: (11) 999999999">
                                         <span
                                             class="alert alert-danger d-none bi bi-exclamation-circle-fill text-danger span-height"
                                             id="telefoneErro"></span>
@@ -83,7 +83,7 @@
                                 </div>
                                 <div class="form-group input-group mb-2">
                                     <input type="password" class="form-control" id="password" placeholder="Senha"
-                                        pattern="(?=.*\d)(?=.*[a-zA-Z]).{8,}"
+                                        pattern="(?=.*\d)(?=.*[a-zA-Z]).{5,}"
                                         title="A senha deve ter pelo menos 5 caracteres, incluindo ao menos 1 número e 1 letra."
                                         maxlength="5">
                                     <span

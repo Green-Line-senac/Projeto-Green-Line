@@ -1,50 +1,63 @@
+const nodemailer = require('nodemailer'); //biblioteca para enviar emails 
 const express = require("express");
-const cors = require("cors"); // Importar o pacote CORS
-const Database = require("./conexao");
-const db = new Database();
-let id_pessoa;
+const cors = require("cors");
+const Database = require("./conexao"); //conexão com o banco de dados local
+const bcrypt = require("bcrypt"); //biblioteca para criptografar strings
 
-const app = express();
+const db = new Database(); //pode utilizar as funções de conexao.js
+const app = express(); //pode usar a biblioteca express
 app.use(express.json());
-app.use(cors()); // Ativar o CORS para permitir requisições de outras origens
+app.use(cors());
 
-app.post("/cadastrar", (req, res) => {
-    console.log("Recebendo dados:", req.body);
+app.post("/cadastrar", async (req, res) => {
     const { nome, email, cpf, telefone, senha } = req.body;
     const inserirPessoa = "INSERT INTO pessoa(nome, email, cpf_cnpj, telefone, tipo_pessoa) VALUES (?, ?, ?, ?, 'F')";
     const selecionarId = "SELECT id_pessoa FROM pessoa ORDER BY id_pessoa DESC";
-    const inserirUsuario = "INSERT INTO usuario(id_pessoa,senha) VALUE(?,?)";
+    const inserirUsuario = "INSERT INTO usuario(id_pessoa,id_tipo_usuario,senha,situacao) VALUE(?,'2',?,'A')";
 
-    db.query(inserirPessoa, [nome, email, cpf, telefone,senha], (err, result) => {
-        if (err) {
-            console.error("ERRO AO INSERIR DADOS:", err);
-            return res.status(500).json({ erro: "Erro ao salvar no banco de dados." });
-        }
+    try {
+        // Hash da senha
+        const senhaCriptografada = await bcrypt.hash(senha, 10);
 
-        res.json({ mensagem: "Dados recebidos e salvos com sucesso na tabela pessoa.", id: result.insertId });
-    });
-    db.query(selecionarId, (err, result) => {
-        if (err) {
-            console.error("ID PESSOA NÃO ENCONTRADO", err);
-            return res.status(500).json({ erro: "Erro ao procurar" })
-        }
-        if (result.lenght > 0) {
-            id_pessoa = result[0].id_pessoa;
-            console.log("ID ENCONTRADO");
-        }
-        else {
-            console.error("Nenhum resultado encontrado");
-            return res.status(404).json({ erro: "ID da pessoa não encontrado." });
-        }
-    })
-    db.query(inserirUsuario, [id_pessoa,senha], (err, result) => {
-        if (err) {
-            console.error("ERRO AO INSERIR DADOS:", err);
-            return res.status(500).json({ erro: "Erro ao salvar no banco de dados." });
-        }
+        // Inserir Pessoa
+        await db.query(inserirPessoa, [nome, email, cpf, telefone]);
 
-        res.json({ mensagem: "Dados recebidos e salvos com sucesso na tabela pessoa.", id: result.insertId });
-    });
+        // Selecionar ID da pessoa
+        const resultadoId = await db.query(selecionarId);
+        if (resultadoId.length > 0) {
+            const id_pessoa = resultadoId[0].id_pessoa;
+
+            // Inserir Usuário
+            await db.query(inserirUsuario, [id_pessoa, senhaCriptografada]);
+            res.json({ mensagem: "Cadastro concluído com sucesso." });
+
+            // Enviar e-mail de confirmação
+            const transporter = nodemailer.createTransport({
+                host: 'smtp.gmail.com',
+                port: 465,
+                secure: true,
+                auth: {
+                    user: 'greenline.ecologic@gmail.com',
+                    pass: 'Greendev01senac'
+                }
+            });
+
+            await transporter.sendMail({
+                from: 'Green Line <greenline.ecologic@gmail.com>',
+                to: email, //email colocado pelo usuário no cadastro
+                subject: 'Confirmação de email',
+                html: '<h1>Faça do meio ambiente o seu meio de vida</h1><p>Olá, obrigado por se tornar parte da Green Line. Confirme o email que colocou no cadastro para que possa começar suas compras dentro da plataforma.</p>'
+            });
+            console.log("E-mail enviado com sucesso.");
+        } else {
+            throw new Error("ID da pessoa não encontrado.");
+        }
+    } catch (err) {
+        console.error("Erro no processo:", err);
+        res.status(500).json({ erro: "Erro durante o processo de cadastro." });
+    } finally {
+        db.close();
+    }
 });
 
 app.listen(3000, () => {
