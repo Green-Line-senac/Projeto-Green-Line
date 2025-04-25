@@ -4,10 +4,11 @@ const express = require("express"); // Framework para construção de APIs web
 const cors = require("cors"); // Middleware para habilitar requisições cross-origin
 const Database = require("./conexao"); // Arquivo para conexão com banco de dados local
 const bcrypt = require("bcrypt"); // Biblioteca para criptografia de senhas
+const jwt = require("jsonwebtoken");
 
 // Instanciando objetos necessários
 const db = new Database(); // Instância para acessar funções de banco de dados
-const app = express(); // Instância do express para criar e configurar o servidor
+const app = express(); // Instância do express para criar e configurar o servid
 
 // Middlewares essenciais
 app.use(express.json()); // Permite o uso de JSON no corpo das requisições
@@ -49,13 +50,19 @@ app.post("/cadastrar", async (req, res) => {
                     pass: 'htvm cxka omdi tcoa' // Senha
                 }
             });
-
+            let gerarToken = criarToken(email);
             // Enviando o e-mail de confirmação para o usuário
             await transporter.sendMail({
-                from: 'Green Line <greenline.ecologic@gmail.com>', // Remetente
-                to: email, // Destinatário
-                subject: 'Confirmação de email', // Assunto do e-mail
-                html: '<h1>Faça do meio ambiente o seu meio de vida</h1><p>Olá, obrigado por se tornar parte da Green Line. Confirme o email que colocou no cadastro para que possa começar suas compras dentro da plataforma.</p>' // Conteúdo do e-mail
+                from: 'Green Line <greenline.ecologic@gmail.com>',
+                to: email,
+                subject: 'Confirmação de email',
+                html: `
+                  <h1>Faça do meio ambiente o seu meio de vida</h1>
+                  <p>Olá, obrigado por se tornar parte da Green Line. Confirme o email que colocou no cadastro para que possa começar suas compras dentro da plataforma.</p>
+                  <a href="http://localhost:3000/validar?token=${gerarToken}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; font-size: 16px; text-align: center;">
+                    Confirmar Email
+                  </a>
+                `
             });
             console.log("E-mail enviado com sucesso.");
         } else {
@@ -75,3 +82,12 @@ app.post("/cadastrar", async (req, res) => {
 app.listen(3000, () => {
     console.log("🚀 Servidor rodando em http://localhost:3000"); // Log indicando que o servidor está ativo
 });
+
+//Função para gerar tokens
+function criarToken(email) {
+    const segredo = 'green_line-ecologic'; // Chave secreta
+    const tempoValido = { expiresIn: "30m" }; // Tempo de validade do token
+
+    // Gera e retorna o token
+    return jwt.sign({ email: email }, segredo, tempoValido);
+}
