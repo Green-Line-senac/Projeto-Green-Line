@@ -1,112 +1,189 @@
 // Lista de produtos e configurações de paginação
-let todosProdutos = []; // Armazena todos os produtos carregados
-let paginaAtual = 1; // Define a página ativa na navegação
-const produtosPorPagina = 8; // Quantidade de produtos exibidos por página
+let todosProdutos = [];         // Armazena todos os produtos carregados do JSON
+let paginaAtual = 1;            // Página atualmente exibida
+const produtosPorPagina = 8;    // Quantos produtos mostrar por página
 
 // Função para renderizar os produtos no container da página
 function renderizarProdutos(produtos) {
-  const container = document.getElementById('container-produtos'); // Seleciona o container de produtos
-  container.innerHTML = ''; // Limpa o container para evitar duplicação
+  const container = document.getElementById('container-produtos');
+  container.innerHTML = ''; // Limpa os produtos anteriores
 
-  const inicio = (paginaAtual - 1) * produtosPorPagina; // Define o índice inicial para os produtos da página
-  const fim = inicio + produtosPorPagina; // Define o índice final para os produtos da página
-  const produtosPagina = produtos.slice(inicio, fim); // Filtra os produtos correspondentes à página atual
+  // Define o intervalo da página atual
+  const inicio = (paginaAtual - 1) * produtosPorPagina;
+  const fim = inicio + produtosPorPagina;
+  const produtosPagina = produtos.slice(inicio, fim); // Seleciona os produtos da página
 
-  // Cria os elementos de produto (cards) para exibição
+  // Para cada produto, cria um card e adiciona no container
   produtosPagina.forEach(produto => {
-    const card = document.createElement('div'); // Cria um div para o card do produto
-    card.className = 'col-12 col-sm-6 col-md-4 col-lg-3 mb-4'; // Classes responsivas para o layout do card
+    const card = document.createElement('div');
+    card.className = 'col-12 col-sm-6 col-md-4 col-lg-3 mb-4';
     card.innerHTML = `
-  <a href="#" class="text-decoration-none text-dark h-100">
-    <div class="card h-100">
-      <img src="${produto.imagem}" class="card-img-top" alt="${produto.nome}"> <!-- Adiciona descrição acessível para imagem -->
-      <div class="card-body p-2 d-flex flex-column justify-content-between">
-        <h6 class="card-title mb-1">${produto.nome}</h6> <!-- Nome do produto -->
-        <p class="text-warning mb-1">★★★★☆ <span class="text-secondary">${produto.avaliacoes} avaliações</span></p> <!-- Avaliação visual -->
-        <small class="text-secondary">${produto.descricao}</small> <!-- Descrição do produto -->
-        <div class="mt-auto">
-          ${produto.promocao ? `
-            <p class="fw-bold text-dark mb-0">
-              <span style="text-decoration: line-through; font-size: 0.9rem;">R$ ${produto.preco.toFixed(2)}</span>
-              <span class="fs-5">R$ ${(produto.preco * 0.8).toFixed(2)}</span>
-            </p>
-          ` : `
-            <p class="fw-bold text-dark mb-0">R$ ${produto.preco.toFixed(2)}</p>
-          `}
+      <a href="#" class="text-decoration-none text-dark h-100">
+        <div class="card h-100">
+          <img src="${produto.imagem}" class="card-img-top" alt="${produto.nome}">
+          <div class="card-body p-2 d-flex flex-column justify-content-between">
+            <h6 class="card-title mb-1">${produto.nome}</h6>
+            <p class="text-warning mb-1">★★★★☆ <span class="text-secondary">${produto.avaliacoes} avaliações</span></p>
+            <small class="text-secondary">${produto.descricao}</small>
+            <div class="mt-auto">
+              ${produto.promocao ? `
+                <p class="fw-bold text-dark mb-0">
+                  <span style="text-decoration: line-through; font-size: 0.9rem;">R$ ${produto.preco.toFixed(2)}</span>
+                  <span class="fs-5">R$ ${(produto.preco * 0.8).toFixed(2)}</span>
+                </p>
+              ` : `
+                <p class="fw-bold text-dark mb-0">R$ ${produto.preco.toFixed(2)}</p>
+              `}
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  </a>`;
-    container.appendChild(card); // Adiciona o card ao container principal
+      </a>`;
+    container.appendChild(card); // Adiciona o card ao container
   });
 
-  criarPaginacao(produtos.length); // Atualiza a navegação de páginas
+  criarPaginacao(produtos.length); // Atualiza os botões de página
 }
 
 // Função para aplicar filtros nos produtos
 function aplicarFiltros(resetPagina = true) {
-  if (resetPagina) {
-    paginaAtual = 1; // Reseta a página ao aplicar novos filtros
-  }
+  if (resetPagina) paginaAtual = 1; // Volta para a primeira página se necessário
 
-  // Captura o estado dos filtros e da busca
-  const promocao = document.getElementById('checkPromocao')?.checked; // Filtro de promoção
-  const frete = document.getElementById('checkFrete')?.checked; // Filtro de frete grátis
-  const estoque = document.getElementById('checkEstoque')?.checked; // Filtro de disponibilidade no estoque
-  const avaliacao = document.getElementById('checkAvaliacao')?.checked; // Filtro de avaliação mínima
-  const textoBusca = document.getElementById('inputBusca')?.value.toLowerCase() || ''; // Busca por nome de produto
+  // Captura os filtros selecionados
+  const textoBusca = document.getElementById('inputBusca')?.value.toLowerCase() || '';
+  const emEstoque = document.getElementById('status-estoque')?.checked;
+  const foraEstoque = document.getElementById('status-fora-estoque')?.checked;
+  const categorias = document.querySelectorAll('input[id^="cat-"]:checked');
 
-  // Filtragem dos produtos com base nos critérios definidos
+  // Filtra os produtos com base nos filtros
   let filtrados = todosProdutos.filter(produto => {
-    if (promocao && !produto.promocao) return false;
-    if (frete && !produto.freteGratis) return false;
-    if (estoque && !produto.estoque) return false;
-    if (avaliacao && produto.avaliacoes < 4) return false;
+    if (emEstoque && !produto.estoque) return false;
+    if (foraEstoque && produto.estoque) return false;
     if (textoBusca && !produto.nome.toLowerCase().includes(textoBusca)) return false;
-    return true; // Mantém o produto na lista filtrada
+
+    // Filtra por categoria (se alguma estiver marcada)
+    const categoriasSelecionadas = Array.from(categorias)
+      .map(cat => cat.id.replace('cat-', ''))
+      .filter(id => id !== 'todos');
+
+    if (categoriasSelecionadas.length && !categoriasSelecionadas.includes(produto.categoria)) return false;
+
+    return true; // Se passou por todos filtros, mantém o produto
   });
 
-  renderizarProdutos(filtrados); // Renderiza os produtos filtrados
+  renderizarProdutos(filtrados); // Mostra os produtos filtrados
+  atualizarFiltrosAplicados();   // Atualiza a seção "Filtros Aplicados"
 }
 
-// Função para criar a navegação de páginas
+// Atualiza os filtros aplicados dinamicamente
+function atualizarFiltrosAplicados() {
+  const container = document.querySelector('.filter-applied');
+  container.innerHTML = ''; // Limpa os filtros anteriores
+
+  // Captura os filtros ativos
+  const textoBusca = document.getElementById('inputBusca')?.value.toLowerCase() || '';
+  const emEstoque = document.getElementById('status-estoque')?.checked;
+  const foraEstoque = document.getElementById('status-fora-estoque')?.checked;
+  const categorias = document.querySelectorAll('input[id^="cat-"]:checked');
+
+  // Adiciona cada filtro como uma tag removível
+  if (textoBusca) {
+    container.appendChild(criarTagFiltro('Busca: ' + textoBusca, () => {
+      document.getElementById('inputBusca').value = '';
+      aplicarFiltros();
+    }));
+  }
+
+  if (emEstoque) {
+    container.appendChild(criarTagFiltro('Em estoque', () => {
+      document.getElementById('status-estoque').checked = false;
+      aplicarFiltros();
+    }));
+  }
+
+  if (foraEstoque) {
+    container.appendChild(criarTagFiltro('Fora de estoque', () => {
+      document.getElementById('status-fora-estoque').checked = false;
+      aplicarFiltros();
+    }));
+  }
+
+  categorias.forEach(cat => {
+    const id = cat.id.replace('cat-', '');
+    const nome = cat.parentElement.textContent.trim();
+    if (id !== 'todos') {
+      container.appendChild(criarTagFiltro(nome, () => {
+        cat.checked = false;
+        aplicarFiltros();
+      }));
+    }
+  });
+
+  // Se nenhum filtro estiver ativo, mostra "Tudo"
+  if (!container.children.length) {
+    container.innerHTML = `
+      <span class="filter-tag">
+        Tudo
+        <button type="button" aria-label="Nenhum filtro ativo">
+          <i class="fas fa-times" style="font-size: 0.75rem;"></i>
+        </button>
+      </span>
+    `;
+  }
+}
+
+// Cria elemento de filtro com botão para remover
+function criarTagFiltro(texto, onRemove) {
+  const span = document.createElement('span');
+  span.className = 'filter-tag';
+  span.innerHTML = `
+    ${texto}
+    <button type="button" aria-label="Remover filtro">
+      <i class="fas fa-times" style="font-size: 0.75rem;"></i>
+    </button>
+  `;
+  span.querySelector('button').addEventListener('click', onRemove); // Ação ao clicar no X
+  return span;
+}
+
+// Cria os botões de navegação de página
 function criarPaginacao(totalProdutos) {
-  const paginacao = document.querySelector('.pagination'); // Seleciona o container de paginação
-  paginacao.innerHTML = ''; // Limpa os elementos existentes
+  const paginacao = document.querySelector('.pagination');
+  paginacao.innerHTML = ''; // Limpa a paginação atual
 
-  const totalPaginas = Math.ceil(totalProdutos / produtosPorPagina); // Calcula o número total de páginas
+  const totalPaginas = Math.ceil(totalProdutos / produtosPorPagina); // Calcula total de páginas
 
-  // Criação dinâmica dos botões de navegação
   for (let i = 1; i <= totalPaginas; i++) {
-    const li = document.createElement('li'); // Cria um item para cada página
-    li.className = `page-item ${i === paginaAtual ? 'active' : ''}`; // Define estilo para a página ativa
-    li.innerHTML = `<a class="page-link" href="#">${i}</a>`; // Adiciona o número da página
+    const li = document.createElement('li');
+    li.className = `page-item ${i === paginaAtual ? 'active' : ''}`;
+    li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
     li.addEventListener('click', (e) => {
-      e.preventDefault(); // Previne comportamento padrão do link
-      paginaAtual = i; // Atualiza a página atual
-      aplicarFiltros(false); // Reaplica os filtros sem resetar
+      e.preventDefault(); // Evita o redirecionamento da página
+      paginaAtual = i;
+      aplicarFiltros(false); // Refiltra sem resetar a página
     });
-    paginacao.appendChild(li); // Adiciona o item à navegação
+    paginacao.appendChild(li);
   }
 }
 
-// Evento para inicializar a página após carregá-la
+// Executado ao carregar a página
 document.addEventListener('DOMContentLoaded', () => {
-  const filtros = document.querySelectorAll('.form-check-input'); // Seleciona todos os filtros
-  filtros.forEach(filtro => {
-    filtro.addEventListener('change', () => aplicarFiltros(true)); // Aplica filtros ao mudar estado
+  // Aplica evento de filtro em todos os checkboxes
+  const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+  checkboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', () => aplicarFiltros(true));
   });
 
-  const inputBusca = document.getElementById('inputBusca'); // Captura o campo de busca
+  // Aplica evento de busca por texto
+  const inputBusca = document.getElementById('inputBusca');
   if (inputBusca) {
-    inputBusca.addEventListener('input', () => aplicarFiltros(true)); // Aplica busca ao digitar
+    inputBusca.addEventListener('input', () => aplicarFiltros(true));
   }
 
-  // Fetch inicial para carregar os produtos
+  // Carrega os produtos do arquivo JSON
   fetch('../json/produtos.json')
-    .then(res => res.json()) // Converte resposta para JSON
+    .then(res => res.json())
     .then(data => {
-      todosProdutos = data; // Armazena os produtos recuperados
-      aplicarFiltros(); // Renderiza todos os produtos inicialmente
+      todosProdutos = data;    // Salva todos os produtos carregados
+      aplicarFiltros();        // Aplica os filtros iniciais (exibe todos por padrão)
     });
 });

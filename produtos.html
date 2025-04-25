@@ -16,12 +16,16 @@
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
     crossorigin="anonymous"></script>
   <script src="js/produtos.js"></script>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+  />
 </head>
 
 <body class="d-flex flex-column">
   <nav class="holo-header menu_green_line">
     <nav class="navbar navbar-expand-lg container bg-dark.bg-gradient">
-      <img src="img/logo.png" alt="">
+      <img src="img/logo.png" alt="Logo GreenLine" />
       <a class="navbar-brand" href="#">GreenLine</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
         aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -97,28 +101,60 @@
   <div class="container-fluid px-3">
     <div class="row">
       <!-- Filtros -->
-      <div class="col-12 col-md-3 mb-4">
-        <h5>Filtrar por:</h5>
-        <form>
-          <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" value="promocao" id="checkPromocao">
-            <label class="form-check-label" for="checkPromocao">Promoção</label>
+      <div class="col-12 col-md-2 mb-4 filter-container">
+        <section aria-label="Filtros" class="w-full">
+          <h2 class="filter-header">
+            <i class="fas fa-filter"></i>
+            Filtros
+          </h2>
+          <hr class="filter-hr" />
+          
+          <div>
+            <p class="filter-section-title">Filtros Aplicados</p>
+            <div class="filter-applied">
+              <!-- Aqui você pode esconder inicialmente se quiser -->
+            </div>
           </div>
-          <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" value="frete" id="checkFrete">
-            <label class="form-check-label" for="checkFrete">Frete grátis</label>
+      
+          <div>
+            <p class="filter-section-title">Categorias</p>
+            <form class="filter-form" aria-label="Categorias">
+              <label class="filter-label" for="cat-todos">
+                <input type="checkbox" id="cat-todos" class="filter-checkbox" />
+                Todos
+              </label>
+              <label class="filter-label" for="cat-casa">
+                <input type="checkbox" id="cat-casa" class="filter-checkbox" />
+                Casa
+              </label>
+              <label class="filter-label" for="cat-3">
+                <input type="checkbox" id="cat-3" class="filter-checkbox" />
+                Categorias 3
+              </label>
+              <label class="filter-label" for="cat-4">
+                <input type="checkbox" id="cat-4" class="filter-checkbox" />
+                Categorias 4
+              </label>
+            </form>
           </div>
-          <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" value="estoque" id="checkEstoque">
-            <label class="form-check-label" for="checkEstoque">Em estoque</label>
+      
+          <div>
+            <p class="filter-section-title">Status de Estoque</p>
+            <form class="filter-form" aria-label="Status de Estoque">
+              <label class="filter-label" for="status-estoque">
+                <input type="checkbox" id="status-estoque" class="filter-checkbox" />
+                Em estoque
+              </label>
+              <label class="filter-label" for="status-fora-estoque">
+                <input type="checkbox" id="status-fora-estoque" class="filter-checkbox" />
+                Fora de estoque
+              </label>
+            </form>
           </div>
-          <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" value="avaliacao" id="checkAvaliacao">
-            <label class="form-check-label" for="checkAvaliacao">Avaliação 4★+</label>
-          </div>
-        </form>
-      </div>
-
+      
+          <hr class="filter-hr mt-4" />
+        </section>
+      </div>      
       <!-- Conteúdo Principal -->
       <div class="col-12 col-md-9">
         <div class="row align-items-center mb-3">
@@ -126,13 +162,11 @@
             <form class="d-flex justify-content-start">
               <div class="input-group">
                 <!-- Busca por Nome -->
-                <div class="mb-4">
-                  <h6 class="text-muted mb-3 d-flex align-items-center gap-2">
-                    <i class="bi bi-search"></i>
-                    <span class="text-nowrap">Buscar Produto</span>
+                <div class="mb-4 w-100">
+                  <h6 class="text-muted mb-4 d-flex align-items-center gap-4">
                   </h6>
                   <div class="input-group">
-                    <input type="text" id="inputBusca" class="form-control" placeholder="Nome do produto">
+                    <input type="text" id="inputBusca" class="form-control" placeholder="Nome do produto" />
                     <button class="btn btn-outline-secondary" type="button" id="botaoBusca">
                       <i class="bi bi-search"></i>
                     </button>
@@ -150,8 +184,7 @@
             </nav>
           </div>
         </div>
-
-        <hr class="mt-3">
+        <hr class="mt-3" />
         <!-- Cards de produtos -->
         <div class="row" id="container-produtos">
           <!-- Os cards serão adicionados aqui dinamicamente -->
