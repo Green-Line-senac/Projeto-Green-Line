@@ -28,7 +28,7 @@ body {
 .pagination .page-link {
     color: #ffffff; /* Cor do texto */
     background-color: #2e8b56cc; /* Cor de fundo dos links */
-    border: 1px solid #2E8B57; /* Borda dos links */
+    border: 35px #2E8B57; /* Borda dos links */
 }
 
 .pagination .page-link:hover {
