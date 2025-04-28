@@ -1,5 +1,5 @@
 [
-  {
+{
     "nome": "Camisa Preta",
     "imagem": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-Apd-5qaDSGuKucXJMEhmqPELT7w_7ywxPA&s",
     "descricao": "Camisa 100% algodão",
@@ -227,5 +227,47 @@
     "freteGratis": false,
     "promocao": false,
     "estoque": false
-  }   
+  },
+  {
+    "nome": "Brinquedos de Madeira Sustentável",
+    "imagem": "https://www.keewe.com.br/media/uploads/162/2024/09/lpGwjI4vaq8AHaoJum3XcKhFt9tsUm9rtKU2zfdk.jpg",
+    "descricao": "Seguros, educativos e feitos com madeira eco.",
+    "preco": 69.90,
+    "avaliacoes": 4.2,
+    "freteGratis": false,
+    "promocao": false,
+    "estoque": false
+  },
+  {
+    "nome": "Produto 1",
+    "promocao": true,
+    "freteGratis": true,
+    "estoque": true,
+    "avaliacoes": 5,
+    "descricao": "Descrição do Produto 1",
+    "imagem": "url_da_imagem_1",
+    "preco": 100.00
+  },
+  {
+    "nome": "Produto 2",
+    "promocao": false,
+    "freteGratis": false,
+    "estoque": false,
+    "avaliacoes": 3,
+    "descricao": "Descrição do Produto 2",
+    "imagem": "https://www.keewe.com.br/media/uploads/162/2024/09/lpGwjI4vaq8AHaoJum3XcKhFt9tsUm9rtKU2zfdk.jpg",
+    "preco": 150.00
+  },
+  {
+    "nome": "Cafeteira Elétrica",
+    "categoria": "casa",
+    "imagem": "https://www.keewe.com.br/media/uploads/162/2024/09/lpGwjI4vaq8AHaoJum3XcKhFt9tsUm9rtKU2zfdk.jpg",
+    "avaliacoes": 125,
+    "descricao": "Uma cafeteira top.",
+    "preco": 199.90,
+    "promocao": true,
+    "freteGratis": true,
+    "estoque": true
+  }
+  
 ]

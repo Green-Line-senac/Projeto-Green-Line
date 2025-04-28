@@ -1,43 +1,51 @@
-/* KAUÃ */
+/* KAUÃ */ 
 @media (min-width: 350px) {
-    #sobre_nos{
-        width: 100%;
+    #sobre_nos {
+        width: 100%; /* Garante que o elemento ocupe toda a largura em dispositivos menores */
     }
 }
 
 @media (min-width: 992px) {
-    .green_line{
-        height: 100vh;
+    .green_line {
+        height: 100vh; /* Define a altura do elemento como igual à altura da janela de visualização */
     }
 }
 
-@media (min-width: 1400px) {}
+@media (min-width: 1400px) {
+    /* Adicionar regras específicas para dispositivos maiores caso necessário */
+}
 
+/* Estilo global */
 html, body {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    position: relative; /* Garante o contexto relativo */
-    overflow-x: hidden;
+    width: 100%; /* Garante que os elementos ocupem a largura total */
+    height: 100%; /* Garante que os elementos ocupem a altura total */
+    margin: 0; /* Remove margens padrão */
+    padding: 0; /* Remove padding padrão */
+    position: relative; /* Configura o contexto para posicionamento absoluto relativo ao documento */
+    overflow-x: hidden; /* Evita a rolagem horizontal para elementos fora do viewport */
 }
 
+/* Estilização de blocos de valores */
 .block_valores {
-    width: 19rem;
-    padding: 1.5rem;
-    height: 19rem;
+    width: 19rem; /* Define largura fixa compatível com design responsivo */
+    padding: 1.5rem; /* Adiciona espaçamento interno para um layout consistente */
+    height: 19rem; /* Define altura fixa */
 }
 
+/* Estilo para imagens */
 .imagem-valores {
-    height: 80px;
-    width: 80px;
+    height: 80px; /* Altura fixa para consistência visual */
+    width: 80px; /* Largura fixa correspondente */
+    /* Sugestão: Use max-width e max-height para garantir escalabilidade em telas menores */
 }
 
+/* Texto alinhado à justificação */
 .text-align-justify {
-    text-align: justify;
+    text-align: justify; /* Garante um alinhamento uniforme de texto */
 }
 
+/* Estilização da seção de equipe */
 .background-nossa-equipe {
-    background-color: #F5F5DC;
-    color: #111111;
+    background-color: #F5F5DC; /* Cor de fundo que proporciona contraste sutil */
+    color: #111111; /* Cor do texto para legibilidade */
 }

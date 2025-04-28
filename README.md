@@ -76,6 +76,7 @@ O Green Line é ideal para quem:
 
 ---
 
+
 ## 🚀 Como Visualizar Localmente
 
 1. Clone o repositório:
@@ -85,6 +86,14 @@ O Green Line é ideal para quem:
 2. Abra o arquivo `index.html` no navegador.
 
 ---
+
+
+<h1 align="center">🖥️ Prototipo Figma (Versão Web)</h1>
+
+- [Link:](https://www.figma.com/design/zqz3oTlb1rMefWhi7QIEJB/WEB--Copy-?t=J0166Bdd1txpyvDJ-1)  
+
+---
+
 
 ## 👥 Equipe
 
