@@ -186,12 +186,28 @@
         </div>
         <hr class="mt-3" />
         <!-- Cards de produtos -->
-        <div class="row" id="container-produtos">
+        <div class="row" id="container-produtos"></div>
           <!-- Os cards serão adicionados aqui dinamicamente -->
         </div>
       </div>
     </div>
   </div>
+<!-- Modal -->
+<div class="modal fade" id="produtoModal" tabindex="-1" aria-labelledby="produtoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="produtoModalLabel">Nome do Produto</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <img id="produtoModalImagem" src="" alt="" class="img-fluid mb-3">
+        <p id="produtoModalDescricao"></p>
+        <p class="fw-bold" id="produtoModalPreco"></p>
+      </div>
+    </div>
+  </div>
+</div>
 
   <footer class="container-fluid text-center text-white" style="background-color:black">
     <!-- Grid container -->
