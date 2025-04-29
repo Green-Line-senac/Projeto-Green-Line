@@ -2,14 +2,13 @@ const express = require("express"); // Framework para construção de APIs web
 const cors = require("cors"); // Middleware para habilitar requisições cross-origin
 const Database = require("./conexao"); // Arquivo para conexão com banco de dados local
 const jwt = require("jsonwebtoken");
-const porta = 3000;
+const porta = 3001;
 
 // Instanciando objetos necessários
 const db = new Database(); // Instância para acessar funções de banco de dados
 const app = express(); // Instância do express para criar e configurar o servidor
 
 // Middlewares essenciais
-app.use(express.json()); // Permite o uso de JSON no corpo das requisições
 app.use(cors()); // Libera acessos de diferentes origens ao servidor
 
 app.get("/validar",async(req,res)=>{

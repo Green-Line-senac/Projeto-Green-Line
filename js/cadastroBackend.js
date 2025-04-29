@@ -1,93 +1,106 @@
-// Importação de bibliotecas essenciais
-const nodemailer = require('nodemailer'); // Biblioteca para envio de e-mails
-const express = require("express"); // Framework para construção de APIs web
-const cors = require("cors"); // Middleware para habilitar requisições cross-origin
-const Database = require("./conexao"); // Arquivo para conexão com banco de dados local
-const bcrypt = require("bcrypt"); // Biblioteca para criptografia de senhas
+require("dotenv").config();
+const nodemailer = require("nodemailer");
+const express = require("express");
+const cors = require("cors");
+const Database = require("./conexao"); // usando o novo arquivo com pool
+const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-// Instanciando objetos necessários
-const db = new Database(); // Instância para acessar funções de banco de dados
-const app = express(); // Instância do express para criar e configurar o servid
+const app = express();
+app.use(express.json());
+app.use(cors());
 
-// Middlewares essenciais
-app.use(express.json()); // Permite o uso de JSON no corpo das requisições
-app.use(cors()); // Libera acessos de diferentes origens ao servidor
+const db = new Database(); // Reaproveita pool de conexões
 
-// Endpoint para cadastro de usuários
+// Função para gerar token JWT
+function criarToken(email) {
+    const segredo = 'green_line-ecologic';
+    return jwt.sign({ email }, segredo, { expiresIn: '30m' });
+}
+
+// Cadastro de usuário
 app.post("/cadastrar", async (req, res) => {
-    // Captura dos dados enviados na requisição
     const { nome, email, cpf, telefone, senha } = req.body;
 
-    // Queries SQL para interagir com o banco de dados
-    const inserirPessoa = "INSERT INTO pessoa(nome, email, cpf_cnpj, telefone, tipo_pessoa) VALUES (?, ?, ?, ?, 'F')"; // Inserção de dados da pessoa
-    const selecionarId = "SELECT id_pessoa FROM pessoa ORDER BY id_pessoa DESC"; // Seleção do último ID inserido
-    const inserirUsuario = "INSERT INTO usuario(id_pessoa,id_tipo_usuario,senha,situacao) VALUE(?,'2',?,'A')"; // Inserção de dados do usuário
+    const inserirPessoa = `INSERT INTO pessoa(nome, email, cpf_cnpj, telefone, tipo_pessoa) VALUES (?, ?, ?, ?, 'F')`;
+    const selecionarId = `SELECT id_pessoa FROM pessoa WHERE email = ? ORDER BY id_pessoa DESC LIMIT 1`;
+    const inserirUsuario = `INSERT INTO usuario(id_pessoa, id_tipo_usuario, senha, situacao) VALUES (?, '2', ?, 'I')`;
+    const inserirToken = `INSERT INTO token_temporario(id_usuario, token, validade, utilizado) VALUES (?, ?, ?, 0)`;
 
     try {
-        // Criptografando a senha para armazenamento seguro
         const senhaCriptografada = await bcrypt.hash(senha, 10);
-
-        // Inserindo os dados da pessoa no banco
         await db.query(inserirPessoa, [nome, email, cpf, telefone]);
 
-        // Recuperando o ID gerado para a pessoa
-        const resultadoId = await db.query(selecionarId);
-        if (resultadoId.length > 0) {
-            const id_pessoa = resultadoId[0].id_pessoa;
-
-            // Inserindo os dados de usuário
-            await db.query(inserirUsuario, [id_pessoa, senhaCriptografada]);
-            res.json({ mensagem: "Cadastro concluído com sucesso." });
-
-            // Configuração do serviço de envio de e-mails
-            const transporter = nodemailer.createTransport({
-                host: 'smtp.gmail.com', // Servidor SMTP para envio
-                port: 465, //
-                secure: true,
-                auth: {
-                    user: 'greenline.ecologic@gmail.com', // E-mail do remetente
-                    pass: 'htvm cxka omdi tcoa' // Senha
-                }
-            });
-            let gerarToken = criarToken(email);
-            // Enviando o e-mail de confirmação para o usuário
-            await transporter.sendMail({
-                from: 'Green Line <greenline.ecologic@gmail.com>',
-                to: email,
-                subject: 'Confirmação de email',
-                html: `
-                  <h1>Faça do meio ambiente o seu meio de vida</h1>
-                  <p>Olá, obrigado por se tornar parte da Green Line. Confirme o email que colocou no cadastro para que possa começar suas compras dentro da plataforma.</p>
-                  <a href="http://localhost:3000/validar?token=${gerarToken}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; font-size: 16px; text-align: center;">
-                    Confirmar Email
-                  </a>
-                `
-            });
-            console.log("E-mail enviado com sucesso.");
-        } else {
-            throw new Error("ID da pessoa não encontrado."); // Erro ao recuperar o ID
+        const resultadoId = await db.query(selecionarId, [email]);
+        if (resultadoId.length === 0) {
+            return res.status(400).json({ erro: "Erro ao recuperar o ID da pessoa." });
         }
+
+        const id_pessoa = resultadoId[0].id_pessoa;
+
+        await db.query(inserirUsuario, [id_pessoa, senhaCriptografada]);
+
+        const token = criarToken(email);
+        const validade = new Date(Date.now() + 30 * 60000); // 30 minutos
+
+        await db.query(inserirToken, [id_pessoa, token, validade]);
+
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
+        await transporter.sendMail({
+            from: 'Green Line <greenline.ecologic@gmail.com>',
+            to: email,
+            subject: 'Confirmação de email',
+            html: `
+              <h1>Faça do meio ambiente o seu meio de vida</h1>
+              <p>Olá, obrigado por se cadastrar na Green Line! Confirme seu e-mail para começar a usar a plataforma:</p>
+              <a href="http://localhost:3000/validar?token=${token}" style="padding:10px 20px; background-color:#007bff; color:white; text-decoration:none; border-radius:5px;">
+                Confirmar Email
+              </a>
+            `
+        });
+
+        console.log("✅ E-mail enviado com sucesso.");
+        res.status(200).json({ mensagem: "Cadastro realizado com sucesso! Verifique seu e-mail para confirmação." });
+
     } catch (err) {
-        // Tratamento de erros durante o processo de cadastro
-        console.error("Erro no processo:", err);
+        console.error("Erro no cadastro:", err);
         res.status(500).json({ erro: "Erro durante o processo de cadastro." });
-    } finally {
-        // Fecha a conexão com o banco de dados
-        db.close();
     }
 });
 
-// Configuração do servidor para ouvir requisições na porta 3000
-app.listen(3000, () => {
-    console.log("🚀 Servidor rodando em http://localhost:3000"); // Log indicando que o servidor está ativo
+// Validação do token (acesso via link de e-mail)
+app.get("/validar", async (req, res) => {
+    const { token } = req.query;
+    const segredo = process.env.SEGREDO_JWT;
+
+    try {
+        const payload = jwt.verify(token, segredo);
+        const email = payload.email;
+
+        const sql = "SELECT * FROM pessoa WHERE email = ?";
+        const resultado = await db.query(sql, [email]);
+
+        if (resultado.length > 0) {
+            res.send("<h1>Email confirmado com sucesso!</h1><p>Você já pode acessar a plataforma.</p>");
+        } else {
+            res.send("<h1>Erro!</h1><p>Email não encontrado. Tente cadastrar novamente.</p>");
+        }
+    } catch (erro) {
+        console.error("Erro na validação do token:", erro);
+        res.send("<h1>Token expirado ou inválido.</h1><p>Tente se cadastrar novamente.</p>");
+    }
 });
 
-//Função para gerar tokens
-function criarToken(email) {
-    const segredo = 'green_line-ecologic'; // Chave secreta
-    const tempoValido = { expiresIn: "30m" }; // Tempo de validade do token
-
-    // Gera e retorna o token
-    return jwt.sign({ email: email }, segredo, tempoValido);
-}
+// Iniciar servidor
+app.listen(process.env.PORTA, () => {
+    console.log("🚀 Servidor rodando em http://localhost:3000");
+});

@@ -1,4 +1,3 @@
-DROP DATABASE green_line;
 CREATE DATABASE green_line;
 USE green_line;
 
@@ -42,10 +41,15 @@ CREATE TABLE ImagensUsuarios (
     caminho_imagem VARCHAR(255) NOT NULL,
     FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE
 );
-
-
-
-
+CREATE TABLE token_temporario (
+    id_token INT PRIMARY KEY AUTO_INCREMENT,
+    id_usuario INT NOT NULL,
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE,
+    token VARCHAR(255) NOT NULL UNIQUE, -- Token gerado
+    validade DATETIME NOT NULL, -- Data e hora de expiração
+    utilizado INT NOT NULL DEFAULT 0, -- Flag para saber se foi usado
+    criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP -- Data de criação
+);
 
 CREATE TABLE acessos (
     id_acesso INT PRIMARY KEY AUTO_INCREMENT, 
@@ -326,7 +330,12 @@ VALUES
 ('CA', '94043-1351', 'Mountain View', 'Santa Clara', '1600 Amphitheatre Parkway', NULL, 'A', 9), -- Google LLC
 ('CA', '94304-1111', 'Palo Alto', 'Santa Clara', '3500 Deer Creek Road', NULL, 'A', 10); -- Tesla, Inc.
 
-
+CREATE EVENT expirar_tokens
+ON SCHEDULE EVERY 1 MINUTE
+DO
+UPDATE token_temporario
+SET utilizado = 1
+WHERE criado_em < DATE_SUB(NOW(), INTERVAL 30 MINUTE) AND utilizado = 0;
 
 
 
