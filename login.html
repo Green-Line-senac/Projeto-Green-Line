@@ -52,7 +52,7 @@
 
                         <!-- Bloco do formulário -->
                         <div class="form-block mx-auto">
-                            <div class="text-center mb-sm-5">
+                            <div class="text-center mb-sm-0">
                                 <h3>Entre na <strong>Green Line</strong></h3>
                                 <p>Digite seu email e senha para entrar em sua conta</p>
                             </div>
@@ -60,15 +60,14 @@
                             <!-- Formulário de login -->
                             <form action="#" method="post">
                                 <!-- Campo Usuário -->
-                                <div class="form-group first">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control input" id="username" placeholder="E-mail">
                                     <label for="username">Usuário</label>
-                                    <input type="text" class="form-control" placeholder="E-mail" id="username">
                                 </div>
-
-                                <!-- Campo Senha -->
-                                <div class="form-group last mb-3">
+                                
+                                <div class="form-floating">
+                                    <input type="password" class="form-control input" id="password" placeholder="Sua senha">
                                     <label for="password">Senha</label>
-                                    <input type="password" class="form-control" placeholder="Sua senha" id="password">
                                 </div>
 
                                 <!-- Checkbox de lembrar senha -->
