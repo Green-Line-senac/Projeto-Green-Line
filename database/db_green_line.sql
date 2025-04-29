@@ -1,6 +1,6 @@
+DROP DATABASE green_line;
 CREATE DATABASE green_line;
 USE green_line;
-
 
 CREATE TABLE pessoa (
     id_pessoa INT PRIMARY KEY AUTO_INCREMENT,
@@ -337,7 +337,9 @@ UPDATE token_temporario
 SET utilizado = 1
 WHERE criado_em < DATE_SUB(NOW(), INTERVAL 30 MINUTE) AND utilizado = 0;
 
-
+SELECT * FROM pessoa;
+SELECT * FROM usuario;
+SELECT * FROM token_temporario;
 
 
 
