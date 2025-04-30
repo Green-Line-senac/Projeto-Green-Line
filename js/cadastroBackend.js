@@ -5,6 +5,7 @@ const cors = require("cors");
 const Database = require("./conexao"); // usando o novo arquivo com pool
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const path = require("path");
 
 const app = express();
 app.use(express.json());
@@ -89,19 +90,21 @@ app.get("/validar", async (req, res) => {
             const id_pessoa = resultado[0].id_pessoa;
             try {
                 await db.query(atualizarSituacao, [id_pessoa]);
-                res.send("<h1>Email confirmado com sucesso!</h1><p>Você já pode acessar a plataforma.</p>");
+                // ✅ envia o arquivo HTML diretamente
+                res.sendFile(path.join(__dirname, "confirmacaoLogin.html"));
             } catch (erro) {
-                res.send("<h1>Aconteceu um erro!Tente novamente mais tarde</h1>");
+                console.error("Erro ao atualizar:", erro);
+                res.sendFile(path.join(__dirname, "erro.html"));
             }
-
         } else {
-            res.send("<h1>Erro!</h1><p>Email não encontrado. Tente cadastrar novamente.</p>");
+            res.sendFile(path.join(__dirname, "erro.html"));
         }
     } catch (erro) {
-        console.error("Erro na validação do token:", erro);
-        res.send("<h1>Token expirado ou inválido.</h1><p>Tente se cadastrar novamente.</p>");
+        console.error("Token inválido ou expirado:", erro);
+        res.sendFile(path.join(__dirname, "tokenExpirado.html")); // cuidado com o nome
     }
 });
+
 
 app.get("/verificarEmail", async (req, res) => {
     const { email } = req.query;
