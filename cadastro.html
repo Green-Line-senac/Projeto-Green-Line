@@ -51,7 +51,7 @@
 
                             <!-- Bloco do formulário -->
                             <div class="form-block mx-auto">
-                                <div class="text-center mb-sm-3">
+                                <div class="text-center -sm-3">
                                     <h3>Torne-se um <strong>Green Line</strong></h3>
                                 </div>
 
@@ -59,71 +59,69 @@
                                 <form id="formularioCadastro">
 
                                     <!-- Campo Nome -->
-                                    <div class="mb-2">
+                                    <div class="input-group">
+                                        <span class="alert d-block bi bi-person text-bg-success" data-bs-toggle="tooltip" title="Nome" id="nomeErro"></span>
                                         <div class="form-floating">
                                             <input type="text" class="form-control input" id="username" placeholder=" "
                                                 pattern="[a-zA-Z\s]+" maxlength="60"
                                                 title="Somente letras e espaços são permitidos." required>
                                             <label class="form-label" for="username">Nome</label>
-                                            <span
-                                                class="alert alert-danger d-none bi bi-exclamation-circle-fill text-danger span-height"
-                                                id="nomeErro"></span>
                                         </div>
                                     </div>
-
                                     <!-- Campo CPF -->
-                                    <div class="form-group last mb-2">
+                                    <div class="input-group">
+                                        <span class="alert d-block bi bi-card-list text-bg-success" id="cpfErro"></span>
                                         <div class="form-floating">
                                             <input type="text" class="form-control input" id="cpf" placeholder=" "
                                                 pattern="\d{3}\.\d{3}\.\d{3}-\d{2}" maxlength="14"
-                                                title="Digite o CPF no formato 123.456.789-00" required>
+                                                title="Digite o CPF no formato 123.456.789-00" onchange="verificarCPF()"
+                                                required>
                                             <label class="form-label" for="cpf">CPF</label>
-                                            <span
-                                                class="alert alert-danger d-none bi bi-exclamation-circle-fill text-danger span-height"
-                                                id="cpfErro"></span>
                                         </div>
                                     </div>
+                                    <span class="d-none text-danger fw-bold-0 text-end" id="cpfCadastrado" style="font-size: 0.6rem;">CPF cadastrado.</span>
 
                                     <!-- Campo E-mail -->
-                                    <div class="form-group mb-2">
+                                    <div class="input-group">
+                                        <span class="alert d-block bi bi-envelope-fill text-bg-success"
+                                            id="emailErro"></span>
                                         <div class="form-floating">
                                             <input type="email" class="form-control input" id="email" placeholder=" "
-                                                maxlength="60" required>
+                                                maxlength="60" onchange="verificarEmail()" required>
                                             <label class="form-label" for="email">E-mail</label>
-                                            <span
-                                                class="alert alert-danger d-none bi bi-exclamation-circle-fill text-danger span-height"
-                                                id="emailErro"></span>
                                         </div>
                                     </div>
+                                    <span class="d-none text-danger fw-bold -0 text-end" id="emailCadastrado" style="font-size: 0.6rem;">E-mail cadastrado.</span>
 
                                     <!-- Campo Telefone -->
-                                    <div class="form-group mb-2">
+                                    <div class="input-group">
+                                        <span class="alert d-block bi bi-telephone-fill text-bg-success"
+                                            id="telefoneErro"></span>
                                         <div class="form-floating">
                                             <input type="text" class="form-control input" id="telefone" placeholder=" "
                                                 pattern="\(\d{2}\)\s9\d{4}-\d{4}" maxlength="15"
                                                 title="Digite o telefone no formato brasileiro: (11) 99999-9999"
                                                 required>
                                             <label class="form-label" for="telefone">Telefone</label>
-                                            <span
-                                                class="alert alert-danger d-none bi bi-exclamation-circle-fill text-danger span-height"
-                                                id="telefoneErro"></span>
                                         </div>
                                     </div>
 
                                     <!-- Campo Senha -->
-                                    <div class="form-floating">
-                                        <input type="password" class="form-control input" id="password" placeholder=" "
-                                            pattern="(?=.*\d)(?=.*[a-zA-Z]).{5,}"
-                                            title="A senha deve ter pelo menos 5 caracteres, incluindo ao menos 1 número e 1 letra."
-                                            maxlength="5" required>
-                                        <label class="form-label" for="password">Senha</label>
+                                    <div class="input-group">
                                         <span
-                                            class="alert alert-danger d-none bi bi-exclamation-circle-fill text-danger span-height"
-                                            id="senhaErro"></span>
+                                                class="alert d-block bi bi-lock-fill text-bg-success"
+                                                id="senhaErro"></span>
+                                        <div class="form-floating">
+                                            <input type="password" class="form-control input" id="password"
+                                                placeholder=" " pattern="(?=.*\d)(?=.*[a-zA-Z]).{5,}"
+                                                title="A senha deve ter pelo menos 5 caracteres, incluindo ao menos 1 número e 1 letra."
+                                                maxlength="5" required>
+                                            <label class="form-label" for="password">Senha</label>
+                                        </div>
                                     </div>
 
                                     <!-- Link para login -->
-                                    <div class="d-sm-flex mb-2 align-items-center justify-content-end">
+                                    <div class="d-sm-flex -2 align-items-center justify-content-end">
                                         <span class="ms-2 ml-auto"><a href="login.html"
                                                 class="forgot-pass text-decoration-none">Já possui conta?
                                                 <u>Entre</u></a></span>

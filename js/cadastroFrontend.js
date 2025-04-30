@@ -1,64 +1,55 @@
+
+const nome = document.getElementById('username').value;
+const nomeErro = document.getElementById('nomeErro');
+const cpf = document.getElementById('cpf').value;
+const cpfErro = document.getElementById('cpfErro');
+const email = document.getElementById('email').value;
+const emailErro = document.getElementById('cpfErro');
+const telefone = document.getElementById('telefone').value;
+const telefoneErro = document.getElementById('telefoneErro');
+const senha = document.getElementById('password').value;
+const senhaErro = document.getElementById('senhaErro');
+const emailCadastrado = document.getElementById('emailCadastrado');
+const cpfCadastrado = document.getElementById('cpfCadastrado');
+
 const formularioCadastro = document.getElementById('formularioCadastro');
 let dadosUsuario = [];
 formularioCadastro.addEventListener('submit', function (e) {
     e.preventDefault();
-
-    const nome = document.getElementById('username').value;
-    const nomeErro = document.getElementById('nomeErro');
-    const cpf = document.getElementById('cpf').value;
-    const cpfErro = document.getElementById('cpfErro');
-    const email = document.getElementById('email').value;
-    const emailErro = document.getElementById('emailErro');
-    const telefone = document.getElementById('telefone').value;
-    const telefoneErro = document.getElementById('telefoneErro');
-    const senha = document.getElementById('password').value;
-    const senhaErro = document.getElementById('senhaErro');
-
     let infoVal = true;
 
     // Limpa mensagens de erro
     nomeErro.textContent = "";
     cpfErro.textContent = "";
-    emailErro.textContent = "";
+    cpfErro.textContent = "";
     telefoneErro.textContent = "";
     senhaErro.textContent = "";
 
     // Validações
     const nameRegex = /^[a-zA-Z\s]{1,30}$/;
     if (!nameRegex.test(nome)) {
-        nomeErro.classList.remove('d-none');
-        nomeErro.classList.add('d-block');
         infoVal = false;
     }
 
     const emailRegex = /^([a-zA-Z0-9._%+-]+)@([a-zA-Z0-9.-]+)\.([a-zA-Z]{2,})$/;
     if (!emailRegex.test(email)) {
-        emailErro.classList.remove('d-none');
-        emailErro.classList.add('d-block');
         infoVal = false;
     }
 
     const phoneRegex = /^\(\d{2}\)\s9\d{4}-\d{4}$/;
     if (!phoneRegex.test(telefone)) {
-        telefoneErro.classList.remove('d-none');
-        telefoneErro.classList.add('d-block');
         infoVal = false;
     }
 
     const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$|^\d{11}$/;
     if (!cpfRegex.test(cpf)) {
-        cpfErro.classList.remove('d-none');
-        cpfErro.classList.add('d-block');
         infoVal = false;
     }
     // Expressão regular para pelo menos 1 letra e 1 número
     const passRegex = /^(?=.*[a-zA-Z])(?=.*\d).{5,}$/;
     if (!passRegex.test(senha)) {
-        senhaErro.classList.remove('d-none');
-        senhaErro.classList.add('d-block');
-    } else {
-        senhaErro.classList.add('d-none');
-    }
+        infoVal = false;
+    } 
 
 
     if (infoVal) {
@@ -78,6 +69,58 @@ formularioCadastro.addEventListener('submit', function (e) {
     }
 
 });
+
+async function verificarEmail() {
+    const email = document.getElementById('email').value;
+    const emailErro = document.getElementById('emailErro');
+    const emailCadastrado = document.getElementById('emailCadastrado');
+
+    if (!email) return;
+
+    try {
+        const verificacao = await fetch(`http://localhost:3000/verificarEmail?email=${email}`);
+        const resposta = await verificacao.json();
+
+        if (resposta.existe) {
+            console.log("✅ Email existente");
+            emailErro.className = "d-block alert bi bi-exclamation-circle-fill text-bg-danger";
+            emailCadastrado.className = "d-block text-danger fw-bold -0 text-end"
+        } else {
+            console.log("❌ Email não encontrado");
+            emailErro.className = "d-block alert bi bi-envelope-fill text-bg-success";
+            emailCadastrado.className = "d-none text-danger fw-bold -0 text-end"
+        }
+    } catch (erro) {
+        console.error("Erro ao verificar o email", erro);
+        alert("Erro ao verificar o email. Tente novamente mais tarde.");
+    }
+}
+
+async function verificarCPF() {
+    const cpf = document.getElementById('cpf').value;
+    const cpfErro = document.getElementById('cpfErro');
+    const cpfCadastrado = document.getElementById('cpfCadastrado');
+
+    if (!cpf) return;
+
+    try {
+        const verificacao = await fetch(`http://localhost:3000/verificarCPF?cpf=${cpf}`);
+        const resposta = await verificacao.json();
+
+        if (resposta.existe) {
+            console.log("✅ CPF existente");
+            cpfErro.className = "d-block alert bi bi-exclamation-circle-fill text-bg-danger";
+            cpfCadastrado.className = "d-block text-danger fw-bold -0 text-end"
+        } else {
+            console.log("❌ CPF não encontrado");
+            cpfErro.className = "d-block alert bi bi-card-list text-bg-success";
+            cpfCadastrado.className = "d-none text-danger fw-bold -0 text-end"
+        }
+    } catch (erro) {
+        console.error("Erro ao verificar o CPF", erro);
+        alert("Erro ao verificar o CPF. Tente novamente mais tarde.");
+    }
+}
 
 //MÁSCARAS
 //CPF

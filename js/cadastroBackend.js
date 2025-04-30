@@ -11,10 +11,10 @@ app.use(express.json());
 app.use(cors());
 
 const db = new Database(); // Reaproveita pool de conexões
+const segredo = process.env.SEGREDO_JWT;
 
 // Função para gerar token JWT
 function criarToken(email) {
-    const segredo = 'green_line-ecologic';
     return jwt.sign({ email }, segredo, { expiresIn: '30m' });
 }
 
@@ -25,7 +25,6 @@ app.post("/cadastrar", async (req, res) => {
     const inserirPessoa = `INSERT INTO pessoa(nome, email, cpf_cnpj, telefone, tipo_pessoa) VALUES (?, ?, ?, ?, 'F')`;
     const selecionarId = `SELECT id_pessoa FROM pessoa WHERE email = ? ORDER BY id_pessoa DESC LIMIT 1`;
     const inserirUsuario = `INSERT INTO usuario(id_pessoa, id_tipo_usuario, senha, situacao) VALUES (?, '2', ?, 'I')`;
-    const inserirToken = `INSERT INTO token_temporario(id_usuario, token, validade, utilizado) VALUES (?, ?, ?, 0)`;
 
     try {
         const senhaCriptografada = await bcrypt.hash(senha, 10);
@@ -41,9 +40,6 @@ app.post("/cadastrar", async (req, res) => {
         await db.query(inserirUsuario, [id_pessoa, senhaCriptografada]);
 
         const token = criarToken(email);
-        const validade = new Date(Date.now() + 30 * 60000); // 30 minutos
-
-        await db.query(inserirToken, [id_pessoa, token, validade]);
 
         const transporter = nodemailer.createTransport({
             host: 'smtp.gmail.com',
@@ -80,17 +76,24 @@ app.post("/cadastrar", async (req, res) => {
 // Validação do token (acesso via link de e-mail)
 app.get("/validar", async (req, res) => {
     const { token } = req.query;
-    const segredo = process.env.SEGREDO_JWT;
+    const atualizarSituacao = "UPDATE usuario SET situacao = 'A' WHERE id_pessoa = ?";
 
     try {
         const payload = jwt.verify(token, segredo);
         const email = payload.email;
 
-        const sql = "SELECT * FROM pessoa WHERE email = ?";
+        const sql = "SELECT u.id_pessoa FROM usuario AS u INNER JOIN pessoa AS p ON p.id_pessoa = u.id_pessoa WHERE u.situacao = 'I' AND p.email = ?;";
         const resultado = await db.query(sql, [email]);
 
         if (resultado.length > 0) {
-            res.send("<h1>Email confirmado com sucesso!</h1><p>Você já pode acessar a plataforma.</p>");
+            const id_pessoa = resultado[0].id_pessoa;
+            try {
+                await db.query(atualizarSituacao, [id_pessoa]);
+                res.send("<h1>Email confirmado com sucesso!</h1><p>Você já pode acessar a plataforma.</p>");
+            } catch (erro) {
+                res.send("<h1>Aconteceu um erro!Tente novamente mais tarde</h1>");
+            }
+
         } else {
             res.send("<h1>Erro!</h1><p>Email não encontrado. Tente cadastrar novamente.</p>");
         }
@@ -99,6 +102,34 @@ app.get("/validar", async (req, res) => {
         res.send("<h1>Token expirado ou inválido.</h1><p>Tente se cadastrar novamente.</p>");
     }
 });
+
+app.get("/verificarEmail", async (req, res) => {
+    const { email } = req.query;
+    const sql = "SELECT COUNT(*) AS total FROM pessoa WHERE email = ?";
+
+    try {
+        const verificacao = await db.query(sql, [email]);
+        const existe = verificacao[0].total > 0;
+
+        res.json({ existe });
+    } catch (erro) {
+        console.error("Erro ao verificar o email: ", erro);
+        res.status(500);
+    }
+});
+app.get("/verificarCPF", async (req, res) => {
+    const { cpf } = req.query;
+    const sql = "SELECT COUNT(*) AS total FROM pessoa WHERE cpf_cnpj = ?";
+
+    try {
+        const verificacao = await db.query(sql, [cpf]);
+        const existe = verificacao[0].total > 0;
+        res.json({ existe });
+    }
+    catch (erro) {
+        console.error("Erro ao verificar o cpf");
+    }
+})
 
 // Iniciar servidor
 app.listen(process.env.PORTA, () => {

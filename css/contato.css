@@ -1,5 +1,10 @@
-body{
-    min-width: 700px;
+html, body{
+    width: 100%; /* Garante que os elementos ocupem a largura total */
+    height: 100%; /* Garante que os elementos ocupem a altura total */
+    margin: 0; /* Remove margens padrão */
+    padding: 0; /* Remove padding padrão */
+    position: relative; /* Configura o contexto para posicionamento absoluto relativo ao documento */
+    overflow-x: hidden; /* Evita a rolagem horizontal para elementos fora do viewport */
 }
 .invisivel {
     height: 4rem;

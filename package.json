@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "setup-and-start": "npm install && node js/cadastroBackend.js && node js/validarToken.js"
+    "setup-and-start": "npm install && node js/cadastroBackend.js"
   },
   "keywords": [],
   "author": "",
