@@ -2,14 +2,16 @@ require("dotenv").config();
 const nodemailer = require("nodemailer");
 const express = require("express");
 const cors = require("cors");
-const Database = require("./conexao"); // usando o novo arquivo com pool
+const Database = require("./conexao");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const path = require("path");
+const PORTA = process.env.PORTA || 3000;
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use(express.static('public'));
 
 const db = new Database(); // Reaproveita pool de conexões
 const segredo = process.env.SEGREDO_JWT;
@@ -90,18 +92,19 @@ app.get("/validar", async (req, res) => {
             const id_pessoa = resultado[0].id_pessoa;
             try {
                 await db.query(atualizarSituacao, [id_pessoa]);
-                // ✅ envia o arquivo HTML diretamente
-                res.sendFile(path.join(__dirname, "confirmacaoLogin.html"));
+                res.sendFile(path.join(__dirname, "../public", "confirmacaoLogin.html"));
             } catch (erro) {
                 console.error("Erro ao atualizar:", erro);
-                res.sendFile(path.join(__dirname, "erro.html"));
+                res.sendFile(path.join(__dirname, "../public", "erro.html"));
             }
         } else {
-            res.sendFile(path.join(__dirname, "erro.html"));
+            res.sendFile(path.join(__dirname, "../public", "erro.html"));
+
         }
     } catch (erro) {
         console.error("Token inválido ou expirado:", erro);
-        res.sendFile(path.join(__dirname, "tokenExpirado.html")); // cuidado com o nome
+        res.sendFile(path.join(__dirname, "..", "tokenExpirado.html"));
+
     }
 });
 
@@ -135,6 +138,6 @@ app.get("/verificarCPF", async (req, res) => {
 })
 
 // Iniciar servidor
-app.listen(process.env.PORTA, () => {
+app.listen(PORTA, () => {
     console.log("🚀 Servidor rodando em http://localhost:3000");
 });

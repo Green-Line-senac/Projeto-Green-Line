@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
     inputBusca.addEventListener('input', () => aplicarFiltros(true));
   }
 
-  fetch('../json/produtos.json')
+  fetch('/json/produtos.json')
     .then(res => res.json())
     .then(data => {
       todosProdutos = data;

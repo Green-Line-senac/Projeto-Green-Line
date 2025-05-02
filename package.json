@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "setup-and-start": "npm install && node js/cadastroBackend.js"
+    "start": "npm install && concurrently \"nodemon js/loginBackend.js\" \"nodemon js/cadastroBackend.js\""
   },
   "keywords": [],
   "author": "",
@@ -12,13 +12,15 @@
   "dependencies": {
     "@prisma/client": "^6.6.0",
     "bcrypt": "^5.1.1",
+    "concurrently": "^9.1.2",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mysql": "^2.18.1",
     "mysql2": "^3.14.0",
-    "nodemailer": "^6.10.1"
+    "nodemailer": "^6.10.1",
+    "sequelize": "^6.37.7"
   },
   "devDependencies": {
     "prisma": "^6.6.0"

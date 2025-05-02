@@ -28,14 +28,14 @@ function carregarImagens(imagem) {
     const itemDiv = document.createElement('div');
     itemDiv.className = `carousel-item ${index === 0 ? 'active' : ''}`;
     itemDiv.innerHTML = `
-        <img src="../img/index_carousel/${element.nomeImagem}" height="400rem" class="d-block w-100" alt="Imagem do carrossel">
+        <img src="/img/index_carousel/${element.nomeImagem}" height="400rem" class="d-block w-100" alt="Imagem do carrossel">
       `;
     carrossel.appendChild(itemDiv);
   });
 }
 
 // Carrega as imagens dinamicamente a partir de um arquivo JSON
-fetch('../json/carousel-index.json')
+fetch('/json/carousel-index.json')
   .then(res => res.json())
   .then(data => {
     carregarImagens(data); // Renderiza as imagens ao carregar o JSON
@@ -45,7 +45,7 @@ fetch('../json/carousel-index.json')
     alert('Não foi possível carregar o carrossel. Tente novamente mais tarde.');
   });
 
-fetch('../json/carousel-index.json')
+fetch('json/carousel-index.json')
   .then(res => res.json())
   .then(data => {
     imagensIndex = data; // Atribui os dados recebidos à variável

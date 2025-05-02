@@ -2,7 +2,6 @@
 let emailValido;
 let cpfValido;
 
-
 const formularioCadastro = document.getElementById('formularioCadastro');
 let dadosUsuario = [];
 formularioCadastro.addEventListener('submit', function (e) {
@@ -65,7 +64,7 @@ formularioCadastro.addEventListener('submit', function (e) {
             .then(data => {
                 console.log("Resposta do servidor:", data);
                 // Redireciona após o sucesso do cadastro
-                window.location.href = "../login.html";
+                window.location.href = "/public/login.html";
             })
             .catch(error => console.error("Erro ao cadastrar:", error));
     }
