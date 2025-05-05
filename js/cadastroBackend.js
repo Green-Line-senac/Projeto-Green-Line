@@ -6,7 +6,7 @@ const Database = require("./conexao");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const path = require("path");
-const PORTA = process.env.PORTA || 3000;
+const PORTA = process.env.PORTA;
 
 const app = express();
 app.use(express.json());
