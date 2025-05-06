@@ -178,7 +178,7 @@ CREATE TABLE pedidos_produtos (
 
 -- INSERINDO DADOS
 
-INSERT INTO pessoa (nome, email,  telefone, cpf_cnpj, rg, genero, idade) VALUES 
+INSERT INTO pessoa (nome, email,  telefone, cpf, rg, genero, idade) VALUES 
 ('Kauã', 'kaua@example.com',  '1234567890', '123.456.789-09', '12.345.678-9', 'M', 21),
 ('Gabriel', 'gabriel@example.com',  '0987654321', '987.654.321-00', '98.765.432-1', 'M', 25),
 ('Edenilson', 'edenilson@example.com',  '1122334455', '112.233.445-67', '11.223.344-5', 'M', 30),
@@ -250,13 +250,13 @@ VALUES ('BA', '65432-987', 'Salvador', 'Pituba', 'Av. Magalhães Neto, 400', 'Ap
 
 CREATE VIEW dados_pessoais
 AS
-SELECT p.id_pessoa,usuario.id_usuario, nome, email, telefone, cpf_cnpj, rg, idade,uf,cep,cidade,bairro,endereco,complemento,senha,caminho_imagem FROM pessoa p INNER JOIN enderecos e ON p.id_pessoa = e.id_pessoa
+SELECT p.id_pessoa,usuario.id_usuario, nome, email, telefone, cpf, rg, idade,uf,cep,cidade,bairro,endereco,complemento,senha,caminho_imagem FROM pessoa p INNER JOIN enderecos e ON p.id_pessoa = e.id_pessoa
 INNER JOIN usuario ON p.id_pessoa = usuario.id_pessoa
 INNER JOIN ImagensUsuarios IU ON IU.id_usuario = usuario.id_usuario;
 
 CREATE VIEW dados_pesquisa
 AS
-SELECT p.id_pessoa,usuario.id_usuario, nome, email, telefone, cpf_cnpj, rg, 
+SELECT p.id_pessoa,usuario.id_usuario, nome, email, telefone, cpf, rg, 
 idade, uf,cep,cidade,bairro,endereco,complemento,caminho_imagem FROM pessoa p INNER JOIN enderecos e ON p.id_pessoa = e.id_pessoa
 INNER JOIN usuario ON p.id_pessoa = usuario.id_pessoa
 INNER JOIN ImagensUsuarios IU ON IU.id_usuario = usuario.id_usuario;
