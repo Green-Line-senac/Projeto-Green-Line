@@ -25,7 +25,7 @@ function criarToken(email) {
 app.post("/cadastrar", async (req, res) => {
     const { nome, email, cpf, telefone, senha } = req.body;
 
-    const inserirPessoa = `INSERT INTO pessoa(nome, email, cpf_cnpj, telefone, tipo_pessoa) VALUES (?, ?, ?, ?, 'F')`;
+    const inserirPessoa = `INSERT INTO pessoa(nome, email, cpf_cnpj, telefone) VALUES (?, ?, ?, ?)`;
     const selecionarId = `SELECT id_pessoa FROM pessoa WHERE email = ? ORDER BY id_pessoa DESC LIMIT 1`;
     const inserirUsuario = `INSERT INTO usuario(id_pessoa, id_tipo_usuario, senha, situacao) VALUES (?, '2', ?, 'I')`;
 
@@ -125,7 +125,7 @@ app.get("/verificarEmail", async (req, res) => {
 });
 app.get("/verificarCPF", async (req, res) => {
     const { cpf } = req.query;
-    const sql = "SELECT COUNT(*) AS total FROM pessoa WHERE cpf_cnpj = ?";
+    const sql = "SELECT COUNT(*) AS total FROM pessoa WHERE cpf = ?";
 
     try {
         const verificacao = await db.query(sql, [cpf]);
