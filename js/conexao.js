@@ -4,11 +4,11 @@ const mysql = require('mysql2/promise');
 class Conexao {
     constructor() {
         this.pool = mysql.createPool({
-            host: '127.0.0.1',
-            port: 3307,
-            user: 'root',
-            password: 'senac',
-            database: 'green_line',
+            host:'127.0.0.1',
+            port:3307,
+            user:'root',
+            password:'senac',
+            database:'green_line',
             waitForConnections: true,
             connectionLimit: 10,
             queueLimit: 0

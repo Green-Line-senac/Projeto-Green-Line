@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npm install && concurrently \"nodemon js/loginBackend.js\" \"nodemon js/cadastroBackend.js\""
+    "start": "npm install && concurrently \"node js/loginBackend.js\" \"node js/cadastroBackend.js\""
   },
   "keywords": [],
   "author": "",
