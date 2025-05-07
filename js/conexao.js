@@ -15,7 +15,6 @@ class Conexao {
             queueLimit: 0
         });
         console.log("💡 Pool de conexões criado com sucesso.");
-        console.log(process.env.DB_PASSWORD);
     }
 
     async query(sql, params = []) {

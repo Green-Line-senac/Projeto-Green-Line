@@ -14,7 +14,6 @@ app.use(express.static('public'));
 
 const db = new Database(); // Reaproveita pool de conexões
 const segredo = process.env.SEGREDO_JWT;
-console.log(process.env.SEGREDO_JWT);
 
 // Função para gerar token JWT
 function criarToken(email) {
