@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 
 <head>
-  <title>Green Line</title>
+  <title>Green Line - Loja de Produtos Ecológicos</title> <!-- Título mais descritivo -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <!-- Adicionando meta tag para descrição -->
+  <meta name="description" content="GreenLine - Loja especializada em produtos ecológicos e sustentáveis">
   <!-- Bootstrap Icons (ícones estilizados) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <!-- Bootstrap CSS -->
@@ -17,35 +19,35 @@
   <link rel="stylesheet" href="css/index.css"> <!-- Estilos específicos para a página -->
   <link rel="stylesheet" href="css/menu_rodape.css"> <!-- Estilos compartilhados entre o menu e o rodapé -->
   <!--JavaScript Personalizado -->
-  <script src="js/index.js" defer></script> <!-- Carregamento diferido para evitar bloqueio no carregamento inicial -->
+  <script src="js/index.js" defer></script>
 </head>
 
-<body> 
+<body>
   <!-- Cabeçalho -->
-  <header class="holo-header menu_green_line"> <!-- Estilo do menu principal com classes personalizadas -->
-    <nav class="navbar navbar-expand-lg container bg-dark.bg-gradient"> <!-- Navbar estilizada e responsiva -->
+  <header class="holo-header menu_green_line" role="banner"> 
+    <nav class="navbar navbar-expand-lg container bg-dark.bg-gradient" aria-label="Navegação principal"> 
       
-      <!-- Logo -->
-      <img src="img/logo.png" alt="Logo GreenLine">
+      <!-- Logo com texto alternativo melhorado -->
+      <img src="img/logo.png" alt="Logo GreenLine - Folha verde estilizada" width="40" height="40">
       
       <!-- Título da marca -->
-      <a class="navbar-brand" href="index.html">GreenLine</a>
+      <a class="navbar-brand" href="index.html" aria-current="page">GreenLine</a> 
       
-      <!-- Botão para dispositivos menores -->
+      <!-- Botão para dispositivos menores com label melhorado -->
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
-        aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+        aria-controls="navbarContent" aria-expanded="false" aria-label="Alternar navegação">
         <span class="navbar-toggler-icon"></span>
       </button>
       
       <!-- Conteúdo do menu de navegação -->
       <div class="collapse navbar-collapse" id="navbarContent">
-        <ul class="navbar-nav mx-auto mb-2 mb-lg-0"> <!-- Centraliza os itens no menu -->
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link" href="#">Início</a>
+            <a class="nav-link active" href="#" aria-current="page">Início</a>
           </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="produtosDropdown" role="button" data-bs-toggle="dropdown"
-              aria-expanded="false">Produtos</a>
+              aria-expanded="false" aria-haspopup="true">Produtos</a>
             <ul class="dropdown-menu bg-white" aria-labelledby="produtosDropdown">
               <li><a class="dropdown-item" href="public/produtos.html">Produtos Ecológicos</a></li>
               <li><a class="dropdown-item" href="#">Roupas</a></li>
@@ -66,13 +68,12 @@
           </li>
         </ul>
         
-        <!-- Ícones adicionais (carrinho e perfil do usuário) -->
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link icon-btn" href="#"><i class="bi bi-cart"></i></a>
+            <a class="nav-link icon-btn" href="#" aria-label="Carrinho de compras"><i class="bi bi-cart" aria-hidden="true"></i></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link icon-btn" href="public/login.html"><i class="bi bi-person"></i></a>
+            <a class="nav-link icon-btn" href="public/login.html" aria-label="Área do usuário"><i class="bi bi-person" aria-hidden="true"></i></a>
           </li>
         </ul>
       </div>
@@ -80,20 +81,19 @@
   </header>
 
   <!-- Conteúdo Principal -->
-  <main class="p-0" style="margin-top: 6.5rem;"> <!-- Adiciona espaçamento superior abaixo do menu -->
-    <div class="container-fluid d-none d-sm-block"> <!-- Visível apenas em dispositivos maiores -->
-      <div class="carousel slide carousel-fade" data-bs-ride="carousel" id="carousel-index"> <!-- Carrossel -->
-        <div class="carousel-inner" id="carousel-imagens">
+  <main class="p-0" style="margin-top: 6.5rem;" role="main"> 
+    <div class="container-fluid d-none d-sm-block">
+      <div class="carousel slide carousel-fade" data-bs-ride="carousel" id="carousel-index" aria-label="Destaques da loja"> <!-- Adicionado aria-label -->
+        <div class="carousel-inner" id="carousel-imagens" role="listbox"> 
           <!-- Slides adicionados dinamicamente -->
         </div>
-        <!-- Botões do carrossel (opcional e comentado) -->
       </div>
     </div>
   </main>
 
   <!-- Rodapé -->
-  <footer class="container-fluid text-center text-white mt-1" style="background-color:black">
-    <div class="container"> <!-- Container principal -->
+  <footer class="container-fluid text-center text-white mt-1" style="background-color:black" role="contentinfo">
+    <div class="container">
       <section>
         <div class="row text-center d-flex justify-content-center pt-5">
           <!-- Links do rodapé -->
@@ -114,7 +114,7 @@
           </div>
         </div>
       </section>
-      <hr class="my-3" />
+      <hr class="my-3" aria-hidden="true" /> 
       <section class="mb-1">
         <div class="row d-flex justify-content-center">
           <div class="col-lg-8">

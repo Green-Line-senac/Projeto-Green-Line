@@ -1,10 +1,10 @@
+require("dotenv").config();
 const express = require('express');
 const database = require('./conexao');
 const cors = require('cors');
 const path = require('path');
 
 const app = express();
-const PORTA = 3001;
 const bcrypt = require('bcrypt');
 const db = new database();
 
@@ -46,6 +46,6 @@ app.post('/verificarConta', async (req, res) => {
 // Servir arquivo HTML estático se quiser
 app.use(express.static(path.join(__dirname, '..')));
 
-app.listen(PORTA, () => {
-    console.log(`🚀 Servidor rodando em http://localhost:${PORTA}`);
+app.listen(process.env.PORTA2, () => {
+    console.log(`🚀 Servidor rodando em http://localhost:${process.env.PORTA2}`);
 });

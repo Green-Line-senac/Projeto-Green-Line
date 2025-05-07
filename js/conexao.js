@@ -1,19 +1,21 @@
 // conexao.js
 const mysql = require('mysql2/promise');
+require("dotenv").config();
 
 class Conexao {
     constructor() {
         this.pool = mysql.createPool({
             host:'127.0.0.1',
-            port:3307,
+            port:3306,
             user:'root',
-            password:'senac',
-            database:'green_line',
+            password: process.env.DB_PASSWORD,
+            database: process.env.DB_NAME,
             waitForConnections: true,
             connectionLimit: 10,
             queueLimit: 0
         });
         console.log("💡 Pool de conexões criado com sucesso.");
+        console.log(process.env.DB_PASSWORD);
     }
 
     async query(sql, params = []) {

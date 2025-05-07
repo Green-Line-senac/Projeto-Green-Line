@@ -6,7 +6,6 @@ const Database = require("./conexao");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const path = require("path");
-const PORTA = process.env.PORTA;
 
 const app = express();
 app.use(express.json());
@@ -15,6 +14,7 @@ app.use(express.static('public'));
 
 const db = new Database(); // Reaproveita pool de conexões
 const segredo = process.env.SEGREDO_JWT;
+console.log(process.env.SEGREDO_JWT);
 
 // Função para gerar token JWT
 function criarToken(email) {
@@ -25,7 +25,7 @@ function criarToken(email) {
 app.post("/cadastrar", async (req, res) => {
     const { nome, email, cpf, telefone, senha } = req.body;
 
-    const inserirPessoa = `INSERT INTO pessoa(nome, email, cpf_cnpj, telefone) VALUES (?, ?, ?, ?)`;
+    const inserirPessoa = `INSERT INTO pessoa(nome, email, cpf, telefone) VALUES (?, ?, ?, ?)`;
     const selecionarId = `SELECT id_pessoa FROM pessoa WHERE email = ? ORDER BY id_pessoa DESC LIMIT 1`;
     const inserirUsuario = `INSERT INTO usuario(id_pessoa, id_tipo_usuario, senha, situacao) VALUES (?, '2', ?, 'I')`;
 
@@ -138,6 +138,6 @@ app.get("/verificarCPF", async (req, res) => {
 })
 
 // Iniciar servidor
-app.listen(PORTA, () => {
+app.listen(process.env.PORTA, () => {
     console.log("🚀 Servidor rodando em http://localhost:3000");
 });
