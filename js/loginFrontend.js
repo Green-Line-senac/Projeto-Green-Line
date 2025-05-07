@@ -26,6 +26,7 @@ async function verificarConta(usuario, senha) {
         });
 
         const dados = await resposta.json();
+        console.log(dados);
 
         switch (dados.dadosValidos) {
             case 0:

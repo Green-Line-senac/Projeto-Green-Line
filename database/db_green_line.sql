@@ -279,6 +279,15 @@ CREATE INDEX idx_nome_produto ON produto(nome_produto);
 CREATE INDEX idx_nome_usuario ON pessoa(nome);
 
 
+CREATE VIEW web_usuarios AS
+SELECT nome,email,senha,situacao FROM usuario 
+INNER JOIN pessoa ON pessoa.id_pessoa = usuario.id_pessoa;
+
+
+
+
+
+
 
 
 
