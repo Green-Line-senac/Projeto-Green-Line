@@ -1,21 +1,18 @@
 const formularioLogin = document.getElementById('formularioLogin');
 
-formularioLogin.addEventListener('submit', function (e) {
+formularioLogin.addEventListener('submit', async function (e) {
     e.preventDefault();
 
     const usuario = document.getElementById('usuario').value.trim();
     const senha = document.getElementById('senha').value.trim();
+    const mensagemUsuario = document.getElementById('mensagem-superior');
 
     if (!usuario || !senha) {
-        console.log('Preencha todos os campos.');
+        mensagemUsuario.className = "d-block alert text-bg-warning fw-bold -2 text-center mb-2";
+        mensagemUsuario.textContent = 'Por favor, preencha todos os campos.';
         return;
     }
 
-    verificarConta(usuario, senha);
-});
-
-async function verificarConta(usuario, senha) {
-    const mensagemUsuario = document.getElementById('mensagem-superior'); 
     try {
         const resposta = await fetch('http://localhost:3001/verificarConta', {
             method: 'POST',
@@ -26,41 +23,41 @@ async function verificarConta(usuario, senha) {
         });
 
         const dados = await resposta.json();
-        console.log(dados);
+        console.log('Resposta do servidor:', dados);
 
         switch (dados.dadosValidos) {
             case 0:
-                console.log('Conta não existente');
                 mensagemUsuario.className = "d-block alert text-bg-danger fw-bold -2 text-center mb-2";
                 mensagemUsuario.textContent = 'Conta não existente. Faça um cadastro para prosseguir.';
                 break;
             case 1:
-                console.log('Email não verificado');
                 mensagemUsuario.className = "d-block alert text-bg-warning fw-bold -2 text-center mb-2";
                 mensagemUsuario.textContent = 'Seu email não está verificado. Enviamos um novo token no seu email.';
                 break;
             case 2:
-                console.log('Login bem-sucedido');
-                let trocaDeConta = 1;
-                await fetch('http://localhost:3002/loginDados',{
-                    method:'POST',
-                    headers:{
-                        'Content-type':'application/json'
-                    },
-                    body: JSON.stringify({trocaDeConta})
+                // Atualiza o estado no servidor de autenticação
+                const respostaAuth = await fetch('http://localhost:3002/loginDados', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ trocar: 1 })
                 });
+                
+                if (!respostaAuth.ok) throw new Error('Falha ao atualizar estado de login');
+                
+                localStorage.setItem("usuario", usuario);
                 window.location.href = '/index.html';
-                localStorage.setItem("usuario",usuario);
                 break;
             case 3:
-                console.log('Usuário ou senha incorretos');
                 mensagemUsuario.className = "d-block alert text-bg-danger fw-bold -2 text-center mb-2";
-                mensagemUsuario.textContent = 'Usuário ou senha incorretos. Verifique suas credenciais e tente novamente.';
+                mensagemUsuario.textContent = 'Usuário ou senha incorretos. Verifique suas credenciais.';
                 break;
             default:
-                console.log('Resposta inesperada:', dados);
+                mensagemUsuario.className = "d-block alert text-bg-warning fw-bold -2 text-center mb-2";
+                mensagemUsuario.textContent = 'Resposta inesperada do servidor.';
         }
     } catch (erro) {
-        console.error('Erro ao verificar conta:', erro);
+        console.error('Erro no processo de login:', erro);
+        mensagemUsuario.className = "d-block alert text-bg-danger fw-bold -2 text-center mb-2";
+        mensagemUsuario.textContent = 'Erro ao conectar com o servidor. Tente novamente.';
     }
-}
+});

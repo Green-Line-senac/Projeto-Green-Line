@@ -21,7 +21,7 @@ function criarToken(email) {
 }
 function imagemUsuario(id) {
     const inserirImagem = `INSERT INTO ImagensUsuarios(id_usuario, caminho_imagem) VALUES (?, ?)`;
-    db.query(inserirImagem, [id, null], (erro) => {
+    db.query(inserirImagem, [id, "null"], (erro) => {
         if (erro) {
             console.error("Erro ao inserir imagem", erro);
             res.status(500).json({ erro: "Erro durante a inserção da imagem" });
@@ -38,6 +38,7 @@ app.post("/cadastrar", async (req, res) => {
     const inserirPessoa = `INSERT INTO pessoa(nome, email, cpf, telefone) VALUES (?, ?, ?, ?)`;
     const selecionarId = `SELECT id_pessoa FROM pessoa WHERE email = ? ORDER BY id_pessoa DESC LIMIT 1`;
     const inserirUsuario = `INSERT INTO usuario(id_pessoa, id_tipo_usuario, senha, situacao) VALUES (?, '2', ?, 'I')`;
+    const selecionarIdUsuario = "SELECT id_usuario FROM usuario WHERE id_pessoa = ?";
 
     try {
         const senhaCriptografada = await bcrypt.hash(senha, 10);
@@ -51,7 +52,8 @@ app.post("/cadastrar", async (req, res) => {
         const id_pessoa = resultadoId[0].id_pessoa;
 
         await db.query(inserirUsuario, [id_pessoa, senhaCriptografada]);
-        await imagemUsuario(resultadoId);
+        
+        await imagemUsuario(id_pessoa);
 
         const token = criarToken(email);
 
