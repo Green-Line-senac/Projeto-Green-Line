@@ -41,7 +41,16 @@ async function verificarConta(usuario, senha) {
                 break;
             case 2:
                 console.log('Login bem-sucedido');
+                let trocaDeConta = 1;
+                await fetch('http://localhost:3002/loginDados',{
+                    method:'POST',
+                    headers:{
+                        'Content-type':'application/json'
+                    },
+                    body: JSON.stringify({trocaDeConta})
+                });
                 window.location.href = '/index.html';
+                localStorage.setItem("usuario",usuario);
                 break;
             case 3:
                 console.log('Usuário ou senha incorretos');

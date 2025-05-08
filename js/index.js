@@ -33,6 +33,10 @@ function carregarImagens(imagem) {
     carrossel.appendChild(itemDiv);
   });
 }
+//TROCAR DE LOGIN
+document.addEventListener("DOMContentLoaded",()=>{
+  console.log(trocarDeConta);
+})
 
 // Carrega as imagens dinamicamente a partir de um arquivo JSON
 fetch('/json/carousel-index.json')
@@ -52,3 +56,7 @@ fetch('json/carousel-index.json')
     carregarImagens(imagensIndex); // Chama a função para renderizar as imagens
   })
   .catch(err => console.error('Erro ao carregar a API:', err));
+
+async function atualizarConta(){
+  
+}
