@@ -1,7 +1,3 @@
-require("dotenv").config();
-const FuncoesUteis = require('./funcoes');
-//erro
-const funcoesUteis = new FuncoesUteis();
 const formularioLogin = document.getElementById('formularioLogin');
 
 
@@ -43,15 +39,33 @@ formularioLogin.addEventListener('submit', async function (e) {
                 mostrarMensagem('Conta não encontrada.', 'danger');
                 break;
             case 1:
-                mostrarMensagem('Email não verificado. Verifique sua caixa de entrada.', 'warning');
-                if (usuario.includes('@')) {
-                    // Se precisar de funcoesUteis, carregue via <script> global
-                    funcoesUteis.enviarEmail(usuario);
+                mostrarMensagem("Email não verificado. Verifique sua caixa de entrada.", "warning");
+                if (usuario.includes("@")) {
+                    try {
+                        await fetch("http://localhost:3001/enviarEmail", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ usuario })
+                        });
+                    } catch (erro) {
+                        console.log("Erro ao enviar o email: ", erro);
+                    }
+
                 }
                 break;
             case 2:
-                localStorage.setItem("usuario", usuario);
-                window.location.href = '/index.html';
+                try {
+                    await fetch("http://localhost:3002/loginDados", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ trocar: 1 })
+                    });
+                    localStorage.setItem("usuario", usuario);
+                    window.location.href = '/index.html';
+                } catch (erro) {
+                    console.log("Erro ao enviar o email: ", erro);
+                }
+
                 return;
             case 3:
                 mostrarMensagem('Credenciais inválidas.', 'danger');

@@ -1,5 +1,4 @@
 require("dotenv").config();
-const nodemailer = require("nodemailer");
 const express = require("express");
 const cors = require("cors");
 const Database = require("./conexao");

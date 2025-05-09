@@ -1,11 +1,14 @@
 require("dotenv").config();
 const express = require('express');
 const database = require('./conexao');
+const funcoes = require('./funcoes');
 const cors = require('cors');
 const path = require('path');
 
+const funcoesUteis = new funcoes();
 const app = express();
 const bcrypt = require('bcrypt');
+app.use(express.static(path.join(__dirname, '..')));
 const db = new database();
 
 app.use(express.json());
@@ -47,9 +50,13 @@ app.post('/verificarConta', async (req, res) => {
         return res.status(500).json({ error: "Erro interno do servidor. Tente novamente mais tarde." });
     }
 });
+app.post("/enviarEmail", async (req, res) => {
+    const { usuario } = req.body;
+    await funcoesUteis.enviarEmail(usuario);
+    res.json({ mensagem: "E-mail enviado com sucesso." });
+});
 
-// Servir arquivo HTML estático se quiser
-app.use(express.static(path.join(__dirname, '..')));
+
 
 app.listen(process.env.PORTA2, () => {
     console.log(`🚀 Servidor rodando em http://localhost:${process.env.PORTA2}`);
