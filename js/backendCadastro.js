@@ -3,6 +3,7 @@ const nodemailer = require("nodemailer");
 const express = require("express");
 const cors = require("cors");
 const Database = require("./conexao");
+const funcoes = require("./funcoes");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const path = require("path");
@@ -12,13 +13,10 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static('public'));
 
-const db = new Database(); // Reaproveita pool de conexões
+const db = new Database();
+const funcoesUteis = new funcoes();
 const segredo = process.env.SEGREDO_JWT;
 
-// Função para gerar token JWT
-function criarToken(email) {
-    return jwt.sign({ email }, segredo, { expiresIn: '30m' });
-}
 function imagemUsuario(id) {
     const inserirImagem = `INSERT INTO ImagensUsuarios(id_usuario, caminho_imagem) VALUES (?, ?)`;
     db.query(inserirImagem, [id, "null"], (erro) => {
@@ -52,35 +50,10 @@ app.post("/cadastrar", async (req, res) => {
         const id_pessoa = resultadoId[0].id_pessoa;
 
         await db.query(inserirUsuario, [id_pessoa, senhaCriptografada]);
-        
+
         await imagemUsuario(id_pessoa);
+        await funcoesUteis.enviarEmail(email);
 
-        const token = criarToken(email);
-
-        const transporter = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 465,
-            secure: true,
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-            }
-        });
-
-        await transporter.sendMail({
-            from: 'Green Line <greenline.ecologic@gmail.com>',
-            to: email,
-            subject: 'Confirmação de email',
-            html: `
-              <h1>Faça do meio ambiente o seu meio de vida</h1>
-              <p>Olá, obrigado por se cadastrar na Green Line! Confirme seu e-mail para começar a usar a plataforma:</p>
-              <a href="http://localhost:3000/validar?token=${token}" style="padding:10px 20px; background-color:#007bff; color:white; text-decoration:none; border-radius:5px;">
-                Confirmar Email
-              </a>
-            `
-        });
-
-        console.log("✅ E-mail enviado com sucesso.");
         res.status(200).json({ mensagem: "Cadastro realizado com sucesso! Verifique seu e-mail para confirmação." });
 
     } catch (err) {

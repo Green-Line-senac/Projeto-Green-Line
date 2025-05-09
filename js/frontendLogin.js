@@ -1,63 +1,78 @@
+require("dotenv").config();
+const FuncoesUteis = require('./funcoes');
+//erro
+const funcoesUteis = new FuncoesUteis();
 const formularioLogin = document.getElementById('formularioLogin');
+
+
+const botaoEntrar = document.getElementById('entrar-na-conta');
+const mensagemUsuario = document.getElementById('mensagem-superior');
 
 formularioLogin.addEventListener('submit', async function (e) {
     e.preventDefault();
 
+    // Obter valores dos campos
     const usuario = document.getElementById('usuario').value.trim();
     const senha = document.getElementById('senha').value.trim();
-    const mensagemUsuario = document.getElementById('mensagem-superior');
 
+    // Resetar estados
+    mensagemUsuario.textContent = '';
+    mensagemUsuario.className = 'd-none';
+    botaoEntrar.disabled = true;
+    botaoEntrar.classList.replace('btn-success', 'btn-secondary');
+
+    // Validação básica
     if (!usuario || !senha) {
-        mensagemUsuario.className = "d-block alert text-bg-warning fw-bold -2 text-center mb-2";
-        mensagemUsuario.textContent = 'Por favor, preencha todos os campos.';
+        mostrarMensagem('Preencha todos os campos.', 'warning');
+        reativarBotao();
         return;
     }
 
     try {
         const resposta = await fetch('http://localhost:3001/verificarConta', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ usuario, senha })
         });
 
         const dados = await resposta.json();
-        console.log('Resposta do servidor:', dados);
+        console.log('Resposta:', dados);
 
         switch (dados.dadosValidos) {
             case 0:
-                mensagemUsuario.className = "d-block alert text-bg-danger fw-bold -2 text-center mb-2";
-                mensagemUsuario.textContent = 'Conta não existente. Faça um cadastro para prosseguir.';
+                mostrarMensagem('Conta não encontrada.', 'danger');
                 break;
             case 1:
-                mensagemUsuario.className = "d-block alert text-bg-warning fw-bold -2 text-center mb-2";
-                mensagemUsuario.textContent = 'Seu email não está verificado. Enviamos um novo token no seu email.';
+                mostrarMensagem('Email não verificado. Verifique sua caixa de entrada.', 'warning');
+                if (usuario.includes('@')) {
+                    // Se precisar de funcoesUteis, carregue via <script> global
+                    funcoesUteis.enviarEmail(usuario);
+                }
                 break;
             case 2:
-                // Atualiza o estado no servidor de autenticação
-                const respostaAuth = await fetch('http://localhost:3002/loginDados', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ trocar: 1 })
-                });
-                
-                if (!respostaAuth.ok) throw new Error('Falha ao atualizar estado de login');
-                
                 localStorage.setItem("usuario", usuario);
                 window.location.href = '/index.html';
-                break;
+                return;
             case 3:
-                mensagemUsuario.className = "d-block alert text-bg-danger fw-bold -2 text-center mb-2";
-                mensagemUsuario.textContent = 'Usuário ou senha incorretos. Verifique suas credenciais.';
+                mostrarMensagem('Credenciais inválidas.', 'danger');
                 break;
             default:
-                mensagemUsuario.className = "d-block alert text-bg-warning fw-bold -2 text-center mb-2";
-                mensagemUsuario.textContent = 'Resposta inesperada do servidor.';
+                mostrarMensagem('Erro desconhecido.', 'warning');
         }
     } catch (erro) {
-        console.error('Erro no processo de login:', erro);
-        mensagemUsuario.className = "d-block alert text-bg-danger fw-bold -2 text-center mb-2";
-        mensagemUsuario.textContent = 'Erro ao conectar com o servidor. Tente novamente.';
+        console.error('Erro:', erro);
+        mostrarMensagem('Falha na conexão. Tente novamente.', 'danger');
+    } finally {
+        reativarBotao();
     }
 });
+
+function mostrarMensagem(texto, tipo) {
+    mensagemUsuario.textContent = texto;
+    mensagemUsuario.className = `d-block alert text-bg-${tipo} text-center mb-2`;
+}
+
+function reativarBotao() {
+    botaoEntrar.disabled = false;
+    botaoEntrar.classList.replace('btn-secondary', 'btn-success');
+}
