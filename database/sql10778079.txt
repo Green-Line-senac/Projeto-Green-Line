@@ -1,0 +1,95 @@
+DROP DATABASE IF EXISTS green_line;
+CREATE DATABASE green_line;
+USE green_line;
+
+-- Criando a tabela de tipos de usuários
+CREATE TABLE tipo_usuario (
+    id_tipo INT PRIMARY KEY AUTO_INCREMENT,
+    tipo VARCHAR(35) NOT NULL
+);
+
+-- Criando a tabela de pessoas
+CREATE TABLE pessoa (
+    id_pessoa INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(40) NOT NULL,
+    email VARCHAR(50) NOT NULL,
+    telefone VARCHAR(15) NOT NULL,
+    cpf VARCHAR(18) NOT NULL UNIQUE,
+    genero ENUM('M', 'F', 'O') NULL,
+    id_tipo_usuario INT NOT NULL, 
+    FOREIGN KEY (id_tipo_usuario) REFERENCES tipo_usuario(id_tipo),
+    senha VARCHAR(255) NOT NULL,
+    situacao ENUM('A', 'I') NOT NULL,
+    imagem_perfil VARCHAR(255) NULL DEFAULT NULL,
+    data_hora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Criando a tabela de registros de acessos
+CREATE TABLE acessos (
+    id_acesso INT PRIMARY KEY AUTO_INCREMENT, 
+    id_pessoa INT NOT NULL,
+    FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa) ON DELETE CASCADE,
+    data_hora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Criando a tabela de pagamentos
+CREATE TABLE pagamento (
+    id_pagamento INT PRIMARY KEY AUTO_INCREMENT,
+    pagamento_situacao CHAR(1) DEFAULT 'P',
+    data_pagamento TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id_f_pagamento INT NOT NULL,
+    valor DECIMAL(10,2) NOT NULL,
+    num_parcelas INT DEFAULT 1,
+    parcelamento_situacao ENUM('Em aberto', 'Pago', 'Cancelado') NULL,
+    transacao_id VARCHAR(100) UNIQUE NULL,
+    bandeira_cartao VARCHAR(20) NULL,
+    FOREIGN KEY (id_f_pagamento) REFERENCES forma_pagamento(id_f_pagamento)
+);
+
+-- Criando a tabela de pedidos
+CREATE TABLE pedidos (
+    id_pedido INT PRIMARY KEY AUTO_INCREMENT,
+    data_hora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    situacao CHAR(1) NOT NULL DEFAULT 'P',
+    id_pessoa INT NOT NULL,
+    FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa),
+    id_pagamento INT NOT NULL,
+    FOREIGN KEY (id_pagamento) REFERENCES pagamento(id_pagamento),
+    status_pagamento CHAR(1) NOT NULL DEFAULT 'P',
+    endereco_entrega TEXT NULL,
+    metodo_entrega VARCHAR(50) NULL
+);
+
+-- Criando a tabela de categorias de produtos
+CREATE TABLE categoria (
+    id_categoria INT PRIMARY KEY AUTO_INCREMENT,
+    categoria VARCHAR(50) NOT NULL,
+    descricao TEXT NULL
+);
+
+-- Criando a tabela de produtos
+CREATE TABLE produto (
+    id_produto INT PRIMARY KEY AUTO_INCREMENT,
+    produto VARCHAR(80) NOT NULL,
+    descricao TEXT NOT NULL,
+    preco DECIMAL(10,2) NOT NULL,
+    marca VARCHAR(20) NULL DEFAULT NULL,
+    avaliacao DECIMAL(5,2) NULL DEFAULT NULL,
+    estoque INT NOT NULL,
+    parcelas_permitidas INT NOT NULL DEFAULT 1,
+    imagem_1 VARCHAR(255) NOT NULL,
+    imagem_2 VARCHAR(255) NULL DEFAULT NULL
+);
+
+-- Inserindo tipos de usuários
+INSERT INTO tipo_usuario (tipo) VALUES
+('Administrador'),
+('Usuário');
+
+-- Inserindo usuários
+INSERT INTO pessoa (nome, email, telefone, cpf, genero, id_tipo_usuario, senha, situacao, imagem_perfil) VALUES
+('Kauã', 'kaua@email.com', '61999990001', '111.222.333-44', 'M', 1, 'senhaKaua', 'A', NULL),
+('Gabriel', 'gabriel@email.com', '61999990002', '222.333.444-55', 'M', 1, 'senhaGabriel', 'A', NULL),
+('Edenilson', 'edenilson@email.com', '61999990003', '333.444.555-66', 'M', 1, 'senhaEdenilson', 'A', NULL),
+('Guilherme', 'guilherme@email.com', '61999990004', '444.555.666-77', 'M', 2, 'senhaGuilherme', 'A', NULL),
+('Fabrício', 'fabricio@email.com', '61999990005', '555.666.777-88', 'M', 2, 'senhaFabricio', 'A', NULL);
