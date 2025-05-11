@@ -1,34 +1,44 @@
 <!doctype html>
 <html lang="en"> <!-- Define o idioma da página -->
+
 <head>
   <title>Trocas e devoluções</title> <!-- Título da página que aparece na aba do navegador -->
   <meta charset="utf-8" /> <!-- Configuração de codificação de caracteres -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" /> <!-- Configuração para responsividade -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <!-- Configuração para responsividade -->
   <link rel="stylesheet" href="../css/padrao.css"> <!-- Estilo personalizado principal -->
   <link rel="stylesheet" href="../css/menu_rodape.css"> <!-- Estilo para o menu e rodapé -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"> <!-- Fonte de ícones do Bootstrap -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- Fonte de ícones do Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous"> <!-- CSS do framework Bootstrap -->
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <!-- CSS do framework Bootstrap -->
 </head>
 
 <body class="d-flex flex-column"> <!-- Corpo da página com layout flexível -->
-  <header class="holo-header menu_green_line"> <!-- Cabeçalho do site -->
-    <nav class="navbar navbar-expand-lg container bg-dark.bg-gradient"> <!-- Barra de navegação expandível -->
-      <img src="../img/logo.png" alt=""> <!-- Logo da empresa -->
-      <a class="navbar-brand" href="/index.html">GreenLine</a> <!-- Nome da marca na barra de navegação -->
+  <nav class="holo-header menu_green_line" role="banner">
+    <nav class="navbar navbar-expand-lg container bg-dark.bg-gradient" aria-label="Navegação principal">
+      <img src="../img/logo.png" alt="Logo GreenLine - Folha verde estilizada" width="40" height="40">
+
+      <!-- Título da marca -->
+      <a class="navbar-brand" href="/index.html" aria-current="page">GreenLine</a>
+
+      <!-- Botão para dispositivos menores com label melhorado -->
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
-        aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation"> <!-- Botão para abrir/fechar menu -->
+        aria-controls="navbarContent" aria-expanded="false" aria-label="Alternar navegação">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse" id="navbarContent"> <!-- Conteúdo que expande no menu -->
-        <ul class="navbar-nav mx-auto mb-2 mb-lg-0"> <!-- Lista de links principais -->
+
+      <!-- Conteúdo do menu de navegação -->
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link" href="#">Início</a> <!-- Link para a página inicial -->
+            <a class="nav-link active" href="#" aria-current="page">Início</a>
           </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="produtosDropdown" role="button" data-bs-toggle="dropdown"
-              aria-expanded="false">Produtos</a> <!-- Menu dropdown com categorias de produtos -->
-            <ul class="dropdown-menu bg-white" aria-labelledby="produtosDropdown"> <!-- Itens do menu dropdown -->
+              aria-expanded="false" aria-haspopup="true">Produtos</a>
+            <ul class="dropdown-menu bg-white" aria-labelledby="produtosDropdown">
               <li><a class="dropdown-item" href="produtos.html">Produtos Ecológicos</a></li>
               <li><a class="dropdown-item" href="#">Roupas</a></li>
               <li><a class="dropdown-item" href="#">Cuidados Pessoais</a></li>
@@ -38,26 +48,29 @@
             </ul>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Ofertas</a> <!-- Link para página de ofertas -->
+            <a class="nav-link" href="#">Ofertas</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="sobre.html">Sobre</a> <!-- Link para página sobre a empresa -->
+            <a class="nav-link" href="sobre.html">Sobre</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="contato.html">Contato</a> <!-- Link para página de contato -->
+            <a class="nav-link" href="contato.html">Contato</a>
           </li>
         </ul>
-        <ul class="navbar-nav"> <!-- Ícones de funcionalidade -->
+
+        <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link icon-btn" href="#"><i class="bi bi-cart"></i></a> <!-- Ícone de carrinho -->
+            <a class="nav-link icon-btn" href="#" aria-label="Carrinho de compras"><i class="bi bi-cart"
+                aria-hidden="true"></i></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link icon-btn" href="login.html"><i class="bi bi-person"></i></a> <!-- Ícone de perfil -->
+            <a class="nav-link icon-btn" href="login.html" aria-label="Área do usuário"><i id="icone-usuario"
+                class="bi bi-person" aria-hidden="true"></i></a>
           </li>
         </ul>
       </div>
     </nav>
-  </header>
+  </nav>
 
   <main class="" style="margin-top: 6.5rem;"> <!-- Área principal da página -->
     <div class="container">
@@ -65,17 +78,18 @@
       <hr>
       <p>
         A Quitanda Online utiliza tecnologia de ponta para a fabricação de seus produtos...
-      </p> 
-      <h5>Devolução por Arrependimento/Desistência</h5> 
+      </p>
+      <h5>Devolução por Arrependimento/Desistência</h5>
       <ul>
-        <li>O produto não poderá ter indícios de uso.</li> 
+        <li>O produto não poderá ter indícios de uso.</li>
         <li>O produto deverá ser encaminhado preferencialmente na embalagem original...</li>
-      </ul> 
+      </ul>
     </div>
   </main>
 
   <!-- Footer -->
-  <footer class="container-fluid text-center text-white fixed-bottom" style="background-color:black"> <!-- Rodapé do site -->
+  <footer class="container-fluid text-center text-white fixed-bottom" style="background-color:black">
+    <!-- Rodapé do site -->
     <div class="container">
       <section>
         <div class="row text-center d-flex justify-content-center pt-5"> <!-- Links do rodapé -->
@@ -110,4 +124,5 @@
     </div>
   </footer>
 </body>
+
 </html>

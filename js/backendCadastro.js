@@ -32,27 +32,23 @@ function imagemUsuario(id) {
 app.post("/cadastrar", async (req, res) => {
     const { nome, email, cpf, telefone, senha } = req.body;
 
-    const inserirPessoa = `INSERT INTO pessoa(nome, email, cpf, telefone) VALUES (?, ?, ?, ?)`;
+    const inserirPessoa = `INSERT INTO pessoa(nome, email, cpf, telefone,id_tipo_usuario, senha, situacao, imagem_perfil) VALUES (?, ?, ?, ?, 2, ?, 'P', 'perfil.png')`;
     const selecionarId = `SELECT id_pessoa FROM pessoa WHERE email = ? ORDER BY id_pessoa DESC LIMIT 1`;
-    const inserirUsuario = `INSERT INTO usuario(id_pessoa, id_tipo_usuario, senha, situacao) VALUES (?, '2', ?, 'I')`;
-    const selecionarIdUsuario = "SELECT id_usuario FROM usuario WHERE id_pessoa = ?";
 
     try {
         const senhaCriptografada = await bcrypt.hash(senha, 10);
-        await db.query(inserirPessoa, [nome, email, cpf, telefone]);
+        await db.query(inserirPessoa, [nome, email, cpf, telefone, senhaCriptografada]);
 
         const resultadoId = await db.query(selecionarId, [email]);
         if (resultadoId.length === 0) {
             return res.status(400).json({ erro: "Erro ao recuperar o ID da pessoa." });
         }
-
-        const id_pessoa = resultadoId[0].id_pessoa;
-
-        await db.query(inserirUsuario, [id_pessoa, senhaCriptografada]);
-
-        await imagemUsuario(id_pessoa);
-        await funcoesUteis.enviarEmail(email);
-
+        try {
+            await funcoesUteis.enviarEmail(email);
+        } catch (erro) {
+            console.log("Erro ao enviar o email");
+            return;
+        }
         res.status(200).json({ mensagem: "Cadastro realizado com sucesso! Verifique seu e-mail para confirmação." });
 
     } catch (err) {
@@ -64,13 +60,13 @@ app.post("/cadastrar", async (req, res) => {
 // Validação do token (acesso via link de e-mail)
 app.get("/validar", async (req, res) => {
     const { token } = req.query;
-    const atualizarSituacao = "UPDATE usuario SET situacao = 'A' WHERE id_pessoa = ?";
+    const atualizarSituacao = "UPDATE pessoa SET situacao = 'A' WHERE id_pessoa = ?";
+    const sql = "SELECT id_pessoa FROM pessoa WHERE situacao = 'P' AND email = ?;";
 
     try {
         const payload = jwt.verify(token, segredo);
         const email = payload.email;
 
-        const sql = "SELECT u.id_pessoa FROM usuario AS u INNER JOIN pessoa AS p ON p.id_pessoa = u.id_pessoa WHERE u.situacao = 'I' AND p.email = ?;";
         const resultado = await db.query(sql, [email]);
 
         if (resultado.length > 0) {

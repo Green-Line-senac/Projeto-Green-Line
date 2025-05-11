@@ -12,37 +12,46 @@ const app = express();
 app.use(express.json()); // Para interpretar JSON no corpo das requisições
 app.use(cors()); // Para habilitar CORS
 
-// Objeto para armazenar o estado de forma mais segura
+
 const estadoLogin = {
+    usuario: null,
     trocarDeConta: 0,
     ultimaAtualizacao: null
 };
 
-// Rota POST para atualizar o estado
+// Rota POST com validação
 app.post("/loginDados", (req, res) => {
-    const novoValor = Number(req.body.trocar) || 0;
-    estadoLogin.trocarDeConta = novoValor;
+    console.log('Corpo recebido:', req.body); // Debug crucial
+    
+    if (!req.body) {
+        return res.status(400).json({ erro: "Nenhum dado recebido" });
+    }
+
+    const { usuario, trocar } = req.body;
+    
+    if (!usuario) {
+        return res.status(400).json({ erro: "Usuário é obrigatório" });
+    }
+
+    estadoLogin.usuario = usuario;
+    estadoLogin.trocarDeConta = Number(trocar) || 0;
     estadoLogin.ultimaAtualizacao = new Date();
     
-    console.log('Estado atualizado:', estadoLogin);
     res.json({ 
         status: 'sucesso',
-        dadosRecebidos: estadoLogin.trocarDeConta,
+        usuario: estadoLogin.usuario,
+        trocar: estadoLogin.trocarDeConta,
         atualizadoEm: estadoLogin.ultimaAtualizacao
     });
 });
 
-// Rota GET para consultar o estado
+// Rota GET
 app.get("/loginDados", (req, res) => {
-    res.json({
-        status: 'sucesso',
-        dadosRecebidos: estadoLogin.trocarDeConta,
-        atualizadoEm: estadoLogin.ultimaAtualizacao
-    });
+    res.json(estadoLogin);
 });
 
 // Inicia o servidor na porta especificada no .env
-const porta = process.env.PORTA3 || 3002;
+const porta = process.env.PORTA3;
 app.listen(porta, () => {
     console.log(`Servidor de autenticação rodando na porta ${porta}`);
     console.log(`Valor inicial de trocarDeConta: ${estadoLogin.trocarDeConta}`);

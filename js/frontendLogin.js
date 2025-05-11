@@ -55,10 +55,13 @@ formularioLogin.addEventListener('submit', async function (e) {
                 break;
             case 2:
                 try {
+                    console.log(usuario);
                     await fetch("http://localhost:3002/loginDados", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ trocar: 1 })
+                        body: JSON.stringify({ 
+                            usuario: usuario, 
+                            trocar: 1 })
                     });
                     localStorage.setItem("usuario", usuario);
                     window.location.href = '/index.html';

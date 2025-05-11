@@ -22,9 +22,9 @@ app.post('/verificarConta', async (req, res) => {
             return res.status(400).json({ dadosValidos: -1, mensagem: "Usuário e senha são obrigatórios." });
         }
 
-        let sql = usuario.includes("@") 
-            ? `SELECT * FROM web_usuarios WHERE email = ?`
-            : `SELECT * FROM web_usuarios WHERE nome = ?`;
+        let sql = usuario.includes("@")
+            ? `SELECT * FROM pessoa WHERE email = ?`
+            : `SELECT * FROM pessoa WHERE nome = ?`;
 
         const pesquisa = await db.query(sql, [usuario]);
 

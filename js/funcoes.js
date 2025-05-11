@@ -7,7 +7,7 @@ class FuncaoUteis {
         return jwt.sign({ email }, process.env.SEGREDO_JWT, { expiresIn: '10m' });
     }
     
-    async enviarEmail(email, res) {  // Added res as parameter
+    async enviarEmail(email, res) {
         try {
             const transportador = nodemailer.createTransport({
                 host: 'smtp.gmail.com',
@@ -43,6 +43,7 @@ class FuncaoUteis {
             }
         }
     };
+    
 }
 
 module.exports = FuncaoUteis;
