@@ -178,7 +178,8 @@ function criarPaginacao(totalProdutos) {
 }
 
 // Ao carregar a página
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+
   const checkboxes = document.querySelectorAll('input[type="checkbox"]');
   checkboxes.forEach(checkbox => {
     checkbox.addEventListener('change', () => aplicarFiltros(true));

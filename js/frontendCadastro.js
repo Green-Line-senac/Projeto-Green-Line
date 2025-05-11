@@ -131,6 +131,7 @@ async function verificarCPF() {
     }
 }
 
+
 //MÁSCARAS
 //CPF
 document.getElementById('cpf').addEventListener('input', function (e) {

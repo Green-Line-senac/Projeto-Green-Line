@@ -9,6 +9,33 @@ let nomeOk = false;
 let emailOk = false;
 let assuntoOk = false;
 
+async function verificarEmail() {
+    const email = document.getElementById('email').value;
+    const emailErro = document.getElementById('emailErro');
+    const emailCadastrado = document.getElementById('emailCadastrado');
+
+    if (!email) return;
+
+    try {
+        const verificacao = await fetch(`http://localhost:3000/verificarEmail?email=${email}`);
+        const resposta = await verificacao.json();
+
+        if (resposta.existe) {
+            console.log("✅ Email existente");
+            emailErro.className = "d-block alert bi bi-exclamation-circle-fill text-bg-danger";
+            emailCadastrado.className = "d-block text-danger fw-bold -0 text-end"
+            emailValido = 0;
+        } else {
+            console.log("❌ Email não encontrado");
+            emailErro.className = "d-block alert bi bi-envelope-fill text-bg-success";
+            emailCadastrado.className = "d-none text-danger fw-bold -0 text-end"
+            emailValido = 1;
+        }
+    } catch (erro) {
+        console.error("Erro ao verificar o email", erro);
+        alert("Erro ao verificar o email. Tente novamente mais tarde.");
+    }
+}
 
 
 function validaNome() {
