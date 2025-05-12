@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npm install && concurrently \"node js/backendCadastro.js\" \"node js/backendLogin.js\" \"node js/backendIndex.js\" "
+    "start": "npm install && concurrently \"node js/backendCadastro.js\" \"node js/backendLogin.js\" \"node js/backendIndex.js\" \"node js/backendprodutos.js\" "
   },
   "keywords": [],
   "author": "",
@@ -17,7 +17,14 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mysql": "^2.18.1",
-    "mysql2": "^3.14.0",
+    "mysql2": "^3.14.1",
     "nodemailer": "^6.10.1"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/user-event": "^14.6.1",
+    "jest": "^29.7.0",
+    "jsdom": "^26.1.0",
+    "supertest": "^7.1.1"
   }
 }

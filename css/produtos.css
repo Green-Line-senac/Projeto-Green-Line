@@ -151,3 +151,28 @@ body {
     text-decoration: underline; 
     color: #424040;
 }
+
+/* Carrinho */
+  .cart-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    background: #fff;
+    min-width: 300px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 1000;
+  }
+  .cart-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .cart-item img {
+    width: 50px;
+    margin-right: 10px;
+  }
+  .cart-item input {
+    width: 50px;
+    margin: 0 10px;
+  }
+
