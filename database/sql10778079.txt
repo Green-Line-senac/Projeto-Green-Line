@@ -62,7 +62,7 @@ CREATE TABLE categoria (
     descricao TEXT NULL
 );
 
--- Criando a tabela de produtos
+
 CREATE TABLE produto (
     id_produto INT PRIMARY KEY AUTO_INCREMENT,
     produto VARCHAR(80) NOT NULL,
@@ -73,8 +73,23 @@ CREATE TABLE produto (
     estoque INT NOT NULL,
     parcelas_permitidas INT NOT NULL DEFAULT 1,
     imagem_1 VARCHAR(255) NOT NULL,
-    imagem_2 VARCHAR(255) NULL DEFAULT NULL
+    imagem_2 VARCHAR(255) NULL DEFAULT NULL,
+    categoria INT NOT NULL,
+    FOREIGN KEY (categoria) REFERENCES categoria(id_categoria) ON DELETE CASCADE
 );
+
+INSERT INTO categoria (categoria, descricao) VALUES
+('Moda Sustentável', 'Roupas e acessórios feitos com materiais ecológicos e métodos de produção éticos.'),
+('Cosméticos Naturais', 'Produtos de beleza e cuidados pessoais feitos com ingredientes naturais e sem testes em animais.'),
+('Casa Ecológica', 'Produtos para a casa feitos com materiais sustentáveis e eficientes em termos de energia.'),
+('Alimentos Orgânicos', 'Alimentos produzidos sem o uso de pesticidas e fertilizantes químicos.'),
+('Transporte Sustentável', 'Veículos elétricos, bicicletas e outros meios de transporte ecologicamente corretos.'),
+('Reciclagem e Reutilização', 'Produtos feitos a partir de materiais reciclados ou que incentivam a reutilização e redução de resíduos.'),
+('Jardinagem Orgânica', 'Ferramentas, sementes e insumos para a jardinagem orgânica e cultivo sustentável.'),
+('Educação e Conscientização', 'Livros, cursos e materiais educacionais sobre sustentabilidade e meio ambiente.'),
+('Energia Renovável', 'Produtos e soluções baseadas em energia solar, eólica e outras fontes renováveis.'),
+('Bem-estar Sustentável', 'Itens para saúde e bem-estar que promovem práticas naturais e sustentáveis.'),
+('Tecnologia Verde', 'Dispositivos e soluções tecnológicas voltadas para a sustentabilidade e redução de impacto ambiental.');
 
 -- Inserindo tipos de usuários
 INSERT INTO tipo_usuario (tipo) VALUES
@@ -89,75 +104,43 @@ INSERT INTO pessoa (nome, email, telefone, cpf, id_tipo_usuario, senha, situacao
 ('Guilherme', 'guilherme@email.com', '61999990004', '444.555.666-77', 2, 'senhaGuilherme', 'A', NULL),
 ('Fabrício', 'fabricio@email.com', '61999990005', '555.666.777-88', 2, 'senhaFabricio', 'A', NULL);
 
---Inserindo produtos
-INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1) 
-VALUES ('Camisa Preta', 'Camisa 100% algodão', 59.99, 4.50, 1, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-Apd-5qaDSGuKucXJMEhmqPELT7w_7ywxPA&s');
+INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1, categoria)  
+VALUES ('Camisa Preta', 'Camisa 100% algodão', 59.99, 4.50, 1, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-Apd-5qaDSGuKucXJMEhmqPELT7w_7ywxPA&s', 1);
 
-INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1) 
-VALUES ('Tênis Branco', 'esportivo confortável', 199.90, 3.70, 0, 'https://cdnv2.moovin.com.br/napolitanacalcados/imagens/produtos/det/tenis-adidas-hp5930-649e2a507d880757d804772fd961402d.jpg');
+INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1, categoria)  
+VALUES ('Tênis Branco', 'Esportivo confortável', 199.90, 3.70, 0, 'https://cdnv2.moovin.com.br/napolitanacalcados/imagens/produtos/det/tenis-adidas-hp5930-649e2a507d880757d804772fd961402d.jpg', 1);
 
-INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1) 
-VALUES ('Escova de Dentes de Bambu', 'Feita com bambu 100% biodegradável.', 14.90, 4.60, 0, 'https://images.tcdn.com.br/img/img_prod/671855/kit_com_10_escovas_de_dente_de_bambu_2079_1_5888ce07ca6053a48a94fa12f2b07d6f.jpg');
+INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1, categoria)  
+VALUES ('Escova de Dentes de Bambu', 'Feita com bambu 100% biodegradável.', 14.90, 4.60, 0, 'https://images.tcdn.com.br/img/img_prod/671855/kit_com_10_escovas_de_dente_de_bambu_2079_1_5888ce07ca6053a48a94fa12f2b07d6f.jpg', 2);
 
-INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1) 
-VALUES ('Shampoo Sólido Natural', 'Sem plástico, sem químicas pesadas, Com óleos essenciais e ingredientes naturais.', 32.00, 4.80, 0, 'https://acdn-us.mitiendanube.com/stores/001/492/053/products/14250195559-shampoo-solido-1-cd29735917944cd23016297759347332-1024-1024.jpg');
+INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1, categoria)  
+VALUES ('Shampoo Sólido Natural', 'Sem plástico, sem químicas pesadas, Com óleos essenciais e ingredientes naturais.', 32.00, 4.80, 0, 'https://acdn-us.mitiendanube.com/stores/001/492/053/products/14250195559-shampoo-solido-1-cd29735917944cd23016297759347332-1024-1024.jpg', 2);
 
-INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1) 
-VALUES ('Canudos Reutilizáveis de Inox', 'Chega de plástico descartável! canudos fritos de inox.', 19.90, 4.50, 0, 'https://images.tcdn.com.br/img/img_prod/1004735/kit_com_4_canudos_inox_reutilizaveis_reto_curvo_com_escova_higienica_75_1_046d7c7267c8fc31f95ee618b4e8fb43.jpg');
+INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1, categoria)  
+VALUES ('Canudos Reutilizáveis de Inox', 'Chega de plástico descartável! Canudos feitos de inox.', 19.90, 4.50, 0, 'https://images.tcdn.com.br/img/img_prod/1004735/kit_com_4_canudos_inox_reutilizaveis_reto_curvo_com_escova_higienica_75_1_046d7c7267c8fc31f95ee618b4e8fb43.jpg', 6);
 
-INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1) 
-VALUES ('Bee Wrap (Embalagem de Cera de Abelha)', 'Pano de algodão coberto com cera de abelha. Reutilizável, lavável.', 29.90, 4.30, 0, 'https://m.media-amazon.com/images/I/81-RFKZmXML._AC_UF894,1000_QL80_.jpg');
+INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1, categoria)  
+VALUES ('Bee Wrap (Embalagem de Cera de Abelha)', 'Pano de algodão coberto com cera de abelha. Reutilizável, lavável.', 29.90, 4.30, 0, 'https://m.media-amazon.com/images/I/81-RFKZmXML._AC_UF894,1000_QL80_.jpg', 6);
 
-INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1) 
-VALUES ('Garrafa Térmica Sustentável', 'Design moderno, construção resistente e zero plástico.', 89.90, 4.70, 0, 'https://70730.cdn.simplo7.net/static/70730/sku/brindes-garrafas-e-squeezes-squeeze-garrafa-termica-sustentavel-550-ml-aco-inox-e-tampa-bambu-brindes-personalizados-bebidas-quentes-e-frias-p-1726872734169.jpg');
+INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1, categoria)  
+VALUES ('Garrafa Térmica Sustentável', 'Design moderno, construção resistente e zero plástico.', 89.90, 4.70, 0, 'https://70730.cdn.simplo7.net/static/70730/sku/brindes-garrafas-e-squeezes-squeeze-garrafa-termica-sustentavel-550-ml-aco-inox-e-tampa-bambu-brindes-personalizados-bebidas-quentes-e-frias-p-1726872734169.jpg', 6);
 
-INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1) 
-VALUES ('Desodorante Natural em Barra', 'Livre de alumínio e parabenos,Embalagem biodegradável e ingredientes naturais.', 24.90, 4.20, 0, 'https://cdn.awsli.com.br/2500x2500/244/244021/produto/111766578/7698b71eca.jpg');
+INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1, categoria)  
+VALUES ('Cafeteira Elétrica', 'Uma cafeteira top.', 199.90, 5.00, 1, 'https://www.keewe.com.br/media/uploads/162/2024/09/lpGwjI4vaq8AHaoJum3XcKhFt9tsUm9rtKU2zfdk.jpg', 3);
 
-INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1) 
-VALUES ('Sacola Reutilizável de Algodão Orgânico', 'e feita com algodão cultivado sem agrotóxicos. Estilo e consciência ecológica em um só produto.', 17.50, 4.40, 0, 'https://images.tcdn.com.br/img/img_prod/604546/ecobag_sacola_100_algodao_cru_agora_sou_eco_media_1281_1_9e9b6bf5e238586371f9cf21a10ffcc5.jpg');
-
-INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1) 
-VALUES ('Copo Retrátil de Silicone', 'Dobrável, prático e ecológico. Ideal pro dia a dia.', 21.90, 4.10, 0, 'https://images.tcdn.com.br/img/img_prod/671855/copo_eco_retratil_dobravel_de_silicone_200ml_227_3_20230310111530.jpg');
-
-INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1) 
-VALUES ('Sabonetes Artesanais Veganos', 'Naturais, veganos e sem testes em animais.', 15.90, 4.00, 0, 'https://images.tcdn.com.br/img/img_prod/604546/sabonete_natural_artesanal_vegano_ares_do_mato_115g_andiroba_argila_verde_e_capim_limao_901_1_20191118161720.jpg');
-
-INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1) 
-VALUES ('Kits de Higiene Pessoal Sustentável', 'Itens essenciais, naturais e sem plástico.', 59.90, 4.30, 0, 'https://cdn.awsli.com.br/2500x2500/1293/1293859/produto/97248829/inserir-um-t-tulo--2--q6569ubosb.jpg');
-
-INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1) 
-VALUES ('Esponja de Lavar Louça Biodegradável', '100% vegetal e compostável. Substitui esponjas comuns.', 24.90, 3.90, 0, 'https://down-br.img.susercontent.com/file/d19117650cf6bfa783cae28cd2269df4');
-
-INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1) 
-VALUES ('Panos Multiuso Reutilizáveis', 'Duráveis, laváveis e sem desperdício', 19.00, 4.10, 0, 'https://m.media-amazon.com/images/I/71Xe8ArIhjL.jpg');
-
-INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1) 
-VALUES ('Roupas de Algodão Orgânico', 'Confortáveis, ecológicas e livres de químicas.', 119.90, 3.80, 0, 'https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcS4r-3WVbdheERAvrg30D4cZJkBjwKFSHapBeQxyIyKMC8PZ0DbKCH10mApZU2R2F3fDg-ISG3cU2K-Ri2pvrG9r1KNd_z0ftXwzFEhxqfKF8af_hV8ru1BuQ');
-
-INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1) 
-VALUES ('Cadernos de Papel Reciclado', 'Papel reciclado, ideal pra estudos e anotações.', 22.90, 4.00, 0, 'https://ajg.im/img/produtos/3/Caderno-A5-Papel-Reciclado-19249d4-1716561407.jpg');
-
-INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1) 
-VALUES ('Carregadores Solares Portáteis', 'Carregue com energia solar. Prático e limpo.', 349.90, 4.50, 0, 'https://m.media-amazon.com/images/I/51yjDO9eeuL._AC_UF1000,1000_QL80_.jpg');
-
-INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1) 
-VALUES ('Velas Ecológicas de Cera Vegetal', 'Cera vegetal e aromas suaves. 100% natural.', 76.90, 3.70, 0, 'https://cdn.awsli.com.br/800x800/1682/1682897/produto/263210254/wiskie-cha--branco-vlsss2l8p3.jpg');
-
-INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1) 
-VALUES ('Talheres Reutilizáveis de Bambu', 'Leves, resistentes e ideais pra levar.', 18.00, 3.90, 0, 'https://cdn.awsli.com.br/2500x2500/2626/2626263/produto/229421116/complesto-2qwc2xczyi.jpg');
-
-INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1) 
-VALUES ('Filtros de Café de Pano', 'Reutilizáveis, laváveis e sem plástico', 9.90, 3.50, 0, 'https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTxZ-jMOayxx44wbD-3ZlHw2o_RM2x9zFdeL9vcHua_TEYITo7FJG77SDE9K6Qn8yuB-L7hy3AV3pJPYmS5Dxsd2z2Z5ooSgTXuF4y6XIi5HHCLIkmy9sQfbUhE');
-
-INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1) 
-VALUES ('Brinquedos de Madeira Sustentável', 'Seguros, educativos e feitos com madeira eco.', 69.90, 4.20, 0, 'https://www.keewe.com.br/media/uploads/162/2024/09/lpGwjI4vaq8AHaoJum3XcKhFt9tsUm9rtKU2zfdk.jpg');
-
-INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1) 
-VALUES ('Produto 1', 'Descrição do Produto 1', 100.00, 5.00, 1, 'url_da_imagem_1');
-
-INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1) 
-VALUES ('Produto 2', 'Descrição do Produto 2', 150.00, 3.00, 0, 'https://www.keewe.com.br/media/uploads/162/2024/09/lpGwjI4vaq8AHaoJum3XcKhFt9tsUm9rtKU2zfdk.jpg');
-
-INSERT INTO produto (produto, descricao, preco, avaliacao, estoque, imagem_1) 
-VALUES ('Cafeteira Elétrica', 'Uma cafeteira top.', 199.90, 5.00, 1, 'https://www.keewe.com.br/media/uploads/162/2024/09/lpGwjI4vaq8AHaoJum3XcKhFt9tsUm9rtKU2zfdk.jpg');
+CREATE VIEW vw_produto_categoria AS
+SELECT 
+    p.id_produto,
+    p.produto,
+    p.descricao,
+    p.preco,
+    p.marca,
+    p.avaliacao,
+    p.estoque,
+    p.parcelas_permitidas,
+    p.imagem_1,
+    p.imagem_2,
+    c.categoria,
+    c.descricao AS categoria_descricao
+FROM produto p
+JOIN categoria c ON p.categoria = c.id_categoria;
