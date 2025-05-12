@@ -31,7 +31,7 @@ function renderizarProdutos(produtos) {
                 <span class="fs-5 ms-2">R$ ${(produto.preco * 0.8).toFixed(2)}</span>
               </p>
             ` : `
-              <p class="fw-bold text-dark mb-0">R$ ${produto.preco.toFixed(2)}</p>
+              <p class="fw-bold text-dark mb-0">R$ ${Number(produto.preco).toFixed(2)}</p>
             `}
           </div>
         </div>
@@ -179,7 +179,23 @@ function criarPaginacao(totalProdutos) {
 
 // Ao carregar a página
 document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const res = await fetch('http://localhost:3003/produto');
+    const data = await res.json();
 
+    console.log("Produtos recebidos da API:", data);
+
+    if (Array.isArray(data)) {
+      todosProdutos = data;
+      aplicarFiltros(); // Isso renderiza os produtos com base nos filtros atuais
+    } else {
+      console.error("Erro: dados inválidos recebidos da API. Esperado um array.");
+    }
+  } catch (err) {
+    console.error("Erro ao buscar produtos:", err);
+  }
+
+  // Eventos de filtro
   const checkboxes = document.querySelectorAll('input[type="checkbox"]');
   checkboxes.forEach(checkbox => {
     checkbox.addEventListener('change', () => aplicarFiltros(true));
@@ -189,11 +205,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (inputBusca) {
     inputBusca.addEventListener('input', () => aplicarFiltros(true));
   }
-
-  fetch('/json/produtos.json')
-    .then(res => res.json())
-    .then(data => {
-      todosProdutos = data;
-      aplicarFiltros();
-    });
 });
+
+
+
