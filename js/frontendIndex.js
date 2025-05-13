@@ -55,7 +55,7 @@ async function carregarProdutosPromocao() {
   try {
     mostrarLoader();
     
-    const response = await fetch(`${config.apiUrl}/produtos?promocao=true`);
+    const response = await fetch(`${config.apiUrl}/produtos?promocao='true'`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     
     const resposta = await response.json();
@@ -154,7 +154,7 @@ function criarCardProduto(produto) {
   const dadosEscapados = escapeHtml(JSON.stringify(dados));
 
   card.innerHTML = `
-    <div class="card h-100" onclick="abrirModalProduto('${dadosEscapados}')">
+    <div class="card h-100" style="width:350px" onclick="abrirModalProduto('${dadosEscapados}')">
       <img src="${dados.imagem}" 
            class="card-img-top" 
            alt="${dados.nome}"
@@ -168,7 +168,7 @@ function criarCardProduto(produto) {
           <small class="text-muted">${dados.avaliacoes} av.</small>
         </div>
         <p class="card-text text-muted small">${dados.descricao.substring(0, 60)}...</p>
-        <p class="fw-bold mb-0 ${dados.promocao ? 'text-danger' : ''}">
+        <p class="fw-bold mb-0 ${dados.promocao ? 'text-dark' : ''}">
           ${precoFormatado}
         </p>
       </div>
@@ -257,7 +257,7 @@ function abrirModalProduto(dadosString) {
     // Preço formatado
     const precoHtml = produto.promocao
       ? `<span style="text-decoration: line-through;">R$ ${produto.preco.toFixed(2)}</span>
-         <span class="text-danger ms-2">R$ ${(produto.preco * 0.9).toFixed(2)}</span>`
+         <span class="text-danger ms-2">R$ ${(produto.preco * 1).toFixed(2)}</span>`
       : `R$ ${produto.preco.toFixed(2)}`;
     
     document.getElementById('produtoModalPreco').innerHTML = precoHtml;
