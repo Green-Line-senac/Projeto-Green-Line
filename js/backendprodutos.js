@@ -35,7 +35,7 @@ app.get("/", (req, res) => {
     res.json({ mensagem: "API de produtos está funcionando" });
 });
 
-const porta = process.env.PORTA4 || 3004;
+const porta = process.env.PORTA4 || 3003;
 app.listen(porta, () => {
     console.log(`Servidor rodando na porta ${porta}`);
 });
