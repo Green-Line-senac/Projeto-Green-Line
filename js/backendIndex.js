@@ -24,13 +24,13 @@ const estadoLogin = {
 // Rota POST com validação
 app.post("/loginDados", (req, res) => {
     console.log('Corpo recebido:', req.body); // Debug crucial
-    
+
     if (!req.body) {
         return res.status(400).json({ erro: "Nenhum dado recebido" });
     }
 
     const { usuario, trocar } = req.body;
-    
+
     if (!usuario) {
         return res.status(400).json({ erro: "Usuário é obrigatório" });
     }
@@ -38,8 +38,8 @@ app.post("/loginDados", (req, res) => {
     estadoLogin.usuario = usuario;
     estadoLogin.trocarDeConta = Number(trocar) || 0;
     estadoLogin.ultimaAtualizacao = new Date();
-    
-    res.json({ 
+
+    res.json({
         status: 'sucesso',
         usuario: estadoLogin.usuario,
         trocar: estadoLogin.trocarDeConta,
@@ -53,36 +53,21 @@ app.get("/loginDados", (req, res) => {
 });
 
 app.get("/produtos", async (req, res) => {
-    // Parâmetros de filtro seguros
-    const { categoria, promocao, limite = 20, pagina = 1 } = req.query;
-
+    const condicao = req.query;
+    if (condicao.length == 0) {
+        console.log('condicao não tem nada');
+    }
+    let produtos;
     try {
-        // Construção segura da query
-        let query = "SELECT id_produto, produto, descricao, preco, imagem_1, categoria FROM produto";
-        const params = [];
-
-        // Adiciona filtros condicionais
-        const conditions = [];
-
-        if (categoria) {
-            conditions.push("categoria = ?");
-            params.push(categoria);
+        let select = 'SELECT * FROM produto';
+        let select2 = 'SELECT * FROM produto WHERE ?'
+        if (condicao.lenght == 0) {
+            produtos = await db.query(select);
+        }
+        else {
+            produtos = await db.query(select2, [condicao])
         }
 
-        if (promocao === 'true') {
-            conditions.push("promocao = true");
-        }
-
-        if (conditions.length) {
-            query += " WHERE " + conditions.join(" AND ");
-        }
-
-        // Adiciona paginação
-        query += " LIMIT ? OFFSET ?";
-        params.push(parseInt(limite), (parseInt(pagina) - 1) * parseInt(limite));
-
-        // Executa a query de forma segura
-        const [produtos] = await db.query(query, params);
 
         if (!produtos || produtos.length === 0) {
             return res.status(404).json({ mensagem: "Nenhum produto encontrado" });

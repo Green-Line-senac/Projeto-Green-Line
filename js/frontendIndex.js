@@ -1,5 +1,4 @@
-// Configurações globais
-const config = {
+let config = {
   apiUrl: 'http://localhost:3002',
   fallbackImage: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGZpbGw9IiM5OTkiPk5lbmh1bWEgSW1hZ2VtPC90ZXh0Pjwvc3ZnPg=='
 };
@@ -28,7 +27,6 @@ async function inicializarApp() {
     await Promise.all([
       carregarCarrossel(),
       carregarProdutosPromocao(),
-      verificarEstadoLogin()
     ]);
   } catch (erro) {
     console.error('Erro na inicialização:', erro);
@@ -284,23 +282,5 @@ function abrirModalProduto(dadosString) {
   } catch (erro) {
     console.error('Erro ao abrir modal:', erro);
     mostrarFeedback('Não foi possível exibir os detalhes do produto', 'danger');
-  }
-}
-
-// Login
-async function verificarEstadoLogin() {
-  if (!elementos.iconeUsuario) return;
-  
-  try {
-    const response = await fetch('http://localhost:3002/loginDados');
-    if (!response.ok) return;
-    
-    const dados = await response.json();
-    if (dados.trocarDeConta == 1 || dados.trocar == 1) {
-      elementos.iconeUsuario.className = "bi bi-person-check text-success";
-      elementos.iconeUsuario.title = "Usuário logado";
-    }
-  } catch (erro) {
-    console.error('Erro ao verificar login:', erro);
   }
 }
