@@ -41,7 +41,7 @@ async function carregarCarrossel() {
   try {
     const response = await fetch('/json/carousel-index.json');
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    
+
     const dados = await response.json();
     estado.imagensCarrossel = Array.isArray(dados) ? dados : [];
     renderizarCarrossel();
@@ -54,20 +54,20 @@ async function carregarCarrossel() {
 async function carregarProdutosPromocao() {
   try {
     mostrarLoader();
-    
-    const response = await fetch(`${config.apiUrl}/produtos?promocao=true`);
+
+    const response = await fetch(`${config.apiUrl}/produtos?promocao='true'`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    
+
     const resposta = await response.json();
-    
+
     // Extrai os produtos da resposta (considerando a nova estrutura)
-    const produtos = resposta.dados ? 
-                    (Array.isArray(resposta.dados) ? resposta.dados : [resposta.dados]) : 
-                    [];
-    
+    const produtos = resposta.dados ?
+      (Array.isArray(resposta.dados) ? resposta.dados : [resposta.dados]) :
+      [];
+
     estado.produtos = produtos;
     renderizarProdutos();
-    
+
   } catch (erro) {
     console.error('Erro nos produtos:', erro);
     mostrarErroCarregamento();
@@ -77,7 +77,7 @@ async function carregarProdutosPromocao() {
 // Renderização
 function renderizarCarrossel() {
   if (!estado.imagensCarrossel.length) return;
-  
+
   elementos.carrossel.innerHTML = '';
   const indicators = document.createElement('div');
   indicators.className = 'carousel-indicators';
@@ -122,7 +122,7 @@ function renderizarProdutos() {
   }
 
   const fragment = document.createDocumentFragment();
-  
+
   estado.produtos.forEach(produto => {
     const card = criarCardProduto(produto);
     fragment.appendChild(card);
@@ -146,7 +146,7 @@ function criarCardProduto(produto) {
     avaliacoes: Math.max(Number(produto.quantidade_avaliacoes) || 0, 0)
   };
 
-  const precoFormatado = dados.promocao 
+  const precoFormatado = dados.promocao
     ? `<span style="text-decoration: line-through; font-size: 0.9rem;">R$ ${dados.preco.toFixed(2)}</span>
        <span class="fs-5 ms-2 text-danger">R$ ${(dados.preco * 0.8).toFixed(2)}</span>`
     : `<span class="fs-5">R$ ${dados.preco.toFixed(2)}</span>`;
@@ -154,7 +154,7 @@ function criarCardProduto(produto) {
   const dadosEscapados = escapeHtml(JSON.stringify(dados));
 
   card.innerHTML = `
-    <div class="card h-100" onclick="abrirModalProduto('${dadosEscapados}')">
+    <div class="card h-100" style="width:350px" onclick="abrirModalProduto('${dadosEscapados}')">
       <img src="${dados.imagem}" 
            class="card-img-top" 
            alt="${dados.nome}"
@@ -168,7 +168,7 @@ function criarCardProduto(produto) {
           <small class="text-muted">${dados.avaliacoes} av.</small>
         </div>
         <p class="card-text text-muted small">${dados.descricao.substring(0, 60)}...</p>
-        <p class="fw-bold mb-0 ${dados.promocao ? 'text-danger' : ''}">
+        <p class="fw-bold mb-0 ${dados.promocao ? 'text-dark' : ''}">
           ${precoFormatado}
         </p>
       </div>
@@ -182,10 +182,10 @@ function criarCardProduto(produto) {
 // Função auxiliar para escape de HTML
 function escapeHtml(str) {
   return str.replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#39;");
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 // Utilitários
@@ -235,7 +235,7 @@ function abrirModalProduto(dadosString) {
   try {
     // Desserializa os dados
     const produto = typeof dadosString === 'string' ? JSON.parse(dadosString) : dadosString;
-    
+
     // Garante que o Bootstrap está carregado
     if (typeof bootstrap === 'undefined' || !bootstrap.Modal) {
       console.error('Bootstrap não está carregado corretamente');
@@ -253,21 +253,21 @@ function abrirModalProduto(dadosString) {
     // Atualiza o conteúdo
     document.getElementById('produtoModalLabel').textContent = produto.nome || 'Produto';
     document.getElementById('produtoModalDescricao').textContent = produto.descricao || 'Descrição não disponível';
-    
+
     // Preço formatado
     const precoHtml = produto.promocao
       ? `<span style="text-decoration: line-through;">R$ ${produto.preco.toFixed(2)}</span>
-         <span class="text-danger ms-2">R$ ${(produto.preco * 0.9).toFixed(2)}</span>`
+     <span class="text-danger ms-2">R$ ${produto.preco_promocional}</span>`
       : `R$ ${produto.preco.toFixed(2)}`;
-    
+
     document.getElementById('produtoModalPreco').innerHTML = precoHtml;
-    
+
     // Imagem (com fallback)
     const imgElement = document.getElementById('produtoModalImagem');
     imgElement.src = produto.imagem || config.fallbackImage;
     imgElement.alt = produto.nome || 'Produto';
     imgElement.onerror = () => imgElement.src = config.fallbackImage;
-    
+
     // Categoria
     const categoriaElement = document.getElementById('produtoModalCategoria');
     if (categoriaElement) {
@@ -278,7 +278,7 @@ function abrirModalProduto(dadosString) {
     // Mostra o modal
     const modal = new bootstrap.Modal(modalElement);
     modal.show();
-    
+
   } catch (erro) {
     console.error('Erro ao abrir modal:', erro);
     mostrarFeedback('Não foi possível exibir os detalhes do produto', 'danger');

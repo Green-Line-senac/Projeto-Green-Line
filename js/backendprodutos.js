@@ -12,6 +12,7 @@ const db = new Conexao();
 
 // Rota para listar produtos
 app.get("/produto", async (req, res) => {
+    const condicao = req.query;
     try {
         const produtos = await db.query("SELECT * FROM produto");
         
