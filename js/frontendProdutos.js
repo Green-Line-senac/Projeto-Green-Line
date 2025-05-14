@@ -273,7 +273,6 @@ function criarPaginacao(totalProdutos) {
   }
 }
 
-
 // Modal
 
 // Função para ajustar a quantidade
@@ -309,7 +308,6 @@ function abrirModalProduto(dadosProduto) {
   } else {
     imgEl.src = 'data:image/svg+xml;base64,...';
   }
-
   // Descrição, Marca, Categoria e Estoque
   document.getElementById('produtoModalDescricao').textContent = produto.descricao || 'Descrição não disponível.';
   document.getElementById('produtoModalMarca').textContent     = produto.marca    || 'Marca não especificada';
@@ -332,7 +330,7 @@ function abrirModalProduto(dadosProduto) {
     const precoProm = (produto.preco * 0.8).toFixed(2);
     precoContainer.innerHTML = `
       <p class="font-bold text-sm mb-1">
-        <span class="line-through text-gray-500">R$ ${precoBase}</span>
+        <span class="line-through text-gray-500 ">R$ ${precoBase}</span>
         <span class="text-green-600 ms-2">R$ ${precoProm}</span>
       </p>
     `;
