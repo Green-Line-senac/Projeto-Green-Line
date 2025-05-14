@@ -97,7 +97,7 @@ function renderizarCarrossel() {
     item.innerHTML = `
       <img src="/img/index_carousel/${img.nomeImagem || 'default.jpg'}" 
            class="d-block w-100" 
-           style="height: 550px; object-fit: cover;" 
+           style="height: 450px; object-fit: cover;" 
            alt="${img.alt || 'Imagem do carrossel'}"
            loading="lazy"
            onerror="this.src='${config.fallbackImage}'">
