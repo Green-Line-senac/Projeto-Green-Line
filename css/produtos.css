@@ -22,7 +22,7 @@ body {
 }
 
 .pagination .page-item {
-    margin: 0 0.25rem; /* Espaçamento entre os itens */
+    margin: 0.1rem; /* Espaçamento entre os itens */
 }
 
 .pagination .page-link {
@@ -176,3 +176,33 @@ body {
     margin: 0 10px;
   }
 
+  .botoes-compra{
+    margin: 1.1rem;
+
+  }
+
+  .btn-comprar-agora{
+    background-color: #2BBD31;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 18px;
+  }
+
+  .btn-adicionar-carrinho{
+    background-color: #2BBD31;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 18px;
+  }
+
+  .btn-checar-cep{
+    background-color: #2BBD31;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 6px;
+  }

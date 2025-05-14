@@ -273,50 +273,129 @@ function criarPaginacao(totalProdutos) {
   }
 }
 
-// Modal do produto
-function abrirModalProduto(dadosProduto) {
-  try {
-    const produto = typeof dadosProduto === 'string' ? JSON.parse(dadosProduto) : dadosProduto;
-    
-    // Atualiza o conteúdo do modal
-    document.getElementById('produtoModalLabel').textContent = produto.produto;
-    document.getElementById('produtoModalImagem').src = produto.imagem_1 || config.fallbackImage;
-    document.getElementById('produtoModalImagem').alt = produto.nome;
-    document.getElementById('produtoModalImagem').onerror = () => {
-      document.getElementById('produtoModalImagem').src = config.fallbackImage;
-    };
-    document.getElementById('produtoModalDescricao').textContent = produto.descricao;
 
-    // Preço formatado
-    const precoHtml = produto.promocao
-      ? `<span style="text-decoration: line-through; font-size: 0.9rem;">R$ ${produto.preco.toFixed(2)}</span>
-         <span class="fs-5 ms-2 ">R$ ${(produto.preco * 0.8).toFixed(2)}</span>`
-      : `<span class="fs-5">R$ ${produto.preco.toFixed(2)}</span>`;
-    
-    document.getElementById('produtoModalPreco').innerHTML = precoHtml;
+// Modal
 
-    // Categoria
-    const categoriaElement = document.getElementById('produtoModalCategoria');
-    if (categoriaElement) {
-      categoriaElement.textContent = produto.categoria || 'Geral';
-      categoriaElement.className = `badge mb-2 bg-${produto.promocao ? 'danger' : 'success'}`;
-    }
-
-    // Estoque
-    const estoqueElement = document.getElementById('produtoModalEstoque');
-    if (estoqueElement) {
-      estoqueElement.textContent = produto.estoque ? 'Disponível' : 'Fora de estoque';
-      estoqueElement.className = `badge bg-${produto.estoque ? 'success' : 'secondary'}`;
-    }
-
-    // Abre o modal
-    elementos.produtoModal.show();
-    
-  } catch (erro) {
-    console.error('Erro ao abrir modal:', erro);
-    mostrarFeedback('Não foi possível exibir os detalhes do produto', 'danger');
-  }
+// Função para ajustar a quantidade
+function adjustQuantity(elementId, change) {
+  const input = document.getElementById(elementId);
+  let value = parseInt(input.value, 10) || 1;
+  value = Math.max(1, value + change);
+  input.value = value;
 }
+
+// Função para abrir o modal do produto
+function abrirModalProduto(dadosProduto) {
+  let produto;
+  try {
+    produto = typeof dadosProduto === 'string'
+      ? JSON.parse(dadosProduto)
+      : dadosProduto;
+  } catch (e) {
+    console.error('JSON inválido:', e);
+    return;
+  }
+
+  // Título
+  document.getElementById('produtoModalLabel').textContent = produto.produto || 'Produto sem nome';
+
+  // Imagem
+  const imgEl = document.getElementById('produtoModalImagem');
+  if (produto.imagem_1) {
+    imgEl.src = produto.imagem_1;
+    imgEl.onerror = () => {
+      imgEl.src = 'data:image/svg+xml;base64,...'; // placeholder
+    };
+  } else {
+    imgEl.src = 'data:image/svg+xml;base64,...';
+  }
+
+  // Descrição, Marca, Categoria e Estoque
+  document.getElementById('produtoModalDescricao').textContent = produto.descricao || 'Descrição não disponível.';
+  document.getElementById('produtoModalMarca').textContent     = produto.marca    || 'Marca não especificada';
+
+  const catEl = document.getElementById('produtoModalCategoria');
+  if (catEl) {
+    catEl.textContent = produto.categoria || 'Geral';
+    catEl.className   = `badge mb-2 bg-${produto.promocao ? 'danger' : 'success'}`;
+  }
+  const estoqueEl = document.getElementById('produtoModalEstoque');
+  if (estoqueEl) {
+    estoqueEl.textContent = produto.estoque ? 'Disponível' : 'Fora de estoque';
+    estoqueEl.className   = `badge bg-${produto.estoque ? 'success' : 'secondary'}`;
+  }
+
+  // Preço e promoção
+  const precoContainer = document.getElementById('produtoModalPreco');
+  const precoBase = (produto.preco || 0).toFixed(2);
+  if (produto.promocao) {
+    const precoProm = (produto.preco * 0.8).toFixed(2);
+    precoContainer.innerHTML = `
+      <p class="font-bold text-sm mb-1">
+        <span class="line-through text-gray-500">R$ ${precoBase}</span>
+        <span class="text-green-600 ms-2">R$ ${precoProm}</span>
+      </p>
+    `;
+  } else {
+    precoContainer.innerHTML = `<p class="font-bold text-sm">R$ ${precoBase}</p>`;
+  }
+
+  // Avaliação
+  const stars = document.getElementById('produtoModalAvaliacao');
+  stars.innerHTML = '';
+  if (produto.avaliacao != null) {
+    const fullStars   = Math.floor(produto.avaliacao);
+    const halfStar    = produto.avaliacao % 1 >= 0.5;
+    const emptyStars  = 5 - fullStars - (halfStar ? 1 : 0);
+    for (let i = 0; i < fullStars; i++)   stars.innerHTML += '<i class="fas fa-star text-yellow-400 text-xs"></i>';
+    if (halfStar)                         stars.innerHTML += '<i class="fas fa-star-half-alt text-yellow-400 text-xs"></i>';
+    for (let i = 0; i < emptyStars; i++)  stars.innerHTML += '<i class="far fa-star text-yellow-400 text-xs"></i>';
+    stars.innerHTML += `<span class="text-xs text-gray-600 ml-1">(${produto.numAvaliacoes || 0})</span>`;
+  }
+
+  // Exibe o modal
+  new bootstrap.Modal(document.getElementById('produtoModal')).show();
+}
+
+// Event listeners após DOM carregar
+document.addEventListener('DOMContentLoaded', () => {
+  // Botões de quantidade já usam onclick direto, mas caso queira data-action:
+  document.querySelectorAll('[data-action="increase"]').forEach(btn =>
+    btn.addEventListener('click', () => adjustQuantity('quantidadeModal', 1))
+  );
+  document.querySelectorAll('[data-action="decrease"]').forEach(btn =>
+    btn.addEventListener('click', () => adjustQuantity('quantidadeModal', -1))
+  );
+
+  // Comprar agora
+  document.getElementById('btnComprarAgora').addEventListener('click', () => {
+    const qtd = document.getElementById('quantidadeModal').value;
+    console.log('Comprar agora – quantidade:', qtd);
+    // TODO: lógica de compra
+  });
+
+  // Adicionar ao carrinho
+  document.getElementById('btnAddCarrinho').addEventListener('click', () => {
+    const qtd = document.getElementById('quantidadeModal').value;
+    console.log('Adicionar ao carrinho – quantidade:', qtd);
+    // TODO: lógica do carrinho
+  });
+
+  // Calcular frete
+  document.getElementById('btnChecar').addEventListener('click', () => {
+    const cep = document.getElementById('freteModal').value;
+    console.log('Calcular frete CEP:', cep);
+    // TODO: chamada de API de CEP/frete
+  });
+   // Abre o modal
+  try {
+      // Código que pode lançar erro
+      elementos.produtoModal.show();
+    } catch (erro) {
+      console.error('Erro ao abrir modal:', erro);
+      mostrarFeedback('Não foi possível exibir os detalhes do produto', 'danger');
+    }
+});
 
 // Utilitários
 function configurarEventos() {
