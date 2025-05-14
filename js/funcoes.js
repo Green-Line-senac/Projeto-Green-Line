@@ -33,12 +33,12 @@ class FuncaoUteis {
             `
             });
             console.log("✅ E-mail enviado com sucesso.");
-            if (res) {  // Check if res exists before using it
+            if (res) { 
                 res.status(200).json({ mensagem: "Verifique seu e-mail para confirmação." });
             }
         } catch (erro) {
             console.error("Erro ao enviar o email:", erro);
-            if (res) {  // Check if res exists before using it
+            if (res) {  
                 res.status(500).json({ erro: "Erro durante o processo envio" });
             }
         }

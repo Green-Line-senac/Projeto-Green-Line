@@ -16,17 +16,6 @@ const db = new Database();
 const funcoesUteis = new funcoes();
 const segredo = process.env.SEGREDO_JWT;
 
-function imagemUsuario(id) {
-    const inserirImagem = `INSERT INTO ImagensUsuarios(id_usuario, caminho_imagem) VALUES (?, ?)`;
-    db.query(inserirImagem, [id, "null"], (erro) => {
-        if (erro) {
-            console.error("Erro ao inserir imagem", erro);
-            res.status(500).json({ erro: "Erro durante a inserção da imagem" });
-        } else {
-            console.log("Função imagem executada com sucesso");
-        }
-    });
-}
 
 // Cadastro de usuário
 app.post("/cadastrar", async (req, res) => {
