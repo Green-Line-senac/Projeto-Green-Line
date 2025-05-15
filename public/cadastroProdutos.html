@@ -7,18 +7,32 @@
     <title>Green Line - Cadastro de Produtos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../css/menu_rodape.css">
     <style>
-        .preview-image {
+        .imagem-preview {
             height: 250px;
             object-fit: contain;
             background-color: #f8f9fa;
         }
-        .dicas-list li {
+
+        .lista-dicas li {
             margin-bottom: 0.5rem;
+        }
+
+        .campo-invalido {
+            border-color: #dc3545;
+        }
+
+        .secao-formulario {
+            margin-bottom: 1.5rem;
+        }
+
+        .container-switch {
+            border-radius: 0.375rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
         }
     </style>
 </head>
@@ -30,43 +44,284 @@
                 <h1 class="h3 fw-bold text-success">Cadastro de Produtos</h1>
                 <p class="lead">Preencha as informações do produto que deseja adicionar ao catálogo.</p>
             </div>
-            
+
             <div class="container-fluid">
                 <div class="row gap-3 justify-content-center">
-                    <!-- Formulário de Cadastro -->
-                    <div class="col-12 col-lg-8 border rounded-3 p-4 form-section">
-                      
+                    <div class="col-12 col-lg-8 border rounded-3 p-4 secao-formulario">
+                        <form id="formulario-produto" method="POST" action="#" novalidate>
+                            <fieldset class="mb-4">
+                                <legend class="h5 fw-bold text-success mb-3">Informações Básicas</legend>
+
+                                <div class="form-floating mb-3">
+                                    <input type="text" name="nome-produto" class="form-control" id="nome-produto"
+                                        placeholder="Digite o nome do produto" required minlength="3" maxlength="100">
+                                    <label for="nome-produto">Nome do Produto*</label>
+                                    <div class="invalid-feedback">Por favor, insira um nome válido (3-100 caracteres).
+                                    </div>
+                                </div>
+
+                                <div class="form-floating mb-3">
+                                    <input type="text" name="marca-produto" class="form-control" id="marca-produto"
+                                        placeholder="Digite a marca do produto" required minlength="2" maxlength="50">
+                                    <label for="marca-produto">Marca*</label>
+                                    <div class="invalid-feedback">Por favor, insira uma marca válida (2-50 caracteres).
+                                    </div>
+                                </div>
+
+                                <div class="form-floating mb-3">
+                                    <textarea name="descricao-curta" class="form-control" id="descricao-curta"
+                                        placeholder="Digite uma descrição curta" required minlength="10" maxlength="200"
+                                        style="height: 100px;"></textarea>
+                                    <label for="descricao-curta">Descrição Curta*</label>
+                                    <div class="invalid-feedback">A descrição curta deve ter entre 10 e 200 caracteres.
+                                    </div>
+                                    <div class="form-text text-end"><span id="contador-descricao">0</span>/200
+                                        caracteres</div>
+                                </div>
+
+                                <div class="form-floating mb-3">
+                                    <textarea name="descricao-detalhada" class="form-control" id="descricao-detalhada"
+                                        placeholder="Digite uma descrição detalhada" minlength="20" maxlength="1000"
+                                        style="height: 120px;"></textarea>
+                                    <label for="descricao-detalhada">Descrição Detalhada</label>
+                                    <div class="invalid-feedback">A descrição detalhada deve ter entre 20 e 1000
+                                        caracteres.</div>
+                                    <div class="form-text text-end"><span id="contador-detalhada">0</span>/1000
+                                        caracteres</div>
+                                </div>
+
+                                <div class="form-floating mb-3">
+                                    <select name="categoria" class="form-select" id="categoria" required>
+                                        <option value="" selected disabled>Escolha uma categoria</option>
+                                        <option value="Moda Sustentável">Moda Sustentável</option>
+                                        <option value="Cosméticos Naturais">Cosméticos Naturais</option>
+                                        <option value="Casa Ecológica">Casa Ecológica</option>
+                                        <option value="Alimentos Orgânicos">Alimentos Orgânicos</option>
+                                        <option value="Transporte Sustentável">Transporte Sustentável</option>
+                                        <option value="Reciclagem e Reutilização">Reciclagem e Reutilização</option>
+                                        <option value="Jardinagem Orgânica">Jardinagem Orgânica</option>
+                                        <option value="Educação e Conscientização">Educação e Conscientização</option>
+                                        <option value="Energia Renovável">Energia Renovável</option>
+                                        <option value="Bem-estar Sustentável">Bem-estar Sustentável</option>
+                                        <option value="Tecnologia Verde">Tecnologia Verde</option>
+                                    </select>
+                                    <label for="categoria">Categoria*</label>
+                                    <div class="invalid-feedback">Por favor, selecione uma categoria.</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="imagens-produto" class="form-label">Imagens do Produto*</label>
+                                    <input class="form-control" type="file" id="imagens-produto" multiple
+                                        accept="image/*" required>
+                                    <div class="form-text">Envie até 5 imagens (JPEG/PNG, máx. 2MB cada)</div>
+                                    <div class="invalid-feedback">Por favor, adicione pelo menos uma imagem do produto.
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset class="mb-4">
+                                <legend class="h5 fw-bold text-success mb-3">Detalhes do Produto</legend>
+
+                                <div class="d-flex justify-content-between gap-3 mb-3">
+                                    <div class="container-switch flex-grow-1">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" name="produto-ativo" type="checkbox"
+                                                id="produto-ativo" checked>
+                                            <label for="produto-ativo" class="form-check-label fw-medium">Produto
+                                                Ativo</label>
+                                        </div>
+                                        <p class="text-muted small mt-1 mb-0">Determina se o produto será exibido no
+                                            catálogo</p>
+                                    </div>
+
+                                    <div class="form-floating flex-grow-1">
+                                        <input type="number" name="estoque" class="form-control" id="estoque"
+                                            placeholder="Digite o estoque do produto" min="0" step="1" required>
+                                        <label for="estoque">Estoque*</label>
+                                        <div class="invalid-feedback">O estoque deve ser um número positivo.</div>
+                                    </div>
+
+                                    <div class="form-floating flex-grow-1">
+                                        <input type="number" name="peso" class="form-control" id="peso"
+                                            placeholder="Digite o peso do produto" min="0" step="0.01" required>
+                                        <label for="peso">Peso (kg)*</label>
+                                        <div class="invalid-feedback">O peso deve ser um número positivo.</div>
+                                    </div>
+                                </div>
+
+                                <div class="form-floating mb-3">
+                                    <input type="text" name="dimensoes" class="form-control" id="dimensoes"
+                                        placeholder="Largura x Altura x Profundidade"
+                                        pattern="^\d+(\.\d+)?x\d+(\.\d+)?x\d+(\.\d+)?$" required>
+                                    <label for="dimensoes">Dimensões (LxAxP)*</label>
+                                    <div class="invalid-feedback">Use o formato: LarguraxAlturaxProfundidade (ex:
+                                        20x15x10)</div>
+                                    <div class="form-text text-end">Exemplo: 20x15x10 (em cm)</div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset class="mb-4">
+                                <legend class="h5 fw-bold text-success mb-3">Preço e Avaliação</legend>
+
+                                <div class="d-flex justify-content-between gap-3 mb-3">
+                                    <div class="form-floating flex-grow-1">
+                                        <input type="text" name="preco" class="form-control" id="preco"
+                                            placeholder="Digite o preço do produto" pattern="^\d{1,6}(,\d{2})?$"
+                                            required>
+                                        <label for="preco">Preço (R$)*</label>
+                                        <div class="invalid-feedback">Use o formato: 9999,99 (sem ponto para milhar)
+                                        </div>
+                                    </div>
+
+                                    <div class="container-switch flex-grow-1">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" name="promocao" type="checkbox"
+                                                id="promocao">
+                                            <label for="promocao" class="form-check-label fw-medium">Em Promoção</label>
+                                        </div>
+                                        <p class="text-muted small mt-1 mb-0">Marque se o produto está com desconto</p>
+                                    </div>
+
+                                    <div class="form-floating flex-grow-1">
+                                        <input type="number" name="parcelas" class="form-control" id="parcelas"
+                                            placeholder="Número de parcelas" min="1" max="12" value="1">
+                                        <label for="parcelas">Parcelas</label>
+                                        <div class="invalid-feedback">Número de parcelas deve ser entre 1 e 12.</div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between gap-3">
+                                    <div class="form-floating flex-grow-1">
+                                        <input type="number" name="avaliacao" class="form-control" id="avaliacao"
+                                            placeholder="Avaliação (0 a 5)" min="0" max="5" step="0.1">
+                                        <label for="avaliacao">Avaliação (0-5)</label>
+                                        <div class="invalid-feedback">A avaliação deve ser entre 0 e 5.</div>
+                                    </div>
+
+                                    <div class="form-floating flex-grow-1">
+                                        <input type="number" name="quantidade-avaliacoes" class="form-control"
+                                            id="quantidade-avaliacoes" placeholder="Número de avaliações" min="0">
+                                        <label for="quantidade-avaliacoes">Nº de Avaliações</label>
+                                        <div class="invalid-feedback">Deve ser um número positivo.</div>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <div class="d-flex justify-content-end mt-4">
+                                <button type="button" class="btn btn-outline-secondary me-3">Cancelar</button>
+                                <button type="submit" class="btn btn-success">Cadastrar Produto</button>
+                            </div>
+                        </form>
                     </div>
-                    
-                    <!-- Pré-visualização e Dicas -->
+
                     <div class="col-12 col-lg-3 d-flex flex-column gap-4">
-                        <!-- Pré-visualização -->
                         <div class="border rounded-3 p-3">
                             <h2 class="h5 mb-3">Pré-visualização</h2>
                             <div class="card">
-                                <img id="previewImage" src="../img/imagem-nao-disponivel.png" class="card-img-top preview-image" alt="Pré-visualização do produto">
+                                <img id="imagem-preview" src="../img/imagem-nao-disponivel.png"
+                                    class="card-img-top imagem-preview" alt="Pré-visualização do produto">
                                 <div class="card-body">
-                                    <h5 id="previewName" class="card-title">Nome do produto</h5>
-                                    <p id="previewDescription" class="card-text text-black-50">Descrição curta</p>
-                                    <p id="previewPrice" class="card-text fw-bold">R$ 0,00</p>
-                                    <span id="previewBadges" class="d-flex gap-1"></span>
+                                    <h5 id="preview-nome" class="card-title">Nome do produto</h5>
+                                    <p id="preview-descricao" class="card-text text-black-50">Descrição curta</p>
+                                    <p id="preview-preco" class="card-text fw-bold">R$ 0,00</p>
+                                    <span id="preview-etiquetas" class="d-flex gap-1">
+                                        <span class="badge bg-success" id="badge-ativo">Ativo</span>
+                                        <span class="badge bg-danger d-none" id="badge-promocao">Promoção</span>
+                                    </span>
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Dicas -->
+
                         <div class="border rounded-3 p-3">
                             <h2 class="h5 mb-3">Dicas para um bom cadastro</h2>
-                            <ul class="dicas-list">
+                            <ul class="lista-dicas">
                                 <li>Use descrições detalhadas para destacar os benefícios ambientais do produto.</li>
                                 <li>Imagens de alta qualidade aumentam a conversão de vendas.</li>
                                 <li>Escolha a categoria mais adequada para melhorar a busca.</li>
+                                <li>Campos marcados com * são obrigatórios.</li>
                             </ul>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <script>
+            // IIFE cria um escopo isolado, evitando que variáveis e funções internas vazem para o escopo global (window).
+            (function () {
+                'use strict';
+
+                const formulario = document.getElementById('formulario-produto');
+                const campoDescricao = document.getElementById('descricao-curta');
+                const contadorDescricao = document.getElementById('contador-descricao');
+                const campoDetalhada = document.getElementById('descricao-detalhada');
+                const contadorDetalhada = document.getElementById('contador-detalhada');
+
+                campoDescricao.addEventListener('input', () => {
+                    contadorDescricao.textContent = campoDescricao.value.length;
+                });
+
+                campoDetalhada.addEventListener('input', () => {
+                    contadorDetalhada.textContent = campoDetalhada.value.length;
+                });
+
+                formulario.addEventListener('submit', (event) => {
+                    if (!formulario.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    formulario.classList.add('was-validated');
+                });
+
+                const atualizarPreVisualizacao = () => {
+                    const nome = document.getElementById('nome-produto').value || 'Nome do produto';
+                    const descricao = document.getElementById('descricao-curta').value || 'Descrição curta';
+                    const preco = document.getElementById('preco').value
+                        ? `R$ ${parseFloat(document.getElementById('preco').value.replace(',', '.')).toFixed(2).replace('.', ',')}`
+                        : 'R$ 0,00';
+                    const ativo = document.getElementById('produto-ativo').checked; //verdadeiro ou falso
+                    const promocao = document.getElementById('promocao').checked;
+
+                    document.getElementById('preview-nome').textContent = nome;
+                    document.getElementById('preview-descricao').textContent = descricao;
+                    document.getElementById('preview-preco').textContent = preco;
+                    /*
+                    if (promocao) {
+                        document.getElementById('badge-promocao').classList.remove('d-none');
+                    } else {
+                        document.getElementById('badge-promocao').classList.add('d-none');
+                    }
+                    */
+                    document.getElementById('badge-ativo').style.display = ativo ? 'inline-block' : 'none'; //true ou false
+                    document.getElementById('badge-promocao').classList.toggle('d-none', !promocao);
+
+                    const arquivoImagem = document.getElementById('imagens-produto');
+                    if (arquivoImagem.files && arquivoImagem.files[0]) {
+                        const leitor = new FileReader();
+                        leitor.onload = function (e) {
+                            document.getElementById('imagem-preview').src = e.target.result;
+                        };
+                        leitor.readAsDataURL(arquivoImagem.files[0]);
+                    }
+                };
+
+                document.querySelectorAll('#formulario-produto input, #formulario-produto textarea, #formulario-produto select')
+                    .forEach(elemento => {
+                        elemento.addEventListener('input', atualizarPreVisualizacao);
+                        elemento.addEventListener('change', atualizarPreVisualizacao);
+                    });
+
+                document.getElementById('preco').addEventListener('input', function () {
+                    let valor = this.value.replace(/\D/g, '');
+                    valor = (valor / 100).toFixed(2).replace('.', ',');
+                    this.value = valor;
+                });
+
+                contadorDescricao.textContent = campoDescricao.value.length;
+                contadorDetalhada.textContent = campoDetalhada.value.length;
+            })();
+        </script>
     </main>
 </body>
+
 </html>

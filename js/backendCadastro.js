@@ -21,7 +21,8 @@ const segredo = process.env.SEGREDO_JWT;
 app.post("/cadastrar", async (req, res) => {
     const { nome, email, cpf, telefone, senha } = req.body;
 
-    const inserirPessoa = `INSERT INTO pessoa(nome, email, cpf, telefone,id_tipo_usuario, senha, situacao, imagem_perfil) VALUES (?, ?, ?, ?, 2, ?, 'P', 'perfil.png')`;
+    const inserirPessoa = `INSERT INTO pessoa(nome, email, cpf, telefone,id_tipo_usuario, senha, situacao, imagem_perfil) 
+    VALUES (?, ?, ?, ?, 2, ?, 'P', 'perfil.png')`;
     const selecionarId = `SELECT id_pessoa FROM pessoa WHERE email = ? ORDER BY id_pessoa DESC LIMIT 1`;
 
     try {

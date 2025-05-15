@@ -54,15 +54,6 @@ CREATE TABLE pedidos (
     endereco_entrega TEXT NULL,
     metodo_entrega VARCHAR(50) NULL
 );
-
--- Criando a tabela de categorias de produtos
-CREATE TABLE categoria (
-    id_categoria INT PRIMARY KEY AUTO_INCREMENT,
-    categoria VARCHAR(50) NOT NULL,
-    descricao TEXT NULL
-);
-
-
 CREATE TABLE produto (
     id_produto INT PRIMARY KEY AUTO_INCREMENT,
     produto VARCHAR(80) NOT NULL UNIQUE,
