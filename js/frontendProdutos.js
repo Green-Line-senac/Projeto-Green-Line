@@ -368,8 +368,32 @@ document.addEventListener('DOMContentLoaded', () => {
   // Comprar agora
   document.getElementById('btnComprarAgora').addEventListener('click', () => {
     const qtd = document.getElementById('quantidadeModal').value;
-    console.log('Comprar agora – quantidade:', qtd);
+
     // TODO: lógica de compra
+    const produtoId = document.getElementById('modalProdutoId').value;
+
+  const dadosCompra = {
+    produtoId: produtoId,
+    quantidade: parseInt(qtd),
+    data: new Date().toISOString()
+  };
+  fetch(`http://localhost:3003/pedidos/${produtoId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(dadosCompra)
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('Resposta do servidor:', data);
+    alert('Compra registrada com sucesso!');
+  })
+  .catch(error => {
+    console.error('Erro ao enviar:', error);
+    alert('Erro ao registrar a compra.');
+  });
+});
   });
 
   // Adicionar ao carrinho
@@ -378,13 +402,39 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Adicionar ao carrinho – quantidade:', qtd);
     // TODO: lógica do carrinho
   });
+//CEP
+  document.getElementById("btnChecar").addEventListener("click", () => {
+    const cepInput = document.getElementById("freteModal");
+    const cep = cepInput.value.replace(/\D/g, '');
+    const resultado = document.getElementById("resultadoFrete");
+  //TODO: Calculo do frete
+    if (cep.length !== 8) {
+      resultado.innerText = "CEP inválido. Digite 8 números.";
+      cepInput.value = ""; // limpa mesmo com erro
+      return;
+    }
+  
+    fetch(`https://viacep.com.br/ws/${cep}/json/`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.erro) {
+          resultado.innerText = "CEP não encontrado.";
+        } else {
+          let valorFrete = "R$ 29,90";
+          if (data.uf === "DF") valorFrete = "Gratis";
+          else if (["RJ", "MG"].includes(data.uf)) valorFrete = "R$ 19,90";
+          else if (data.uf === "RS") valorFrete = "R$ 24,90";
+  
+          resultado.innerText = `Endereço: ${data.localidade} - ${data.uf}\nFrete estimado: ${valorFrete}`;
+        }
+        cepInput.value = ""; // limpa após sucesso
+      })
+      .catch(() => {
+        resultado.innerText = "Erro ao buscar o CEP.";
+        cepInput.value = ""; // limpa se der erro
+      });
+  });  
 
-  // Calcular frete
-  document.getElementById('btnChecar').addEventListener('click', () => {
-    const cep = document.getElementById('freteModal').value;
-    console.log('Calcular frete CEP:', cep);
-    // TODO: chamada de API de CEP/frete
-  });
    // Abre o modal
   try {
       // Código que pode lançar erro
@@ -393,7 +443,6 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('Erro ao abrir modal:', erro);
       mostrarFeedback('Não foi possível exibir os detalhes do produto', 'danger');
     }
-});
 
 // Utilitários
 function configurarEventos() {
