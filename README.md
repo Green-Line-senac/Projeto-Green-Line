@@ -1,3 +1,4 @@
+
 <h1 align="center">🌿 Green Line - E-commerce Sustentável 🌱</h1>
 
 <p align="center">
@@ -75,17 +76,6 @@ O Green Line é ideal para quem:
 - JDBC
 
 ---
-## 📅 Timeline do Projeto
-| Etapa                      | Status          |
-| -------------------------- | --------------- |
-| Levantamento de requisitos | ✅ Concluído     |
-| Protótipo (Figma)          | ✅ Concluído     |
-| Desenvolvimento Web        | ⚙️ Em andamento |
-| Desenvolvimento Desktop    | ⚙️ Em andamento |
-| Testes                     | 🔜 Em breve     |
-| Documentação Final         | 🔜 Em breve     |
-
----
 
 ## 📁 Estrutura do Projeto
 
@@ -100,4 +90,102 @@ O Green Line é ideal para quem:
 │   ├── lib/                # Bibliotecas externas
 │   └── README_DESKTOP.md   # Instruções de uso da versão desktop
 └── README.md               # Este arquivo
+```
 
+---
+
+## 📸 Prévia do Projeto
+
+<p align="center">
+  <img src="preview.jpg" alt="Preview do Green Line" width="600">
+</p>
+
+---
+
+## 🚀 Como Visualizar Localmente
+
+### Web
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/seuusuario/green-line-web.git
+   ```
+2. Abra o arquivo `index.html` no navegador.
+
+### Desktop
+1. Navegue até a pasta `/desktop`
+2. Importe o projeto em uma IDE Java (como NetBeans ou IntelliJ)
+3. Configure o banco de dados MySQL
+4. Execute a classe principal
+
+---
+
+<h1 align="center">🖥️ Protótipo Figma (Versão Web)</h1>
+
+- [Acesse aqui](https://www.figma.com/design/zqz3oTlb1rMefWhi7QIEJB/WEB--Copy-?t=J0166Bdd1txpyvDJ-1)
+
+---
+
+## 📅 Timeline do Projeto
+
+| Etapa                    | Status       |
+|--------------------------|--------------|
+| Levantamento de requisitos | ✅ Concluído |
+| Protótipo (Figma)          | ✅ Concluído |
+| Desenvolvimento Web        | ⚙️ Em andamento |
+| Desenvolvimento Desktop    | ⚙️ Em andamento |
+| Testes                     | 🔜 Em breve |
+| Documentação Final         | 🔜 Em breve |
+
+---
+
+## 📊 Tarefas / To-Do
+
+- [x] Criar layout responsivo com Bootstrap  
+- [x] Implementar catálogo de produtos  
+- [x] Desenvolver sistema de cadastro Java  
+- [ ] Integrar backend com banco de dados  
+- [ ] Adicionar login de administrador  
+- [ ] Finalizar documentação técnica
+
+---
+
+## 👥 Equipe
+
+Este projeto foi desenvolvido com dedicação por:
+
+- [Kauã Nunes](https://github.com/KauaNca)  
+- [Fabrício](https://github.com/fabricioribdev)
+- [Gabriel](https://github.com/gabriel-reiss)
+- [Edenilson](https://github.com/Edenilson-Nascimento) 
+- [Guilherme](https://github.com/soaresCP)
+
+---
+
+## 🤝 Como Contribuir
+
+Quer colaborar?
+
+1. Faça um fork do projeto
+2. Crie uma branch: `git checkout -b minha-contribuicao`
+3. Faça suas alterações: `git commit -m "minha contribuição"`
+4. Envie: `git push origin minha-contribuicao`
+5. Abra um Pull Request
+
+---
+
+## 📧 Contato
+
+Dúvidas ou sugestões? Fale com a gente:
+
+📩 Email: [greenline.ecologic@gmail.com](mailto:greenline.ecologic@gmail.com)
+
+---
+
+## 📄 Licença
+
+Este projeto está licenciado sob a Licença MIT.  
+Você é livre para usar, modificar e distribuir com os devidos créditos.
+
+---
+
+<h2 align="center">🌎 Faça do meio ambiente o seu meio de vida! 🌱</h2>
