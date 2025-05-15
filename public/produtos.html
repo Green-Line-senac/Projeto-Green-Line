@@ -15,12 +15,13 @@
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   <!-- Bootstrap Icons (ícones estilizados) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <!-- Scripts -->
+  <script src="../js/frontendPadrao.js"></script>
+  <script src="../js/frontendProdutos.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
     crossorigin="anonymous"></script>
-  <script src="../js/frontendProdutos.js" defer></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
-  <script src="../js/frontendPadrao.js"></script>
 </head>
 
 <body>
@@ -283,12 +284,19 @@
               <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-2 mt-4">
                 <label class="text-xs mb-1 sm:mb-0" for="freteModal">Calcule seu frete</label>
                 <div class="flex">
-                  <input class="border border-gray-300 rounded-l text-xs px-2 py-1 w-20" id="freteModal" name="frete"
-                    type="text" placeholder="CEP" />
-                  <button class="btn-checar-cep" id="btnChecar">Checar</button>
+                  <input
+                    class="text-base border border-gray-300 rounded-lg px-6 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    id="freteModal"
+                    name="frete"
+                    type="text"
+                    placeholder="CEP"
+                  />
+                  <button class="btn-checar-cep ml-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700" id="btnChecar">
+                    Checar
+                  </button>
                 </div>
-              </div>
-            </div>
+                <p id="resultadoFrete" class="mt-1 text-sm text-gray-700"></p>
+              </div>              
           </div>
 
           <!-- Descrição -->
