@@ -75,6 +75,17 @@ O Green Line é ideal para quem:
 - JDBC
 
 ---
+## 📅 Timeline do Projeto
+| Etapa                      | Status          |
+| -------------------------- | --------------- |
+| Levantamento de requisitos | ✅ Concluído     |
+| Protótipo (Figma)          | ✅ Concluído     |
+| Desenvolvimento Web        | ⚙️ Em andamento |
+| Desenvolvimento Desktop    | ⚙️ Em andamento |
+| Testes                     | 🔜 Em breve     |
+| Documentação Final         | 🔜 Em breve     |
+
+---
 
 ## 📁 Estrutura do Projeto
 
@@ -89,3 +100,4 @@ O Green Line é ideal para quem:
 │   ├── lib/                # Bibliotecas externas
 │   └── README_DESKTOP.md   # Instruções de uso da versão desktop
 └── README.md               # Este arquivo
+
