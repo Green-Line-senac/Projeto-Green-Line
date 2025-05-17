@@ -55,15 +55,14 @@ async function carregarProdutosPromocao() {
   try {
     mostrarLoader();
 
-    const response = await fetch(`${config.apiUrl}/produtos?promocao='true'`);
+    const response = await fetch(`${config.apiUrl}/produtos`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
     const resposta = await response.json();
+    console.log(resposta);
 
     // Extrai os produtos da resposta (considerando a nova estrutura)
-    const produtos = resposta.dados ?
-      (Array.isArray(resposta.dados) ? resposta.dados : [resposta.dados]) :
-      [];
+    const produtos = resposta
 
     estado.produtos = produtos;
     renderizarProdutos();

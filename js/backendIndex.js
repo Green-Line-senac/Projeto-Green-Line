@@ -24,13 +24,13 @@ const estadoLogin = {
 // Rota POST com validação
 app.post("/loginDados", (req, res) => {
     console.log('Corpo recebido:', req.body); // Debug crucial
-    
+
     if (!req.body) {
         return res.status(400).json({ erro: "Nenhum dado recebido" });
     }
 
     const { usuario, trocar } = req.body;
-    
+
     if (!usuario) {
         return res.status(400).json({ erro: "Usuário é obrigatório" });
     }
@@ -38,8 +38,8 @@ app.post("/loginDados", (req, res) => {
     estadoLogin.usuario = usuario;
     estadoLogin.trocarDeConta = Number(trocar) || 0;
     estadoLogin.ultimaAtualizacao = new Date();
-    
-    res.json({ 
+
+    res.json({
         status: 'sucesso',
         usuario: estadoLogin.usuario,
         trocar: estadoLogin.trocarDeConta,
@@ -53,47 +53,14 @@ app.get("/loginDados", (req, res) => {
 });
 
 app.get("/produtos", async (req, res) => {
-    // Parâmetros de filtro seguros
-    const { categoria, promocao, limite = 20, pagina = 1 } = req.query;
-
     try {
-        // Construção segura da query
-        let query = "SELECT * FROM produto";
-        const params = [];
+        const produtos = await db.query("SELECT * FROM produto WHERE promocao = true");
 
-        // Adiciona filtros condicionais
-        const conditions = [];
-
-        if (categoria) {
-            conditions.push("categoria = ?");
-            params.push(categoria);
-        }
-
-        if (promocao === 'true') {
-            conditions.push("promocao = true");
-        }
-
-        if (conditions.length) {
-            query += " WHERE " + conditions.join(" AND ");
-        }
-
-        // Adiciona paginação
-        query += " LIMIT ? OFFSET ?";
-        params.push(parseInt(limite), (parseInt(pagina) - 1) * parseInt(limite));
-
-        // Executa a query de forma segura
-        const [produtos] = await db.query(query, params);
-
+        // Verifica se há produtos
         if (!produtos || produtos.length === 0) {
             return res.status(404).json({ mensagem: "Nenhum produto encontrado" });
         }
-
-        res.json({
-            dados: produtos,
-            pagina: parseInt(pagina),
-            por_pagina: parseInt(limite)
-        });
-
+        res.json(produtos);
     } catch (err) {
         console.error("Erro ao buscar produtos:", err);
         res.status(500).json({
