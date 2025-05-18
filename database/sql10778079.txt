@@ -79,18 +79,6 @@ CREATE TABLE produto (
     categoria VARCHAR(50) NOT NULL COMMENT 'Moda Sustentável, Cosméticos Naturais, Casa Ecológica, etc'
 );
 
-INSERT INTO categoria (categoria, descricao) VALUES
-('Moda Sustentável', 'Roupas e acessórios feitos com materiais ecológicos e métodos de produção éticos.'),
-('Cosméticos Naturais', 'Produtos de beleza e cuidados pessoais feitos com ingredientes naturais e sem testes em animais.'),
-('Casa Ecológica', 'Produtos para a casa feitos com materiais sustentáveis e eficientes em termos de energia.'),
-('Alimentos Orgânicos', 'Alimentos produzidos sem o uso de pesticidas e fertilizantes químicos.'),
-('Transporte Sustentável', 'Veículos elétricos, bicicletas e outros meios de transporte ecologicamente corretos.'),
-('Reciclagem e Reutilização', 'Produtos feitos a partir de materiais reciclados ou que incentivam a reutilização e redução de resíduos'),
-('Jardinagem Orgânica', 'Ferramentas, sementes e insumos para a jardinagem orgânica e cultivo sustentável.'),
-('Educação e Conscientização', 'Livros, cursos e materiais educacionais sobre sustentabilidade e meio ambiente.'),
-('Energia Renovável', 'Produtos e soluções baseadas em energia solar, eólica e outras fontes renováveis.'),
-('Bem-estar Sustentável', 'Itens para saúde e bem-estar que promovem práticas naturais e sustentáveis.'),
-('Tecnologia Verde', 'Dispositivos e soluções tecnológicas voltadas para a sustentabilidade e redução de impacto ambiental.');
 
 -- Inserindo tipos de usuários
 INSERT INTO tipo_usuario (tipo) VALUES

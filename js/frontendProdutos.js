@@ -50,12 +50,12 @@ async function inicializarApp() {
 async function carregarProdutos() {
   try {
     mostrarLoader();
-    
+
     const response = await fetch(`${config.apiUrl}/produto`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    
+
     const data = await response.json();
-    
+
     if (Array.isArray(data)) {
       estado.produtos = data.map(sanitizarProduto);
       aplicarFiltros();
@@ -98,7 +98,7 @@ function renderizarProdutos(produtosFiltrados) {
   const fragment = document.createDocumentFragment();
   const inicio = (estado.paginaAtual - 1) * config.produtosPorPagina;
   const fim = inicio + config.produtosPorPagina;
-  
+
   produtosFiltrados.slice(inicio, fim).forEach(produto => {
     const card = criarCardProduto(produto);
     fragment.appendChild(card);
@@ -154,14 +154,14 @@ function aplicarFiltros(resetarPagina = true) {
     if (textoBusca && !produto.nome.toLowerCase().includes(textoBusca.toLowerCase())) {
       return false;
     }
-    
+
     // Filtro por estoque
     if (emEstoque && !produto.estoque) return false;
     if (foraEstoque && produto.estoque) return false;
-    
+
     // Filtro por categoria
     if (categorias.length && !categorias.includes(produto.categoria)) return false;
-    
+
     return true;
   });
 
@@ -187,7 +187,7 @@ function resetarFiltros() {
   elementos.statusEstoque.checked = false;
   elementos.statusForaEstoque.checked = false;
   elementos.categoriaCheckboxes.forEach(cb => cb.checked = false);
-  
+
   atualizarFiltros();
 }
 
@@ -310,17 +310,17 @@ function abrirModalProduto(dadosProduto) {
   }
   // Descrição, Marca, Categoria e Estoque
   document.getElementById('produtoModalDescricao').textContent = produto.descricao || 'Descrição não disponível.';
-  document.getElementById('produtoModalMarca').textContent     = produto.marca    || 'Marca não especificada';
+  document.getElementById('produtoModalMarca').textContent = produto.marca || 'Marca não especificada';
 
   const catEl = document.getElementById('produtoModalCategoria');
   if (catEl) {
     catEl.textContent = produto.categoria || 'Geral';
-    catEl.className   = `badge mb-2 bg-${produto.promocao ? 'danger' : 'success'}`;
+    catEl.className = `badge mb-2 bg-${produto.promocao ? 'danger' : 'success'}`;
   }
   const estoqueEl = document.getElementById('produtoModalEstoque');
   if (estoqueEl) {
     estoqueEl.textContent = produto.estoque ? 'Disponível' : 'Fora de estoque';
-    estoqueEl.className   = `badge bg-${produto.estoque ? 'success' : 'secondary'}`;
+    estoqueEl.className = `badge bg-${produto.estoque ? 'success' : 'secondary'}`;
   }
 
   // Preço e promoção
@@ -342,11 +342,11 @@ function abrirModalProduto(dadosProduto) {
   const stars = document.getElementById('produtoModalAvaliacao');
   stars.innerHTML = '';
   if (produto.avaliacao != null) {
-    const fullStars   = Math.floor(produto.avaliacao);
-    const halfStar    = produto.avaliacao % 1 >= 0.5;
-    const emptyStars  = 5 - fullStars - (halfStar ? 1 : 0);
+    const fullStars = Math.floor(produto.avaliacao);
+    const halfStar = produto.avaliacao % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
     for (let i = 0; i < fullStars; i++)   stars.innerHTML += '<i class="fas fa-star text-yellow-400 text-xs"></i>';
-    if (halfStar)                         stars.innerHTML += '<i class="fas fa-star-half-alt text-yellow-400 text-xs"></i>';
+    if (halfStar) stars.innerHTML += '<i class="fas fa-star-half-alt text-yellow-400 text-xs"></i>';
     for (let i = 0; i < emptyStars; i++)  stars.innerHTML += '<i class="far fa-star text-yellow-400 text-xs"></i>';
     stars.innerHTML += `<span class="text-xs text-gray-600 ml-1">(${produto.numAvaliacoes || 0})</span>`;
   }
@@ -372,77 +372,77 @@ document.addEventListener('DOMContentLoaded', () => {
     // TODO: lógica de compra
     const produtoId = document.getElementById('modalProdutoId').value;
 
-  const dadosCompra = {
-    produtoId: produtoId,
-    quantidade: parseInt(qtd),
-    data: new Date().toISOString()
-  };
-  fetch(`http://localhost:3003/pedidos/${produtoId}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(dadosCompra)
-  })
-  .then(response => response.json())
-  .then(data => {
-    console.log('Resposta do servidor:', data);
-    alert('Compra registrada com sucesso!');
-  })
-  .catch(error => {
-    console.error('Erro ao enviar:', error);
-    alert('Erro ao registrar a compra.');
-  });
-});
-  });
-
-  // Adicionar ao carrinho
-  document.getElementById('btnAddCarrinho').addEventListener('click', () => {
-    const qtd = document.getElementById('quantidadeModal').value;
-    console.log('Adicionar ao carrinho – quantidade:', qtd);
-    // TODO: lógica do carrinho
-  });
-//CEP
-  document.getElementById("btnChecar").addEventListener("click", () => {
-    const cepInput = document.getElementById("freteModal");
-    const cep = cepInput.value.replace(/\D/g, '');
-    const resultado = document.getElementById("resultadoFrete");
-  //TODO: Calculo do frete
-    if (cep.length !== 8) {
-      resultado.innerText = "CEP inválido. Digite 8 números.";
-      cepInput.value = ""; // limpa mesmo com erro
-      return;
-    }
-  
-    fetch(`https://viacep.com.br/ws/${cep}/json/`)
+    const dadosCompra = {
+      produtoId: produtoId,
+      quantidade: parseInt(qtd),
+      data: new Date().toISOString()
+    };
+    fetch(`http://localhost:3003/pedidos/${produtoId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(dadosCompra)
+    })
       .then(response => response.json())
       .then(data => {
-        if (data.erro) {
-          resultado.innerText = "CEP não encontrado.";
-        } else {
-          let valorFrete = "R$ 29,90";
-          if (data.uf === "DF") valorFrete = "Gratis";
-          else if (["RJ", "MG"].includes(data.uf)) valorFrete = "R$ 19,90";
-          else if (data.uf === "RS") valorFrete = "R$ 24,90";
-  
-          resultado.innerText = `Endereço: ${data.localidade} - ${data.uf}\nFrete estimado: ${valorFrete}`;
-        }
-        cepInput.value = ""; // limpa após sucesso
+        console.log('Resposta do servidor:', data);
+        alert('Compra registrada com sucesso!');
       })
-      .catch(() => {
-        resultado.innerText = "Erro ao buscar o CEP.";
-        cepInput.value = ""; // limpa se der erro
+      .catch(error => {
+        console.error('Erro ao enviar:', error);
+        alert('Erro ao registrar a compra.');
       });
-  });  
+  });
+});
 
-   // Abre o modal
-  try {
-      // Código que pode lançar erro
-      elementos.produtoModal.show();
-    } catch (erro) {
-      console.error('Erro ao abrir modal:', erro);
-      mostrarFeedback('Não foi possível exibir os detalhes do produto', 'danger');
-    }
+// Adicionar ao carrinho
+document.getElementById('btnAddCarrinho').addEventListener('click', () => {
+  const qtd = document.getElementById('quantidadeModal').value;
+  console.log('Adicionar ao carrinho – quantidade:', qtd);
+  // TODO: lógica do carrinho
+});
+//CEP
+document.getElementById("btnChecar").addEventListener("click", () => {
+  const cepInput = document.getElementById("freteModal");
+  const cep = cepInput.value.replace(/\D/g, '');
+  const resultado = document.getElementById("resultadoFrete");
+  //TODO: Calculo do frete
+  if (cep.length !== 8) {
+    resultado.innerText = "CEP inválido. Digite 8 números.";
+    cepInput.value = ""; // limpa mesmo com erro
+    return;
+  }
+
+  fetch(`https://viacep.com.br/ws/${cep}/json/`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.erro) {
+        resultado.innerText = "CEP não encontrado.";
+      } else {
+        let valorFrete = "R$ 29,90";
+        if (data.uf === "DF") valorFrete = "Gratis";
+        else if (["RJ", "MG"].includes(data.uf)) valorFrete = "R$ 19,90";
+        else if (data.uf === "RS") valorFrete = "R$ 24,90";
+
+        resultado.innerText = `Endereço: ${data.localidade} - ${data.uf}\nFrete estimado: ${valorFrete}`;
+      }
+      cepInput.value = ""; // limpa após sucesso
+    })
+    .catch(() => {
+      resultado.innerText = "Erro ao buscar o CEP.";
+      cepInput.value = ""; // limpa se der erro
+    });
+});
+
+// Abre o modal
+try {
+  // Código que pode lançar erro
+  elementos.produtoModal.show();
+} catch (erro) {
+  console.error('Erro ao abrir modal:', erro);
+  mostrarFeedback('Não foi possível exibir os detalhes do produto', 'danger');
+}
 
 // Utilitários
 function configurarEventos() {
@@ -476,10 +476,10 @@ function configurarEventos() {
 
 function escapeHtml(str) {
   return str.replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#39;");
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function gerarEstrelas(nota) {

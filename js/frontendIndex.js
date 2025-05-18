@@ -7,7 +7,7 @@ let config = {
 const elementos = {
   carrossel: document.getElementById('carousel-imagens'),
   carrosselContainer: document.getElementById('carousel-index'),
-  produtosContainer: document.getElementById('container-produtos-promocao'),
+  produtosContainer: document.getElementById('container-produtos'),
   iconeUsuario: document.getElementById('icone-usuario')
 };
 
@@ -62,7 +62,11 @@ async function carregarProdutosPromocao() {
     console.log(resposta);
 
     // Extrai os produtos da resposta (considerando a nova estrutura)
-    const produtos = resposta
+    if (Array.isArray(resposta)) {
+      estado.produtos = resposta.map(sanitizarProduto);
+    } else {
+      throw new Error('Dados inválidos recebidos da API');
+    }
 
     estado.produtos = produtos;
     renderizarProdutos();
@@ -71,6 +75,15 @@ async function carregarProdutosPromocao() {
     console.error('Erro nos produtos:', erro);
     mostrarErroCarregamento();
   }
+}
+function sanitizarProduto(produto) {
+  return {
+    ...produto,
+    preco: Number(produto.preco) || 0,
+    avaliacoes: Number(produto.avaliacoes) || 0,
+    estoque: Boolean(produto.estoque),
+    promocao: Boolean(produto.promocao)
+  };
 }
 
 // Renderização
@@ -230,56 +243,73 @@ function mostrarFeedback(mensagem, tipo = 'success') {
 }
 
 // Modal do produto
-function abrirModalProduto(dadosString) {
+function abrirModalProduto(dadosProduto) {
+  let produto;
   try {
-    // Desserializa os dados
-    const produto = typeof dadosString === 'string' ? JSON.parse(dadosString) : dadosString;
-
-    // Garante que o Bootstrap está carregado
-    if (typeof bootstrap === 'undefined' || !bootstrap.Modal) {
-      console.error('Bootstrap não está carregado corretamente');
-      alert('Recursos necessários não carregados. Recarregue a página.');
-      return;
-    }
-
-    // Elementos do modal
-    const modalElement = document.getElementById('produtoModal');
-    if (!modalElement) {
-      console.error('Elemento do modal não encontrado');
-      return;
-    }
-
-    // Atualiza o conteúdo
-    document.getElementById('produtoModalLabel').textContent = produto.nome || 'Produto';
-    document.getElementById('produtoModalDescricao').textContent = produto.descricao || 'Descrição não disponível';
-
-    // Preço formatado
-    const precoHtml = produto.promocao
-      ? `<span style="text-decoration: line-through;">R$ ${produto.preco.toFixed(2)}</span>
-     <span class="text-danger ms-2">R$ ${produto.preco_promocional}</span>`
-      : `R$ ${produto.preco.toFixed(2)}`;
-
-    document.getElementById('produtoModalPreco').innerHTML = precoHtml;
-
-    // Imagem (com fallback)
-    const imgElement = document.getElementById('produtoModalImagem');
-    imgElement.src = produto.imagem || config.fallbackImage;
-    imgElement.alt = produto.nome || 'Produto';
-    imgElement.onerror = () => imgElement.src = config.fallbackImage;
-
-    // Categoria
-    const categoriaElement = document.getElementById('produtoModalCategoria');
-    if (categoriaElement) {
-      categoriaElement.textContent = produto.categoria || 'Geral';
-      categoriaElement.className = `badge mb-2 bg-${produto.promocao ? 'danger' : 'success'}`;
-    }
-
-    // Mostra o modal
-    const modal = new bootstrap.Modal(modalElement);
-    modal.show();
-
-  } catch (erro) {
-    console.error('Erro ao abrir modal:', erro);
-    mostrarFeedback('Não foi possível exibir os detalhes do produto', 'danger');
+    produto = typeof dadosProduto === 'string'
+      ? JSON.parse(dadosProduto)
+      : dadosProduto;
+  } catch (e) {
+    console.error('JSON inválido:', e);
+    return;
   }
+
+  // Título
+  document.getElementById('produtoModalLabel').textContent = produto.produto || 'Produto sem nome';
+
+  // Imagem
+  const imgEl = document.getElementById('produtoModalImagem');
+  if (produto.imagem_1) {
+    imgEl.src = produto.imagem_1;
+    imgEl.onerror = () => {
+      imgEl.src = 'data:image/svg+xml;base64,...'; // placeholder
+    };
+  } else {
+    imgEl.src = 'data:image/svg+xml;base64,...';
+  }
+  // Descrição, Marca, Categoria e Estoque
+  document.getElementById('produtoModalDescricao').textContent = produto.descricao || 'Descrição não disponível.';
+  document.getElementById('produtoModalMarca').textContent     = produto.marca    || 'Marca não especificada';
+
+  const catEl = document.getElementById('produtoModalCategoria');
+  if (catEl) {
+    catEl.textContent = produto.categoria || 'Geral';
+    catEl.className   = `badge mb-2 bg-${produto.promocao ? 'danger' : 'success'}`;
+  }
+  const estoqueEl = document.getElementById('produtoModalEstoque');
+  if (estoqueEl) {
+    estoqueEl.textContent = produto.estoque ? 'Disponível' : 'Fora de estoque';
+    estoqueEl.className   = `badge bg-${produto.estoque ? 'success' : 'secondary'}`;
+  }
+
+  // Preço e promoção
+  const precoContainer = document.getElementById('produtoModalPreco');
+  const precoBase = (produto.preco || 0).toFixed(2);
+  if (produto.promocao) {
+    const precoProm = (produto.preco * 0.8).toFixed(2);
+    precoContainer.innerHTML = `
+      <p class="font-bold text-sm mb-1">
+        <span class="line-through text-gray-500 ">R$ ${precoBase}</span>
+        <span class="text-green-600 ms-2">R$ ${precoProm}</span>
+      </p>
+    `;
+  } else {
+    precoContainer.innerHTML = `<p class="font-bold text-sm">R$ ${precoBase}</p>`;
+  }
+
+  // Avaliação
+  const stars = document.getElementById('produtoModalAvaliacao');
+  stars.innerHTML = '';
+  if (produto.avaliacao != null) {
+    const fullStars   = Math.floor(produto.avaliacao);
+    const halfStar    = produto.avaliacao % 1 >= 0.5;
+    const emptyStars  = 5 - fullStars - (halfStar ? 1 : 0);
+    for (let i = 0; i < fullStars; i++)   stars.innerHTML += '<i class="fas fa-star text-yellow-400 text-xs"></i>';
+    if (halfStar)                         stars.innerHTML += '<i class="fas fa-star-half-alt text-yellow-400 text-xs"></i>';
+    for (let i = 0; i < emptyStars; i++)  stars.innerHTML += '<i class="far fa-star text-yellow-400 text-xs"></i>';
+    stars.innerHTML += `<span class="text-xs text-gray-600 ml-1">(${produto.numAvaliacoes || 0})</span>`;
+  }
+
+  // Exibe o modal
+  new bootstrap.Modal(document.getElementById('produtoModal')).show();
 }
