@@ -56,23 +56,17 @@ async function carregarProdutosPromocao() {
     mostrarLoader();
 
     const response = await fetch(`${config.apiUrl}/produtos`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const { success, data, message } = await response.json();
 
-    const resposta = await response.json();
-    console.log(resposta);
-
-    // Extrai os produtos da resposta (considerando a nova estrutura)
-    if (Array.isArray(resposta)) {
-      estado.produtos = resposta.map(sanitizarProduto);
-    } else {
-      throw new Error('Dados inválidos recebidos da API');
+    if (!success || !Array.isArray(data)) {
+      throw new Error(message || 'Dados inválidos');
     }
 
-    estado.produtos = produtos;
+    estado.produtos = data.map(sanitizarProduto);
     renderizarProdutos();
 
   } catch (erro) {
-    console.error('Erro nos produtos:', erro);
+    console.error('Erro:', erro);
     mostrarErroCarregamento();
   }
 }
@@ -262,24 +256,24 @@ function abrirModalProduto(dadosProduto) {
   if (produto.imagem_1) {
     imgEl.src = produto.imagem_1;
     imgEl.onerror = () => {
-      imgEl.src = 'data:image/svg+xml;base64,...'; // placeholder
+      imgEl.src = config.fallbackImage;
     };
   } else {
-    imgEl.src = 'data:image/svg+xml;base64,...';
+    imgEl.src = config.fallbackImage;
   }
   // Descrição, Marca, Categoria e Estoque
   document.getElementById('produtoModalDescricao').textContent = produto.descricao || 'Descrição não disponível.';
-  document.getElementById('produtoModalMarca').textContent     = produto.marca    || 'Marca não especificada';
+  document.getElementById('produtoModalMarca').textContent = produto.marca || 'Marca não especificada';
 
   const catEl = document.getElementById('produtoModalCategoria');
   if (catEl) {
     catEl.textContent = produto.categoria || 'Geral';
-    catEl.className   = `badge mb-2 bg-${produto.promocao ? 'danger' : 'success'}`;
+    catEl.className = `badge mb-2 bg-${produto.promocao ? 'danger' : 'success'}`;
   }
   const estoqueEl = document.getElementById('produtoModalEstoque');
   if (estoqueEl) {
     estoqueEl.textContent = produto.estoque ? 'Disponível' : 'Fora de estoque';
-    estoqueEl.className   = `badge bg-${produto.estoque ? 'success' : 'secondary'}`;
+    estoqueEl.className = `badge bg-${produto.estoque ? 'success' : 'secondary'}`;
   }
 
   // Preço e promoção
@@ -301,11 +295,11 @@ function abrirModalProduto(dadosProduto) {
   const stars = document.getElementById('produtoModalAvaliacao');
   stars.innerHTML = '';
   if (produto.avaliacao != null) {
-    const fullStars   = Math.floor(produto.avaliacao);
-    const halfStar    = produto.avaliacao % 1 >= 0.5;
-    const emptyStars  = 5 - fullStars - (halfStar ? 1 : 0);
+    const fullStars = Math.floor(produto.avaliacao);
+    const halfStar = produto.avaliacao % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
     for (let i = 0; i < fullStars; i++)   stars.innerHTML += '<i class="fas fa-star text-yellow-400 text-xs"></i>';
-    if (halfStar)                         stars.innerHTML += '<i class="fas fa-star-half-alt text-yellow-400 text-xs"></i>';
+    if (halfStar) stars.innerHTML += '<i class="fas fa-star-half-alt text-yellow-400 text-xs"></i>';
     for (let i = 0; i < emptyStars; i++)  stars.innerHTML += '<i class="far fa-star text-yellow-400 text-xs"></i>';
     stars.innerHTML += `<span class="text-xs text-gray-600 ml-1">(${produto.numAvaliacoes || 0})</span>`;
   }

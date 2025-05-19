@@ -11,7 +11,7 @@ body {
 }
 
 /* Estilo para imagens dentro do carrossel */
-.carousel-inner img {
+#carouselExampleSlidesOnly .carousel-inner img {
     height: 200px; /* Define uma altura fixa para as imagens */
     object-fit: cover; /* Faz com que as imagens ocupem todo o espaço, mantendo suas proporções */
 }

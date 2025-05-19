@@ -54,13 +54,18 @@ app.get("/loginDados", (req, res) => {
 
 app.get("/produtos", async (req, res) => {
     try {
-        const produtos = await db.query("SELECT * FROM produto WHERE promocao = true");
+        const produtos = await db.query(`
+            SELECT * FROM produto 
+            WHERE promocao = true 
+            AND ativo = true
+            ORDER BY RAND()
+            LIMIT 12
+        `);
 
-        // Verifica se há produtos
-        if (!produtos || produtos.length === 0) {
-            return res.status(404).json({ mensagem: "Nenhum produto encontrado" });
-        }
-        res.json(produtos);
+        res.json({
+            success: true,
+            data: produtos || [] // Garante array mesmo se for undefined
+        });
     } catch (err) {
         console.error("Erro ao buscar produtos:", err);
         res.status(500).json({

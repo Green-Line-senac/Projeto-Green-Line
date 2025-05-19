@@ -26,34 +26,6 @@ CREATE TABLE acessos (
     FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa) ON DELETE CASCADE,
     data_hora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-
--- Criando a tabela de pagamentos
-CREATE TABLE pagamento (
-    id_pagamento INT PRIMARY KEY AUTO_INCREMENT,
-    pagamento_situacao CHAR(1) DEFAULT 'P',
-    data_pagamento TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    id_f_pagamento INT NOT NULL,
-    valor DECIMAL(10,2) NOT NULL,
-    num_parcelas INT DEFAULT 1,
-    parcelamento_situacao ENUM('Em aberto', 'Pago', 'Cancelado') NULL,
-    transacao_id VARCHAR(100) UNIQUE NULL,
-    bandeira_cartao VARCHAR(20) NULL,
-    FOREIGN KEY (id_f_pagamento) REFERENCES forma_pagamento(id_f_pagamento)
-);
-
--- Criando a tabela de pedidos
-CREATE TABLE pedidos (
-    id_pedido INT PRIMARY KEY AUTO_INCREMENT,
-    data_hora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    situacao CHAR(1) NOT NULL DEFAULT 'P',
-    id_pessoa INT NOT NULL,
-    FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa),
-    id_pagamento INT NOT NULL,
-    FOREIGN KEY (id_pagamento) REFERENCES pagamento(id_pagamento),
-    status_pagamento CHAR(1) NOT NULL DEFAULT 'P',
-    endereco_entrega TEXT NULL,
-    metodo_entrega VARCHAR(50) NULL
-);
 CREATE TABLE produto (
     id_produto INT PRIMARY KEY AUTO_INCREMENT,
     produto VARCHAR(80) NOT NULL UNIQUE,
@@ -68,15 +40,15 @@ CREATE TABLE produto (
     estoque INT NOT NULL,
     parcelas_permitidas INT NOT NULL DEFAULT 1,
     peso_kg DECIMAL(6,3) NULL,
-    dimensoes VARCHAR(20) NULL COMMENT 'Formato: LARGxALTxPROF (cm)',
+    dimensoes VARCHAR(20) NULL,
     ativo BOOLEAN DEFAULT TRUE,
-    data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
-    data_alteracao DATETIME ON UPDATE CURRENT_TIMESTAMP,
+    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_alteracao DATETIME NULL,
     imagem_1 VARCHAR(255) NOT NULL,
     imagem_2 VARCHAR(255) NULL DEFAULT NULL,
     imagem_3 VARCHAR(255) NULL DEFAULT NULL,
     imagem_4 VARCHAR(255) NULL DEFAULT NULL,
-    categoria VARCHAR(50) NOT NULL COMMENT 'Moda Sustentável, Cosméticos Naturais, Casa Ecológica, etc'
+    categoria VARCHAR(50) NOT NULL
 );
 
 
@@ -157,3 +129,33 @@ INSERT INTO produto (
 ('Brinquedos de Madeira Sustentável', 'Seguros, educativos e feitos com madeira eco.', 'Blocos de montar 50 peças', 69.90, 59.90, FALSE, 'EcoToys', 4.2, 180, 0, 6, 1.200, '30x20x15', TRUE, 'https://www.keewe.com.br/media/uploads/162/2024/09/lpGwjI4vaq8AHaoJum3XcKhFt9tsUm9rtKU2zfdk.jpg', 'https://example.com/brinquedo2.jpg', NULL, NULL, 'Reciclagem e Reutilização'),
 
 ('Cafeteira Elétrica', 'Uma cafeteira top.', 'Cafeteira elétrica 1.2L', 199.90, 179.90, TRUE, 'EcoBrew', 4.5, 320, 20, 6, 1.500, '20x15x25', TRUE, 'https://www.keewe.com.br/media/uploads/162/2024/09/lpGwjI4vaq8AHaoJum3XcKhFt9tsUm9rtKU2zfdk.jpg', 'https://example.com/cafeteira2.jpg', 'https://example.com/cafeteira3.jpg', NULL, 'Casa Ecológica');
+
+
+
+-- Criando a tabela de pagamentos
+CREATE TABLE pagamento (
+    id_pagamento INT PRIMARY KEY AUTO_INCREMENT,
+    pagamento_situacao CHAR(1) DEFAULT 'P',
+    data_pagamento TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id_f_pagamento INT NOT NULL,
+    valor DECIMAL(10,2) NOT NULL,
+    num_parcelas INT DEFAULT 1,
+    parcelamento_situacao ENUM('Em aberto', 'Pago', 'Cancelado') NULL,
+    transacao_id VARCHAR(100) UNIQUE NULL,
+    bandeira_cartao VARCHAR(20) NULL,
+    FOREIGN KEY (id_f_pagamento) REFERENCES forma_pagamento(id_f_pagamento)
+);
+
+-- Criando a tabela de pedidos
+CREATE TABLE pedidos (
+    id_pedido INT PRIMARY KEY AUTO_INCREMENT,
+    data_hora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    situacao CHAR(1) NOT NULL DEFAULT 'P',
+    id_pessoa INT NOT NULL,
+    FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa),
+    id_pagamento INT NOT NULL,
+    FOREIGN KEY (id_pagamento) REFERENCES pagamento(id_pagamento),
+    status_pagamento CHAR(1) NOT NULL DEFAULT 'P',
+    endereco_entrega TEXT NULL,
+    metodo_entrega VARCHAR(50) NULL
+);
