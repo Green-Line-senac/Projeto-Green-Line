@@ -159,3 +159,20 @@ CREATE TABLE pedidos (
     endereco_entrega TEXT NULL,
     metodo_entrega VARCHAR(50) NULL
 );
+
+CREATE TABLE carrinho (
+    id_carrinho INT PRIMARY KEY AUTO_INCREMENT,
+    data_hora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    situacao CHAR(1) NOT NULL DEFAULT 'P', -- 'P' para pendente, 'F' para finalizado
+    id_pessoa INT NOT NULL,
+    FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa)
+);
+
+CREATE TABLE carrinho_itens (
+    id_item INT PRIMARY KEY AUTO_INCREMENT,
+    id_carrinho INT NOT NULL,
+    FOREIGN KEY (id_carrinho) REFERENCES carrinho(id_carrinho),
+    id_produto INT NOT NULL,
+    FOREIGN KEY (id_produto) REFERENCES produto(id_produto),
+    quantidade INT NOT NULL DEFAULT 1
+);

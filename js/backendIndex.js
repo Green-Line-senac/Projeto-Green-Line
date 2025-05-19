@@ -17,12 +17,13 @@ app.use(cors()); // Para habilitar CORS
 
 const estadoLogin = {
     usuario: null,
+    id_pessoa: null,
     trocarDeConta: 0,
     ultimaAtualizacao: null
 };
 
 // Rota POST com validação
-app.post("/loginDados", (req, res) => {
+app.post("/loginDados", async (req, res) => {
     console.log('Corpo recebido:', req.body); // Debug crucial
 
     if (!req.body) {
@@ -34,6 +35,14 @@ app.post("/loginDados", (req, res) => {
     if (!usuario) {
         return res.status(400).json({ erro: "Usuário é obrigatório" });
     }
+    const resposta = await db.query("SELECT id_pessoa FROM pessoa WHERE nome = ?", [usuario]);
+    console.log("Resposta do banco:", resposta);
+
+    if (resposta.length > 0) {
+        estadoLogin.id_pessoa = Number(resposta[0].id_pessoa);
+    } else {
+        estadoLogin.id_pessoa = null; 
+    }
 
     estadoLogin.usuario = usuario;
     estadoLogin.trocarDeConta = Number(trocar) || 0;
@@ -42,6 +51,7 @@ app.post("/loginDados", (req, res) => {
     res.json({
         status: 'sucesso',
         usuario: estadoLogin.usuario,
+        id_pessoa: estadoLogin.id_pessoa,
         trocar: estadoLogin.trocarDeConta,
         atualizadoEm: estadoLogin.ultimaAtualizacao
     });

@@ -113,6 +113,7 @@
 
   <!-- Conteúdo principal da página de produtos -->
   <main class="container-fluid px-3" role="main">
+    </div>
     <div class="row">
       <!-- Seção de Filtros - Permite refinar a busca por produtos -->
       <div class="col-12 col-md-2 mb-4 filter-container">
@@ -221,7 +222,7 @@
   </main>
   <!-- Modal de Detalhes do Produto -->
   <div class="modal fade" id="produtoModal" tabindex="-1" aria-labelledby="produtoModalLabel" aria-hidden="true">
-    <div class="modal-dialog" style="max-width: 1000px;"> <!-- Estica o modal -->
+    <div class="modal-dialog" style="max-width: 1000px;">
       <div class="modal-content bg-white text-black">
         <div class="modal-header border-b border-gray-400">
           <h2 class="font-bold text-base md:text-lg leading-tight" id="produtoModalLabel">Carregando...</h2>
@@ -229,6 +230,10 @@
         </div>
 
         <div class="modal-body p-6">
+          <div
+            class="d-none alert alert-danger text-center fw-bold position-absolute top-50 start-50 translate-middle-x w-75" id="modal-alert">
+            Entre na sua conta ou faça um cadastro para prosseguir
+          </div>
           <div class="row g-4">
             <!-- Imagem do produto -->
             <div class="col-md-6 text-center">
@@ -286,29 +291,26 @@
                 <div class="flex">
                   <input
                     class="text-base border border-gray-300 rounded-lg px-6 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    id="freteModal"
-                    name="frete"
-                    type="text"
-                    placeholder="CEP"
-                  />
-                  <button class="btn-checar-cep ml-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700" id="btnChecar">
+                    id="freteModal" name="frete" type="text" placeholder="CEP" />
+                  <button class="btn-checar-cep ml-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    id="btnChecar">
                     Checar
                   </button>
                 </div>
                 <p id="resultadoFrete" class="mt-1 text-sm text-gray-700"></p>
-              </div>              
-          </div>
+              </div>
+            </div>
 
-          <!-- Descrição -->
-          <div class="mt-6">
-            <hr>
-            <h2 class="text-sm font-semibold border-b border-gray-400 pb-1 mb-2">Descrição</h2>
-            <p class="text-xs mb-3 leading-relaxed" id="produtoModalDescricao">Descrição não disponível.</p>
+            <!-- Descrição -->
+            <div class="mt-6">
+              <hr>
+              <h2 class="text-sm font-semibold border-b border-gray-400 pb-1 mb-2">Descrição</h2>
+              <p class="text-xs mb-3 leading-relaxed" id="produtoModalDescricao">Descrição não disponível.</p>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
   </div>
   </div>
   <!-- Rodapé do site -->

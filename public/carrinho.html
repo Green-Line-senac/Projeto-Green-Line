@@ -14,41 +14,41 @@
             --verde-claro: #d4edda;
             --cinza-claro: #f8f9fa;
         }
-        
+
         body {
             background-color: #f5f5f5;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         .secao-carrinho {
             background-color: white;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             padding: 25px;
         }
-        
+
         .produto-carrinho {
             border-bottom: 1px solid #eee;
             padding: 15px 0;
             transition: all 0.3s ease;
         }
-        
+
         .produto-carrinho:hover {
             background-color: var(--cinza-claro);
         }
-        
+
         .img-produto {
             width: 80px;
             height: 80px;
             object-fit: cover;
             border-radius: 5px;
         }
-        
+
         .quantidade-input {
             width: 60px;
             text-align: center;
         }
-        
+
         .btn-quantidade {
             width: 30px;
             height: 30px;
@@ -57,53 +57,53 @@
             justify-content: center;
             padding: 0;
         }
-        
+
         .resumo-pedido {
             background-color: white;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             padding: 25px;
         }
-        
+
         .valor-total {
             font-size: 1.2rem;
             color: var(--verde-principal);
             font-weight: bold;
         }
-        
+
         .btn-continuar {
             background-color: var(--verde-principal);
             color: white;
             font-weight: bold;
             padding: 10px 20px;
         }
-        
+
         .btn-continuar:hover {
             background-color: #218838;
             color: white;
         }
-        
+
         .link-continuar {
             color: var(--verde-principal);
             text-decoration: none;
             font-weight: bold;
         }
-        
+
         .link-continuar:hover {
             text-decoration: underline;
         }
-        
+
         .badge-promocao {
             background-color: #dc3545;
             font-size: 0.7rem;
         }
-        
+
         .preco-original {
             text-decoration: line-through;
             color: #6c757d;
             font-size: 0.9rem;
         }
-        
+
         .preco-promocao {
             color: #dc3545;
             font-weight: bold;
@@ -112,6 +112,7 @@
 </head>
 
 <body>
+   
     <main>
         <div class="container py-5">
             <div class="row">
@@ -153,7 +154,8 @@
                                 <div class="d-flex justify-content-between align-items-center mt-2">
                                     <div class="d-flex align-items-center">
                                         <button class="btn btn-outline-secondary btn-quantidade">-</button>
-                                        <input type="number" value="2" min="1" class="form-control quantidade-input mx-2">
+                                        <input type="number" value="2" min="1"
+                                            class="form-control quantidade-input mx-2">
                                         <button class="btn btn-outline-secondary btn-quantidade">+</button>
                                     </div>
                                     <div class="text-end">
@@ -170,7 +172,7 @@
                 <div class="col-lg-4">
                     <div class="resumo-pedido sticky-top" style="top: 20px;">
                         <h2 class="h5 fw-bold mb-4">Resumo do Pedido</h2>
-                        
+
                         <div class="mb-3">
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted">Subtotal (3 itens)</span>
@@ -185,20 +187,20 @@
                                 <span class="text-success">-R$ 60,00</span>
                             </div>
                         </div>
-                        
+
                         <div class="py-3 border-top border-bottom">
                             <div class="d-flex justify-content-between">
                                 <span class="fw-bold">Total</span>
                                 <span class="valor-total">R$ 289,70</span>
                             </div>
                         </div>
-                        
+
                         <div class="mt-4">
                             <button class="btn btn-continuar w-100 py-3">
                                 Finalizar Compra
                             </button>
                         </div>
-                        
+
                         <div class="mt-3 small text-muted">
                             <p class="mb-1">
                                 <i class="bi bi-lock-fill"></i> Suas informações estão seguras conosco

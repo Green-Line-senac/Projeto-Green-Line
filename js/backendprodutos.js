@@ -36,6 +36,10 @@ app.get("/", (req, res) => {
     res.json({ mensagem: "API de produtos está funcionando" });
 });
 
+app.post("/pedidos",async(req,res) => {
+    let venda = req.body;
+    console.log(venda);
+})
 const porta = process.env.PORTA4 || 3003;
 app.listen(porta, () => {
     console.log(`Servidor rodando na porta ${porta}`);

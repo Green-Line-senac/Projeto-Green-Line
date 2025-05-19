@@ -366,18 +366,37 @@ document.addEventListener('DOMContentLoaded', () => {
   );
 
   // Comprar agora
-  document.getElementById('btnComprarAgora').addEventListener('click', () => {
+  document.getElementById('btnComprarAgora').addEventListener('click', async () => {
+    let id_pessoa;
+    try {
+      const response = await fetch('http://localhost:3002/loginDados');
+      if (!response.ok) return;
+      const dados = await response.json();
+      id_pessoa = dados.id_pessoa;
+
+      if (dados.trocarDeConta === 0 || dados.trocar === 0) {
+        const modal_alert = document.getElementById('modal-alert');
+        modal_alert.classList.remove("d-none"); // Exibe o alerta
+        setTimeout(() => modal_alert.classList.add("d-none"), 5000); // Oculta depois de 5s
+      }
+    } catch (erro) {
+      console.error("Erro ao buscar loginDados:", erro);
+    }
+
     const qtd = document.getElementById('quantidadeModal').value;
+    const nomeProduto = document.getElementById('produtoModalLabel').textContent;
+    console.log(nomeProduto);
 
     // TODO: lógica de compra
-    const produtoId = document.getElementById('modalProdutoId').value;
-
     const dadosCompra = {
-      produtoId: produtoId,
+      nomeProduto: nomeProduto,
+      id_pessoa: id_pessoa,
       quantidade: parseInt(qtd),
       data: new Date().toISOString()
     };
-    fetch(`http://localhost:3003/pedidos/${produtoId}`, {
+    console.log(dadosCompra);
+
+    fetch(`http://localhost:3003/pedidos`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
