@@ -31,14 +31,8 @@ const elementos = {
   modalAlert: document.getElementById('modal-alert')
 };
 
-document.addEventListener("DOMContentLoaded", inicializarApp);
-
 async function inicializarApp() {
   try {
-    const response = await fetch('http://localhost:3002/loginDados');
-    if (!response.ok) return;
-    const dados = await response.json();
-    estado.id_pessoa = dados.id_pessoa;
     estado.carregando = true;
     await carregarProdutos();
     configurarEventos();
@@ -50,7 +44,12 @@ async function inicializarApp() {
   }
 }
 
-function verificarEstadoLogin() {
+async function verificarEstadoLogin() {
+  const response = await fetch('http://localhost:3002/loginDados');
+  if (!response.ok) return;
+  const dados = await response.json();
+  estado.id_pessoa = dados.id_pessoa;
+  console.log(estado.id_pessoa);
   if (!estado.id_pessoa) {
     mostrarFeedback('Por favor, faça login para continuar.', 'danger');
     return false;
@@ -319,6 +318,7 @@ function abrirModalProduto(dadosProduto) {
   elementos.produtoModal.show();
 }
 
+
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-action="increase"]').forEach(btn =>
     btn.addEventListener('click', () => adjustQuantity('quantidadeModal', 1))
@@ -328,12 +328,18 @@ document.addEventListener('DOMContentLoaded', () => {
   );
 
   document.getElementById('btnComprarAgora').addEventListener('click', async () => {
-    if (!verificarEstadoLogin()) return;
+    if (!estado.id_pessoa) {
+      console.log("Usuário não está logado!");
+      mostrarFeedback("Por favor, faça login ou cadastro para prosseguir","danger");
+      return;
+    }
     const qtd = document.getElementById('quantidadeModal').value;
     if (isNaN(qtd) || qtd <= 0) {
       mostrarFeedback("Quantidade inválida!", 'danger');
+      console.log("Quantidade inválida");
       return;
     }
+
     const nomeProduto = document.getElementById('produtoModalLabel').textContent;
     const dadosCompra = {
       nomeProduto: nomeProduto,
@@ -341,12 +347,19 @@ document.addEventListener('DOMContentLoaded', () => {
       quantidade: parseInt(qtd),
       data: new Date().toISOString(),
     };
+
+    console.log("Dados da compra:", dadosCompra);
+
     localStorage.setItem("dadosCompra", JSON.stringify(dadosCompra));
     window.location.href = "vendas.html";
   });
 
   document.getElementById('btnAddCarrinho').addEventListener('click', async () => {
-    if (!verificarEstadoLogin()) return;
+    if (!estado.id_pessoa) {
+      console.log("Usuário não está logado!");
+      mostrarFeedback("Por favor, faça login ou cadastro para prosseguir","danger");
+      return;
+    }
 
     let quantidade = document.getElementById('quantidadeModal').value;
 
@@ -466,3 +479,5 @@ function mostrarFeedback(mensagem, tipo = 'success') {
   new bootstrap.Toast(toast).show();
   setTimeout(() => toast.remove(), 5000);
 }
+
+document.addEventListener("DOMContentLoaded", inicializarApp);
