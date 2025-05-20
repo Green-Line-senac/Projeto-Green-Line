@@ -54,3 +54,20 @@ function mascaraCEP(input) {
     let valor = input.value.replace(/\D/g, ''); // Remove caracteres não numéricos
     input.value = valor.replace(/^(\d{5})(\d)/, '$1-$2'); // Adiciona o hífen após o quinto dígito
 }
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    const dadosCompra = JSON.parse(localStorage.getItem("dadosCompra"));
+    if (dadosCompra) {
+      const containerProdutos = document.querySelector(".container-produtos-vendas");
+      containerProdutos.innerHTML = `
+            <p><strong>Produto:</strong> ${dadosCompra.nomeProduto}</p>
+            <p><strong>Quantidade:</strong> ${dadosCompra.quantidade}</p>
+          </div>
+        </div>
+      `;
+    }
+  });
+  
+
+  

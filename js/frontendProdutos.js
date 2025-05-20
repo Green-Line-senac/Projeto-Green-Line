@@ -274,7 +274,13 @@ function criarPaginacao(totalProdutos) {
 }
 
 // Modal
+const produtoModal = document.getElementById('produtoModal');
+produtoModal.addEventListener('hidden.bs.modal', () => {
+  const inputQuantidade = document.getElementById('quantidadeModal');
+  inputQuantidade.value = 1; // resetar para 1 ao fechar o modal
+});
 
+    
 // Função para ajustar a quantidade
 function adjustQuantity(elementId, change) {
   const input = document.getElementById(elementId);
@@ -365,54 +371,44 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => adjustQuantity('quantidadeModal', -1))
   );
 
-  // Comprar agora
   document.getElementById('btnComprarAgora').addEventListener('click', async () => {
     let id_pessoa;
     try {
       const response = await fetch('http://localhost:3002/loginDados');
       if (!response.ok) return;
+      
       const dados = await response.json();
       id_pessoa = dados.id_pessoa;
-
+  
+      // Se não pode comprar, mostra o alerta e interrompe o processo
       if (dados.trocarDeConta === 0 || dados.trocar === 0) {
         const modal_alert = document.getElementById('modal-alert');
-        modal_alert.classList.remove("d-none"); // Exibe o alerta
-        setTimeout(() => modal_alert.classList.add("d-none"), 5000); // Oculta depois de 5s
+        modal_alert.classList.remove("d-none");
+        setTimeout(() => modal_alert.classList.add("d-none"), 5000);
+        return;
       }
     } catch (erro) {
       console.error("Erro ao buscar loginDados:", erro);
+      return;
     }
-
+  
+    // Definir as variáveis antes de usar
     const qtd = document.getElementById('quantidadeModal').value;
     const nomeProduto = document.getElementById('produtoModalLabel').textContent;
-    console.log(nomeProduto);
-
-    // TODO: lógica de compra
     const dadosCompra = {
       nomeProduto: nomeProduto,
       id_pessoa: id_pessoa,
       quantidade: parseInt(qtd),
-      data: new Date().toISOString()
-    };
-    console.log(dadosCompra);
+      data: new Date().toISOString(),
 
-    fetch(`http://localhost:3003/pedidos`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(dadosCompra)
-    })
-      .then(response => response.json())
-      .then(data => {
-        console.log('Resposta do servidor:', data);
-        alert('Compra registrada com sucesso!');
-      })
-      .catch(error => {
-        console.error('Erro ao enviar:', error);
-        alert('Erro ao registrar a compra.');
-      });
-  });
+    };
+  
+    // Salvar os dados no localStorage
+    localStorage.setItem("dadosCompra", JSON.stringify(dadosCompra));
+  
+    // Redirecionar para a página de finalização
+    window.location.href = "vendas.html";
+  });  
 });
 
 // Adicionar ao carrinho
@@ -421,7 +417,7 @@ document.getElementById('btnAddCarrinho').addEventListener('click', () => {
   console.log('Adicionar ao carrinho – quantidade:', qtd);
   // TODO: lógica do carrinho
 });
-//CEP
+//CEP (SEM USO)
 document.getElementById("btnChecar").addEventListener("click", () => {
   const cepInput = document.getElementById("freteModal");
   const cep = cepInput.value.replace(/\D/g, '');
@@ -455,13 +451,14 @@ document.getElementById("btnChecar").addEventListener("click", () => {
 });
 
 // Abre o modal
-try {
-  // Código que pode lançar erro
-  elementos.produtoModal.show();
-} catch (erro) {
-  console.error('Erro ao abrir modal:', erro);
-  mostrarFeedback('Não foi possível exibir os detalhes do produto', 'danger');
-}
+
+// try {
+// Código que pode lançar erro
+// elementos.produtoModal.show();
+// } catch (erro) {
+// console.error('Erro ao abrir modal:', erro);
+// mostrarFeedback('Não foi possível exibir os detalhes do produto', 'danger');
+// }
 
 // Utilitários
 function configurarEventos() {
