@@ -177,6 +177,7 @@ CREATE TABLE carrinho_itens (
     quantidade INT NOT NULL DEFAULT 1
 );
 
+//VIEWS
 CREATE VIEW view_carrinho_produtos AS
 SELECT 
     c.id_pessoa,
@@ -189,3 +190,39 @@ JOIN
     carrinho_itens ci ON c.id_carrinho = ci.id_carrinho
 WHERE 
     c.situacao = 'P';
+
+
+
+CREATE VIEW vw_carrinho_itens_detalhados AS
+SELECT 
+    ci.id_item,
+    ci.id_carrinho,
+    ci.id_produto,
+    p.produto AS nome_produto,
+    p.descricao_curta,
+    ci.quantidade,
+    p.preco AS preco_unitario,
+    p.promocao,
+    p.preco_promocional,
+    (CASE 
+        WHEN p.promocao THEN p.preco_promocional 
+        ELSE p.preco 
+    END) AS preco_final,
+    (ci.quantidade * (CASE 
+        WHEN p.promocao THEN p.preco_promocional 
+        ELSE p.preco 
+    END)) AS subtotal,
+    p.imagem_1 AS imagem_principal,
+    p.marca,
+    p.estoque,
+    c.id_pessoa,
+    c.situacao,
+    c.data_hora AS data_carrinho
+FROM 
+    carrinho_itens ci
+JOIN 
+    produto p ON ci.id_produto = p.id_produto
+JOIN 
+    carrinho c ON ci.id_carrinho = c.id_carrinho
+WHERE 
+    p.ativo = TRUE;
