@@ -176,3 +176,16 @@ CREATE TABLE carrinho_itens (
     FOREIGN KEY (id_produto) REFERENCES produto(id_produto),
     quantidade INT NOT NULL DEFAULT 1
 );
+
+CREATE VIEW view_carrinho_produtos AS
+SELECT 
+    c.id_pessoa,
+    ci.id_produto,
+    ci.quantidade,
+    c.situacao
+FROM 
+    carrinho c
+JOIN 
+    carrinho_itens ci ON c.id_carrinho = ci.id_carrinho
+WHERE 
+    c.situacao = 'P';
