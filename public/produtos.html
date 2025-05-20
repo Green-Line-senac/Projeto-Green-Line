@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
   <!-- Scripts -->
-  <script src="../js/frontendPadrao.js"></script>
+  <script src="../js/frontendPadrao.js" defer></script>
   <script src="../js/frontendProdutos.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
@@ -70,8 +70,13 @@
 
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link icon-btn" href="manutencao.html" aria-label="Carrinho de compras"><i class="bi bi-cart"
-                aria-hidden="true"></i></a>
+            <a class="nav-link icon-btn" href="manutencao.html" aria-label="Carrinho de compras">
+              <i class="bi bi-cart position-relative" aria-hidden="true">
+                <span
+                  class="badge text-bg-success position-absolute top-0 start-100 translate-middle rounded-circle border border-light"
+                  id="badge-carrinho">0</span>
+              </i>
+            </a>
           </li>
           <li class="nav-item">
             <a class="nav-link icon-btn" href="login.html" aria-label="Área do usuário"><i id="icone-usuario"
@@ -231,8 +236,8 @@
 
         <div class="modal-body p-6">
           <div
-            class="d-none alert alert-danger text-center fw-bold position-absolute top-50 start-50 translate-middle-x w-75" id="modal-alert">
-            Entre na sua conta ou faça um cadastro para prosseguir
+            class="d-none alert alert-danger text-center fw-bold position-absolute top-50 start-50 translate-middle-x w-75"
+            id="item-resultado">
           </div>
           <div class="row g-4">
             <!-- Imagem do produto -->

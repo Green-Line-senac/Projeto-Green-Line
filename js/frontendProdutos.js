@@ -1,14 +1,15 @@
-// Configurações globais
 const config = {
   apiUrl: 'http://localhost:3003',
   produtosPorPagina: 8,
   fallbackImage: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGZpbGw9IiM5OTkiPk5lbmh1bWEgSW1hZ2VtPC90ZXh0Pjwvc3ZnPg=='
 };
 
-// Estado da aplicação
 const estado = {
   produtos: [],
   paginaAtual: 1,
+  id_pessoa: null,
+  id_produto: null,
+  quantidadeProduto: null,
   carregando: false,
   filtrosAtivos: {
     textoBusca: '',
@@ -18,7 +19,6 @@ const estado = {
   }
 };
 
-// Cache de elementos DOM
 const elementos = {
   produtosContainer: document.getElementById('container-produtos'),
   paginacao: document.querySelector('.pagination'),
@@ -27,14 +27,18 @@ const elementos = {
   statusEstoque: document.getElementById('status-estoque'),
   statusForaEstoque: document.getElementById('status-fora-estoque'),
   categoriaCheckboxes: document.querySelectorAll('input[id^="cat-"]'),
-  produtoModal: new bootstrap.Modal('#produtoModal')
+  produtoModal: new bootstrap.Modal('#produtoModal'),
+  modalAlert: document.getElementById('modal-alert')
 };
 
-// Inicialização
 document.addEventListener("DOMContentLoaded", inicializarApp);
 
 async function inicializarApp() {
   try {
+    const response = await fetch('http://localhost:3002/loginDados');
+    if (!response.ok) return;
+    const dados = await response.json();
+    estado.id_pessoa = dados.id_pessoa;
     estado.carregando = true;
     await carregarProdutos();
     configurarEventos();
@@ -46,16 +50,20 @@ async function inicializarApp() {
   }
 }
 
-// Carregamento de dados
+function verificarEstadoLogin() {
+  if (!estado.id_pessoa) {
+    mostrarFeedback('Por favor, faça login para continuar.', 'danger');
+    return false;
+  }
+  return true;
+}
+
 async function carregarProdutos() {
   try {
     mostrarLoader();
-
     const response = await fetch(`${config.apiUrl}/produto`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
     const data = await response.json();
-
     if (Array.isArray(data)) {
       estado.produtos = data.map(sanitizarProduto);
       aplicarFiltros();
@@ -78,10 +86,8 @@ function sanitizarProduto(produto) {
   };
 }
 
-// Renderização
 function renderizarProdutos(produtosFiltrados) {
   elementos.produtosContainer.innerHTML = '';
-
   if (!produtosFiltrados.length) {
     elementos.produtosContainer.innerHTML = `
       <div class="col-12 text-center py-5">
@@ -94,16 +100,13 @@ function renderizarProdutos(produtosFiltrados) {
     `;
     return;
   }
-
   const fragment = document.createDocumentFragment();
   const inicio = (estado.paginaAtual - 1) * config.produtosPorPagina;
   const fim = inicio + config.produtosPorPagina;
-
   produtosFiltrados.slice(inicio, fim).forEach(produto => {
     const card = criarCardProduto(produto);
     fragment.appendChild(card);
   });
-
   elementos.produtosContainer.appendChild(fragment);
   criarPaginacao(produtosFiltrados.length);
 }
@@ -111,14 +114,12 @@ function renderizarProdutos(produtosFiltrados) {
 function criarCardProduto(produto) {
   const card = document.createElement('div');
   card.className = 'col-12 col-sm-6 col-md-4 col-lg-3 mb-4';
-
   const precoFormatado = produto.promocao
     ? `<span style="text-decoration: line-through; font-size: 0.9rem;">R$ ${produto.preco.toFixed(2)}</span>
        <span class="fs-5 ms-2">R$ ${(produto.preco * 0.8).toFixed(2)}</span>`
     : `<span class="fs-5">R$ ${produto.preco.toFixed(2)}</span>`;
-
   card.innerHTML = `
-    <div class="card h-100" onclick="abrirModalProduto(${escapeHtml(JSON.stringify(produto))})">
+    <div class="card h-100" onclick="abrirModalProduto(${JSON.stringify(produto).replace(/"/g, '&quot;')})">
       <img src="${produto.imagem_1 || config.fallbackImage}" 
            class="card-img-top" 
            alt="${produto.nome}"
@@ -139,32 +140,21 @@ function criarCardProduto(produto) {
       </div>
     </div>
   `;
-
   return card;
 }
 
-// Filtros
 function aplicarFiltros(resetarPagina = true) {
   if (resetarPagina) estado.paginaAtual = 1;
-
   const { textoBusca, emEstoque, foraEstoque, categorias } = estado.filtrosAtivos;
-
   const produtosFiltrados = estado.produtos.filter(produto => {
-    // Filtro por texto
     if (textoBusca && !produto.nome.toLowerCase().includes(textoBusca.toLowerCase())) {
       return false;
     }
-
-    // Filtro por estoque
     if (emEstoque && !produto.estoque) return false;
     if (foraEstoque && produto.estoque) return false;
-
-    // Filtro por categoria
     if (categorias.length && !categorias.includes(produto.categoria)) return false;
-
     return true;
   });
-
   renderizarProdutos(produtosFiltrados);
   atualizarFiltrosAplicados();
 }
@@ -178,7 +168,6 @@ function atualizarFiltros() {
       .filter(cb => cb.checked && cb.id !== 'cat-todos')
       .map(cb => cb.id.replace('cat-', ''))
   };
-
   aplicarFiltros();
 }
 
@@ -187,35 +176,30 @@ function resetarFiltros() {
   elementos.statusEstoque.checked = false;
   elementos.statusForaEstoque.checked = false;
   elementos.categoriaCheckboxes.forEach(cb => cb.checked = false);
-
   atualizarFiltros();
 }
 
 function atualizarFiltrosAplicados() {
   elementos.filtrosAplicados.innerHTML = '';
   const { textoBusca, emEstoque, foraEstoque, categorias } = estado.filtrosAtivos;
-
   if (textoBusca) {
     elementos.filtrosAplicados.appendChild(criarTagFiltro(`Busca: ${textoBusca}`, () => {
       elementos.inputBusca.value = '';
       atualizarFiltros();
     }));
   }
-
   if (emEstoque) {
     elementos.filtrosAplicados.appendChild(criarTagFiltro('Em estoque', () => {
       elementos.statusEstoque.checked = false;
       atualizarFiltros();
     }));
   }
-
   if (foraEstoque) {
     elementos.filtrosAplicados.appendChild(criarTagFiltro('Fora de estoque', () => {
       elementos.statusForaEstoque.checked = false;
       atualizarFiltros();
     }));
   }
-
   categorias.forEach(categoria => {
     const checkbox = document.getElementById(`cat-${categoria}`);
     if (checkbox) {
@@ -228,7 +212,6 @@ function atualizarFiltrosAplicados() {
       ));
     }
   });
-
   if (!elementos.filtrosAplicados.children.length) {
     elementos.filtrosAplicados.innerHTML = `
       <span class="filter-tag">
@@ -254,11 +237,9 @@ function criarTagFiltro(texto, onClick) {
   return tag;
 }
 
-// Paginação
 function criarPaginacao(totalProdutos) {
   elementos.paginacao.innerHTML = '';
   const totalPaginas = Math.ceil(totalProdutos / config.produtosPorPagina);
-
   for (let i = 1; i <= totalPaginas; i++) {
     const li = document.createElement('li');
     li.className = `page-item ${i === estado.paginaAtual ? 'active' : ''}`;
@@ -273,15 +254,12 @@ function criarPaginacao(totalProdutos) {
   }
 }
 
-// Modal
 const produtoModal = document.getElementById('produtoModal');
 produtoModal.addEventListener('hidden.bs.modal', () => {
   const inputQuantidade = document.getElementById('quantidadeModal');
-  inputQuantidade.value = 1; // resetar para 1 ao fechar o modal
+  inputQuantidade.value = 1;
 });
 
-    
-// Função para ajustar a quantidade
 function adjustQuantity(elementId, change) {
   const input = document.getElementById(elementId);
   let value = parseInt(input.value, 10) || 1;
@@ -289,35 +267,21 @@ function adjustQuantity(elementId, change) {
   input.value = value;
 }
 
-// Função para abrir o modal do produto
 function abrirModalProduto(dadosProduto) {
   let produto;
   try {
-    produto = typeof dadosProduto === 'string'
-      ? JSON.parse(dadosProduto)
-      : dadosProduto;
+    produto = typeof dadosProduto === 'string' ? JSON.parse(dadosProduto) : dadosProduto;
   } catch (e) {
     console.error('JSON inválido:', e);
     return;
   }
-
-  // Título
+  estado.id_produto = produto.id_produto;
   document.getElementById('produtoModalLabel').textContent = produto.produto || 'Produto sem nome';
-
-  // Imagem
   const imgEl = document.getElementById('produtoModalImagem');
-  if (produto.imagem_1) {
-    imgEl.src = produto.imagem_1;
-    imgEl.onerror = () => {
-      imgEl.src = 'data:image/svg+xml;base64,...'; // placeholder
-    };
-  } else {
-    imgEl.src = 'data:image/svg+xml;base64,...';
-  }
-  // Descrição, Marca, Categoria e Estoque
+  imgEl.src = produto.imagem_1 || config.fallbackImage;
+  imgEl.onerror = () => imgEl.src = config.fallbackImage;
   document.getElementById('produtoModalDescricao').textContent = produto.descricao || 'Descrição não disponível.';
   document.getElementById('produtoModalMarca').textContent = produto.marca || 'Marca não especificada';
-
   const catEl = document.getElementById('produtoModalCategoria');
   if (catEl) {
     catEl.textContent = produto.categoria || 'Geral';
@@ -328,42 +292,34 @@ function abrirModalProduto(dadosProduto) {
     estoqueEl.textContent = produto.estoque ? 'Disponível' : 'Fora de estoque';
     estoqueEl.className = `badge bg-${produto.estoque ? 'success' : 'secondary'}`;
   }
-
-  // Preço e promoção
   const precoContainer = document.getElementById('produtoModalPreco');
   const precoBase = (produto.preco || 0).toFixed(2);
   if (produto.promocao) {
     const precoProm = (produto.preco * 0.8).toFixed(2);
     precoContainer.innerHTML = `
       <p class="font-bold text-sm mb-1">
-        <span class="line-through text-gray-500 ">R$ ${precoBase}</span>
+        <span class="line-through text-gray-500">R$ ${precoBase}</span>
         <span class="text-green-600 ms-2">R$ ${precoProm}</span>
       </p>
     `;
   } else {
     precoContainer.innerHTML = `<p class="font-bold text-sm">R$ ${precoBase}</p>`;
   }
-
-  // Avaliação
   const stars = document.getElementById('produtoModalAvaliacao');
   stars.innerHTML = '';
   if (produto.avaliacao != null) {
     const fullStars = Math.floor(produto.avaliacao);
     const halfStar = produto.avaliacao % 1 >= 0.5;
     const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
-    for (let i = 0; i < fullStars; i++)   stars.innerHTML += '<i class="fas fa-star text-yellow-400 text-xs"></i>';
+    for (let i = 0; i < fullStars; i++) stars.innerHTML += '<i class="fas fa-star text-yellow-400 text-xs"></i>';
     if (halfStar) stars.innerHTML += '<i class="fas fa-star-half-alt text-yellow-400 text-xs"></i>';
-    for (let i = 0; i < emptyStars; i++)  stars.innerHTML += '<i class="far fa-star text-yellow-400 text-xs"></i>';
+    for (let i = 0; i < emptyStars; i++) stars.innerHTML += '<i class="far fa-star text-yellow-400 text-xs"></i>';
     stars.innerHTML += `<span class="text-xs text-gray-600 ml-1">(${produto.numAvaliacoes || 0})</span>`;
   }
-
-  // Exibe o modal
-  new bootstrap.Modal(document.getElementById('produtoModal')).show();
+  elementos.produtoModal.show();
 }
 
-// Event listeners após DOM carregar
 document.addEventListener('DOMContentLoaded', () => {
-  // Botões de quantidade já usam onclick direto, mas caso queira data-action:
   document.querySelectorAll('[data-action="increase"]').forEach(btn =>
     btn.addEventListener('click', () => adjustQuantity('quantidadeModal', 1))
   );
@@ -372,112 +328,88 @@ document.addEventListener('DOMContentLoaded', () => {
   );
 
   document.getElementById('btnComprarAgora').addEventListener('click', async () => {
-    let id_pessoa;
-    try {
-      const response = await fetch('http://localhost:3002/loginDados');
-      if (!response.ok) return;
-      
-      const dados = await response.json();
-      id_pessoa = dados.id_pessoa;
-  
-      // Se não pode comprar, mostra o alerta e interrompe o processo
-      if (dados.trocarDeConta === 0 || dados.trocar === 0) {
-        const modal_alert = document.getElementById('modal-alert');
-        modal_alert.classList.remove("d-none");
-        setTimeout(() => modal_alert.classList.add("d-none"), 5000);
-        return;
-      }
-    } catch (erro) {
-      console.error("Erro ao buscar loginDados:", erro);
+    if (!verificarEstadoLogin()) return;
+    const qtd = document.getElementById('quantidadeModal').value;
+    if (isNaN(qtd) || qtd <= 0) {
+      mostrarFeedback("Quantidade inválida!", 'danger');
       return;
     }
-  
-    // Definir as variáveis antes de usar
-    const qtd = document.getElementById('quantidadeModal').value;
     const nomeProduto = document.getElementById('produtoModalLabel').textContent;
     const dadosCompra = {
       nomeProduto: nomeProduto,
-      id_pessoa: id_pessoa,
+      id_pessoa: estado.id_pessoa,
       quantidade: parseInt(qtd),
       data: new Date().toISOString(),
-
     };
-  
-    // Salvar os dados no localStorage
     localStorage.setItem("dadosCompra", JSON.stringify(dadosCompra));
-  
-    // Redirecionar para a página de finalização
     window.location.href = "vendas.html";
-  });  
-});
+  });
 
-// Adicionar ao carrinho
-document.getElementById('btnAddCarrinho').addEventListener('click', () => {
-  const qtd = document.getElementById('quantidadeModal').value;
-  console.log('Adicionar ao carrinho – quantidade:', qtd);
-  // TODO: lógica do carrinho
-});
-//CEP (SEM USO)
-document.getElementById("btnChecar").addEventListener("click", () => {
-  const cepInput = document.getElementById("freteModal");
-  const cep = cepInput.value.replace(/\D/g, '');
-  const resultado = document.getElementById("resultadoFrete");
-  //TODO: Calculo do frete
-  if (cep.length !== 8) {
-    resultado.innerText = "CEP inválido. Digite 8 números.";
-    cepInput.value = ""; // limpa mesmo com erro
-    return;
-  }
+  document.getElementById('btnAddCarrinho').addEventListener('click', async () => {
+    if (!verificarEstadoLogin()) return;
 
-  fetch(`https://viacep.com.br/ws/${cep}/json/`)
-    .then(response => response.json())
-    .then(data => {
-      if (data.erro) {
-        resultado.innerText = "CEP não encontrado.";
+    let quantidade = document.getElementById('quantidadeModal').value;
+
+    try {
+      const requisicao = await fetch('http://localhost:3003/carrinho', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id_pessoa: estado.id_pessoa,
+          id_produto: estado.id_produto,
+          quantidade: quantidade
+        })
+      });
+
+      const resposta = await requisicao.json();
+      const item_resultado = document.getElementById('item-resultado');
+
+      if (resposta.codigo === 1 || resposta.mensagem === "ITEM_DUPLICADO") {
+        item_resultado.classList.remove('d-none');
+        item_resultado.innerHTML = "⚠️ Este item já está no seu carrinho";
+        setTimeout(() => item_resultado.classList.add('d-none'), 5000);
+      } else if (resposta.sucesso) {
+        // Atualiza o contador APÓS sucesso
+        let badge = document.getElementById('badge-carrinho');
+        badge.textContent = parseInt(badge.textContent || '0') + 1;
+
+        item_resultado.classList.remove('d-none');
+        item_resultado.innerHTML = "✔️ Item adicionado ao carrinho!";
+        item_resultado.classList.add('text-success');
+        setTimeout(() => {
+          item_resultado.classList.add('d-none');
+          item_resultado.classList.remove('text-success');
+        }, 5000);
       } else {
-        let valorFrete = "R$ 29,90";
-        if (data.uf === "DF") valorFrete = "Gratis";
-        else if (["RJ", "MG"].includes(data.uf)) valorFrete = "R$ 19,90";
-        else if (data.uf === "RS") valorFrete = "R$ 24,90";
-
-        resultado.innerText = `Endereço: ${data.localidade} - ${data.uf}\nFrete estimado: ${valorFrete}`;
+        item_resultado.classList.remove('d-none');
+        item_resultado.innerHTML = "❌ Erro: " + (resposta.mensagem || "Erro desconhecido");
+        item_resultado.classList.add('text-danger');
       }
-      cepInput.value = ""; // limpa após sucesso
-    })
-    .catch(() => {
-      resultado.innerText = "Erro ao buscar o CEP.";
-      cepInput.value = ""; // limpa se der erro
-    });
+    } catch (erro) {
+      console.error("Erro ao adicionar ao carrinho:", erro);
+      const item_resultado = document.getElementById('item-resultado');
+      item_resultado.classList.remove('d-none');
+      item_resultado.innerHTML = "❌ Falha na conexão com o servidor";
+      item_resultado.classList.add('text-danger');
+      setTimeout(() => item_resultado.classList.add('d-none'), 5000);
+    }
+  });
+
 });
 
-// Abre o modal
-
-// try {
-// Código que pode lançar erro
-// elementos.produtoModal.show();
-// } catch (erro) {
-// console.error('Erro ao abrir modal:', erro);
-// mostrarFeedback('Não foi possível exibir os detalhes do produto', 'danger');
-// }
-
-// Utilitários
 function configurarEventos() {
-  // Filtros
   elementos.inputBusca.addEventListener('input', () => {
     estado.filtrosAtivos.textoBusca = elementos.inputBusca.value;
     aplicarFiltros();
   });
-
   elementos.statusEstoque.addEventListener('change', () => {
     estado.filtrosAtivos.emEstoque = elementos.statusEstoque.checked;
     aplicarFiltros();
   });
-
   elementos.statusForaEstoque.addEventListener('change', () => {
     estado.filtrosAtivos.foraEstoque = elementos.statusForaEstoque.checked;
     aplicarFiltros();
   });
-
   elementos.categoriaCheckboxes.forEach(checkbox => {
     checkbox.addEventListener('change', () => {
       if (checkbox.id === 'cat-todos' && checkbox.checked) {
@@ -491,11 +423,7 @@ function configurarEventos() {
 }
 
 function escapeHtml(str) {
-  return str.replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
 function gerarEstrelas(nota) {
