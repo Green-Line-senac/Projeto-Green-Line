@@ -52,45 +52,72 @@ async function buscarProdutos() {
 async function renderizarProdutos(produtos) {
     const container = document.getElementById('produtos-carrinho');
     container.innerHTML = '';
-    if (produtos.promocao == true) {
 
-    }
+    produtos.forEach((item) => {
+        const divProduto = document.createElement("div");
+        divProduto.className = "produto-carrinho d-flex button";
+        divProduto.setAttribute("data-id", item.id_produto);
+        divProduto.setAttribute("data-id-carrinho".item.id_carrinho);
 
-   produtos.forEach((item, index) => {
-    const divProduto = document.createElement("div");
-    divProduto.className = "produto-carrinho d-flex";
-
-    divProduto.innerHTML = `
-        <div class="flex-shrink-0">
-            <img src="${item.imagem_principal}" alt="Produto" class="img-produto">
-        </div>
-        <div class="flex-grow-1 ms-3">
-            <div class="d-flex justify-content-between">
-                <div>
-                    <h3 class="h6 fw-bold mb-1">${item.nome_produto}</h3>
-                    ${item.promocao ? '<span class="badge badge-promocao ms-1">Promoção</span>' : ''}
-                </div>
-                <button class="btn btn-link text-danger p-0 align-self-start">
-                    <i class="bi bi-trash"></i>
-                </button>
+        divProduto.innerHTML = `
+            <div class="flex-shrink-0">
+                <img src="${item.imagem_principal}" alt="Produto" class="img-produto">
             </div>
+            <div class="flex-grow-1 ms-3">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3 class="h6 fw-bold mb-1">${item.nome_produto}</h3>
+                        ${item.promocao ? '<span class="badge badge-promocao ms-1">Promoção</span>' : ''}
+                    </div>
+                    <button class="btn btn-link text-danger p-0 align-self-start excluir-produto">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <div class="d-flex align-items-center">
+                        <span class="text-muted">Quantidade: ${item.quantidade}</span>
+                    </div>
+                    <div class="text-end">
+                        ${!item.promocao ? `<div class="">R$ ${item.preco_unitario}</div>` : `<div class="preco-original">R$ ${item.preco_unitario}</div>`}
+                        ${item.promocao ? `<div class="preco-promocao">R$ ${item.preco_promocional}</div>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+        divProduto.querySelector(".excluir-produto").addEventListener("click", async () => {
+            let id_produto_Excluir = divProduto.getAttribute("data-id");
+            let id_carrinho = div.Produto.getAttribute("data-id_carrinho");
+            let produtoSelecionado = estado.produtos.find(item => item.id_produto == id_produto);
+            const requisicao = await fetch('http://localhost:3006/excluir-produtos', {
+                method: 'POST',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id_pessoa: estado.id_pessoa, id_produto: id_produto_Excluir, id_carrinho: id_carrinho })  // Agora enviando como objeto
+            });
+
+            if (!resposta.ok) throw new Error("Erro ao excluir produtos");
             
-            <div class="d-flex justify-content-between align-items-center mt-2">
-                <div class="d-flex align-items-center">
-                    <button class="btn btn-outline-secondary btn-quantidade">-</button>
-                    <input type="number" value="2" min="1" class="form-control quantidade-input mx-2">
-                    <button class="btn btn-outline-secondary btn-quantidade">+</button>
-                </div>
-                <div class="text-end">
-                    ${!item.promocao ? `<div class="">R$ ${item.preco_unitario}</div>` : `<div class="preco-original">R$ ${item.preco_unitario}</div>`}
-                    ${item.promocao ? `<div class="preco-promocao">R$ ${item.preco_promocional}</div>` : ''}
-                </div>
-            </div>
-        </div>
-    `;
+        });
 
-    container.appendChild(divProduto); // Adiciona ao container
-});
+        container.appendChild(divProduto); // Adiciona ao container
+    });
+}
+function subtotal() {
+    let total = document.getElementById('total');
+    let quantidade = document.getElementById('quantidade-itens');
+    let valor = 0;
+    let quant = 0
+    estado.produtos.forEach((item) => {
+        valor += parseFloat(item.subtotal);
+        quant += parseInt(item.quantidade);
+    });
+    quantidade.innerHTML = Number(quant.toFixed(2)) || 0;
+    total.innerHTML = Number(valor.toFixed(2)) || 0;
 }
 
-document.addEventListener("DOMContentLoaded", inicializar);
+document.addEventListener("DOMContentLoaded", async () => {
+
+    await inicializar();
+    await subtotal();
+});
+

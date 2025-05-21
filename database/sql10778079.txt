@@ -174,7 +174,8 @@ CREATE TABLE carrinho_itens (
     FOREIGN KEY (id_carrinho) REFERENCES carrinho(id_carrinho),
     id_produto INT NOT NULL,
     FOREIGN KEY (id_produto) REFERENCES produto(id_produto),
-    quantidade INT NOT NULL DEFAULT 1
+    quantidade INT NOT NULL DEFAULT 1,
+    situacao CHAR(1) NOT NULL DEFAULT 'P' -- 'P' para pendente, 'R' para removido, 'C' para comprado
 );
 
 //VIEWS
