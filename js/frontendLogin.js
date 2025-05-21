@@ -35,43 +35,48 @@ formularioLogin.addEventListener('submit', async function (e) {
         console.log('Resposta:', dados);
 
         switch (dados.dadosValidos) {
-    case 0:
-        mostrarMensagem('Conta não encontrada.', 'danger');
-        break;
-    case 1:
-        mostrarMensagem("Email não verificado. Verifique sua caixa de entrada.", "warning");
-        if (usuario.includes("@")) {
-            try {
-                await fetch("http://localhost:3001/enviarEmail", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ usuario })
-                });
-            } catch (erro) {
-                console.log("Erro ao enviar o email: ", erro);
-            }
+            case 0:
+                mostrarMensagem('Conta não encontrada.', 'danger');
+                break;
+            case 1:
+                mostrarMensagem("Email não verificado. Verifique sua caixa de entrada.", "warning");
+                if (usuario.includes("@")) {
+                    try {
+                        await fetch("http://localhost:3001/enviarEmail", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ usuario })
+                        });
+                    } catch (erro) {
+                        console.log("Erro ao enviar o email: ", erro);
+                    }
+
+                }
+                break;
+            case 2:
+                try {
+                    console.log(usuario);
+                    await fetch("http://localhost:3002/loginDados", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            usuario: usuario,
+                            trocar: 1
+                        })
+                    });
+                    localStorage.setItem("usuario", usuario);
+                    window.location.href = '/index.html';
+                } catch (erro) {
+                    console.log("Erro ao enviar o email: ", erro);
+                }
+
+                return;
+            case 3:
+                mostrarMensagem('Credenciais inválidas.', 'danger');
+                break;
+            default:
+                mostrarMensagem('Erro desconhecido.', 'warning');
         }
-        break;
-    case 2:
-        try {
-            // Armazena os dados do usuário no localStorage
-            localStorage.setItem("usuario", dados.nome || usuario);
-            localStorage.setItem("id_pessoa", dados.id_pessoa);
-            
-            // Redireciona para o perfil
-            window.location.href = '/conexaoP/perfil.html';
-            
-        } catch (erro) {
-            console.log("Erro ao processar login:", erro);
-            mostrarMensagem('Erro ao fazer login.', 'danger');
-        }
-        return;
-    case 3:
-        mostrarMensagem('Credenciais inválidas.', 'danger');
-        break;
-    default:
-        mostrarMensagem('Erro desconhecido.', 'warning');
-}
     } catch (erro) {
         console.error('Erro:', erro);
         mostrarMensagem('Falha na conexão. Tente novamente.', 'danger');
