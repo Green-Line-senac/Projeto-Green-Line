@@ -32,7 +32,7 @@ app.post('/verificarConta', async (req, res) => {
             return res.json({ dadosValidos: 0, mensagem: "Conta não encontrada." });
         }
 
-        const { situacao, senha: senhaHash } = pesquisa[0];
+        const { id_pessoa, situacao, senha: senhaHash } = pesquisa[0];
 
         if (situacao !== 'A') {
             return res.json({ dadosValidos: 1, mensagem: "Conta pendente ou bloqueada." });
@@ -43,7 +43,13 @@ app.post('/verificarConta', async (req, res) => {
             return res.json({ dadosValidos: 3, mensagem: "Usuário ou senha incorretos." });
         }
 
-        return res.json({ dadosValidos: 2, mensagem: "Autenticação bem-sucedida." });
+        // Retorna o id_pessoa no caso de sucesso
+        return res.json({ 
+            dadosValidos: 2, 
+            mensagem: "Autenticação bem-sucedida.",
+            id_pessoa: id_pessoa,
+            nome: pesquisa[0].nome
+        });
 
     } catch (error) {
         console.error("Erro ao verificar conta:", error);
