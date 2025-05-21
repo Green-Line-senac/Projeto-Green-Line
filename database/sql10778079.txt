@@ -179,12 +179,14 @@ CREATE TABLE carrinho_itens (
 );
 
 //VIEWS
+DROP VIEW IF EXISTS view_carrinho_produtos;
+
 CREATE VIEW view_carrinho_produtos AS
 SELECT 
     c.id_pessoa,
     ci.id_produto,
     ci.quantidade,
-    c.situacao
+    ci.situacao AS situacao_item -- Substituindo situacao por situacao_item
 FROM 
     carrinho c
 JOIN 

@@ -60,11 +60,17 @@ app.post('/excluir-produtos', async (req, res) => {
         try {
             await db.query("UPDATE carrinho_itens SET situacao ='R' WHERE id_produto = ? AND id_carrinho = ?;", [id_produto, id_carrinho]);
         } catch (erro) {
-            console.log("Erro ao excluir",erro);
+            console.log("Erro ao excluir", erro);
+            return res.json({
+                sucesso: false,
+                mensagem: "Item não excluido",
+                codigo: 2
+            });
         }
         return res.json({
             sucesso: true,
-            mensagem: "Item Excluído com sucesso"
+            mensagem: "Item Excluído com sucesso",
+            codigo: 3
         });
 
 
@@ -74,6 +80,7 @@ app.post('/excluir-produtos', async (req, res) => {
         return res.status(500).json({
             sucesso: false,
             mensagem: "Erro interno no servidor",
+            codigo: 1,
             detalhes: erro.message
         });
     }

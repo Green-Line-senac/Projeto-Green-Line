@@ -75,8 +75,8 @@ app.post('/carrinho', async (req, res) => {
 
         // Verificar se o produto já está no carrinho (com await)
         const itens = await db.query(
-            'SELECT * FROM view_carrinho_produtos WHERE id_pessoa = ? AND id_produto = ?',
-            [id_pessoa, id_produto]
+            'SELECT * FROM view_carrinho_produtos WHERE id_pessoa = ? AND id_produto = ? AND situacao_item = ? ',
+            [id_pessoa, id_produto,"P"]
         );
 
         if (itens.length > 0) {
