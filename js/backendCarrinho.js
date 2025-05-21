@@ -24,8 +24,8 @@ app.post('/buscar-produtos', async (req, res) => {
         console.log(`Buscando produtos para ID: ${id_pessoa}`);
 
         // Consulta ao banco de dados - forma correta
-        const resultado = await db.query("SELECT * FROM vw_carrinho_itens_detalhados WHERE id_pessoa = ? AND situacao ='P'", [id_pessoa]);
-        
+        const resultado = await db.query("SELECT * FROM vw_carrinho_itens_detalhados WHERE id_pessoa = ? AND situacao_item = 'P'", [id_pessoa]);
+
         return res.json({
             sucesso: true,
             produtos: resultado
@@ -42,6 +42,44 @@ app.post('/buscar-produtos', async (req, res) => {
         });
     }
 });
+
+app.post('/excluir-produtos', async (req, res) => {
+    try {
+        const { id_produto, id_carrinho } = req.body;
+
+        if (!id_produto && !id_carrinho) {
+            return res.status(400).json({
+                sucesso: false,
+                mensagem: "ID produto e carrinho não estão aqui"
+            });
+        }
+
+        console.log(`Buscando produtos do ID carrinho: ${id_carrinho}`);
+
+        // Consulta ao banco de dados - forma correta
+        try {
+            await db.query("UPDATE carrinho_itens SET situacao ='R' WHERE id_produto = ? AND id_carrinho = ?;", [id_produto, id_carrinho]);
+        } catch (erro) {
+            console.log("Erro ao excluir",erro);
+        }
+        return res.json({
+            sucesso: true,
+            mensagem: "Item Excluído com sucesso"
+        });
+
+
+
+    } catch (erro) {
+        console.error("Erro ao buscar produtos:", erro);
+        return res.status(500).json({
+            sucesso: false,
+            mensagem: "Erro interno no servidor",
+            detalhes: erro.message
+        });
+    }
+});
+
+
 
 // Rota de teste
 app.get('/teste', (req, res) => {
