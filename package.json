@@ -4,13 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npm install && concurrently \"node js/backendCadastro.js\" \"node js/backendLogin.js\" \"node js/backendIndex.js\" \"node js/backendprodutos.js\" \"node js/backendPadrao.js\" \"node js/backendCarrinho.js\" "
+    "start": "npm install && concurrently \"node js/backendCadastro.js\" \"node js/backendLogin.js\" \"node js/backendIndex.js\" \"node js/backendprodutos.js\" \"node js/backendPadrao.js\" \"node js/backendCarrinho.js\" \"node conexaoP/server.js\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.2",
     "concurrently": "^9.1.2",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
