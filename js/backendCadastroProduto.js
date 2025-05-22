@@ -8,7 +8,7 @@ const app = express();
 const db = new conexao();
 
 // Configurações
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '100mb' }));
 app.use(cors({
     origin: process.env.FRONTEND_URL || '*',
     methods: ['GET', 'POST']

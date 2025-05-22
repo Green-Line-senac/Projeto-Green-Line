@@ -22,6 +22,10 @@
                 <p class="lead">Preencha as informações do produto que deseja adicionar ao catálogo.</p>
             </div>
 
+            <!-- Mensagens de feedback -->
+            <div id="error-message" class="alert alert-danger mx-auto" style="display: none; max-width: 800px;"></div>
+            <div id="success-message" class="alert alert-success mx-auto" style="display: none; max-width: 800px;"></div>
+
             <div class="container-fluid">
                 <div class="row gap-3 justify-content-center">
                     <div class="col-12 col-lg-8 border rounded-3 p-4 secao-formulario">
@@ -89,13 +93,10 @@
                                 <div class="mb-3">
                                     <label for="imagens-produto" class="form-label">Imagens do Produto*</label>
                                     <input class="form-control" type="file" id="imagens-produto" multiple
-                                        accept="image/*" onchange="File()" required>
-                                    <div class="form-text">Envie até 5 imagens (JPEG/PNG, máx. 2MB cada)</div>
+                                        accept="image/jpeg, image/png" required>
+                                    <div class="form-text">Envie até 3 imagens (JPEG/PNG, máx. 5MB cada)</div>
                                     <div class="invalid-feedback">Por favor, adicione pelo menos uma imagem do produto.
                                     </div>
-                                    <!--
-                                        O input type file sempre retorna um FileList, a diferença entre ter o multiple é que dá acesso a mais espaço do objeto FileList, fazendo o lenght ser maior que 1.
-                                    -->
                                 </div>
                             </fieldset>
 
@@ -165,11 +166,9 @@
                                         <input type="text" name="preco-promocional" class="form-control"
                                             id="preco-promocional" placeholder="Preço promocional"
                                             pattern="^\d{1,6}(,\d{2})?$">
-                                        <label for="parcelas">Preço promocional(R$)</label>
-                                        <div class="invalid-feedback">Produto em promoção</div>
+                                        <label for="preco-promocional">Preço promocional (R$)</label>
+                                        <div class="invalid-feedback">Use o formato: 9999,99 (sem ponto para milhar)</div>
                                     </div>
-
-
                                 </div>
 
                                 <div class="d-flex justify-content-between gap-3">
@@ -197,7 +196,10 @@
 
                             <div class="d-flex justify-content-end mt-4">
                                 <button type="button" class="btn btn-outline-secondary me-3">Cancelar</button>
-                                <button type="submit" class="btn btn-success">Cadastrar Produto</button>
+                                <button type="submit" class="btn btn-success">
+                                    <span class="submit-text">Cadastrar Produto</span>
+                                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -213,7 +215,7 @@
                                     <p id="preview-descricao" class="card-text text-black-50">Descrição curta</p>
                                     <p id="preview-preco" class="card-text fw-bold">R$ 0,00</p>
                                     <span id="preview-etiquetas" class="d-flex gap-1">
-                                        <span class="badge bg-success" id="badge-ativo">Ativo</span>
+                                        <span class="badge bg-success" id="badge-ativo" style="display: none;">Ativo</span>
                                         <span class="badge bg-danger d-none" id="badge-promocao">Promoção</span>
                                     </span>
                                 </div>
