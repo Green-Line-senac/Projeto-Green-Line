@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npm install && concurrently \"node js/backendCadastro.js\" \"node js/backendLogin.js\" \"node js/backendCadastroProduto.js\" \"node js/backendIndex.js\" \"node js/backendprodutos.js\" \"node js/backendPadrao.js\" \"node js/backendCarrinho.js\" \"node conexaoP/server.js\""
+    "start": "npm install && concurrently \"node js/backendCadastro.js\" \"node js/backendLogin.js\" \"node js/backendCadastroProduto.js\" \"node js/backendIndex.js\" \"node js/backendprodutos.js\" \"node js/backendPadrao.js\" \"node js/backendCarrinho.js\" \"node js/server.js\""
   },
   "keywords": [],
   "author": "",

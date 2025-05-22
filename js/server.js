@@ -164,37 +164,37 @@ app.get('/pessoa', async (req, res) => {
 });
 
 // [4] BUSCAR USUÁRIO POR ID (GET) - Versão corrigida
-app.get('/pessoa/:id_pessoa', async (req, res) => {
+app.get("/pessoa/:id_pessoa", async (req, res) => {
   try {
-      console.log('[BACK] Requisição recebida para buscar pessoa. ID:', req.params.id_pessoa);
-    
-    // Verifica se o ID é um número válido
-    const id = parseInt(req.params.id_pessoa);
-    if (isNaN(id) || id <= 0) {
-      return res.status(400).json({ error: 'ID inválido' });
-    }
+      console.log("[BACK] Requisição recebida para buscar pessoa. ID:", req.params.id_pessoa);
 
-    // Query corrigida - seleciona apenas campos não sensíveis
-    const [rows] = await db.query(
-      'SELECT id_pessoa, nome, email, telefone, cpf, id_tipo_usuario, situacao, imagem_perfil FROM pessoa WHERE id_pessoa = ?',
-      [id]
-    );
-    
-    if (rows.length === 0) {
-      return res.status(404).json({ 
-        error: 'Usuário não encontrado',
-        details: `Nenhum usuário encontrado com o ID ${id}`
-      });
-    }
-    
-    // Retorna apenas o primeiro resultado (deveria ser único por ser ID)
-    res.json(rows[0]);
+      // Converte o ID para número antes da validação
+      const id = Number(req.params.id_pessoa);
+      if (isNaN(id) || id <= 0) {
+          return res.status(400).json({ error: "ID inválido" });
+      }
+
+      // Consulta no banco
+      const [rows] = await db.query(
+          "SELECT id_pessoa, nome, email, telefone, cpf, id_tipo_usuario, situacao, imagem_perfil FROM pessoa WHERE id_pessoa = ?",
+          [id]
+      );
+
+      if (!rows || rows.length === 0) {
+          return res.status(404).json({ 
+              error: "Usuário não encontrado",
+              details: `Nenhum usuário encontrado com o ID ${id}`
+          });
+      }
+
+      // Retorna os dados
+      res.json(rows[0]);
   } catch (err) {
-    console.error('Erro detalhado:', err);
-    res.status(500).json({ 
-      error: 'Erro ao buscar usuário',
-      details: err.message 
-    });
+      console.error("Erro ao buscar usuário:", err.message);
+      res.status(500).json({ 
+          error: "Erro ao buscar usuário",
+          details: err.message
+      });
   }
 });
 // [5] ATUALIZAR USUÁRIO (PUT) - (Protegida em produção)
