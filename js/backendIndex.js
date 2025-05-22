@@ -35,17 +35,17 @@ app.post("/loginDados", async (req, res) => {
 
     try {
         const respostaPessoa = await db.query(
-            "SELECT id_pessoa, id_tipo_usuario FROM pessoa WHERE nome = ?", 
+            "SELECT id_pessoa, id_tipo_usuario FROM pessoa WHERE nome = ?",
             [usuario]
         );
-        
+
         if (respostaPessoa.length > 0) {
             estadoLogin.id_pessoa = Number(respostaPessoa[0].id_pessoa);
             estadoLogin.tipo_usuario = Number(respostaPessoa[0].id_tipo_usuario);
 
-            const respostaCarrinho = await db.query(
-                "SELECT SUM(quantidade_pendente) AS numero_carrinho FROM vw_quantidade_pendente WHERE id_pessoa = ?", 
-                [estadoLogin.id_pessoa] 
+            let respostaCarrinho = await db.query(
+                "SELECT SUM(quantidade_pendente) AS numero_carrinho FROM vw_quantidade_pendente WHERE id_pessoa = ?",
+                [estadoLogin.id_pessoa]
             );
 
             estadoLogin.quantidade_produtos = respostaCarrinho.length > 0 ? Number(respostaCarrinho[0].numero_carrinho || 0) : 0;
@@ -73,8 +73,21 @@ app.post("/loginDados", async (req, res) => {
 });
 
 // Rota GET
-app.get("/loginDados", (req, res) => {
-    res.json(estadoLogin);
+//O login não muda, mas o carrinho, sim;
+app.get("/loginDados", async (req, res) => {
+    try {
+        let respostaCarrinho = await db.query(
+            "SELECT SUM(quantidade_pendente) AS numero_carrinho FROM vw_quantidade_pendente WHERE id_pessoa = ?",
+            [estadoLogin.id_pessoa]
+        );
+
+        estadoLogin.quantidade_produtos = respostaCarrinho.length > 0 ? Number(respostaCarrinho[0].numero_carrinho || 0) : 0;
+
+        res.json(estadoLogin);
+    } catch (error) {
+        console.error("Erro ao buscar estado de login:", error);
+        res.status(500).json({ erro: "Erro ao buscar estado de login", detalhes: error.message });
+    }
 });
 
 // Rota para buscar produtos em promoção

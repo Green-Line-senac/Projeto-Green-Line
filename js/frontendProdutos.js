@@ -1,10 +1,12 @@
+document.addEventListener("DOMContentLoaded", inicializarApp);
+
 const config = {
   apiUrl: 'http://localhost:3003',
   produtosPorPagina: 8,
   fallbackImage: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGZpbGw9IiM5OTkiPk5lbmh1bWEgSW1hZ2VtPC90ZXh0Pjwvc3ZnPg=='
 };
 
-const estado = {
+let estado = {
   produtos: [],
   paginaAtual: 1,
   id_pessoa: null,
@@ -34,8 +36,15 @@ const elementos = {
 async function inicializarApp() {
   try {
     estado.carregando = true;
-    await carregarProdutos();
+    // Carrega id_pessoa do localStorage como fallback inicial
+    const storedId = localStorage.getItem('id_pessoa');
+    if (storedId) {
+      estado.id_pessoa = parseInt(storedId);
+      console.log('id_pessoa carregado do localStorage:', estado.id_pessoa);
+    }
+    await Promise.all([carregarProdutos(), verificarEstadoLogin()]);
     configurarEventos();
+    console.log('Estado após inicialização:', estado);
   } catch (erro) {
     console.error('Erro na inicialização:', erro);
     mostrarFeedback('Opa, algo deu errado! Tente recarregar.', 'danger');
@@ -45,16 +54,33 @@ async function inicializarApp() {
 }
 
 async function verificarEstadoLogin() {
-  const response = await fetch('http://localhost:3002/loginDados');
-  if (!response.ok) return;
-  const dados = await response.json();
-  estado.id_pessoa = dados.id_pessoa;
-  console.log(estado.id_pessoa);
-  if (!estado.id_pessoa) {
-    mostrarFeedback('Por favor, faça login para continuar.', 'danger');
+  try {
+    console.log('Iniciando verificação de login...');
+    const response = await fetch('http://localhost:3002/loginDados', {
+      credentials: 'include'
+    });
+    console.log('Status da resposta:', response.status);
+    if (!response.ok) {
+      throw new Error(`Falha na verificação: HTTP ${response.status}`);
+    }
+
+    const dados = await response.json();
+    console.log('Dados recebidos:', dados);
+
+    if (dados && dados.id_pessoa) {
+      estado.id_pessoa = parseInt(dados.id_pessoa);
+      localStorage.setItem('id_pessoa', estado.id_pessoa);
+      console.log('id_pessoa atualizado:', estado.id_pessoa);
+      return true;
+    } else {
+      console.log('id_pessoa não encontrado nos dados:', dados);
+      return false;
+    }
+  } catch (erro) {
+    console.error('Erro ao verificar login:', erro);
+    // Não tenta carregar do localStorage aqui, já feito em inicializarApp
     return false;
   }
-  return true;
 }
 
 async function carregarProdutos() {
@@ -78,10 +104,17 @@ async function carregarProdutos() {
 function sanitizarProduto(produto) {
   return {
     ...produto,
+    id_produto: parseInt(produto.id_produto) || null,
     preco: Number(produto.preco) || 0,
-    avaliacoes: Number(produto.avaliacoes) || 0,
+    avaliacao: Number(produto.avaliacao) || 0,
+    numAvaliacoes: Number(produto.numAvaliacoes) || 0,
     estoque: Boolean(produto.estoque),
-    promocao: Boolean(produto.promocao)
+    promocao: Boolean(produto.promocao),
+    nome: produto.produto || produto.nome || 'Produto sem nome',
+    descricao: produto.descricao || 'Sem descrição',
+    categoria: produto.categoria || 'Geral',
+    marca: produto.marca || 'Sem marca',
+    imagem_1: produto.imagem_1 || config.fallbackImage
   };
 }
 
@@ -119,20 +152,20 @@ function criarCardProduto(produto) {
     : `<span class="fs-5">R$ ${produto.preco.toFixed(2)}</span>`;
   card.innerHTML = `
     <div class="card h-100" onclick="abrirModalProduto(${JSON.stringify(produto).replace(/"/g, '&quot;')})">
-      <img src="${produto.imagem_1 || config.fallbackImage}" 
+      <img src="${produto.imagem_1}" 
            class="card-img-top" 
-           alt="${produto.nome}"
+           alt="${escapeHtml(produto.nome)}"
            loading="lazy"
            style="height: 200px; object-fit: contain;"
            onerror="this.src='${config.fallbackImage}'">
       <div class="card-body">
-        <h6 class="card-title">${produto.produto}</h6>
+        <h6 class="card-title">${escapeHtml(produto.nome)}</h6>
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <span class="text-warning">${gerarEstrelas(4)}</span>
-          <small class="text-muted">${produto.avaliacoes} av.</small>
+          <span class="text-warning">${gerarEstrelas(produto.avaliacao)}</span>
+          <small class="text-muted">${produto.numAvaliacoes} av.</small>
         </div>
-        <p class="card-text text-muted small">${produto.descricao.substring(0, 60)}${produto.descricao.length > 60 ? '...' : ''}</p>
-        <p class="fw-bold mb-0 ${produto.promocao ? '' : ''}">
+        <p class="card-text text-muted small">${escapeHtml(produto.descricao.substring(0, 60))}${produto.descricao.length > 60 ? '...' : ''}</p>
+        <p class="fw-bold mb-0 ${produto.promocao ? 'text-success' : ''}">
           ${precoFormatado}
         </p>
         ${!produto.estoque ? '<span class="badge bg-secondary mt-2">Fora de estoque</span>' : ''}
@@ -160,7 +193,7 @@ function aplicarFiltros(resetarPagina = true) {
 
 function atualizarFiltros() {
   estado.filtrosAtivos = {
-    textoBusca: elementos.inputBusca.value,
+    textoBusca: elementos.inputBusca.value.trim(),
     emEstoque: elementos.statusEstoque.checked,
     foraEstoque: elementos.statusForaEstoque.checked,
     categorias: Array.from(elementos.categoriaCheckboxes)
@@ -174,7 +207,7 @@ function resetarFiltros() {
   elementos.inputBusca.value = '';
   elementos.statusEstoque.checked = false;
   elementos.statusForaEstoque.checked = false;
-  elementos.categoriaCheckboxes.forEach(cb => cb.checked = false);
+  elementos.categoriaCheckboxes.forEach(cb => cb.checked = cb.id === 'cat-todos');
   atualizarFiltros();
 }
 
@@ -182,7 +215,7 @@ function atualizarFiltrosAplicados() {
   elementos.filtrosAplicados.innerHTML = '';
   const { textoBusca, emEstoque, foraEstoque, categorias } = estado.filtrosAtivos;
   if (textoBusca) {
-    elementos.filtrosAplicados.appendChild(criarTagFiltro(`Busca: ${textoBusca}`, () => {
+    elementos.filtrosAplicados.appendChild(criarTagFiltro(`Busca: ${escapeHtml(textoBusca)}`, () => {
       elementos.inputBusca.value = '';
       atualizarFiltros();
     }));
@@ -203,7 +236,7 @@ function atualizarFiltrosAplicados() {
     const checkbox = document.getElementById(`cat-${categoria}`);
     if (checkbox) {
       elementos.filtrosAplicados.appendChild(criarTagFiltro(
-        checkbox.parentElement.textContent.trim(),
+        escapeHtml(checkbox.parentElement.textContent.trim()),
         () => {
           checkbox.checked = false;
           atualizarFiltros();
@@ -257,6 +290,10 @@ const produtoModal = document.getElementById('produtoModal');
 produtoModal.addEventListener('hidden.bs.modal', () => {
   const inputQuantidade = document.getElementById('quantidadeModal');
   inputQuantidade.value = 1;
+  estado.id_produto = null;
+  const itemResultado = document.getElementById('item-resultado');
+  itemResultado.classList.add('d-none');
+  itemResultado.innerHTML = '';
 });
 
 function adjustQuantity(elementId, change) {
@@ -272,18 +309,19 @@ function abrirModalProduto(dadosProduto) {
     produto = typeof dadosProduto === 'string' ? JSON.parse(dadosProduto) : dadosProduto;
   } catch (e) {
     console.error('JSON inválido:', e);
+    mostrarFeedback('Erro ao abrir produto', 'danger');
     return;
   }
   estado.id_produto = produto.id_produto;
-  document.getElementById('produtoModalLabel').textContent = produto.produto || 'Produto sem nome';
+  document.getElementById('produtoModalLabel').textContent = produto.nome;
   const imgEl = document.getElementById('produtoModalImagem');
-  imgEl.src = produto.imagem_1 || config.fallbackImage;
+  imgEl.src = produto.imagem_1;
   imgEl.onerror = () => imgEl.src = config.fallbackImage;
-  document.getElementById('produtoModalDescricao').textContent = produto.descricao || 'Descrição não disponível.';
-  document.getElementById('produtoModalMarca').textContent = produto.marca || 'Marca não especificada';
+  document.getElementById('produtoModalDescricao').textContent = produto.descricao;
+  document.getElementById('produtoModalMarca').textContent = produto.marca;
   const catEl = document.getElementById('produtoModalCategoria');
   if (catEl) {
-    catEl.textContent = produto.categoria || 'Geral';
+    catEl.textContent = produto.categoria;
     catEl.className = `badge mb-2 bg-${produto.promocao ? 'danger' : 'success'}`;
   }
   const estoqueEl = document.getElementById('produtoModalEstoque');
@@ -292,7 +330,7 @@ function abrirModalProduto(dadosProduto) {
     estoqueEl.className = `badge bg-${produto.estoque ? 'success' : 'secondary'}`;
   }
   const precoContainer = document.getElementById('produtoModalPreco');
-  const precoBase = (produto.preco || 0).toFixed(2);
+  const precoBase = produto.preco.toFixed(2);
   if (produto.promocao) {
     const precoProm = (produto.preco * 0.8).toFixed(2);
     precoContainer.innerHTML = `
@@ -313,11 +351,10 @@ function abrirModalProduto(dadosProduto) {
     for (let i = 0; i < fullStars; i++) stars.innerHTML += '<i class="fas fa-star text-yellow-400 text-xs"></i>';
     if (halfStar) stars.innerHTML += '<i class="fas fa-star-half-alt text-yellow-400 text-xs"></i>';
     for (let i = 0; i < emptyStars; i++) stars.innerHTML += '<i class="far fa-star text-yellow-400 text-xs"></i>';
-    stars.innerHTML += `<span class="text-xs text-gray-600 ml-1">(${produto.numAvaliacoes || 0})</span>`;
+    stars.innerHTML += `<span class="text-xs text-gray-600 ml-1">(${produto.numAvaliacoes})</span>`;
   }
   elementos.produtoModal.show();
 }
-
 
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-action="increase"]').forEach(btn =>
@@ -329,90 +366,88 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('btnComprarAgora').addEventListener('click', async () => {
     if (!estado.id_pessoa) {
-      console.log("Usuário não está logado!");
-      mostrarFeedback("Por favor, faça login ou cadastro para prosseguir","danger");
+      mostrarFeedback("Por favor, faça login ou cadastro para prosseguir", "danger");
       return;
     }
-    const qtd = document.getElementById('quantidadeModal').value;
+    const qtd = parseInt(document.getElementById('quantidadeModal').value, 10);
     if (isNaN(qtd) || qtd <= 0) {
       mostrarFeedback("Quantidade inválida!", 'danger');
-      console.log("Quantidade inválida");
       return;
     }
 
     const nomeProduto = document.getElementById('produtoModalLabel').textContent;
     const dadosCompra = {
-      nomeProduto: nomeProduto,
+      nomeProduto,
       id_pessoa: estado.id_pessoa,
-      quantidade: parseInt(qtd),
+      quantidade: qtd,
       data: new Date().toISOString(),
     };
 
     console.log("Dados da compra:", dadosCompra);
-
     localStorage.setItem("dadosCompra", JSON.stringify(dadosCompra));
     window.location.href = "vendas.html";
   });
 
   document.getElementById('btnAddCarrinho').addEventListener('click', async () => {
     if (!estado.id_pessoa) {
-      console.log("Usuário não está logado!");
-      mostrarFeedback("Por favor, faça login ou cadastro para prosseguir","danger");
+      mostrarFeedback("Por favor, faça login ou cadastro para prosseguir", "danger");
       return;
     }
 
-    let quantidade = document.getElementById('quantidadeModal').value;
+    const quantidade = parseInt(document.getElementById('quantidadeModal').value, 10);
+    if (isNaN(quantidade) || quantidade <= 0) {
+      mostrarFeedback("Quantidade inválida!", 'danger');
+      return;
+    }
 
     try {
-      const requisicao = await fetch('http://localhost:3003/carrinho', {
+      const requisicao = await fetch(`${config.apiUrl}/carrinho`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id_pessoa: estado.id_pessoa,
           id_produto: estado.id_produto,
-          quantidade: quantidade
+          quantidade
         })
       });
 
       const resposta = await requisicao.json();
-      const item_resultado = document.getElementById('item-resultado');
+      const itemResultado = document.getElementById('item-resultado');
 
       if (resposta.codigo === 1 || resposta.mensagem === "ITEM_DUPLICADO") {
-        item_resultado.classList.remove('d-none');
-        item_resultado.innerHTML = "⚠️ Este item já está no seu carrinho";
-        setTimeout(() => item_resultado.classList.add('d-none'), 5000);
+        itemResultado.classList.remove('d-none');
+        itemResultado.innerHTML = "⚠️ Este item já está no seu carrinho";
+        setTimeout(() => itemResultado.classList.add('d-none'), 5000);
       } else if (resposta.sucesso) {
-        // Atualiza o contador APÓS sucesso
         let badge = document.getElementById('badge-carrinho');
         badge.textContent = parseInt(badge.textContent || '0') + 1;
-
-        item_resultado.classList.remove('d-none');
-        item_resultado.innerHTML = "✔️ Item adicionado ao carrinho!";
-        item_resultado.classList.add('text-success');
+        itemResultado.classList.remove('d-none');
+        itemResultado.innerHTML = "✔️ Item adicionado ao carrinho!";
+        itemResultado.classList.add('text-success');
         setTimeout(() => {
-          item_resultado.classList.add('d-none');
-          item_resultado.classList.remove('text-success');
+          itemResultado.classList.add('d-none');
+          itemResultado.classList.remove('text-success');
         }, 5000);
       } else {
-        item_resultado.classList.remove('d-none');
-        item_resultado.innerHTML = "❌ Erro: " + (resposta.mensagem || "Erro desconhecido");
-        item_resultado.classList.add('text-danger');
+        itemResultado.classList.remove('d-none');
+        itemResultado.innerHTML = `❌ Erro: ${resposta.mensagem || "Erro desconhecido"}`;
+        itemResultado.classList.add('text-danger');
+        setTimeout(() => itemResultado.classList.add('d-none'), 5000);
       }
     } catch (erro) {
       console.error("Erro ao adicionar ao carrinho:", erro);
-      const item_resultado = document.getElementById('item-resultado');
-      item_resultado.classList.remove('d-none');
-      item_resultado.innerHTML = "❌ Falha na conexão com o servidor";
-      item_resultado.classList.add('text-danger');
-      setTimeout(() => item_resultado.classList.add('d-none'), 5000);
+      const itemResultado = document.getElementById('item-resultado');
+      itemResultado.classList.remove('d-none');
+      itemResultado.innerHTML = "❌ Falha na conexão com o servidor";
+      itemResultado.classList.add('text-danger');
+      setTimeout(() => itemResultado.classList.add('d-none'), 5000);
     }
   });
-
 });
 
 function configurarEventos() {
   elementos.inputBusca.addEventListener('input', () => {
-    estado.filtrosAtivos.textoBusca = elementos.inputBusca.value;
+    estado.filtrosAtivos.textoBusca = elementos.inputBusca.value.trim();
     aplicarFiltros();
   });
   elementos.statusEstoque.addEventListener('change', () => {
@@ -429,6 +464,8 @@ function configurarEventos() {
         elementos.categoriaCheckboxes.forEach(cb => {
           if (cb.id !== 'cat-todos') cb.checked = false;
         });
+      } else if (checkbox.id !== 'cat-todos' && checkbox.checked) {
+        document.getElementById('cat-todos').checked = false;
       }
       atualizarFiltros();
     });
@@ -436,10 +473,11 @@ function configurarEventos() {
 }
 
 function escapeHtml(str) {
-  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
 function gerarEstrelas(nota) {
+  if (!nota) return '☆☆☆☆☆';
   const estrelasCheias = Math.floor(nota);
   const temMeia = nota % 1 >= 0.5;
   return '★'.repeat(estrelasCheias) + (temMeia ? '½' : '') + '☆'.repeat(5 - estrelasCheias - (temMeia ? 1 : 0));
@@ -471,7 +509,7 @@ function mostrarFeedback(mensagem, tipo = 'success') {
   toast.className = `toast align-items-center text-white bg-${tipo} border-0 position-fixed bottom-0 end-0 m-3`;
   toast.innerHTML = `
     <div class="d-flex">
-      <div class="toast-body">${mensagem}</div>
+      <div class="toast-body">${escapeHtml(mensagem)}</div>
       <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
     </div>
   `;
@@ -479,5 +517,3 @@ function mostrarFeedback(mensagem, tipo = 'success') {
   new bootstrap.Toast(toast).show();
   setTimeout(() => toast.remove(), 5000);
 }
-
-document.addEventListener("DOMContentLoaded", inicializarApp);

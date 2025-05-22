@@ -65,7 +65,7 @@ formularioLogin.addEventListener('submit', async function (e) {
                         })
                     });
                     localStorage.setItem("usuario", usuario);
-                    window.location.href = '/index.html';
+                    window.location.href = '../index.html';
                 } catch (erro) {
                     console.log("Erro ao enviar o email: ", erro);
                 }

@@ -23,61 +23,76 @@
 
 <body>
   <!-- Cabeçalho -->
-  <nav class="holo-header menu_green_line" role="banner">
-    <nav class="navbar navbar-expand-lg container bg-dark.bg-gradient" aria-label="Navegação principal">
-      <img src="img/logo.png" alt="Logo GreenLine - Folha verde estilizada" width="40" height="40">
+    <nav class="holo-header menu_green_line" role="banner">
+        <nav class="navbar navbar-expand-lg container bg-dark.bg-gradient" aria-label="Navegação principal">
+            <img src="../img/logo.png" alt="Logo GreenLine - Folha verde estilizada" width="40" height="40">
 
-      <!-- Título da marca -->
-      <a class="navbar-brand" href="index.html" aria-current="page">GreenLine</a>
+            <!-- Título da marca -->
+            <a class="navbar-brand" href="index.html" aria-current="page">GreenLine</a>
 
-      <!-- Botão para dispositivos menores com label melhorado -->
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
-        aria-controls="navbarContent" aria-expanded="false" aria-label="Alternar navegação">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+            <!-- Botão para dispositivos menores com label melhorado -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                aria-controls="navbarContent" aria-expanded="false" aria-label="Alternar navegação">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-      <!-- Conteúdo do menu de navegação -->
-      <div class="collapse navbar-collapse" id="navbarContent">
-        <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link active" href="index.html" aria-current="page">Início</a>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="produtosDropdown" role="button" data-bs-toggle="dropdown"
-              aria-expanded="false" aria-haspopup="true">Produtos</a>
-            <ul class="dropdown-menu bg-white" aria-labelledby="produtosDropdown">
-              <li><a class="dropdown-item" href="public/produtos.html">Produtos Ecológicos</a></li>
-              <li><a class="dropdown-item" href="public/manutencao.html">Roupas</a></li>
-              <li><a class="dropdown-item" href="public/manutencao.html">Cuidados Pessoais</a></li>
-              <li><a class="dropdown-item" href="public/manutencao.html">Artigos Esportivos</a></li>
-              <li><a class="dropdown-item" href="public/manutencao.html">Eletrônicos</a></li>
-              <li><a class="dropdown-item" href="public/manutencao.html">Livros</a></li>
-            </ul>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="public/manutencao.html">Ofertas</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="public/sobre.html">Sobre</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="public/contato.html">Contato</a>
-          </li>
-        </ul>
+            <!-- Conteúdo do menu de navegação -->
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="../index.html" aria-current="page">Início</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="produtosDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Produtos</a>
+                        <ul class="dropdown-menu bg-white" aria-labelledby="produtosDropdown">
+                            <li><a class="dropdown-item" href="public/produtos.html">Produtos Ecológicos</a></li>
+                            <li><a class="dropdown-item" href="public/manutencao.html">Roupas</a></li>
+                            <li><a class="dropdown-item" href="public/manutencao.html">Cuidados Pessoais</a></li>
+                            <li><a class="dropdown-item" href="public/manutencao.html">Artigos Esportivos</a></li>
+                            <li><a class="dropdown-item" href="public/manutencao.html">Eletrônicos</a></li>
+                            <li><a class="dropdown-item" href="public/manutencao.html">Livros</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="public/manutencao.html">Ofertas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="public/sobre.html">Sobre</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="public/contato.html">Contato</a>
+                    </li>
+                    <li class="nav-item dropdown d-none">
+                        <a class="nav-link dropdown-toggle" href="#" id="admDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Administração</a>
+                        <ul class="dropdown-menu bg-white" aria-labelledby="produtosDropdown">
+                            <li><a class="dropdown-item" href="public/cadastroProdutos.html">Cadastrar Produtos</a></li>
+                            <li><a class="dropdown-item" href="public/manutencao.html">Cadastro de Administrador</a></li>
+                            <li><a class="dropdown-item" href="public/manutencao.html">Cadastro de Categorias</a></li>
+                            <li><a class="dropdown-item" href="public/manutencao.html">Dados de venda</a></li>
+                        </ul>
+                    </li>
+                </ul>
 
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <a class="nav-link icon-btn" href="public/manutencao.html" aria-label="Carrinho de compras"><i
-                class="bi bi-cart" aria-hidden="true"></i></a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link icon-btn" href="public/login.html" aria-label="Área do usuário"><i id="icone-usuario"
-                class="bi bi-person" aria-hidden="true"></i></a>
-          </li>
-        </ul>
-      </div>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link icon-btn" href="public/carrinho.html" aria-label="Carrinho de compras">
+                            <i class="bi bi-cart position-relative" aria-hidden="true">
+                                <span
+                                    class="badge text-bg-success position-absolute top-0 start-100 translate-middle rounded-circle border border-light badge-sm"
+                                    id="badge-carrinho">0</span>
+                            </i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link icon-btn" href="public/login.html" id="link-usuario" aria-label="Área do usuário"><i
+                                id="icone-usuario" class="bi bi-person" aria-hidden="true"></i></a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
     </nav>
-  </nav>
 
   <!-- Conteúdo Principal -->
   <main class="p-0" style="margin-top: 6.5rem;">
