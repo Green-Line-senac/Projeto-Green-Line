@@ -7,7 +7,7 @@ const path = require('path');
 
 const funcoesUteis = new funcoes();
 const app = express();
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 app.use(express.static(path.join(__dirname, '..')));
 const db = new database();
 
