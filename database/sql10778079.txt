@@ -135,15 +135,11 @@ INSERT INTO produto (
 -- Criando a tabela de pagamentos
 CREATE TABLE pagamento (
     id_pagamento INT PRIMARY KEY AUTO_INCREMENT,
-    pagamento_situacao CHAR(1) DEFAULT 'P',
-    data_pagamento TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    id_f_pagamento INT NOT NULL,
+tipo ENUM("CRÉDITO","DÉBITO","BOLETO BANCÁRIO","PIX") NOT NULL DEFAULT "CRÉDITO",
+    pagamento_situacao ENUM('Em aberto', 'Pago', 'Cancelado') NOT NULL DEFAULT "Em aberto",
     valor DECIMAL(10,2) NOT NULL,
     num_parcelas INT DEFAULT 1,
-    parcelamento_situacao ENUM('Em aberto', 'Pago', 'Cancelado') NULL,
-    transacao_id VARCHAR(100) UNIQUE NULL,
     bandeira_cartao VARCHAR(20) NULL,
-    FOREIGN KEY (id_f_pagamento) REFERENCES forma_pagamento(id_f_pagamento)
 );
 
 -- Criando a tabela de pedidos
@@ -155,8 +151,7 @@ CREATE TABLE pedidos (
     FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa),
     id_pagamento INT NOT NULL,
     FOREIGN KEY (id_pagamento) REFERENCES pagamento(id_pagamento),
-    status_pagamento CHAR(1) NOT NULL DEFAULT 'P',
-    endereco_entrega TEXT NULL,
+    cep_entrega TEXT NULL,
     metodo_entrega VARCHAR(50) NULL
 );
 
@@ -176,6 +171,16 @@ CREATE TABLE carrinho_itens (
     FOREIGN KEY (id_produto) REFERENCES produto(id_produto),
     quantidade INT NOT NULL DEFAULT 1,
     situacao CHAR(1) NOT NULL DEFAULT 'P' -- 'P' para pendente, 'R' para removido, 'C' para comprado
+);
+
+CREATE TABLE pedido_produto (
+    id_pedido_produto INT PRIMARY KEY AUTO_INCREMENT,
+    id_pedido INT NOT NULL,
+    id_produto INT NOT NULL,
+    quantidade INT NOT NULL DEFAULT 1,
+    preco_unitario DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (id_pedido) REFERENCES pedidos(id_pedido),
+    FOREIGN KEY (id_produto) REFERENCES produto(id_produto)
 );
 
 //VIEWS
