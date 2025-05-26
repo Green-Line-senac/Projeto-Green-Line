@@ -38,7 +38,6 @@
         aria-controls="navbarContent" aria-expanded="false" aria-label="Alternar navegação">
         <span class="navbar-toggler-icon"></span>
       </button>
-
       <!-- Conteúdo do menu de navegação -->
       <div class="collapse navbar-collapse" id="navbarContent">
         <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
@@ -283,15 +282,11 @@
 
               <!-- Quantidade -->
               <div class="flex items-center space-x-2 mb-4">
-                <label class="text-xs" for="quantidadeModal">Quantidade</label>
-                <input class="w-10 border border-gray-300 rounded text-xs px-2 py-1" id="quantidadeModal" min="1"
-                  name="quantidade" type="number" value="1" />
-                <button aria-label="Diminuir quantidade" class="border border-gray-300 rounded px-3 py-1 text-xs"
-                  type="button" onclick="adjustQuantity('quantidadeModal', -1)">-</button>
-                <button aria-label="Aumentar quantidade" class="border border-gray-300 rounded px-3 py-1 text-xs"
-                  type="button" onclick="adjustQuantity('quantidadeModal', 1)">+</button>
+                <label for="quantidadeModal">Quantidade</label>
+                <input id="quantidadeModal" min="1" name="quantidade" type="number" value="1" />
+                <button aria-label="Diminuir quantidade" type="button" onclick="adjustQuantity('quantidadeModal', -1)">–</button>
+                <button aria-label="Aumentar quantidade" type="button" onclick="adjustQuantity('quantidadeModal', 1)">+</button>
               </div>
-
               <!-- Botões principais -->
               <div class="mb-6">
                 <div class="botoes-compra">

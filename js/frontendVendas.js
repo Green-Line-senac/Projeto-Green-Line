@@ -91,22 +91,30 @@ function mascaraCEP(input) {
 document.addEventListener("DOMContentLoaded", () => {
     const dadosCompra = JSON.parse(localStorage.getItem("dadosCompra"));
     const containerProdutos = document.querySelector(".container-produtos-vendas");
+    console.log(dadosCompra);
+
+
 
     if (dadosCompra) {
-        console.log("Compra carregada:", dadosCompra); // <--- debug útil
-
-        const precoFormatado = parseFloat(dadosCompra.preco).toFixed(2).replace(".", ",");
-        const subtotalFormatado = parseFloat(dadosCompra.subtotal).toFixed(2).replace(".", ",");
-
-        containerProdutos.innerHTML = `
-            <p><strong>Produto:</strong> ${dadosCompra.nomeProduto}</p>
-            <p><strong>Preço unitário:</strong> R$ ${precoFormatado}</p>
-            <p><strong>Quantidade:</strong> ${dadosCompra.quantidade}</p>
-        `;
-
-        // Atualiza os contadores de valores no resumo
-        document.getElementById("contador-subtotal").textContent = `R$ ${subtotalFormatado}`;
-        document.getElementById("contador-total").textContent = `R$ ${subtotalFormatado}`; // sem frete por enquanto
+        let htmlContent = ""; // Acumular o HTML
+    
+        dadosCompra.forEach(element => {
+            const precoFormatado = parseFloat(element.preco_final).toFixed(2).replace(".", ",");
+            const subtotalFormatado = parseFloat(element.subtotal).toFixed(2).replace(".", ",");
+    
+            htmlContent += `
+                <p><strong>Produto:</strong> ${element.nome_produto}</p>
+                <p><strong>Preço unitário:</strong> R$ ${precoFormatado}</p>
+                <p><strong>Quantidade:</strong> ${element.quantidade}</p>
+            `;
+    
+            // Atualiza os contadores de valores no resumo (exibe apenas o último subtotal)
+            document.getElementById("contador-subtotal").textContent = `R$ ${subtotalFormatado}`;
+            document.getElementById("contador-total").textContent = `R$ ${subtotalFormatado}`; // sem frete por enquanto
+        });
+    
+        // Agora sim, atribuímos todo o conteúdo ao container de uma vez
+        containerProdutos.innerHTML = htmlContent;
     } else {
         containerProdutos.innerHTML = "<p>Nenhum produto selecionado.</p>";
     }
