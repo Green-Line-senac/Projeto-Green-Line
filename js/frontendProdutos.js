@@ -369,23 +369,29 @@ document.addEventListener('DOMContentLoaded', () => {
       mostrarFeedback("Por favor, faça login ou cadastro para prosseguir", "danger");
       return;
     }
-    const qtd = parseInt(document.getElementById('quantidadeModal').value, 10);
+    const qtd = parseInt(document.getElementById('quantidadeModal').value, 10); 
     if (isNaN(qtd) || qtd <= 0) {
       mostrarFeedback("Quantidade inválida!", 'danger');
       return;
     }
 
     const nomeProduto = document.getElementById('produtoModalLabel').textContent;
-    const dadosCompra = {
-      nomeProduto,
-      id_pessoa: estado.id_pessoa,
-      quantidade: qtd,
-      data: new Date().toISOString(),
-    };
+    const preco = parseFloat(document.getElementById('produtoModalPreco').textContent.replace("R$ ", "").replace(",", "."));
+const subtotal = (preco * qtd).toFixed(2);
 
-    console.log("Dados da compra:", dadosCompra);
-    localStorage.setItem("dadosCompra", JSON.stringify(dadosCompra));
-    window.location.href = "vendas.html";
+const dadosCompra = {
+  nomeProduto,
+  preco, // envia também o preço unitário
+  quantidade: qtd,
+  subtotal,
+  id_pessoa: estado.id_pessoa,
+  data: new Date().toISOString(),
+};
+
+console.log("Dados da compra:", dadosCompra);
+localStorage.setItem("dadosCompra", JSON.stringify(dadosCompra));
+window.location.href = "vendas.html";
+
   });
 
   document.getElementById('btnAddCarrinho').addEventListener('click', async () => {
@@ -417,7 +423,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (resposta.codigo === 1 || resposta.mensagem === "ITEM_DUPLICADO") {
         itemResultado.classList.remove('d-none');
         itemResultado.innerHTML = "⚠️ Este item já está no seu carrinho";
-        setTimeout(() => itemResultado.classList.add('d-none'), 5000);
+        setTimeout(() => itemResultado.classList.add('d-none'), 500);
       } else if (resposta.sucesso) {
         let badge = document.getElementById('badge-carrinho');
         badge.textContent = parseInt(badge.textContent || '0') + 1;
@@ -432,7 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
         itemResultado.classList.remove('d-none');
         itemResultado.innerHTML = `❌ Erro: ${resposta.mensagem || "Erro desconhecido"}`;
         itemResultado.classList.add('text-danger');
-        setTimeout(() => itemResultado.classList.add('d-none'), 5000);
+        setTimeout(() => itemResultado.classList.add('d-none'), 500);
       }
     } catch (erro) {
       console.error("Erro ao adicionar ao carrinho:", erro);
@@ -440,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
       itemResultado.classList.remove('d-none');
       itemResultado.innerHTML = "❌ Falha na conexão com o servidor";
       itemResultado.classList.add('text-danger');
-      setTimeout(() => itemResultado.classList.add('d-none'), 5000);
+      setTimeout(() => itemResultado.classList.add('d-none'), 500);
     }
   });
 });
