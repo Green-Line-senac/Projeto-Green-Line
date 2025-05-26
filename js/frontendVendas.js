@@ -89,36 +89,50 @@ function mascaraCEP(input) {
 
 // Exibe informações do produto selecionado
 document.addEventListener("DOMContentLoaded", () => {
-    const dadosCompra = JSON.parse(localStorage.getItem("dadosCompra"));
+    let dadosCompra = localStorage.getItem("dadosCompra");
+
+    if (dadosCompra) {
+        dadosCompra = JSON.parse(dadosCompra); // Converte de string para objeto
+
+        // Se for um objeto e não um array, transforma em um array
+        if (!Array.isArray(dadosCompra)) {
+            dadosCompra = [dadosCompra];
+        }
+    } else {
+        dadosCompra = [];
+    }
+
     const containerProdutos = document.querySelector(".container-produtos-vendas");
     console.log(dadosCompra);
 
+    if (dadosCompra.length > 0) {
+        let htmlContent = "";
 
-
-    if (dadosCompra) {
-        let htmlContent = ""; // Acumular o HTML
-    
         dadosCompra.forEach(element => {
             const precoFormatado = parseFloat(element.preco_final).toFixed(2).replace(".", ",");
             const subtotalFormatado = parseFloat(element.subtotal).toFixed(2).replace(".", ",");
-    
+
             htmlContent += `
+            <hr>
                 <p><strong>Produto:</strong> ${element.nome_produto}</p>
                 <p><strong>Preço unitário:</strong> R$ ${precoFormatado}</p>
                 <p><strong>Quantidade:</strong> ${element.quantidade}</p>
             `;
-    
-            // Atualiza os contadores de valores no resumo (exibe apenas o último subtotal)
-            document.getElementById("contador-subtotal").textContent = `R$ ${subtotalFormatado}`;
-            document.getElementById("contador-total").textContent = `R$ ${subtotalFormatado}`; // sem frete por enquanto
+            let totalFinal = total(element.subtotal); // Atualiza o total com o subtotal do produto
+            document.getElementById("contador-subtotal").textContent = `R$ ${totalFinal}`;
+            document.getElementById("contador-total").textContent = `R$ ${totalFinal}`; // Atualiza o total final
         });
-    
-        // Agora sim, atribuímos todo o conteúdo ao container de uma vez
+
         containerProdutos.innerHTML = htmlContent;
     } else {
         containerProdutos.innerHTML = "<p>Nenhum produto selecionado.</p>";
     }
 });
 
+let somar = 0;
+function total(valor) {
+    somar += parseFloat(valor) || 0; 
+    return somar.toFixed(2).replace(".", ",");
+}
 
 
