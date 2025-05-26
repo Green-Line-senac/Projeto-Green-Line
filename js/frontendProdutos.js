@@ -375,13 +375,13 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    const nomeProduto = document.getElementById('produtoModalLabel').textContent;
-    const preco = parseFloat(document.getElementById('produtoModalPreco').textContent.replace("R$ ", "").replace(",", "."));
-const subtotal = (preco * qtd).toFixed(2);
+    const nome_produto = document.getElementById('produtoModalLabel').textContent;
+    const preco_final = parseFloat(document.getElementById('produtoModalPreco').textContent.replace("R$ ", "").replace(",", "."));
+const subtotal = (preco_final * qtd).toFixed(2);
 
 const dadosCompra = {
-  nomeProduto,
-  preco, // envia também o preço unitário
+  nome_produto,
+  preco_final,
   quantidade: qtd,
   subtotal,
   id_pessoa: estado.id_pessoa,
