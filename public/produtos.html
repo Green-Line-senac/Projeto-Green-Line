@@ -281,12 +281,12 @@
               <!-- Fim do MD -->
 
               <!-- Quantidade -->
-              <div class="flex items-center space-x-2 mb-4">
-                <label for="quantidadeModal">Quantidade</label>
+              <div id="quantidadeWrapper" class="flex items-center space-x-2 mb-4">
+                <label id="quantidadeLabel" for="quantidadeModal">Quantidade</label>
                 <input id="quantidadeModal" min="1" name="quantidade" type="number" value="1" />
-                <button aria-label="Diminuir quantidade" type="button" onclick="adjustQuantity('quantidadeModal', -1)">–</button>
-                <button aria-label="Aumentar quantidade" type="button" onclick="adjustQuantity('quantidadeModal', 1)">+</button>
-              </div>
+                <button id="btnDiminuir" aria-label="Diminuir quantidade" type="button" onclick="adjustQuantity('quantidadeModal', -1)">–</button>
+                <button id="btnAumentar" aria-label="Aumentar quantidade" type="button" onclick="adjustQuantity('quantidadeModal', 1)">+</button>
+              </div>              
               <!-- Botões principais -->
               <div class="mb-6">
                 <div class="botoes-compra">

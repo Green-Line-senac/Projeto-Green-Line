@@ -199,16 +199,8 @@ body {
     font-size: 18px;
   }
 
-  .btn-checar-cep{
-    background-color: #2BBD31;
-    color: white;
-    border: none;
-    border-radius: 7px;
-    padding: 6px;
-  }
-
   #quantidadeModal {
-    width: 4rem; /* equivalente a w-16 */
+    width: 3rem; /* equivalente a w-16 */
     text-align: center;
     font-size: 0.75rem; /* text-xs */
     padding: 0.25rem 0.5rem !important; /* px-2 py-1 */
@@ -217,14 +209,28 @@ body {
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
   }
-  
+
   #quantidadeModal:focus {
     border-color: #6FC933; /* cor */
     box-shadow: 0 0 0 2px #41f11d80; /* anel verde */
   }
-  
+  #btnDiminuir, #btnAumentar {
+ border: 1px solid #6FC933;
+  border-radius: 6px;
+  width: 2rem;
+  height: 1.8rem; /* opcional, se quiser altura igual também */
+  text-align: center;
+  line-height: 1rem; /* centraliza o texto verticalmente */
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  }
 
-  
+#btnDiminuir:hover,
+#btnAumentar:hover {
+  background-color: #9ff168ee;
+  color: white;
+  transform: scale(1.1);
+}
   /* Remove as setinhas no Chrome, Edge, Safari */
 input[type=number]::-webkit-inner-spin-button, 
 input[type=number]::-webkit-outer-spin-button { 
