@@ -212,7 +212,6 @@ body {
 
   #quantidadeModal:focus {
     border-color: #6FC933; /* cor */
-    box-shadow: 0 0 0 2px #41f11d80; /* anel verde */
   }
   #btnDiminuir, #btnAumentar {
  border: 1px solid #6FC933;
@@ -227,8 +226,6 @@ body {
 
 #btnDiminuir:hover,
 #btnAumentar:hover {
-  background-color: #9ff168ee;
-  color: white;
   transform: scale(1.1);
 }
   /* Remove as setinhas no Chrome, Edge, Safari */
@@ -242,5 +239,40 @@ input[type=number]::-webkit-outer-spin-button {
 input[type=number] {
   -moz-appearance: textfield;
 
+}
+
+.price-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.original-price {
+  text-decoration: line-through;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.discount-price {
+  color: #059669;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.current-price {
+  color: #1f2937;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.discount-badge {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
 }
 

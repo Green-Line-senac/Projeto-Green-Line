@@ -226,11 +226,6 @@ function abrirModalProduto(dadosProduto) {
     catEl.className = `badge mb-2 bg-${produto.promocao ? 'danger' : 'success'}`;
   }
   
-  const estoqueEl = document.getElementById('produtoModalEstoque');
-  if (estoqueEl) {
-    estoqueEl.textContent = produto.estoque ? 'Disponível' : 'Fora de estoque';
-    estoqueEl.className = `badge bg-${produto.estoque ? 'success' : 'secondary'}`;
-  }
   
   // ÁREA REFORMULADA - EXIBIÇÃO DE PREÇOS
   const precoContainer = document.getElementById('produtoModalPreco');

@@ -25,7 +25,7 @@ let estadoLogin = {
 
 // Rota POST com validação
 app.post("/loginDados", async (req, res) => {
-    console.log("Corpo recebido:", req.body); // Debug crucial
+    console.log("Corpo recebido:", req.body); 
 
     if (!req.body || !req.body.usuario) {
         return res.status(400).json({ erro: "Usuário é obrigatório" });
