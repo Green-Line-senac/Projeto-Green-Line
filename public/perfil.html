@@ -249,9 +249,20 @@
 
         // Logout
         function logout() {
-            localStorage.removeItem("usuario");
             localStorage.removeItem("id_pessoa");
-            window.location.href = "../index.html";
+            localStorage.removeItem("usuario");
+            localStorage.removeItem("dadosCompra");
+            fetch(`${AUTH_API_URL}/logout`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                body: JSON.stringify({ codigo: "logout" })
+                }
+                
+            }).finally(() => {
+                localStorage.clear();
+                window.location.href = "../index.html";
+            });
         }
 
         // Carrega os dados ao abrir a página
