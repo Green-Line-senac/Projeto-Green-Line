@@ -89,6 +89,7 @@ async function carregarProdutos() {
     const response = await fetch(`${config.apiUrl}/produto`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
+    console.log('Produtos recebidos:', data);
     if (Array.isArray(data)) {
       estado.produtos = data.map(sanitizarProduto);
       aplicarFiltros();
@@ -312,6 +313,7 @@ function abrirModalProduto(dadosProduto) {
     mostrarFeedback('Erro ao abrir produto', 'danger');
     return;
   }
+  console.log('Abrindo modal para produto:', produto);
   estado.id_produto = produto.id_produto;
   document.getElementById('produtoModalLabel').textContent = produto.nome;
   const imgEl = document.getElementById('produtoModalImagem');

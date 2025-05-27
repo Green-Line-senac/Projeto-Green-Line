@@ -13,9 +13,9 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   <!--CSS Personalizados -->
-  <link rel="stylesheet" href="css/produtos.css">
   <link rel="stylesheet" href="css/index.css"> <!-- Estilos específicos para a página -->
   <link rel="stylesheet" href="css/menu_rodape.css"> <!-- Estilos compartilhados entre o menu e o rodapé -->
+  <link rel="stylesheet" href="css/produtos.css">
   <!--JavaScript Personalizado -->
   <script src="js/frontendIndex.js" defer></script>
   <script src="js/frontendPadrao.js" defer></script>
@@ -109,12 +109,7 @@
       Promoções Imperdíveis
     </p>
     <!-- Grid de Produtos - Exibe os cards de produtos dinamicamente -->
-    <div class="row" id="container-produtos" role="list" aria-label="Lista de produtos">
-      <!-- Os cards serão adicionados aqui dinamicamente pelo JavaScript -->
-    </div>
-
-    <!-- Grid de Produtos - Exibe os cards de produtos dinamicamente -->
-    <div class="row" id="container-produtos" role="list" aria-label="Lista de produtos">
+    <div class="row justify-content-center" id="container-produtos" role="list" aria-label="Lista de produtos">
       <!-- Os cards serão adicionados aqui dinamicamente pelo JavaScript -->
     </div>
     <div class="container-fluid d-flex align-items-center mt-3" id="comunidade">
@@ -164,9 +159,9 @@
       <p class="text-center">© 2025 GreenLine</p>
     </div>
   </footer>
-  <!-- Modal dos Produtos -->
+  <!-- Modal de Detalhes do Produto -->
   <div class="modal fade" id="produtoModal" tabindex="-1" aria-labelledby="produtoModalLabel" aria-hidden="true">
-    <div class="modal-dialog" style="max-width: 1000px;"> <!-- Estica o modal -->
+    <div class="modal-dialog" style="max-width: 1000px;">
       <div class="modal-content bg-white text-black">
         <div class="modal-header border-b border-gray-400">
           <h2 class="font-bold text-base md:text-lg leading-tight" id="produtoModalLabel">Carregando...</h2>
@@ -174,11 +169,15 @@
         </div>
 
         <div class="modal-body p-6">
+          <div
+            class="d-none alert alert-danger text-center fw-bold position-absolute top-50 start-50 translate-middle-x w-75"
+            id="item-resultado">
+          </div>
           <div class="row g-4">
             <!-- Imagem do produto -->
             <div class="col-md-6 text-center">
               <div class="w-full md:w-1/3 flex justify-center items-center mb-6 md:mb-0">
-                <img id="produtoModalImagem" src=" " alt="Imagem do produto" class="w-60 h-60 object-cover" height="240"
+                <img id="produtoModalImagem" src="" alt="Imagem do produto" class="w-60 h-60 object-cover" height="240"
                   width="240" />
               </div>
             </div>
@@ -200,23 +199,19 @@
 
                 <!-- Preço -->
                 <div class="mb-3" id="produtoModalPreco">
-                  <p class="font-bold text-sm">R$ 0,00</p>
+                <p id="produtoModalPreco">R$ 00,00</p>
                 </div>
                 <p class="text-xs mb-3">ou em até 2x no cartão de crédito</p>
               </div>
               <!-- Fim do MD -->
 
               <!-- Quantidade -->
-              <div class="flex items-center space-x-2 mb-4">
-                <label class="text-xs" for="quantidadeModal">Quantidade</label>
-                <input class="w-10 border border-gray-300 rounded text-xs px-2 py-1" id="quantidadeModal" min="1"
-                  name="quantidade" type="number" value="1" />
-                <button aria-label="Diminuir quantidade" class="border border-gray-300 rounded px-2 py-1 text-xs"
-                  type="button" onclick="adjustQuantity('quantidadeModal', -1)">-</button>
-                <button aria-label="Aumentar quantidade" class="border border-gray-300 rounded px-2 py-1 text-xs"
-                  type="button" onclick="adjustQuantity('quantidadeModal', 1)">+</button>
-              </div>
-
+              <div id="quantidadeWrapper" class="flex items-center space-x-2 mb-4">
+                <label id="quantidadeLabel" for="quantidadeModal">Quantidade</label>
+                <input id="quantidadeModal" min="1" name="quantidade" type="number" value="1" />
+                <button id="btnDiminuir" aria-label="Diminuir quantidade" type="button" onclick="adjustQuantity('quantidadeModal', -1)">–</button>
+                <button id="btnAumentar" aria-label="Aumentar quantidade" type="button" onclick="adjustQuantity('quantidadeModal', 1)">+</button>
+              </div>              
               <!-- Botões principais -->
               <div class="mb-6">
                 <div class="botoes-compra">
@@ -224,23 +219,7 @@
                   <button class="btn-adicionar-carrinho" id="btnAddCarrinho">Adicionar ao carrinho</button>
                 </div>
               </div>
-
-              <!-- Cálculo de frete -->
-              <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-2 mt-4">
-                <label class="text-xs mb-1 sm:mb-0" for="freteModal">Calcule seu frete</label>
-                <div class="flex">
-                  <input
-                    class="text-base border border-gray-300 rounded-lg px-6 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    id="freteModal" name="frete" type="text" placeholder="CEP" />
-                  <button class="btn-checar-cep ml-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                    id="btnChecar">
-                    Checar
-                  </button>
-                </div>
-                <p id="resultadoFrete" class="mt-1 text-sm text-gray-700"></p>
-              </div>
             </div>
-
             <!-- Descrição -->
             <div class="mt-6">
               <hr>

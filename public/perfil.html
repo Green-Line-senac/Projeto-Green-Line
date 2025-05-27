@@ -126,8 +126,7 @@
                     return;
                 }
 
-                // Armazena o ID no localStorage para uso posterior
-                localStorage.setItem("id_pessoa", idPessoa);
+
 
                 // 2. Obter os dados completos do usuário
                 const responseUser = await fetch(`${API_URL}/pessoa/${idPessoa}`);
@@ -201,7 +200,7 @@
 
             document.getElementById("savePersonalBtn").addEventListener("click", async function () {
                 try {
-                    const idPessoa = localStorage.getItem("id_pessoa");
+                    const idPessoa = Number(localStorage.getItem("id_pessoa"));
                     const updatedData = {
                         nome: document.getElementById("profileFullName").textContent,
                         telefone: document.getElementById("profilePhone").textContent

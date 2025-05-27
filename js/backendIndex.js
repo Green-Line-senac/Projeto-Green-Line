@@ -99,6 +99,7 @@ app.get("/produtos", async (req, res) => {
             ORDER BY id_produto DESC
             LIMIT 12
         `);
+        console.log("Produtos encontrados:", produtos);
 
         res.json({
             success: true,
