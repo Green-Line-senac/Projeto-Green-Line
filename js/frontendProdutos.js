@@ -48,7 +48,8 @@ function gerarEstrelas(nota) {
 
 function mostrarFeedback(mensagem, tipo = 'success') {
   const toast = document.createElement('div');
-  toast.className = `toast align-items-center text-white bg-${tipo} border-0 position-fixed bottom-0 end-0 m-3`;
+  toast.className = `toast align-items-center text-white bg-${tipo} border-0 position-absolute top-50 start-50 translate-middle`;
+  toast.style.zIndex = 1100; 
   toast.innerHTML = `
     <div class="d-flex">
       <div class="toast-body">${escapeHtml(mensagem)}</div>
@@ -267,8 +268,11 @@ function aplicarFiltros(resetarPagina = true) {
       return false;
     }
 
-    if (emEstoque && !produto.estoque == 0) return false;
-    if (foraEstoque && produto.estoque == 0) return false;
+    // Se filtrando por "em estoque" e o produto não tem estoque, exclui
+if (emEstoque && !(produto.estoque > 0)) return false;
+
+// Se filtrando por "fora de estoque" e o produto tem estoque, exclui
+if (foraEstoque && !(produto.estoque == 0)) return false;
 
     if (categorias.length > 0) {
       const categoriaProduto = produto.categoria.toLowerCase();
@@ -347,9 +351,8 @@ function abrirModalProduto(dadosProduto) {
   }
   
   const estoqueEl = document.getElementById('produtoModalEstoque');
-  if (estoqueEl) estoqueEl.textContent = produto.estoque !== 0 ? 'Em estoque' : 'Fora de estoque';
-  
-  if (produto.estoque == 0) {
+  if (produto.estoque ==  0 || produto.estoque == null) {
+    estoqueEl.innerHTML = `<span class="badge bg-secondary">Fora de estoque</span>`;
     let botaoComprar = document.querySelector('#btnComprarAgora');
     let botaoCarrinho = document.querySelector('#btnAddCarrinho');
     if (botaoComprar) {
@@ -360,8 +363,20 @@ function abrirModalProduto(dadosProduto) {
       botaoCarrinho.disabled = true;
       botaoCarrinho.classList.add("text-bg-secondary");
     }
+  }else{
+    estoqueEl.innerHTML = `<span class="badge bg-success">Em estoque</span>`;
+    let botaoComprar = document.querySelector('#btnComprarAgora');
+    let botaoCarrinho = document.querySelector('#btnAddCarrinho');
+    if (botaoComprar) {
+      botaoComprar.disabled = false;
+      botaoComprar.classList.remove("text-bg-secondary");
+    }
+    if (botaoCarrinho) {
+      botaoCarrinho.disabled = false;
+      botaoCarrinho.classList.remove("text-bg-secondary");
+    }
   }
-  
+
   // Preços
   const precoContainer = document.getElementById('produtoModalPreco');
   const precoBase = (Number(produto.preco) || 0).toLocaleString('pt-BR', {
@@ -505,15 +520,65 @@ function configurarEventos() {
       mostrarFeedback("Por favor, faça login ou cadastro para prosseguir", "danger");
       return;
     }
-    const qtd = parseInt(document.getElementById('quantidadeModal').value, 10);
-    if (isNaN(qtd) || qtd <= 0) {
-      mostrarFeedback("Quantidade inválida!", 'danger');
-      return;
-    }
+// Obter quantidade
+const qtdInput = document.getElementById('quantidadeModal');
+const qtd = parseInt(qtdInput.value, 10);
 
-    const nome_produto = document.getElementById('produtoModalLabel').textContent;
-    const preco_final = parseFloat(document.getElementById('produtoModalPreco').textContent.replace("R$ ", "").replace(",", "."));
-    const subtotal = (preco_final * qtd).toFixed(2);
+// Validar quantidade
+if (isNaN(qtd) || qtd <= 0 || qtd > 1000) { 
+  mostrarFeedback("Quantidade inválida! Por favor, insira um valor entre 1 e 1000.", 'danger');
+  return;
+}
+console.log("Quantidade selecionada:", qtd);
+
+// Obter nome do produto
+const nome_produto = document.getElementById('produtoModalLabel').textContent.trim();
+
+// Obter elementos de preço
+const originalPriceEl = document.querySelector('#produtoModalPreco .original-price');
+const discountPriceEl = document.querySelector('#produtoModalPreco .discount-price');
+
+if (!originalPriceEl) {
+  mostrarFeedback("Erro ao obter preço do produto.", 'danger');
+  return;
+}
+
+// Extrair preço de forma segura
+function extrairPreco(elemento) {
+  if (!elemento) return null;
+  
+  const precoTexto = elemento.textContent.trim();
+  const precoNumerico = parseFloat(
+    precoTexto
+      .replace(/[^\d,]/g, '')  
+      .replace(',', '.')
+  );
+  
+  return isNaN(precoNumerico) ? null : precoNumerico;
+}
+
+
+let preco_final;
+const isPromocao = window.getComputedStyle(originalPriceEl).textDecoration.includes('line-through');
+
+if (isPromocao && discountPriceEl) {
+  preco_final = extrairPreco(discountPriceEl);
+} else {
+  preco_final = extrairPreco(originalPriceEl);
+}
+
+// Validar preço
+if (preco_final === null || preco_final <= 0) {
+  mostrarFeedback("Preço do produto inválido.", 'danger');
+  return;
+}
+
+console.log("Preço final:", preco_final);
+
+// Calcular subtotal com arredondamento
+const subtotal = Math.round((preco_final * qtd) * 100) / 100;
+console.log("Subtotal:", subtotal.toFixed(2));
+
 
     const dadosCompra = {
       nome_produto,
@@ -558,7 +623,7 @@ function configurarEventos() {
       if (resposta.codigo === 1 || resposta.mensagem === "ITEM_DUPLICADO") {
         itemResultado.classList.remove('d-none');
         itemResultado.innerHTML = "⚠️ Este item já está no seu carrinho";
-        setTimeout(() => itemResultado.classList.add('d-none'), 500);
+        setTimeout(() => itemResultado.classList.add('d-none'), 2000);
       } else if (resposta.sucesso) {
         let badge = document.getElementById('badge-carrinho');
         badge.textContent = parseInt(badge.textContent || '0') + 1;
@@ -568,12 +633,12 @@ function configurarEventos() {
         setTimeout(() => {
           itemResultado.classList.add('d-none');
           itemResultado.classList.remove('text-success');
-        }, 5000);
+        }, 3000);
       } else {
         itemResultado.classList.remove('d-none');
         itemResultado.innerHTML = `❌ Erro: ${resposta.mensagem || "Erro desconhecido"}`;
         itemResultado.classList.add('text-danger');
-        setTimeout(() => itemResultado.classList.add('d-none'), 500);
+        setTimeout(() => itemResultado.classList.add('d-none'), 2000);
       }
     } catch (erro) {
       console.error("Erro ao adicionar ao carrinho:", erro);
@@ -581,7 +646,7 @@ function configurarEventos() {
       itemResultado.classList.remove('d-none');
       itemResultado.innerHTML = "❌ Falha na conexão com o servidor";
       itemResultado.classList.add('text-danger');
-      setTimeout(() => itemResultado.classList.add('d-none'), 500);
+      setTimeout(() => itemResultado.classList.add('d-none'), 2000);
     }
   });
 }
