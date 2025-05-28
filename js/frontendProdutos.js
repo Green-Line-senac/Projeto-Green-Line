@@ -525,8 +525,8 @@ const qtdInput = document.getElementById('quantidadeModal');
 const qtd = parseInt(qtdInput.value, 10);
 
 // Validar quantidade
-if (isNaN(qtd) || qtd <= 0 || qtd > 1000) { 
-  mostrarFeedback("Quantidade inválida! Por favor, insira um valor entre 1 e 1000.", 'danger');
+if (isNaN(qtd) || qtd <= 0 || qtd > 100) { 
+  mostrarFeedback("Quantidade inválida! Por favor, insira um valor entre 1 e 1F00.", 'danger');
   return;
 }
 console.log("Quantidade selecionada:", qtd);
