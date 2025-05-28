@@ -207,6 +207,24 @@ app.post('/cadastro-produto', async (req, res) => {
     }
 });
 
+app.get("/produto", async (req, res) => {
+    try {
+        const produtos = await db.query("SELECT * FROM produto");
+
+        if (!produtos || produtos.length === 0) {
+            return res.status(404).json({ mensagem: "Nenhum produto encontrado" });
+        }
+
+        res.json(produtos);
+    } catch (err) {
+        console.error("Erro ao buscar produtos:", err);
+        res.status(500).json({
+            erro: "Erro ao buscar produtos",
+            detalhes: process.env.NODE_ENV === 'development' ? err.message : undefined
+        });
+    }
+});
+
 app.get("/produtos", async (req, res) => {
     try {
         const produtos = await db.query(`
