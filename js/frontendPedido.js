@@ -1,343 +1,405 @@
-// JavaScript para página de pedido confirmado - GreenLine
-document.addEventListener("DOMContentLoaded", () => {
-  // Inicializar página
-  initializePage()
-  loadOrderData()
-  loadRelatedProducts()
 
-  console.log("Página de pedido confirmado carregada com sucesso!")
-})
-
-// Dados simulados do pedido (normalmente viriam do backend)
-const orderData = {
-  numero: "#GL-2025-001234",
-  dataConfirmacao: new Date().toLocaleString("pt-BR"),
-  previsaoEntrega: "3-5 dias úteis",
-  status: "confirmado",
-  cliente: {
-    nome: "João Silva",
-    endereco: {
-      rua: "Rua das Flores, 123 - Apt 45",
-      bairro: "Jardim Sustentável",
-      cidade: "Brasília",
-      estado: "DF",
-      cep: "70000-000",
-    },
-  },
-  produtos: [
-
-  ]
+function gerarNumeroPedido() {
+  const ano = new Date().getFullYear();
+  const numero = String(Math.floor(Math.random() * 999999)).padStart(6, '0');
+  return `#GL-${ano}-${numero}`;
 }
 
-// Produtos relacionados simulados
-const relatedProducts = [
-  {
-    id: 101,
-    nome: "Escova de Dente de Bambu",
-    preco: 12.9,
-    imagem: "/placeholder.svg?height=200&width=200",
-  },
-  {
-    id: 102,
-    nome: "Detergente Ecológico",
-    preco: 18.5,
-    imagem: "/placeholder.svg?height=200&width=200",
-  },
-  {
-    id: 103,
-    nome: "Sacola Reutilizável",
-    preco: 22.0,
-    imagem: "/placeholder.svg?height=200&width=200",
-  },
-  {
-    id: 104,
-    nome: "Canudo de Inox",
-    preco: 8.9,
-    imagem: "/placeholder.svg?height=200&width=200",
-  },
-]
+// Função para formatar data e hora
+function formatarDataHora() {
+  const agora = new Date();
+  const hoje = agora.toLocaleDateString('pt-BR');
+  const hora = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  return `${hoje}, ${hora}`;
+}
 
-// Inicializar página
-function initializePage() {
-  // Atualizar número do pedido na URL se disponível
-  const urlParams = new URLSearchParams(window.location.search)
-  const orderNumber = urlParams.get("pedido")
-
-  if (orderNumber) {
-    orderData.numero = orderNumber
-    document.getElementById("numeroPedido").textContent = orderNumber
+// Função para formatar endereço completo
+function formatarEndereco(dadosCliente) {
+  if (!dadosCliente || !dadosCliente.nome) {
+    return `Endereço não informado<br>
+            Complete seus dados na próxima compra<br>
+            para uma experiência melhor`;
   }
 
-  // Configurar data de confirmação
-  document.getElementById("dataConfirmacao").textContent = orderData.dataConfirmacao
-  document.getElementById("previsaoEntrega").textContent = `Previsão: ${orderData.previsaoEntrega}`
+  return `${dadosCliente.nome}<br>
+          ${dadosCliente.endereco}, ${dadosCliente.numero}${dadosCliente.complemento ? ' - ' + dadosCliente.complemento : ''}<br>
+          ${dadosCliente.bairro}<br>
+          ${dadosCliente.cidade} - ${dadosCliente.estado}, ${dadosCliente.cep}`;
 }
 
-// Carregar dados do pedido
-function loadOrderData() {
-  // Carregar produtos do pedido
-  loadOrderItems()
-
-  // Carregar informações de entrega
-  loadDeliveryInfo()
-
-  // Carregar resumo do pedido
-  loadOrderSummary()
-
-  // Atualizar impacto ecológico
-  updateEcoImpact()
+// Função para determinar método de entrega baseado no CEP
+function determinarMetodoEntrega(cep) {
+  if (!cep) return "Entrega Padrão (3-5 dias úteis)";
+  
+  const cepNumerico = cep.replace(/\D/g, '');
+  
+  // Simulação baseada em regiões do Brasil
+  if (cepNumerico.startsWith('01') || cepNumerico.startsWith('04') || 
+      cepNumerico.startsWith('05') || cepNumerico.startsWith('08')) {
+    return "Entrega Expressa (1-2 dias úteis)";
+  } else if (cepNumerico.startsWith('2') || cepNumerico.startsWith('3') || 
+             cepNumerico.startsWith('7')) {
+    return "Entrega Padrão (3-5 dias úteis)";
+  } else {
+    return "Entrega Estendida (5-7 dias úteis)";
+  }
 }
 
-// Carregar itens do pedido
-function loadOrderItems() {
-  const container = document.getElementById("produtosPedido")
-  container.innerHTML = ""
-
-  orderData.produtos.forEach((produto) => {
-    const itemElement = createOrderItem(produto)
-    container.appendChild(itemElement)
-  })
+// Função para calcular previsão de entrega
+function calcularPrevisaoEntrega(metodoEntrega) {
+  if (metodoEntrega.includes("Expressa")) {
+    return "Previsão: 1-2 dias úteis";
+  } else if (metodoEntrega.includes("Padrão")) {
+    return "Previsão: 3-5 dias úteis";
+  } else {
+    return "Previsão: 5-7 dias úteis";
+  }
 }
 
-// Criar elemento de item do pedido
-function createOrderItem(produto) {
-  const item = document.createElement("div")
-  item.className = "order-item"
+// Função para formatar forma de pagamento
+function formatarFormaPagamento(dadosFormulario) {
+  if (!dadosFormulario || !dadosFormulario.metodoPagamento) {
+    return '<i class="bi bi-credit-card me-2"></i>Não informado';
+  }
 
-  item.innerHTML = `
-        <img src="${produto.imagem}" alt="${produto.nome}" class="item-image">
-        <div class="item-details">
-            <div class="item-name">${produto.nome}</div>
-            <div class="item-description">${produto.descricao}</div>
-            <div class="item-quantity">Quantidade: ${produto.quantidade}</div>
-        </div>
-        <div class="item-price">R$ ${(produto.preco * produto.quantidade).toFixed(2).replace(".", ",")}</div>
-    `
-
-  return item
+  switch (dadosFormulario.metodoPagamento) {
+    case 'CC':
+      const ultimosDigitos = dadosFormulario.numeroCartao ? 
+        dadosFormulario.numeroCartao.slice(-4) : '0000';
+      return `<i class="bi bi-credit-card me-2"></i>Cartão de Crédito ****${ultimosDigitos}`;
+    case 'PIX':
+      return '<i class="bi bi-qr-code me-2"></i>PIX';
+    case 'BB':
+      return '<i class="bi bi-file-earmark-text me-2"></i>Boleto Bancário';
+    default:
+      return '<i class="bi bi-credit-card me-2"></i>Não informado';
+  }
 }
 
-// Carregar informações de entrega
-function loadDeliveryInfo() {
-  const enderecoElement = document.getElementById("enderecoEntrega")
-  const metodoElement = document.getElementById("metodoEntrega")
-
-  enderecoElement.innerHTML = `
-        ${orderData.cliente.nome}<br>
-        ${orderData.cliente.endereco.rua}<br>
-        ${orderData.cliente.endereco.bairro}<br>
-        ${orderData.cliente.endereco.cidade} - ${orderData.cliente.endereco.estado}, ${orderData.cliente.endereco.cep}
-    `
-
-  metodoElement.innerHTML = `
-        <i class="bi bi-truck me-2"></i>
-        ${orderData.entrega.metodo} (${orderData.entrega.prazo})
-    `
+// Função para calcular impacto sustentável
+function calcularImpactoSustentavel(produtos) {
+  const totalProdutos = produtos.length;
+  const co2Evitado = (totalProdutos * 1.2).toFixed(1); // 1.2kg por produto
+  const arvores = Math.ceil(totalProdutos / 2); // 1 árvore a cada 2 produtos
+  
+  return {
+    co2: `${co2Evitado}kg`,
+    arvores: arvores
+  };
 }
 
-// Carregar resumo do pedido
-function loadOrderSummary() {
-  document.getElementById("subtotal").textContent = `R$ ${orderData.resumo.subtotal.toFixed(2).replace(".", ",")}`
-  document.getElementById("frete").textContent = `R$ ${orderData.resumo.frete.toFixed(2).replace(".", ",")}`
-  document.getElementById("desconto").textContent = `-R$ ${orderData.resumo.desconto.toFixed(2).replace(".", ",")}`
-  document.getElementById("total").textContent = `R$ ${orderData.resumo.total.toFixed(2).replace(".", ",")}`
+// Função principal para carregar dados do pedido
+function carregarDadosPedido() {
+  try {
+    console.log("Iniciando carregamento dos dados do pedido...");
 
-  document.getElementById("formaPagamento").innerHTML = `
-        <i class="bi bi-credit-card me-2"></i>
-        ${orderData.pagamento.metodo} ${orderData.pagamento.cartao}
-    `
+    // Carrega dados da compra
+    const dadosCompraStr = localStorage.getItem("dadosCompra");
+    const dadosFormularioStr = localStorage.getItem("dadosFormulario");
+    
+    if (!dadosCompraStr) {
+      console.error("Dados da compra não encontrados no localStorage");
+      mostrarErro("Dados da compra não encontrados. Redirecionando para a página de vendas...");
+      setTimeout(() => {
+        window.location.href = "vendas.html";
+      }, 3000);
+      return;
+    }
+
+    // Parse dos dados da compra
+    let dadosCompra;
+    try {
+      dadosCompra = JSON.parse(dadosCompraStr);
+      // Se for um objeto único, transforma em array
+      if (!Array.isArray(dadosCompra)) {
+        dadosCompra = [dadosCompra];
+      }
+      console.log("Dados da compra carregados:", dadosCompra);
+    } catch (error) {
+      console.error("Erro ao fazer parse dos dados da compra:", error);
+      mostrarErro("Erro nos dados da compra");
+      return;
+    }
+
+    // Parse dos dados do formulário (opcional)
+    let dadosFormulario = {};
+    if (dadosFormularioStr) {
+      try {
+        dadosFormulario = JSON.parse(dadosFormularioStr);
+        console.log("Dados do formulário carregados:", dadosFormulario);
+      } catch (error) {
+        console.error("Erro ao fazer parse dos dados do formulário:", error);
+        console.log("Continuando sem dados do formulário...");
+      }
+    }
+
+    // Calcula valores financeiros
+    const subtotal = dadosCompra.reduce((total, item) => {
+      return total + (parseFloat(item.subtotal) || 0);
+    }, 0);
+    
+    const frete = 19.90; // Valor fixo do frete
+    const desconto = subtotal > 100 ? 10.00 : 0; // Desconto eco para compras acima de R$ 100
+    const total = subtotal + frete - desconto;
+
+    // Gera informações do pedido
+    const numeroPedido = gerarNumeroPedido();
+    const dataConfirmacao = formatarDataHora();
+    const metodoEntrega = determinarMetodoEntrega(dadosFormulario.cep);
+    const previsaoEntrega = calcularPrevisaoEntrega(metodoEntrega);
+    const impacto = calcularImpactoSustentavel(dadosCompra);
+
+    // Monta objeto completo do pedido
+    const pedido = {
+      numeroPedido: numeroPedido,
+      dataConfirmacao: dataConfirmacao,
+      previsaoEntrega: previsaoEntrega,
+      enderecoEntrega: formatarEndereco(dadosFormulario),
+      metodoEntrega: metodoEntrega,
+      produtos: dadosCompra.map(item => ({
+        nome: item.nome_produto || "Produto",
+        quantidade: parseInt(item.quantidade) || 1,
+        preco: parseFloat(item.preco_final) || 0,
+        subtotal: parseFloat(item.subtotal) || 0
+      })),
+      subtotal: subtotal,
+      frete: frete,
+      desconto: desconto,
+      total: total,
+      formaPagamento: formatarFormaPagamento(dadosFormulario),
+      impactoCO2: impacto.co2,
+      arvores: impacto.arvores
+    };
+
+    console.log("Pedido montado:", pedido);
+
+    // Preenche a página com os dados
+    preencherPaginaConfirmacao(pedido);
+
+    // Salva dados do pedido para uso futuro
+    localStorage.setItem("ultimoPedido", JSON.stringify(pedido));
+
+    // Simula envio de email (apenas log)
+    console.log(`Email de confirmação seria enviado para: ${dadosFormulario.email || 'email não informado'}`);
+
+  } catch (error) {
+    console.error("Erro geral ao carregar dados do pedido:", error);
+    mostrarErro("Erro inesperado ao carregar dados do pedido");
+  }
 }
 
-// Atualizar impacto ecológico
-function updateEcoImpact() {
-  const ecoText = document.querySelector(".eco-text")
-  ecoText.innerHTML = `
-        Com esta compra, você evitou <strong>${orderData.impactoEco.co2Evitado}kg</strong> de CO₂ 
-        e contribuiu para o plantio de <strong>${orderData.impactoEco.arvoresPlantadas} árvore</strong>!
-    `
-}
+// Função para preencher a página de confirmação
+function preencherPaginaConfirmacao(pedido) {
+  try {
+    console.log("Preenchendo página com dados do pedido...");
 
-// Carregar produtos relacionados
-function loadRelatedProducts() {
-  const container = document.getElementById("produtosRelacionados")
-  container.innerHTML = ""
+    // Número do pedido
+    const numeroPedidoEl = document.getElementById("numeroPedido");
+    if (numeroPedidoEl) {
+      numeroPedidoEl.textContent = pedido.numeroPedido;
+    }
 
-  relatedProducts.forEach((produto) => {
-    const productElement = createRelatedProduct(produto)
-    container.appendChild(productElement)
-  })
-}
+    // Data de confirmação
+    const dataConfirmacaoEl = document.getElementById("dataConfirmacao");
+    if (dataConfirmacaoEl) {
+      dataConfirmacaoEl.textContent = pedido.dataConfirmacao;
+    }
 
-// Criar elemento de produto relacionado
-function createRelatedProduct(produto) {
-  const col = document.createElement("div")
-  col.className = "col-6 col-md-3 mb-3"
+    // Previsão de entrega
+    const previsaoEntregaEl = document.getElementById("previsaoEntrega");
+    if (previsaoEntregaEl) {
+      previsaoEntregaEl.textContent = pedido.previsaoEntrega;
+    }
 
-  col.innerHTML = `
-        <div class="related-product-card">
-            <div class="related-product-image">
-                <img src="${produto.imagem}" alt="${produto.nome}">
+    // Endereço de entrega
+    const enderecoEntregaEl = document.getElementById("enderecoEntrega");
+    if (enderecoEntregaEl) {
+      enderecoEntregaEl.innerHTML = pedido.enderecoEntrega;
+    }
+
+    // Método de entrega
+    const metodoEntregaEl = document.getElementById("metodoEntrega");
+    if (metodoEntregaEl) {
+      metodoEntregaEl.innerHTML = `<i class="bi bi-truck me-2"></i>${pedido.metodoEntrega}`;
+    }
+
+    // Produtos do pedido
+    const produtosContainer = document.getElementById("produtosPedido");
+    if (produtosContainer) {
+      produtosContainer.innerHTML = ""; // Limpa conteúdo anterior
+      
+      pedido.produtos.forEach((produto, index) => {
+        const produtoHTML = `
+          <div class="order-item d-flex justify-content-between align-items-center py-3 ${index < pedido.produtos.length - 1 ? 'border-bottom' : ''}">
+            <div class="item-info">
+              <h5 class="item-name mb-1">${produto.nome}</h5>
+              <p class="item-details text-muted mb-0">
+                Quantidade: ${produto.quantidade} × R$ ${produto.preco.toFixed(2).replace('.', ',')}
+              </p>
             </div>
-            <div class="related-product-info">
-                <div class="related-product-title">${produto.nome}</div>
-                <div class="related-product-price">R$ ${produto.preco.toFixed(2).replace(".", ",")}</div>
-                <button class="btn btn-success btn-sm w-100" onclick="addToCart(${produto.id})">
-                    <i class="bi bi-cart-plus me-1"></i>
-                    Adicionar
-                </button>
+            <div class="item-total">
+              <strong>R$ ${produto.subtotal.toFixed(2).replace('.', ',')}</strong>
             </div>
-        </div>
-    `
+          </div>
+        `;
+        produtosContainer.insertAdjacentHTML('beforeend', produtoHTML);
+      });
+    }
 
-  return col
+    // Resumo financeiro
+    const subtotalEl = document.getElementById("subtotal");
+    if (subtotalEl) {
+      subtotalEl.textContent = `R$ ${pedido.subtotal.toFixed(2).replace('.', ',')}`;
+    }
+
+    const freteEl = document.getElementById("frete");
+    if (freteEl) {
+      freteEl.textContent = `R$ ${pedido.frete.toFixed(2).replace('.', ',')}`;
+    }
+
+    const descontoEl = document.getElementById("desconto");
+    if (descontoEl) {
+      descontoEl.textContent = `-R$ ${pedido.desconto.toFixed(2).replace('.', ',')}`;
+      // Oculta linha de desconto se for zero
+      if (pedido.desconto === 0) {
+        const descontoRow = descontoEl.closest('.summary-row');
+        if (descontoRow) descontoRow.style.display = 'none';
+      }
+    }
+
+    const totalEl = document.getElementById("total");
+    if (totalEl) {
+      totalEl.textContent = `R$ ${pedido.total.toFixed(2).replace('.', ',')}`;
+    }
+
+    // Forma de pagamento
+    const formaPagamentoEl = document.getElementById("formaPagamento");
+    if (formaPagamentoEl) {
+      formaPagamentoEl.innerHTML = pedido.formaPagamento;
+    }
+
+    // Impacto sustentável
+    const ecoTextEl = document.querySelector(".eco-text");
+    if (ecoTextEl) {
+      const ecoText = `Com esta compra, você evitou <strong>${pedido.impactoCO2}</strong> de CO₂ 
+                       e contribuiu para o plantio de <strong>${pedido.arvores} árvore${pedido.arvores > 1 ? 's' : ''}</strong>!`;
+      ecoTextEl.innerHTML = ecoText;
+    }
+
+    console.log("Página preenchida com sucesso!");
+
+  } catch (error) {
+    console.error("Erro ao preencher página de confirmação:", error);
+    mostrarErro("Erro ao exibir dados do pedido");
+  }
 }
 
-// Funções de ação dos botões
+// Função para mostrar erro na página
+function mostrarErro(mensagem) {
+  const main = document.querySelector("main");
+  if (main) {
+    const errorDiv = document.createElement("div");
+    errorDiv.className = "alert alert-danger mx-3 mt-3";
+    errorDiv.innerHTML = `
+      <h4><i class="bi bi-exclamation-triangle me-2"></i>Ops! Algo deu errado</h4>
+      <p>${mensagem}</p>
+      <div class="mt-3">
+        <button class="btn btn-success me-2" onclick="window.location.href='vendas.html'">
+          <i class="bi bi-arrow-left me-2"></i>Voltar para Vendas
+        </button>
+        <button class="btn btn-outline-success" onclick="window.location.href='produtos.html'">
+          <i class="bi bi-shop me-2"></i>Ver Produtos
+        </button>
+      </div>
+    `;
+    main.insertBefore(errorDiv, main.firstChild);
+  }
+}
+
+// Funções para os botões de ação
 function continuarComprando() {
-  window.location.href = "produtos.html"
+  // Limpa dados da compra atual
+  localStorage.removeItem("dadosCompra");
+  localStorage.removeItem("dadosFormulario");
+  
+  // Redireciona para produtos
+  window.location.href = "produtos.html";
 }
 
 function acompanharPedido() {
-  // Simular redirecionamento para página de acompanhamento
-  alert(`Redirecionando para acompanhamento do pedido ${orderData.numero}`)
-  // window.location.href = `acompanhar-pedido.html?pedido=${orderData.numero}`;
+  const ultimoPedido = localStorage.getItem("ultimoPedido");
+  if (ultimoPedido) {
+    const pedido = JSON.parse(ultimoPedido);
+    alert(`Acompanhe seu pedido ${pedido.numeroPedido} através do nosso WhatsApp ou email de confirmação.`);
+  } else {
+    alert("Dados do pedido não encontrados.");
+  }
 }
 
 function baixarComprovante() {
-  // Simular download do comprovante
-  const blob = new Blob([generateReceiptText()], { type: "text/plain" })
-  const url = window.URL.createObjectURL(blob)
-  const a = document.createElement("a")
-  a.href = url
-  a.download = `comprovante-${orderData.numero.replace("#", "")}.txt`
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  window.URL.revokeObjectURL(url)
+  // Simula download do comprovante
+  window.print();
 }
 
 function entrarContato() {
-  // Simular abertura do chat de suporte
-  alert("Redirecionando para o chat de suporte...")
-   window.location.href = 'contato.html';
+  // Redireciona para página de contato
+  window.location.href = "contato.html";
 }
 
-function addToCart(productId) {
-  // Simular adição ao carrinho
-  const produto = relatedProducts.find((p) => p.id === productId)
-  if (produto) {
-    // Atualizar badge do carrinho
-    const badge = document.getElementById("badge-carrinho")
-    const currentCount = Number.parseInt(badge.textContent) || 0
-    badge.textContent = currentCount + 1
+// Função para carregar produtos relacionados (simulação)
+function carregarProdutosRelacionados() {
+  const produtosContainer = document.getElementById("produtosRelacionados");
+  if (!produtosContainer) return;
 
-    // Feedback visual
-    const button = event.target.closest("button")
-    const originalText = button.innerHTML
-    button.innerHTML = '<i class="bi bi-check me-1"></i>Adicionado!'
-    button.classList.add("btn-outline-success")
-    button.classList.remove("btn-success")
+  // Produtos relacionados simulados
+  const produtosRelacionados = [
+    { nome: "Camiseta Orgânica", preco: 45.90, imagem: "../img/produto1.jpg" },
+    { nome: "Mochila Sustentável", preco: 89.90, imagem: "../img/produto2.jpg" },
+    { nome: "Garrafa Reutilizável", preco: 29.90, imagem: "../img/produto3.jpg" }
+  ];
 
-    setTimeout(() => {
-      button.innerHTML = originalText
-      button.classList.remove("btn-outline-success")
-      button.classList.add("btn-success")
-    }, 2000)
-
-    console.log(`Produto ${produto.nome} adicionado ao carrinho`)
-  }
+  produtosRelacionados.forEach(produto => {
+    const produtoHTML = `
+      <div class="col-md-4 mb-3">
+        <div class="card h-100">
+          <img src="${produto.imagem}" class="card-img-top" alt="${produto.nome}" style="height: 200px; object-fit: cover;">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">${produto.nome}</h5>
+            <p class="card-text text-success fw-bold mt-auto">R$ ${produto.preco.toFixed(2).replace('.', ',')}</p>
+            <button class="btn btn-outline-success btn-sm">Ver Produto</button>
+          </div>
+        </div>
+      </div>
+    `;
+    produtosContainer.insertAdjacentHTML('beforeend', produtoHTML);
+  });
 }
 
-// Gerar texto do comprovante
-function generateReceiptText() {
-  return `
-GREENLINE - COMPROVANTE DE PEDIDO
-==================================
+// Inicialização quando a página carrega
+document.addEventListener("DOMContentLoaded", function() {
+  console.log("Página de confirmação carregada - GreenLine");
+  
+  // Carrega dados do pedido
+  carregarDadosPedido();
+  
+  // Carrega produtos relacionados
+  carregarProdutosRelacionados();
+  
+  // Adiciona event listeners para botões se não estiverem definidos inline
+  const btnContinuar = document.querySelector('button[onclick="continuarComprando()"]');
+  const btnAcompanhar = document.querySelector('button[onclick="acompanharPedido()"]');
+  const btnBaixar = document.querySelector('button[onclick="baixarComprovante()"]');
+  const btnContato = document.querySelector('button[onclick="entrarContato()"]');
+  
+  // Log para debug
+  console.log("Event listeners configurados para os botões de ação");
+});
 
-Número do Pedido: ${orderData.numero}
-Data: ${orderData.dataConfirmacao}
-
-PRODUTOS:
-${orderData.produtos
-  .map((p) => `- ${p.nome} (${p.quantidade}x) - R$ ${(p.preco * p.quantidade).toFixed(2).replace(".", ",")}`)
-  .join("\n")}
-
-RESUMO:
-Subtotal: R$ ${orderData.resumo.subtotal.toFixed(2).replace(".", ",")}
-Frete: R$ ${orderData.resumo.frete.toFixed(2).replace(".", ",")}
-Desconto: -R$ ${orderData.resumo.desconto.toFixed(2).replace(".", ",")}
-TOTAL: R$ ${orderData.resumo.total.toFixed(2).replace(".", ",")}
-
-ENTREGA:
-${orderData.cliente.nome}
-${orderData.cliente.endereco.rua}
-${orderData.cliente.endereco.bairro}
-${orderData.cliente.endereco.cidade} - ${orderData.cliente.endereco.estado}, ${orderData.cliente.endereco.cep}
-
-Método: ${orderData.entrega.metodo}
-Prazo: ${orderData.entrega.prazo}
-
-PAGAMENTO:
-${orderData.pagamento.metodo} ${orderData.pagamento.cartao}
-
-IMPACTO SUSTENTÁVEL:
-CO₂ evitado: ${orderData.impactoEco.co2Evitado}kg
-Árvores plantadas: ${orderData.impactoEco.arvoresPlantadas}
-
-Obrigado por escolher produtos sustentáveis!
-GreenLine - Sustentabilidade e Qualidade
-    `.trim()
-}
-
-// Simular atualização em tempo real do status
-function simulateStatusUpdate() {
+// Função para limpar dados após confirmação (chamada quando sair da página)
+window.addEventListener('beforeunload', function() {
+  // Mantém dados do último pedido, mas limpa dados temporários após um tempo
   setTimeout(() => {
-    // Simular mudança de status após 5 segundos
-    const preparingStep = document.querySelector(".status-step:nth-child(2)")
-    preparingStep.classList.add("active")
-
-    // Atualizar texto
-    const preparingText = preparingStep.querySelector("p")
-    preparingText.textContent = "Agora"
-
-    console.log("Status atualizado: Preparando pedido")
-  }, 5000)
-}
-
-// Iniciar simulação de atualização de status
-simulateStatusUpdate()
-
-// Função para integração com backend (exemplo)
-async function fetchOrderData(orderNumber) {
-  try {
-    // Exemplo de chamada para API
-    const response = await fetch(`/api/orders/${orderNumber}`)
-    if (response.ok) {
-      const data = await response.json()
-      return data
-    } else {
-      throw new Error("Pedido não encontrado")
-    }
-  } catch (error) {
-    console.error("Erro ao carregar dados do pedido:", error)
-    // Usar dados simulados como fallback
-    return orderData
-  }
-}
-
-// Função para salvar dados no localStorage (para persistência local)
-function saveOrderToLocalStorage() {
-  localStorage.setItem("lastOrder", JSON.stringify(orderData))
-}
-
-// Função para carregar dados do localStorage
-function loadOrderFromLocalStorage() {
-  const saved = localStorage.getItem("lastOrder")
-  if (saved) {
-    return JSON.parse(saved)
-  }
-  return null
-}
-
-// Salvar pedido atual
-saveOrderToLocalStorage()
+    localStorage.removeItem("dadosCompra");
+    localStorage.removeItem("dadosFormulario");
+  }, 300000); // Remove após 5 minutos
+});
