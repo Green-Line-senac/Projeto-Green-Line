@@ -127,7 +127,6 @@ body {
 }
 
 .menu_green_line .dropdown-menu {
-    background: rgba(6, 78, 59, 0.9);
     border: none;
     border-radius: 10px;
     z-index: 1100;
@@ -172,7 +171,6 @@ body {
 }
 
 .menu_green_line .navbar-brand:hover {
-    text-shadow: 0 0 25px rgba(52, 211, 153, 0.233), 0 6px 15px rgba(0, 0, 0, 0.5);
     transform: scale(1.05);
 }
 

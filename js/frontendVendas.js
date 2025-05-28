@@ -1,5 +1,3 @@
-const { click } = require("@testing-library/user-event/dist/cjs/convenience/click.js");
-
 // Alteração dinâmica do método de pagamento
 document.getElementById("pagamento").addEventListener("change", function () {
     let pagamentos = this.value;
@@ -131,12 +129,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-document.getElementById("FinalizarCompra").addEventListener("click", function(event) {
+
+document.getElementById("FinalizarCompra").addEventListener("click",(event) =>{
     event.preventDefault();
-    window.location.href = "pedido_confirmado.html";
-  });
+    window.location.href = "pedido_confirmado.html"
+});
+
   document.getElementById("Cancelar").addEventListener("click", function() {
-    window.location.href = "produtos.html";
+    window.location.href = "carrinho.html";
   });
 
 let somar = 0;
@@ -144,5 +144,3 @@ function total(valor) {
     somar += parseFloat(valor) || 0; 
     return somar.toFixed(2).replace(".", ",");
 }
-
-
