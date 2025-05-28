@@ -104,6 +104,6 @@ app.post('/cadastro-produto', async (req, res) => {
 // Iniciar servidor
 const PORT = process.env.PORTA6 || 3005;
 app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
+    console.log(`Servidor rodando - backendCadastroProduto - na porta ${PORT}`);
     console.log(`Uploads sendo salvos em: ${uploadDir}`);
 });

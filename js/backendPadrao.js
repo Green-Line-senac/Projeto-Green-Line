@@ -29,5 +29,5 @@ app.get("/enviar-email", async (req, res) => {
 // Iniciar servidor
 const PORT = process.env.PORTA5 || 3004;
 app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
+    console.log(`Servidor rodando -backendPadrao- na porta ${PORT}`);
 });

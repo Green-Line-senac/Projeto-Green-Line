@@ -96,5 +96,5 @@ app.get('/teste', (req, res) => {
 // Iniciar servidor
 const PORT = process.env.PORTA7 || 3006;
 app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
+    console.log(`Servidor rodando -backendCarrinho- na porta ${PORT}`);
 });

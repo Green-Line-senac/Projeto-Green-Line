@@ -138,6 +138,6 @@ app.get("/produtos", async (req, res) => {
 // Inicia o servidor na porta especificada no .env
 const porta = process.env.PORTA3 || 3000;
 app.listen(porta, () => {
-    console.log(`Servidor de autenticação rodando na porta ${porta}`);
+    console.log(`Servidor de autenticação -backendIndex- rodando na porta ${porta}`);
     console.log(`Valor inicial de trocarDeConta: ${estadoLogin.trocarDeConta}`);
 });

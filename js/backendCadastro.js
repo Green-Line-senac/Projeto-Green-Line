@@ -110,5 +110,5 @@ app.get("/verificarCPF", async (req, res) => {
 
 // Iniciar servidor
 app.listen(process.env.PORTA, () => {
-    console.log("🚀 Servidor rodando em http://localhost:3000");
+    console.log("🚀 Servidor rodando em backendCadastro: http://localhost:3000");
 });

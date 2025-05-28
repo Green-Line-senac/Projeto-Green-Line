@@ -293,7 +293,7 @@ app.put('/pessoa/:id_pessoa/imagem', async (req, res) => {
 // ==================== INICIAR SERVIDOR ====================
 const PORTA8 = process.env.PORTA8 || 3008;
 app.listen(PORTA8, () => {
-  console.log(`✅ Servidor rodando na porta ${PORTA8}`);
+  console.log(`✅ Servidor rodando -backendPerfil- na porta ${PORTA8}`);
   console.log(`🔗 Acesse a documentação em http://localhost:${PORTA8}/`);
   console.log(`🔗 Acesse SERVER a API em http://localhost:${PORTA8}/pessoa`);
   console.log(`🔗 Acesse SERVER a API em http://localhost:${PORTA8}/pessoa/:id_pessoa`);

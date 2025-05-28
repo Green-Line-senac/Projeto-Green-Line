@@ -65,5 +65,5 @@ app.post("/enviarEmail", async (req, res) => {
 
 
 app.listen(process.env.PORTA2, () => {
-    console.log(`🚀 Servidor rodando em http://localhost:${process.env.PORTA2}`);
+    console.log(`🚀 Servidor rodando -backendLogin- em http://localhost:${process.env.PORTA2}`);
 });
