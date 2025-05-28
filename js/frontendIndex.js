@@ -34,8 +34,7 @@ async function inicializarApp() {
   try {
     estado.carregando = true;    
     await Promise.all([
-      carregarCarrossel(),
-      carregarProdutosPromocao(),
+      carregarProdutosPromocao()
     ]);
   } catch (erro) {
     console.error('Erro na inicialização:', erro);
@@ -46,21 +45,6 @@ async function inicializarApp() {
 }
 
 // ==================== FUNÇÕES DE CARREGAMENTO ====================
-
-async function carregarCarrossel() {
-  try {
-    const response = await fetch('../json/carousel-index.json');
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-    const dados = await response.json();
-    estado.imagensCarrossel = Array.isArray(dados) ? dados : [];
-    renderizarCarrossel();
-  } catch (erro) {
-    console.error('Erro no carrossel:', erro);
-    mostrarFeedback('Não foi possível carregar o carrossel', 'warning');
-  }
-}
-
 async function carregarProdutosPromocao() {
   try {
     mostrarLoader();
@@ -82,39 +66,6 @@ async function carregarProdutosPromocao() {
 }
 
 // ==================== FUNÇÕES DE RENDERIZAÇÃO ====================
-
-function renderizarCarrossel() {
-  if (!estado.imagensCarrossel.length) return;
-
-  elementos.carrossel.innerHTML = '';
-  const indicators = document.createElement('div');
-  indicators.className = 'carousel-indicators';
-
-  estado.imagensCarrossel.forEach((img, index) => {
-    // Criar indicadores
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.dataset.bsTarget = '#carousel-index';
-    button.dataset.bsSlideTo = index;
-    button.className = index === 0 ? 'active' : '';
-    indicators.appendChild(button);
-
-    // Criar itens do carrossel
-    const item = document.createElement('div');
-    item.className = `carousel-item ${index === 0 ? 'active' : ''}`;
-    item.innerHTML = `
-      <img src="../img/index_carousel/${img.nomeImagem || 'default.jpg'}" 
-           class="d-block w-100" 
-           style="height: px; object-fit: cover;" 
-           alt="${img.alt || 'Imagem do carrossel'}"
-           loading="lazy"
-           onerror="this.src='${config.fallbackImage}'">
-    `;
-    elementos.carrossel.appendChild(item);
-  });
-
-  elementos.carrosselContainer.prepend(indicators);
-}
 
 function renderizarProdutos() {
   console.log('Renderizando produtos:', estado.produtos);
