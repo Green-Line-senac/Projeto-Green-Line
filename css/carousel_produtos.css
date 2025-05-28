@@ -8,7 +8,7 @@
 .carousel-image {
   height: 400px !important;
   object-fit: cover;
-  filter: brightness(0.6);
+  filter: brightness(0.9);
 }
 
 .carousel-overlay {
