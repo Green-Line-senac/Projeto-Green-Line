@@ -112,6 +112,6 @@ app.post('/carrinho', async (req, res) => {
 
 const porta = process.env.PORTA4 || 3003;
 app.listen(porta, () => {
-    console.log(`Servidor rodando na porta ${porta}`);
+    console.log(`Servidor rodando -backendprodutos- na porta ${porta}`);
 });
 
