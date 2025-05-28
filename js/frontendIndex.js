@@ -49,7 +49,7 @@ async function inicializarApp() {
 
 async function carregarCarrossel() {
   try {
-    const response = await fetch('/json/carousel-index.json');
+    const response = await fetch('../json/carousel-index.json');
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
     const dados = await response.json();
@@ -103,7 +103,7 @@ function renderizarCarrossel() {
     const item = document.createElement('div');
     item.className = `carousel-item ${index === 0 ? 'active' : ''}`;
     item.innerHTML = `
-      <img src="/img/index_carousel/${img.nomeImagem || 'default.jpg'}" 
+      <img src="../img/index_carousel/${img.nomeImagem || 'default.jpg'}" 
            class="d-block w-100" 
            style="height: px; object-fit: cover;" 
            alt="${img.alt || 'Imagem do carrossel'}"
