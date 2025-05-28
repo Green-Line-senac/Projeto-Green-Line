@@ -25,7 +25,7 @@ const orderData = {
     },
   },
   produtos: [
-    
+
   ]
 }
 
@@ -219,7 +219,7 @@ function baixarComprovante() {
 function entrarContato() {
   // Simular abertura do chat de suporte
   alert("Redirecionando para o chat de suporte...")
-  // window.location.href = 'contato.html';
+   window.location.href = 'contato.html';
 }
 
 function addToCart(productId) {
