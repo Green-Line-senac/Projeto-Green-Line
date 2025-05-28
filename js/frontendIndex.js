@@ -49,7 +49,7 @@ async function inicializarApp() {
 
 async function carregarCarrossel() {
   try {
-    const response = await fetch('../json/carousel-index.json');
+    const response = await fetch('/json/carousel-index.json');
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
     const dados = await response.json();
