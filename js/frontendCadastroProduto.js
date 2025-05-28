@@ -162,7 +162,7 @@
             };
 
             // Enviar para o backend
-            const response = await fetch('http://localhost:3005/cadastro-produto', {
+            const response = await fetch('https://green-line-web.onrender.com/cadastro-produto', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(dados)

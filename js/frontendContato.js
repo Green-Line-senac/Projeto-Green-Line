@@ -17,7 +17,7 @@ async function verificarEmail() {
     if (!email) return;
 
     try {
-        const verificacao = await fetch(`http://localhost:3000/verificarEmail?email=${email}`);
+        const verificacao = await fetch(`https://green-line-web.onrender.com/verificarEmail?email=${email}`);
         const resposta = await verificacao.json();
 
         if (resposta.existe) {

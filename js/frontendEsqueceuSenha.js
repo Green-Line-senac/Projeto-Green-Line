@@ -4,7 +4,7 @@ botaoEnviar.addEventListener("click", async (event) => {
 
     const inputEmail = document.getElementById('email').value;
     try {
-        const resposta = await fetch(`http://localhost:3004/enviar-email?email=${inputEmail}`);
+        const resposta = await fetch(`https://green-line-web.onrender.com/enviar-email?email=${inputEmail}`);
         const dado = await resposta.json();
         console.log(dado); 
 

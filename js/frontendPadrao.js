@@ -14,7 +14,7 @@ async function verificarEstadoLogin() {
     if (!elementosHTML.iconeUsuario || !elementosHTML.badgeCarrinho || !elementosHTML.link_usuario) return;
 
     try {
-        let response = await fetch("http://localhost:3002/loginDados");
+        let response = await fetch("https://green-line-web.onrender.com/loginDados");
 
         if (!response.ok) {
             // Se houver erro, limpa o localStorage (usuário não está logado)

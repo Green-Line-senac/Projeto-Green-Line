@@ -25,7 +25,7 @@ formularioLogin.addEventListener('submit', async function (e) {
     }
 
     try {
-        const resposta = await fetch('http://localhost:3001/verificarConta', {
+        const resposta = await fetch('https://green-line-web.onrender.com/verificarConta', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ usuario, senha })
@@ -42,7 +42,7 @@ formularioLogin.addEventListener('submit', async function (e) {
                 mostrarMensagem("Email não verificado. Verifique sua caixa de entrada.", "warning");
                 if (usuario.includes("@")) {
                     try {
-                        await fetch("http://localhost:3001/enviarEmail", {
+                        await fetch("https://green-line-web.onrender.com/enviarEmail", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({ usuario })

@@ -55,7 +55,7 @@ formularioCadastro.addEventListener('submit', function (e) {
 
     if (infoVal && cpfValido == 1 && emailValido == 1) {
         dadosUsuario = { nome, email, cpf, telefone, senha };
-        fetch("http://localhost:3000/cadastrar", {
+        fetch("https://green-line-web.onrender.com/cadastrar", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(dadosUsuario)
@@ -83,7 +83,7 @@ async function verificarEmail() {
     if (!email) return;
 
     try {
-        const verificacao = await fetch(`http://localhost:3000/verificarEmail?email=${email}`);
+        const verificacao = await fetch(`https://green-line-web.onrender.com/verificarEmail?email=${email}`);
         const resposta = await verificacao.json();
 
         if (resposta.existe) {
@@ -111,7 +111,7 @@ async function verificarCPF() {
     if (!cpf) return;
 
     try {
-        const verificacao = await fetch(`http://localhost:3000/verificarCPF?cpf=${cpf}`);
+        const verificacao = await fetch(`https://green-line-web.onrender.com/verificarCPF?cpf=${cpf}`);
         const resposta = await verificacao.json();
 
         if (resposta.existe) {
