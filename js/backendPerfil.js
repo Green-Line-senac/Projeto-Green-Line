@@ -3,20 +3,20 @@ const express = require('express');
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
-
+const cors = require('cors');
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 // Configuração do MySQL
 let db;
 mysql.createConnection({
   database: process.env.DB_NAME,
   host: process.env.DB_HOST,
-  user: process.env.DB_USER ,
-  password: process.env.DB_PASSWORD ,
-  port: process.env.DB_PORT 
-
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT
 })
 .then(connection => {
   db = connection;
@@ -35,12 +35,9 @@ const gerarHashSenha = async (senha) => {
   return { hash, salt };
 };
 
-const cors = require('cors');
-app.use(cors()); // Libera acesso de qualquer origem
-
 // ==================== ROTAS ====================
 
-// Rota raiz (documentação básica)
+// Rota raiz
 app.get('/', (req, res) => {
   res.json({
     message: 'API de Usuários Segura',
@@ -49,8 +46,18 @@ app.get('/', (req, res) => {
       login: 'POST /login',
       listar: 'GET /pessoa',
       buscar: 'GET /pessoa/:id_pessoa',
-      atualizar: 'PUT /pessoa/:id_pessoa (autenticado)',
-      deletar: 'DELETE /pessoa/:id_pessoa (autenticado)'
+      atualizar: 'PUT /pessoa/:id_pessoa',
+      deletar: 'DELETE /pessoa/:id_pessoa',
+      endereco: {
+        buscar: 'GET /pessoa/:id_pessoa/endereco',
+        atualizar: 'PUT /pessoa/:id_pessoa/endereco'
+      },
+      pagamentos: {
+        listar: 'GET /pessoa/:id_pessoa/pagamentos',
+        adicionar: 'POST /pessoa/:id_pessoa/pagamentos',
+        remover: 'DELETE /pessoa/:id_pessoa/pagamentos/:id'
+      },
+      imagem: 'PUT /pessoa/:id_pessoa/imagem'
     }
   });
 });
@@ -74,33 +81,31 @@ app.post('/pessoa', async (req, res) => {
 
   try {
     // Verifica se usuário já existe
-    const [existing] = await db.query('SELECT id_pessoa FROM users WHERE email = ?', [email]);
+    const [existing] = await db.query('SELECT id_pessoa FROM pessoa WHERE email = ?', [email]);
     if (existing.length > 0) {
       return res.status(409).json({ error: 'E-mail já cadastrado' });
     }
 
     // Gera hash da senha
-    const { hash, salt } = await gerarHashSenha(password);
+    const { hash, salt } = await gerarHashSenha(senha);
 
     // Insere no banco
-    const [result] = await db.query('INSERT INTO users SET ?', {
+    const [result] = await db.query('INSERT INTO pessoa SET ?', {
       nome,
       email,
       telefone,
       cpf,
-      id_tipo_usuario,
+      id_tipo_usuario: id_tipo_usuario || 1, // Default para usuário comum
       senha_hash: hash,
       senha_salt: salt,
-      situacao,
-      imagem_perfil
-
+      situacao: situacao || 'A', // Default para ativo
+      imagem_perfil: imagem_perfil || null
     });
 
-    // Retorna resposta (sem dados sensíveis)
     res.status(201).json({
       id_pessoa: result.insertId,
       message: 'Usuário criado com sucesso',
-      pessoa: { nome, email, telefone, cpf, id_tipo_usuario, senha, situacao, imagem_perfil }
+      pessoa: { nome, email, telefone, cpf, id_tipo_usuario, situacao, imagem_perfil }
     });
 
   } catch (err) {
@@ -144,7 +149,7 @@ app.post('/login', async (req, res) => {
       id_tipo_usuario: user.id_tipo_usuario,
       situacao: user.situacao,
       imagem_perfil: user.imagem_perfil,
-      token // Em produção, use JWT
+      token
     });
 
   } catch (err) {
@@ -152,72 +157,67 @@ app.post('/login', async (req, res) => {
   }
 });
 
-
-// [3] LISTAR USUÁRIOS (GET) - (Protegida em produção)
+// [3] LISTAR USUÁRIOS (GET)
 app.get('/pessoa', async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM pessoa');
+    const [rows] = await db.query('SELECT id_pessoa, nome, email, telefone, cpf, id_tipo_usuario, situacao, imagem_perfil FROM pessoa');
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: 'Erro ao buscar usuários' });
   }
 });
 
-// [4] BUSCAR USUÁRIO POR ID (GET) - Versão corrigida
-app.get("/pessoa/:id_pessoa", async (req, res) => {
+// [4] BUSCAR USUÁRIO POR ID (GET)
+app.get('/pessoa/:id_pessoa', async (req, res) => {
   try {
-      console.log("[BACK] Requisição recebida para buscar pessoa. ID:", req.params.id_pessoa);
+    const id = parseInt(req.params.id_pessoa);
+    if (isNaN(id) || id <= 0) {
+      return res.status(400).json({ error: 'ID inválido' });
+    }
 
-      // Converte o ID para número antes da validação
-      const id = Number(req.params.id_pessoa);
-      if (isNaN(id) || id <= 0) {
-          return res.status(400).json({ error: "ID inválido" });
-      }
-
-      // Consulta no banco
-      const [rows] = await db.query(
-          "SELECT id_pessoa, nome, email, telefone, cpf, id_tipo_usuario, situacao, imagem_perfil FROM pessoa WHERE id_pessoa = ?",
-          [id]
-      );
-
-      if (!rows || rows.length === 0) {
-          return res.status(404).json({ 
-              error: "Usuário não encontrado",
-              details: `Nenhum usuário encontrado com o ID ${id}`
-          });
-      }
-
-      // Retorna os dados
-      res.json(rows[0]);
-  } catch (err) {
-      console.error("Erro ao buscar usuário:", err.message);
-      res.status(500).json({ 
-          error: "Erro ao buscar usuário",
-          details: err.message
+    const [rows] = await db.query(
+      'SELECT id_pessoa, nome, email, telefone, cpf, id_tipo_usuario, situacao, imagem_perfil FROM pessoa WHERE id_pessoa = ?',
+      [id]
+    );
+    
+    if (rows.length === 0) {
+      return res.status(404).json({ 
+        error: 'Usuário não encontrado',
+        details: `Nenhum usuário encontrado com o ID ${id}`
       });
+    }
+    
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('Erro detalhado:', err);
+    res.status(500).json({ 
+      error: 'Erro ao buscar usuário',
+      details: err.message 
+    });
   }
 });
-// [5] ATUALIZAR USUÁRIO (PUT) - (Protegida em produção)
-app.put('/pessoa/:id_pessoa', async (req, res) => {
-  const { nome, telefone} = req.body;
+
+// [5] ATUALIZAR USUÁRIO (PUT)
+app.put("/pessoa/:id_pessoa", async (req, res) => {
+  const { id_pessoa } = req.params;
+  const { nome, telefone } = req.body;
 
   try {
     const [result] = await db.query(
-      'UPDATE pessoa SET nome = ?, telefone = ?, ? WHERE id_pessoa = ?',
-      [nome, telefone, req.params.id_pessoa]
+      "UPDATE pessoa SET nome = ?, telefone = ? WHERE id_pessoa = ?",
+      [nome, telefone, id_pessoa]
     );
-    
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Usuário não encontrado' });
+    if (result.affectedRows > 0) {
+      res.json({ message: "Pessoa atualizada com sucesso" });
+    } else {
+      res.status(404).json({ error: "Pessoa não encontrada" });
     }
-    
-    res.json({ message: 'Usuário atualizado com sucesso' });
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao atualizar usuário' });
+    res.status(500).json({ error: "Erro ao atualizar pessoa" });
   }
 });
 
-// [6] DELETAR USUÁRIO (DELETE) - (Protegida em produção)
+// [6] DELETAR USUÁRIO (DELETE)
 app.delete('/pessoa/:id_pessoa', async (req, res) => {
   try {
     const [result] = await db.query('DELETE FROM pessoa WHERE id_pessoa = ?', [req.params.id_pessoa]);
@@ -232,18 +232,16 @@ app.delete('/pessoa/:id_pessoa', async (req, res) => {
   }
 });
 
-// [7] OBTER DADOS DO USUÁRIO LOGADO (GET) - Protegida
-// Rota para obter dados do usuário logado
+// [7] OBTER DADOS DO USUÁRIO LOGADO (GET)
 app.get('/pessoa/me', async (req, res) => {
   try {
-    // Em produção, você deve verificar o token JWT aqui
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
       return res.status(401).json({ error: 'Token não fornecido' });
     }
 
-    // Simples verificação - em produção, decodifique o token JWT para obter o ID
-    const userId = req.body.userId || req.query.userId; // Adapte conforme sua autenticação
+    // Em produção, decodifique o token JWT para obter o ID
+    const userId = req.body.userId || req.query.userId;
     
     const [rows] = await db.query(
       'SELECT id_pessoa, nome, email, telefone, cpf, situacao, imagem_perfil FROM pessoa WHERE id_pessoa = ?',
@@ -290,11 +288,84 @@ app.put('/pessoa/:id_pessoa/imagem', async (req, res) => {
     }
 });
 
+// [9] ROTAS PARA ENDEREÇO
+app.get('/pessoa/:id_pessoa/endereco', async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT * FROM enderecos WHERE id_pessoa = ?', [req.params.id_pessoa]);
+        if (rows.length === 0) {
+            return res.status(404).json({ error: 'Endereço não encontrado' });
+        }
+        res.json(rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: 'Erro ao buscar endereço' });
+    }
+});
+
+app.put('/pessoa/:id_pessoa/endereco', async (req, res) => {
+    try {
+        const { cep, logradouro, numero, complemento, cidade, estado } = req.body;
+        const idPessoa = req.params.id_pessoa;
+
+        // Verifica se já existe endereço
+        const [existing] = await db.query('SELECT id FROM enderecos WHERE id_pessoa = ?', [idPessoa]);
+        
+        if (existing.length > 0) {
+            // Atualiza existente
+            await db.query(
+                'UPDATE enderecos SET cep = ?, logradouro = ?, numero = ?, complemento = ?, cidade = ?, estado = ? WHERE id_pessoa = ?',
+                [cep, logradouro, numero, complemento, cidade, estado, idPessoa]
+            );
+        } else {
+            // Cria novo
+            await db.query(
+                'INSERT INTO enderecos (id_pessoa, cep, logradouro, numero, complemento, cidade, estado) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                [idPessoa, cep, logradouro, numero, complemento, cidade, estado]
+            );
+        }
+        
+        res.json({ message: 'Endereço atualizado com sucesso' });
+    } catch (err) {
+        res.status(500).json({ error: 'Erro ao atualizar endereço' });
+    }
+});
+
+// [10] ROTAS PARA MÉTODOS DE PAGAMENTO
+app.get('/pessoa/:id_pessoa/pagamentos', async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT id, tipo, numero FROM metodos_pagamento WHERE id_pessoa = ?', [req.params.id_pessoa]);
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ error: 'Erro ao buscar métodos de pagamento' });
+    }
+});
+
+app.post('/pessoa/:id_pessoa/pagamentos', async (req, res) => {
+    try {
+        const { tipo, numero } = req.body;
+        await db.query(
+            'INSERT INTO metodos_pagamento (id_pessoa, tipo, numero) VALUES (?, ?, ?)',
+            [req.params.id_pessoa, tipo, numero]
+        );
+        res.status(201).json({ message: 'Método de pagamento adicionado' });
+    } catch (err) {
+        res.status(500).json({ error: 'Erro ao adicionar método de pagamento' });
+    }
+});
+
+app.delete('/pessoa/:id_pessoa/pagamentos/:id', async (req, res) => {
+    try {
+        await db.query('DELETE FROM metodos_pagamento WHERE id = ? AND id_pessoa = ?', [req.params.id, req.params.id_pessoa]);
+        res.status(204).end();
+    } catch (err) {
+        res.status(500).json({ error: 'Erro ao remover método de pagamento' });
+    }
+});
+
 // ==================== INICIAR SERVIDOR ====================
 const PORTA8 = process.env.PORTA8 || 3008;
 app.listen(PORTA8, () => {
-  console.log(`✅ Servidor rodando -backendPerfil- na porta ${PORTA8}`);
+  console.log(`✅ Servidor rodando na porta ${PORTA8}`);
   console.log(`🔗 Acesse a documentação em http://localhost:${PORTA8}/`);
-  console.log(`🔗 Acesse SERVER a API em http://localhost:${PORTA8}/pessoa`);
-  console.log(`🔗 Acesse SERVER a API em http://localhost:${PORTA8}/pessoa/:id_pessoa`);
+  console.log(`🔗 Acesse a API em http://localhost:${PORTA8}/pessoa`);
+
 });

@@ -1,25 +1,20 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Perfil</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../css/reset.css">
-    <link rel="stylesheet" href="../css/perfil.css">
-
+    <link rel="stylesheet" href="./style/reset.css">
+    <link rel="stylesheet" href="./style/perfil.css">
 </head>
-
 <body>
     <div class="container">
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="profile-header">
                 <div class="profile-avatar">
-                    <img id="profileAvatar"
-                        src="https://w7.pngwing.com/pngs/81/570/png-transparent-profile-logo-computer-icons-user-user-blue-heroes-logo-thumbnail.png"
-                        alt="Avatar">
+                    <img id="profileAvatar" src="https://w7.pngwing.com/pngs/81/570/png-transparent-profile-logo-computer-icons-user-user-blue-heroes-logo-thumbnail.png" alt="Avatar">
                     <label class="change-avatar" for="avatarInput">
                         <i class="fas fa-camera"></i>
                         <input type="file" id="avatarInput" accept="image/*">
@@ -28,7 +23,7 @@
                 <h2 class="profile-name" id="profileName">Carregando...</h2>
                 <div class="profile-email" id="profileEmail">carregando...</div>
             </div>
-
+            
             <div class="nav-menu">
                 <div class="nav-item active" data-section="personal">
                     <i class="fas fa-user"></i> Informações Pessoais
@@ -47,7 +42,7 @@
                 </div>
             </div>
         </div>
-
+        
         <!-- Main Content -->
         <div class="main-content">
             <!-- Seção de Informações Pessoais -->
@@ -75,10 +70,9 @@
                         <div class="info-value" id="profileStatus">carregando...</div>
                     </div>
                 </div>
-                <button class="btn btn-primary" id="savePersonalBtn" style="margin-top: 20px;">Salvar
-                    Alterações</button>
+                <button class="btn btn-primary" id="savePersonalBtn" style="margin-top: 20px;">Salvar Alterações</button>
             </div>
-
+            
             <!-- Seção de Pedidos -->
             <div id="orders-section" class="hidden">
                 <h2 class="section-title">Meus Pedidos</h2>
@@ -86,7 +80,7 @@
                     <p>Seus pedidos aparecerão aqui</p>
                 </div>
             </div>
-
+            
             <!-- Seção de Produtos Salvos -->
             <div id="saved-section" class="hidden">
                 <h2 class="section-title">Produtos Salvos</h2>
@@ -94,103 +88,236 @@
                     <p>Seus produtos salvos aparecerão aqui</p>
                 </div>
             </div>
+            
+            <!-- Seção de Configurações -->
+            <div id="gears-section" class="hidden">
+                <h2 class="section-title">Configurações</h2>
+                
+                <div class="settings-grid">
+                    <!-- Modo Noturno -->
+                    <div class="setting-item">
+                        <div class="setting-label">Modo Noturno</div>
+                        <label class="switch">
+                            <input type="checkbox" id="darkModeToggle">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    
+                    <!-- Endereço -->
+                    <div class="setting-item">
+                        <div class="setting-label">Meu Endereço</div>
+                        <div class="address-card" id="addressContent">
+                            <p>Carregando endereço...</p>
+                        </div>
+                        <button class="btn btn-primary" id="updateAddressBtn">Atualizar Endereço</button>
+                    </div>
+                    
+                    <!-- Método de Pagamento -->
+                    <div class="setting-item">
+                        <div class="setting-label">Método de Pagamento</div>
+                        <div class="payment-methods" id="paymentMethods">
+                            <p>Carregando métodos...</p>
+                        </div>
+                        <button class="btn btn-primary" id="addPaymentMethodBtn">Adicionar Método</button>
+                    </div>
+                    
+                    <!-- Deletar Conta -->
+                    <div class="setting-item danger-zone">
+                        <div class="setting-label">Zona de Perigo</div>
+                        <button class="btn btn-danger" id="deleteAccountBtn">
+                            <i class="fas fa-exclamation-triangle"></i> Deletar Minha Conta
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Modal para deletar conta -->
+    <div id="deleteModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3>Confirmar Exclusão de Conta</h3>
+            <p>Tem certeza que deseja deletar sua conta? Esta ação não pode ser desfeita.</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="cancelDeleteBtn">Cancelar</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn">Confirmar Exclusão</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para atualizar endereço -->
+    <div id="addressModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3>Atualizar Endereço</h3>
+            <form id="addressForm">
+                <div class="form-group">
+                    <label for="cep">CEP</label>
+                    <input type="text" id="cep" name="cep" required>
+                </div>
+                <div class="form-group">
+                    <label for="logradouro">Endereço</label>
+                    <input type="text" id="logradouro" name="logradouro" required>
+                </div>
+                <div class="form-group">
+                    <label for="numero">Número</label>
+                    <input type="text" id="numero" name="numero" required>
+                </div>
+                <div class="form-group">
+                    <label for="complemento">Complemento</label>
+                    <input type="text" id="complemento" name="complemento">
+                </div>
+                <div class="form-group">
+                    <label for="cidade">Cidade</label>
+                    <input type="text" id="cidade" name="cidade" required>
+                </div>
+                <div class="form-group">
+                    <label for="estado">Estado</label>
+                    <input type="text" id="estado" name="estado" required maxlength="2">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelAddressBtn">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Endereço</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para adicionar método de pagamento -->
+    <div id="paymentModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3>Adicionar Método de Pagamento</h3>
+            <form id="paymentForm">
+                <div class="form-group">
+                    <label for="paymentType">Tipo</label>
+                    <select id="paymentType" name="paymentType" required>
+                        <option value="VISA">Visa</option>
+                        <option value="MASTERCARD">Mastercard</option>
+                        <option value="AMEX">American Express</option>
+                        <option value="ELO">Elo</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cardNumber">Número do Cartão</label>
+                    <input type="text" id="cardNumber" name="cardNumber" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelPaymentBtn">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Adicionar Cartão</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
         // Dados do usuário
         let usuarioLogado = null;
-        const API_URL = "https://green-line-web.onrender.com";
-        const AUTH_API_URL = "https://green-line-web.onrender.com";
-        const semPhoto = "https://w7.pngwing.com/pngs/81/570/png-transparent-profile-logo-computer-icons-user-user-blue-heroes-logo-thumbnail.png";
+        const API_URL = 'http://localhost:3008';
 
-        // Função para carregar dados do usuário - MODIFICADA
+        // Carrega os dados do usuário ao abrir a página
+        document.addEventListener('DOMContentLoaded', async () => {
+            await carregarDadosUsuario();
+            setupEventListeners();
+            setupSettings();
+        });
+
+        // Função para carregar dados do usuário
         async function carregarDadosUsuario() {
             try {
-                // 1. Obter o ID do usuário da API de autenticação
-                const responseAuth = await fetch(`${AUTH_API_URL}/loginDados`);
-
-                if (!responseAuth.ok) {
-                    throw new Error("Erro ao obter dados de autenticação");
-                }
-
-                const authData = await responseAuth.json();
-                console.log("Dados de autenticação:", authData);
-
-                // Verificação robusta do ID
-                const idPessoa = authData?.id_pessoa ? Number(authData.id_pessoa) : null;
-                if (!idPessoa || isNaN(idPessoa) || idPessoa <= 0) {
-                    console.error("ID inválido recebido:", authData.id_pessoa);
-                    window.location.href = "../index.html";
+                const idPessoa = localStorage.getItem('id_pessoa');
+                if (!idPessoa) {
+                    window.location.href = '../index.html';
                     return;
                 }
 
-
-
-                // 2. Obter os dados completos do usuário
-                const responseUser = await fetch(`${API_URL}/pessoa/${idPessoa}`);
-                if (!responseUser.ok) {
-                    throw new Error("Erro ao carregar dados do usuário");
+                const response = await fetch(`${API_URL}/pessoa/${idPessoa}`);
+                
+                if (!response.ok) {
+                    throw new Error('Erro ao carregar dados do usuário');
                 }
 
-                usuarioLogado = await responseUser.json();
-                console.log("Dados do usuário:", usuarioLogado);
+                usuarioLogado = await response.json();
                 mostrarPerfil(usuarioLogado);
-
             } catch (error) {
-                console.error("Erro ao carregar perfil:", error.message);
-                alert("Erro ao carregar perfil. Redirecionando para login...");
-                window.location.href = "../index.html";
+                console.error('Erro ao carregar perfil:', error);
+                alert('Erro ao carregar perfil. Redirecionando para login...');
+                window.location.href = '../index.html';
             }
         }
 
+        const semphoto = 'https://w7.pngwing.com/pngs/81/570/png-transparent-profile-logo-computer-icons-user-user-blue-heroes-logo-thumbnail.png';
         // Mostrar perfil com dados do usuário
         function mostrarPerfil(usuario) {
             if (!usuario) return;
-
-            document.getElementById("profileName").textContent = usuario.nome || "Nome não informado";
-            document.getElementById("profileEmail").textContent = usuario.email || "Email não informado";
-            document.getElementById("profileEmailContent").textContent = usuario.email || "Email não informado";
-            document.getElementById("profileFullName").textContent = usuario.nome || "Nome não informado";
-            document.getElementById("profilePhone").textContent = usuario.telefone || "Telefone não informado";
-            document.getElementById("profileCpf").textContent = usuario.cpf || "CPF não informado";
-            document.getElementById("profileStatus").textContent = usuario.situacao === "A" ? "Ativo" : "Inativo";
-
-            document.getElementById("profileAvatar").src = usuario.imagem_perfil?.trim() ? usuario.imagem_perfil : semPhoto;
+            
+            // Preenche os dados na página
+            document.getElementById('profileName').textContent = usuario.nome || 'Nome não informado';
+            document.getElementById('profileEmail').textContent = usuario.email || 'Email não informado';
+            document.getElementById('profileEmailContent').textContent = usuario.email || 'Email não informado';
+            document.getElementById('profileFullName').textContent = usuario.nome || 'Nome não informado';
+            document.getElementById('profilePhone').textContent = usuario.telefone || 'Telefone não informado';
+            document.getElementById('profileCpf').textContent = usuario.cpf || 'CPF não informado';
+            document.getElementById('profileStatus').textContent = usuario.situacao === 'A' ? 'Ativo' : 'Inativo';
+            
+            // Imagem de perfil
+            if (usuario.imagem_perfil === null || usuario.imagem_perfil === '') {
+                document.getElementById('profileAvatar').src = semphoto;
+            }
         }
-
-
 
         // Configura os event listeners
         function setupEventListeners() {
-            document.querySelectorAll(".nav-item").forEach(item => {
-                item.addEventListener("click", function () {
-                    document.querySelectorAll(".nav-item").forEach(navItem => navItem.classList.remove("active"));
-                    this.classList.add("active");
-
-                    document.querySelectorAll(".main-content > div").forEach(section => section.classList.add("hidden"));
-                    document.getElementById(`${this.dataset.section}-section`).classList.remove("hidden");
-                });
-            });
-
-            document.getElementById("avatarInput").addEventListener("change", async function (e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function (event) {
-                        document.getElementById("profileAvatar").src = event.target.result;
-                        atualizarImagemPerfil(event.target.result);
-                    };
-                    reader.readAsDataURL(file);
+            // Navegação entre seções
+            document.querySelectorAll('.nav-item').forEach(item => {
+                if (!item.onclick) {
+                    item.addEventListener('click', function() {
+                        if (this.dataset.section) {
+                            // Remove a classe active de todos os itens
+                            document.querySelectorAll('.nav-item').forEach(navItem => {
+                                navItem.classList.remove('active');
+                            });
+                            
+                            // Adiciona a classe active apenas no item clicado
+                            this.classList.add('active');
+                            
+                            // Esconde todas as seções
+                            document.querySelectorAll('.main-content > div').forEach(section => {
+                                section.classList.add('hidden');
+                            });
+                            
+                            // Mostra apenas a seção selecionada
+                            document.getElementById(`${this.dataset.section}-section`).classList.remove('hidden');
+                        }
+                    });
                 }
             });
 
-            document.querySelectorAll(".editable").forEach(item => {
-                item.addEventListener("click", function () {
-                    const currentValue = this.textContent.trim();
-                    const fieldName = this.id.replace("profile", "").toLowerCase();
+            // Upload de imagem de perfil
+            document.getElementById('avatarInput').addEventListener('change', async function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    try {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            document.getElementById('profileAvatar').src = event.target.result;
+                            atualizarImagemPerfil(event.target.result);
+                        };
+                        reader.readAsDataURL(file);
+                    } catch (error) {
+                        console.error('Erro ao atualizar imagem:', error);
+                        alert('Erro ao atualizar imagem de perfil');
+                    }
+                }
+            });
 
+            // Edição de campos
+            document.querySelectorAll('.editable').forEach(item => {
+                item.addEventListener('click', function() {
+                    const currentValue = this.textContent;
+                    const fieldName = this.id.replace('profile', '').toLowerCase();
+                    
                     const newValue = prompt(`Editar ${fieldName}:`, currentValue);
                     if (newValue && newValue !== currentValue) {
                         this.textContent = newValue;
@@ -198,80 +325,302 @@
                 });
             });
 
-            document.getElementById("savePersonalBtn").addEventListener("click", async function () {
+            // Botão salvar
+            document.getElementById('savePersonalBtn').addEventListener('click', async function() {
                 try {
-                    const idPessoa = Number(localStorage.getItem("id_pessoa"));
+                    const idPessoa = localStorage.getItem('id_pessoa');
                     const updatedData = {
-                        nome: document.getElementById("profileFullName").textContent,
-                        telefone: document.getElementById("profilePhone").textContent
+                        nome: document.getElementById('profileFullName').textContent,
+                        telefone: document.getElementById('profilePhone').textContent
                     };
 
                     const response = await fetch(`${API_URL}/pessoa/${idPessoa}`, {
-                        method: "PUT",
+                        method: 'PUT',
                         headers: {
-                            "Content-Type": "application/json"
+                            'Content-Type': 'application/json'
                         },
                         body: JSON.stringify(updatedData)
                     });
 
                     if (response.ok) {
-                        alert("Dados atualizados com sucesso!");
+                        alert('Dados atualizados com sucesso!');
                         await carregarDadosUsuario();
                     } else {
-                        throw new Error("Erro ao atualizar dados");
+                        throw new Error('Erro ao atualizar dados');
                     }
                 } catch (error) {
-                    console.error("Erro ao salvar dados:", error.message);
-                    alert("Erro ao salvar alterações");
+                    console.error('Erro ao salvar dados:', error);
+                    alert('Erro ao salvar alterações');
                 }
             });
         }
 
-        // Atualizar imagem de perfil
+        // Configurações do usuário
+        function setupSettings() {
+            // Modo Noturno
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            darkModeToggle.addEventListener('change', toggleDarkMode);
+            
+            // Carrega configurações salvas
+            loadSettings();
+            
+            // Deletar conta
+            document.getElementById('deleteAccountBtn').addEventListener('click', showDeleteModal);
+            document.getElementById('cancelDeleteBtn').addEventListener('click', hideDeleteModal);
+            document.getElementById('confirmDeleteBtn').addEventListener('click', deleteAccount);
+            
+            // Endereço
+            document.getElementById('updateAddressBtn').addEventListener('click', showAddressModal);
+            document.getElementById('cancelAddressBtn').addEventListener('click', hideAddressModal);
+            document.getElementById('addressForm').addEventListener('submit', saveAddress);
+            
+            // Pagamento
+            document.getElementById('addPaymentMethodBtn').addEventListener('click', showPaymentModal);
+            document.getElementById('cancelPaymentBtn').addEventListener('click', hidePaymentModal);
+            document.getElementById('paymentForm').addEventListener('submit', addPaymentMethod);
+            
+            // Fechar modais
+            document.querySelectorAll('.close-modal').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.closest('.modal').classList.add('hidden');
+                });
+            });
+        }
+        
+        function toggleDarkMode() {
+            const isDarkMode = document.getElementById('darkModeToggle').checked;
+            document.body.classList.toggle('dark-mode', isDarkMode);
+            localStorage.setItem('darkMode', isDarkMode);
+        }
+        
+        function loadSettings() {
+            // Carrega modo noturno
+            const darkMode = localStorage.getItem('darkMode') === 'true';
+            document.getElementById('darkModeToggle').checked = darkMode;
+            document.body.classList.toggle('dark-mode', darkMode);
+            
+            // Carrega endereço
+            loadUserAddress();
+            
+            // Carrega métodos de pagamento
+            loadPaymentMethods();
+        }
+        
+        async function loadUserAddress() {
+            try {
+                const idPessoa = localStorage.getItem('id_pessoa');
+                const response = await fetch(`${API_URL}/pessoa/${idPessoa}/endereco`);
+                
+                if (response.ok) {
+                    const address = await response.json();
+                    document.getElementById('addressContent').innerHTML = `
+                        <p><strong>CEP:</strong> ${address.cep || 'Não informado'}</p>
+                        <p><strong>Endereço:</strong> ${address.logradouro || 'Não informado'}</p>
+                        <p><strong>Número:</strong> ${address.numero || 'Não informado'}</p>
+                        <p><strong>Complemento:</strong> ${address.complemento || 'Nenhum'}</p>
+                        <p><strong>Cidade:</strong> ${address.cidade || 'Não informado'}</p>
+                        <p><strong>Estado:</strong> ${address.estado || 'Não informado'}</p>
+                    `;
+                } else {
+                    document.getElementById('addressContent').innerHTML = '<p>Nenhum endereço cadastrado</p>';
+                }
+            } catch (error) {
+                console.error('Erro ao carregar endereço:', error);
+            }
+        }
+        
+        async function loadPaymentMethods() {
+            try {
+                const idPessoa = localStorage.getItem('id_pessoa');
+                const response = await fetch(`${API_URL}/pessoa/${idPessoa}/pagamentos`);
+                
+                if (response.ok) {
+                    const methods = await response.json();
+                    let html = '<div class="payment-methods-list">';
+                    
+                    methods.forEach(method => {
+                        html += `
+                            <div class="payment-method">
+                                <i class="fab fa-cc-${method.tipo.toLowerCase()}"></i>
+                                <span>${method.tipo} ****${method.numero.slice(-4)}</span>
+                                <button class="btn-remove-payment" data-id="${method.id}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                    document.getElementById('paymentMethods').innerHTML = html;
+                    
+                    // Adiciona eventos aos botões de remover
+                    document.querySelectorAll('.btn-remove-payment').forEach(btn => {
+                        btn.addEventListener('click', removePaymentMethod);
+                    });
+                } else {
+                    document.getElementById('paymentMethods').innerHTML = '<p>Nenhum método de pagamento cadastrado</p>';
+                }
+            } catch (error) {
+                console.error('Erro ao carregar métodos de pagamento:', error);
+            }
+        }
+        
+        function showDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+        
+        function hideDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+        
+        async function deleteAccount() {
+            try {
+                const idPessoa = localStorage.getItem('id_pessoa');
+                const response = await fetch(`${API_URL}/pessoa/${idPessoa}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    alert('Conta deletada com sucesso. Redirecionando...');
+                    logout();
+                } else {
+                    throw new Error('Erro ao deletar conta');
+                }
+            } catch (error) {
+                console.error('Erro ao deletar conta:', error);
+                alert('Erro ao deletar conta. Tente novamente.');
+            } finally {
+                hideDeleteModal();
+            }
+        }
+        
+        function showAddressModal() {
+            document.getElementById('addressModal').classList.remove('hidden');
+        }
+        
+        function hideAddressModal() {
+            document.getElementById('addressModal').classList.add('hidden');
+        }
+        
+        async function saveAddress(e) {
+            e.preventDefault();
+            try {
+                const idPessoa = localStorage.getItem('id_pessoa');
+                const formData = {
+                    cep: document.getElementById('cep').value,
+                    logradouro: document.getElementById('logradouro').value,
+                    numero: document.getElementById('numero').value,
+                    complemento: document.getElementById('complemento').value,
+                    cidade: document.getElementById('cidade').value,
+                    estado: document.getElementById('estado').value
+                };
+                
+                const response = await fetch(`${API_URL}/pessoa/${idPessoa}/endereco`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    alert('Endereço atualizado com sucesso!');
+                    loadUserAddress();
+                    hideAddressModal();
+                } else {
+                    throw new Error('Erro ao atualizar endereço');
+                }
+            } catch (error) {
+                console.error('Erro ao salvar endereço:', error);
+                alert('Erro ao salvar endereço');
+            }
+        }
+        
+        function showPaymentModal() {
+            document.getElementById('paymentModal').classList.remove('hidden');
+        }
+        
+        function hidePaymentModal() {
+            document.getElementById('paymentModal').classList.add('hidden');
+        }
+        
+        async function addPaymentMethod(e) {
+            e.preventDefault();
+            try {
+                const idPessoa = localStorage.getItem('id_pessoa');
+                const formData = {
+                    tipo: document.getElementById('paymentType').value,
+                    numero: document.getElementById('cardNumber').value
+                };
+                
+                const response = await fetch(`${API_URL}/pessoa/${idPessoa}/pagamentos`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    alert('Método de pagamento adicionado com sucesso!');
+                    loadPaymentMethods();
+                    hidePaymentModal();
+                } else {
+                    throw new Error('Erro ao adicionar método de pagamento');
+                }
+            } catch (error) {
+                console.error('Erro ao adicionar método de pagamento:', error);
+                alert('Erro ao adicionar método de pagamento');
+            }
+        }
+        
+        async function removePaymentMethod(e) {
+            const methodId = e.currentTarget.dataset.id;
+            try {
+                const idPessoa = localStorage.getItem('id_pessoa');
+                const response = await fetch(`${API_URL}/pessoa/${idPessoa}/pagamentos/${methodId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    alert('Método de pagamento removido com sucesso!');
+                    loadPaymentMethods();
+                } else {
+                    throw new Error('Erro ao remover método de pagamento');
+                }
+            } catch (error) {
+                console.error('Erro ao remover método de pagamento:', error);
+                alert('Erro ao remover método de pagamento');
+            }
+        }
+
+        // Função para atualizar imagem de perfil
         async function atualizarImagemPerfil(imageData) {
             try {
-                const idPessoa = localStorage.getItem("id_pessoa");
+                const idPessoa = localStorage.getItem('id_pessoa');
                 const response = await fetch(`${API_URL}/pessoa/${idPessoa}/imagem`, {
-                    method: "PUT",
+                    method: 'PUT',
                     headers: {
-                        "Content-Type": "application/json"
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ imagem_perfil: imageData })
                 });
 
                 if (!response.ok) {
-                    throw new Error("Erro ao atualizar imagem");
+                    throw new Error('Erro ao atualizar imagem');
                 }
             } catch (error) {
-                console.error("Erro ao atualizar imagem:", error.message);
+                console.error('Erro:', error);
+                throw error;
             }
         }
 
         // Logout
         function logout() {
-            localStorage.removeItem("id_pessoa");
-            localStorage.removeItem("usuario");
-            localStorage.removeItem("dadosCompra");
-            fetch(`${AUTH_API_URL}/logout`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                body: JSON.stringify({ codigo: "logout" })
-                }
-                
-            }).finally(() => {
-                localStorage.clear();
-                window.location.href = "../index.html";
-            });
+            localStorage.removeItem('usuario');
+            localStorage.removeItem('id_pessoa');
+            window.location.href = '../index.html';
         }
-
-        // Carrega os dados ao abrir a página
-        document.addEventListener("DOMContentLoaded", async () => {
-            await carregarDadosUsuario();
-            setupEventListeners();
-        });
-
     </script>
 </body>
-
 </html>
