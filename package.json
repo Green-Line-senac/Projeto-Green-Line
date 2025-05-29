@@ -3,9 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
- "scripts": {
-  "start": "node backendGreenLine.js",
-  "dev": "nodemon backendGreenLine.js"
+"scripts": {
+  "start": "concurrently \"node backendGreenLine.js\" \"node js/backendPerfil.js\""
 },
   "keywords": [],
   "author": "",
