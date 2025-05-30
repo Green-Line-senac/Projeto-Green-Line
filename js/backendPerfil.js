@@ -1,14 +1,16 @@
 require('dotenv').config();
 const express = require('express');
-const mysql = require('mysql2/promise');
+const conexao = require('../conexao.js');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const cors = require('cors');
 
 const app = express();
+let db = new conexao();
 app.use(express.json());
 app.use(cors());
 
+/*
 // Configuração do MySQL
 let db;
 mysql.createConnection({
@@ -24,7 +26,7 @@ mysql.createConnection({
 })
 .catch(err => {
   console.error('❌ Erro no MySQL:', err.message);
-});
+});*/
 
 // ==================== FUNÇÕES AUXILIARES ====================
 const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -160,7 +162,10 @@ app.post('/login', async (req, res) => {
 // [3] LISTAR USUÁRIOS (GET)
 app.get('/pessoa', async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT id_pessoa, nome, email, telefone, cpf, id_tipo_usuario, situacao, imagem_perfil FROM pessoa');
+    let rows;
+    const resposta = await db.query('SELECT id_pessoa, nome, email, telefone, cpf, id_tipo_usuario, situacao, imagem_perfil FROM pessoa');
+    console.log(resposta);
+    rows = resposta;
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: 'Erro ao buscar usuários' });
@@ -170,15 +175,18 @@ app.get('/pessoa', async (req, res) => {
 // [4] BUSCAR USUÁRIO POR ID (GET)
 app.get('/pessoa/:id_pessoa', async (req, res) => {
   try {
+    console.log('Buscando usuário com ID:', req.params.id_pessoa);
     const id = parseInt(req.params.id_pessoa);
     if (isNaN(id) || id <= 0) {
       return res.status(400).json({ error: 'ID inválido' });
     }
-
-    const [rows] = await db.query(
+    let rows;
+    const resposta = await db.query(
       'SELECT id_pessoa, nome, email, telefone, cpf, id_tipo_usuario, situacao, imagem_perfil FROM pessoa WHERE id_pessoa = ?',
       [id]
     );
+    console.log('Resposta da consulta:', resposta);
+    rows = resposta;
     
     if (rows.length === 0) {
       return res.status(404).json({ 
@@ -187,7 +195,7 @@ app.get('/pessoa/:id_pessoa', async (req, res) => {
       });
     }
     
-    res.json(rows[0]);
+    res.json(rows);
   } catch (err) {
     console.error('Erro detalhado:', err);
     res.status(500).json({ 
@@ -360,6 +368,8 @@ app.delete('/pessoa/:id_pessoa/pagamentos/:id', async (req, res) => {
         res.status(500).json({ error: 'Erro ao remover método de pagamento' });
     }
 });
+
+
 
 // ==================== INICIAR SERVIDOR ====================
 const PORTA8 = process.env.PORTA8 || 3008;
