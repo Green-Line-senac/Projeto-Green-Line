@@ -10,7 +10,7 @@ let elementosHTML = {
 };
 const api = {
     online: "https://green-line-web.onrender.com",
-    offline: "http://localhost:3004"
+    index: "http://localhost:3002"
 };
 
 // Função para verificar estado de login
@@ -18,7 +18,7 @@ async function verificarEstadoLogin() {
     if (!elementosHTML.iconeUsuario || !elementosHTML.badgeCarrinho || !elementosHTML.link_usuario) return;
 
     try {
-        let response = await fetch(`${api.offline}/loginDados`, {);
+        let response = await fetch(`${api.index}/loginDados`);
 
         if (!response.ok) {
             // Se houver erro, limpa o localStorage (usuário não está logado)

@@ -84,7 +84,7 @@ app.get("/validar", async (req, res) => {
 });
 
 
-app.get("/verificarEmail", async (req, res) => {
+app.get("/verificar-email", async (req, res) => {
     const { email } = req.query;
     const sql = "SELECT COUNT(*) AS total FROM pessoa WHERE email = ?";
 

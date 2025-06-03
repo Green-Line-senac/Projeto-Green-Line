@@ -4,7 +4,11 @@ let email = document.querySelector('#email');
 
 let assunto = document.querySelector('#assunto');
 
-
+//não arrumei essa
+const api = {
+    online: "https://green-line-web.onrender.com"
+    //??
+};
 let nomeOk = false;
 let emailOk = false;
 let assuntoOk = false;

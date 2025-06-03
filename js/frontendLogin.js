@@ -1,3 +1,9 @@
+const api = {
+    online: 'https://green-line-web.onrender.com',
+    login:'http://localhost:3001',
+    index:'http://localhost:3002',
+};
+
 const formularioLogin = document.getElementById('formularioLogin');
 
 
@@ -25,7 +31,7 @@ formularioLogin.addEventListener('submit', async function (e) {
     }
 
     try {
-        const resposta = await fetch('https://green-line-web.onrender.com/verificarConta', {
+        const resposta = await fetch(`${api.login}/verificarConta`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ usuario, senha })
@@ -42,7 +48,7 @@ formularioLogin.addEventListener('submit', async function (e) {
                 mostrarMensagem("Email não verificado. Verifique sua caixa de entrada.", "warning");
                 if (usuario.includes("@")) {
                     try {
-                        await fetch("https://green-line-web.onrender.com/enviarEmail", {
+                        await fetch(`${api.login}/enviarEmail`, {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({ usuario })
@@ -56,7 +62,7 @@ formularioLogin.addEventListener('submit', async function (e) {
             case 2:
                 try {
                     console.log(usuario);
-                    await fetch("https://green-line-web.onrender.com/loginDados", {
+                    await fetch(`${api.index}/loginDados`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({

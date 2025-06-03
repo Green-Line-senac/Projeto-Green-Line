@@ -1,7 +1,8 @@
 // Configurações globais
 const config = {
-  apiUrl: 'https://green-line-web.onrender.com',
-  apiUrlCarrinho: 'https://green-line-web.onrender.com',
+  online: 'https://green-line-web.onrender.com',
+  produtos: 'http://localhost:3003',
+  index: 'http://localhost:3002',
   fallbackImage: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGZpbGw9IiM5OTkiPk5lbmh1bWEgSW1hZ2VtPC90ZXh0Pjwvc3ZnPg=='
 };
 // Inicialização
@@ -49,7 +50,7 @@ async function carregarProdutosPromocao() {
   try {
     mostrarLoader();
 
-    const response = await fetch(`${config.apiUrl}/produtos`);
+    const response = await fetch(`${config.index}/produtos`);
     const { success, data, message } = await response.json();
 
     if (!success || !Array.isArray(data)) {
@@ -428,7 +429,7 @@ document.getElementById('btnAddCarrinho').addEventListener('click', async () => 
   }
 
   try {
-    const requisicao = await fetch(`${config.apiUrlCarrinho}/carrinho`, {
+    const requisicao = await fetch(`${config.produtos}/carrinho`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

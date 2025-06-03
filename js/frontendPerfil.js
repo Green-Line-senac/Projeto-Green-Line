@@ -1,7 +1,11 @@
 // Dados do usuário
 let usuarioLogado = null;
-const API_URL = "http://localhost:3008";
-const AUTH_API_URL = "https://green-line-web.onrender.com";
+// URL da API
+const api = {
+    online: "https://green-line-web.onrender.com",
+    perfil: "http://localhost:3008",
+    index: "http://localhost:3002"
+}
 
 // Função para carregar dados do usuário
 async function carregarDadosUsuario() {
@@ -14,7 +18,7 @@ async function carregarDadosUsuario() {
             return;
         }
 
-        const response = await fetch(`${API_URL}/pessoa/${idPessoa}`);
+        const response = await fetch(`${api.perfil}/pessoa/${idPessoa}`);
         
         if (!response.ok) {
             throw new Error('Erro ao carregar dados do usuário');
@@ -121,7 +125,7 @@ function setupEventListeners() {
                 telefone: document.getElementById('profilePhone').textContent
             };
 
-            const response = await fetch(`${API_URL}/pessoa/${idPessoa}`, {
+            const response = await fetch(`${api.perfil}/pessoa/${idPessoa}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -196,7 +200,7 @@ function loadSettings() {
 async function loadUserAddress() {
     try {
         const idPessoa = localStorage.getItem('id_pessoa');
-        const response = await fetch(`${API_URL}/pessoa/${idPessoa}/endereco`);
+        const response = await fetch(`${api.perfil}/pessoa/${idPessoa}/endereco`);
         
         if (response.ok) {
             const address = await response.json();
@@ -219,7 +223,7 @@ async function loadUserAddress() {
 async function loadPaymentMethods() {
     try {
         const idPessoa = localStorage.getItem('id_pessoa');
-        const response = await fetch(`${API_URL}/pessoa/${idPessoa}/pagamentos`);
+        const response = await fetch(`${api.perfil}/pessoa/${idPessoa}/pagamentos`);
         
         if (response.ok) {
             const methods = await response.json();
@@ -263,7 +267,7 @@ function hideDeleteModal() {
 async function deleteAccount() {
     try {
         const idPessoa = localStorage.getItem('id_pessoa');
-        const response = await fetch(`${API_URL}/pessoa/${idPessoa}`, {
+        const response = await fetch(`${api.perfil}/pessoa/${idPessoa}`, {
             method: 'DELETE'
         });
         
@@ -302,7 +306,7 @@ async function saveAddress(e) {
             estado: document.getElementById('estado').value
         };
         
-        const response = await fetch(`${API_URL}/pessoa/${idPessoa}/endereco`, {
+        const response = await fetch(`${api.perfil}/pessoa/${idPessoa}/endereco`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -340,7 +344,7 @@ async function addPaymentMethod(e) {
             numero: document.getElementById('cardNumber').value
         };
         
-        const response = await fetch(`${API_URL}/pessoa/${idPessoa}/pagamentos`, {
+        const response = await fetch(`${api.perfil}/pessoa/${idPessoa}/pagamentos`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -365,7 +369,7 @@ async function removePaymentMethod(e) {
     const methodId = e.currentTarget.dataset.id;
     try {
         const idPessoa = localStorage.getItem('id_pessoa');
-        const response = await fetch(`${API_URL}/pessoa/${idPessoa}/pagamentos/${methodId}`, {
+        const response = await fetch(`${api.perfil}/pessoa/${idPessoa}/pagamentos/${methodId}`, {
             method: 'DELETE'
         });
         
@@ -385,7 +389,7 @@ async function removePaymentMethod(e) {
 async function atualizarImagemPerfil(imageData) {
     try {
         const idPessoa = localStorage.getItem('id_pessoa');
-        const response = await fetch(`${API_URL}/pessoa/${idPessoa}/imagem`, {
+        const response = await fetch(`${api.perfil}/pessoa/${idPessoa}/imagem`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -403,34 +407,35 @@ async function atualizarImagemPerfil(imageData) {
 }
 
 // Logout
-function logout() {
-    localStorage.removeItem('usuario');
-    localStorage.removeItem('id_pessoa');
-    localStorage.clear();
-    try{
-        const respostaLogout = fetch(`${AUTH_API_URL}/logout`,{
+async function logout() {
+    try {
+        const respostaLogout = await fetch(`${api.index}/logout`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ codigo: 0})
         });
+
         if (!respostaLogout.ok) {
-            throw new Error('Erro ao fazer logout');
+            throw new Error('Erro ao fazer logout - Status: ' + respostaLogout.status);
         }
-        console.log(respostaLogout);
-        let resposta = respostaLogout.json();
-        if(resposta.status === "sucesso") {
+
+        const resposta = await respostaLogout.json();
+        
+        if(resposta.status == "sucesso") {
             console.log('Logout realizado com sucesso');
-        }else{
+            localStorage.removeItem('usuario');
+            localStorage.removeItem('id_pessoa');
+            localStorage.clear();
+            window.location.href = '../index.html'; 
+        } else {
             console.error('Erro ao realizar logout:', resposta.mensagem);
             alert('Erro ao realizar logout. Tente novamente.');
         }
-    }catch (error) {
+    } catch (error) {
         console.error('Erro ao fazer logout:', error);
         alert('Erro ao fazer logout. Tente novamente.');
     }
-    window.location.href = '../index.html';
 };
 
 // Inicialização

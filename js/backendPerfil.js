@@ -371,6 +371,8 @@ app.delete('/pessoa/:id_pessoa/pagamentos/:id', async (req, res) => {
 
 
 
+
+
 // ==================== INICIAR SERVIDOR ====================
 const PORTA8 = process.env.PORTA8 || 3008;
 app.listen(PORTA8, () => {

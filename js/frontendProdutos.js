@@ -1,9 +1,13 @@
 // Configurações globais
 const config = {
-  apiUrl: 'https://green-line-web.onrender.com',
   produtosPorPagina: 8,
   fallbackImage: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGZpbGw9IiM5OTkiPk5lbmh1bWEgSW1hZ2VtPC90ZXh0Pjwvc3ZnPg=='
 };
+const api = {
+online: 'https://green-line-web.onrender.com',
+produto: 'http://localhost:3003',
+index: 'http://localhost:3002',
+}
 
 // Estado da aplicação
 let estado = {
@@ -104,7 +108,7 @@ function sanitizarProduto(produto) {
 async function carregarProdutos() {
   try {
     mostrarLoader();
-    const response = await fetch(`${config.apiUrl}/produto`);
+    const response = await fetch(`${api.produto}/produto`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     console.log('Produtos recebidos:', data);
@@ -437,7 +441,7 @@ function abrirModalProduto(dadosProduto) {
 async function verificarEstadoLogin() {
   try {
     console.log('Iniciando verificação de login...');
-    const response = await fetch('https://green-line-web.onrender.com/loginDados', {
+    const response = await fetch(`${api.index}/loginDados`, {
       credentials: 'include'
     });
     console.log('Status da resposta:', response.status);
@@ -607,7 +611,7 @@ console.log("Subtotal:", subtotal.toFixed(2));
     }
 
     try {
-      const requisicao = await fetch(`${config.apiUrl}/carrinho`, {
+      const requisicao = await fetch(`${api.produto}/carrinho`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

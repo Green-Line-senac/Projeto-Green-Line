@@ -92,11 +92,7 @@ app.get("/loginDados", async (req, res) => {
 
 app.post('/logout', (req, res) => {
     console.log("Requisição de logout recebida");
-   let codigo = req.body.codigo || 0;
-    console.log("Código de logout recebido:", codigo);
-    // Verifica se o código de logout é válido
     
-    // Reseta o estado de login
     estadoLogin = {
         usuario: null,
         id_pessoa: null,
@@ -108,7 +104,7 @@ app.post('/logout', (req, res) => {
 
     console.log("Estado de login após logout:", estadoLogin);
     
-    res.json({ status: "sucesso", mensagem: "Usuário desconectado com sucesso" });
+    res.status(200).json({ status: "sucesso", mensagem: "Usuário desconectado com sucesso" });
 });
 
 // Rota para buscar produtos em promoção

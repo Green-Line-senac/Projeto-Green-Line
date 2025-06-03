@@ -1,5 +1,10 @@
 // IIFE cria um escopo isolado, evitando que variáveis e funções internas vazem para o escopo global (window).
 (function () {
+    const api = {
+        online: "https://green-line-web.onrender.com",
+        cadastro_produto: "http://localhost:3005"
+    }
+
     'use strict';
     const formulario = document.getElementById('formulario-produto');
     const campoDescricao = document.getElementById('descricao-curta');
@@ -162,7 +167,7 @@
             };
 
             // Enviar para o backend
-            const response = await fetch('https://green-line-web.onrender.com/cadastro-produto', {
+            const response = await fetch(`${api.cadastro_produto}/cadastro-produto`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(dados)

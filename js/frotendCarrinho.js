@@ -3,12 +3,18 @@ let estado = {
     produtos: []
 };
 
+const api = {
+    online: "https://green-line-web.onrender.com",
+    index: "http://localhost:3002",
+    carrinho: "http://localhost:3006"
+};
+
 // Inicializa o sistema
 async function inicializar() {
     try {
         console.log("Iniciando carregamento...");
 
-        const respostaLogin = await fetch("https://green-line-web.onrender.com/loginDados");
+        const respostaLogin = await fetch(`${api.index}/loginDados`);
         if (!respostaLogin.ok) throw new Error("Erro na requisição de login");
 
         const dados = await respostaLogin.json();
@@ -30,7 +36,7 @@ async function buscarProdutos() {
     try {
         console.log("Buscando produtos para ID:", estado.id_pessoa);
 
-        const resposta = await fetch('https://green-line-web.onrender.com/buscar-produtos', {
+        const resposta = await fetch(`${api.carrinho}/buscar-produtos`, {
             method: 'POST',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id_pessoa: estado.id_pessoa })
@@ -124,7 +130,7 @@ function subtotal() {
 // Função para remover produto
 async function excluirProduto(id_produto, id_carrinho, elemento) {
     try {
-        let requisicao = await fetch('https://green-line-web.onrender.com/excluir-produtos', {
+        let requisicao = await fetch(`${api.carrinho}/excluir-produtos`, {
             method: 'POST',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id_pessoa: estado.id_pessoa, id_produto, id_carrinho })
