@@ -8,13 +8,17 @@ let elementosHTML = {
     link_usuario: document.getElementById('link-usuario'),
     administracao: document.getElementById('admDropdown')
 };
+const api = {
+    online: "https://green-line-web.onrender.com",
+    offline: "http://localhost:3004"
+};
 
 // Função para verificar estado de login
 async function verificarEstadoLogin() {
     if (!elementosHTML.iconeUsuario || !elementosHTML.badgeCarrinho || !elementosHTML.link_usuario) return;
 
     try {
-        let response = await fetch("https://green-line-web.onrender.com/loginDados");
+        let response = await fetch(`${api.offline}/loginDados`, {);
 
         if (!response.ok) {
             // Se houver erro, limpa o localStorage (usuário não está logado)
