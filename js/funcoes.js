@@ -27,7 +27,7 @@ class FuncaoUteis {
                 html: `
               <h1>Faça do meio ambiente o seu meio de vida</h1>
               <p>Olá, obrigado por se cadastrar na Green Line! Confirme seu e-mail para começar a usar a plataforma:</p>
-              <a href="http://localhost:3000/validar?token=${token}" style="padding:10px 20px; background-color:#007bff; color:white; text-decoration:none; border-radius:5px;">
+              <a href="https://green-line-web.onrender.com/validar?token=${token}" style="padding:10px 20px; background-color:#007bff; color:white; text-decoration:none; border-radius:5px;">
                 Confirmar Email
               </a>
             `

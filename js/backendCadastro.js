@@ -63,17 +63,17 @@ app.get("/validar", async (req, res) => {
             const id_pessoa = resultado[0].id_pessoa;
             try {
                 await db.query(atualizarSituacao, [id_pessoa]);
-                res.sendFile(path.join(__dirname, "../public", "confirmacaoLogin.html"), (err) => {
+                res.sendFile(path.resolve(__dirname, '../public/erro.html'), (err) => {
                     if (err) {
                         res.status(404).send("Página não encontrada!");
                     }
                 });
             } catch (erro) {
                 console.error("Erro ao atualizar:", erro);
-                res.sendFile(path.join(__dirname, "../public", "erro.html"));
+                res.sendFile(path.resolve(__dirname, '../public/erro.html'));
             }
         } else {
-            res.sendFile(path.join(__dirname, "../public", "erro.html"));
+            res.sendFile(path.resolve(__dirname, '../public/erro.html'));
 
         }
     } catch (erro) {

@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-"scripts": {
-    "start": "npm install && concurrently \"node js/backendCadastro.js\" \"node js/backendLogin.js\" \"node js/backendCadastroProduto.js\" \"node js/backendIndex.js\" \"node js/backendprodutos.js\" \"node js/backendPadrao.js\" \"node js/backendCarrinho.js\" \"node js/backendPerfil.js\""
+  "scripts": {
+    "start": "npm install && concurrently \"node js/backendCadastro.js\" \"node js/backendLogin.js\" \"node js/backendCadastroProduto.js\" \"node js/backendIndex.js\" \"node js/backendprodutos.js\" \"node js/backendPadrao.js\" \"node js/backendCarrinho.js\" \"node js/backendPerfil.js\" \"node js/backendVendas.js\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.9.0",
     "bcryptjs": "^3.0.2",
     "concurrently": "^9.1.2",
     "cors": "^2.8.5",
