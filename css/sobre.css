@@ -12,6 +12,9 @@ html, body {
     color: #111111;
     padding: 3rem 0;
 }
+.text-align-justify {
+    text-align: justify;
+}
 
 /* CARDS DA EQUIPE */
 .equipe-card {
