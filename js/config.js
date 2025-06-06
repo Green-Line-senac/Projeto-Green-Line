@@ -1,4 +1,4 @@
-const GreenLineConfig = {
+window.GreenLineConfig = {
     api: {
         online: "https://green-line-web.onrender.com",
         index: "http://localhost:3002",
