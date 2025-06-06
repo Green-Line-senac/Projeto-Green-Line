@@ -3,8 +3,17 @@ const config = {
   produtosPorPagina: 8,
   fallbackImage: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGZpbGw9IiM5OTkiPk5lbmh1bWEgSW1hZ2VtPC90ZXh0Pjwvc3ZnPg=='
 };
-const apiProduto = window.GreenLineConfig.api.produto;
-const apiIndex = window.GreenLineConfig.api.index;
+const apiProduto = {
+        online: "https://green-line-web.onrender.com",
+        index: "http://localhost:3002",
+        produto: "http://localhost:3003",
+        carrinho: "http://localhost:3006",
+        vendas: 'http://localhost:3009',
+        perfil: "http://localhost:3008",
+        login:'http://localhost:3001',
+        cadastro_produto: "http://localhost:3005",
+        cadastro: "http://localhost:3000"
+}
 
 // Estado da aplicação
 let estado = {
@@ -105,7 +114,7 @@ function sanitizarProduto(produto) {
 async function carregarProdutos() {
   try {
     mostrarLoader();
-    const response = await fetch(`${apiProduto}/produto`);
+    const response = await fetch(`${apiProduto.produto}/produto`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     console.log('Produtos recebidos:', data);
@@ -438,7 +447,7 @@ function abrirModalProduto(dadosProduto) {
 async function verificarEstadoLogin() {
   try {
     console.log('Iniciando verificação de login...');
-    const response = await fetch(`${apiIndex}/loginDados`, {
+    const response = await fetch(`${apiProduto.index}/loginDados`, {
       credentials: 'include'
     });
     console.log('Status da resposta:', response.status);
@@ -608,7 +617,7 @@ console.log("Subtotal:", subtotal.toFixed(2));
     }
 
     try {
-      const requisicao = await fetch(`${apiProduto}/carrinho`, {
+      const requisicao = await fetch(`${apiProduto.produto}/carrinho`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

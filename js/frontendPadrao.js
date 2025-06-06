@@ -4,14 +4,23 @@ let elementosHTML = {
     link_usuario: document.getElementById('link-usuario'),
     administracao: document.getElementById('admDropdown')
 };
-const api = window.GreenLineConfig.api.index;
-
+const api = {
+        online: "https://green-line-web.onrender.com",
+        index: "http://localhost:3002",
+        produto: "http://localhost:3003",
+        carrinho: "http://localhost:3006",
+        vendas: 'http://localhost:3009',
+        perfil: "http://localhost:3008",
+        login:'http://localhost:3001',
+        cadastro_produto: "http://localhost:3005",
+        cadastro: "http://localhost:3000"
+}
 // Função para verificar estado de login
 async function verificarEstadoLogin() {
     if (!elementosHTML.iconeUsuario || !elementosHTML.badgeCarrinho || !elementosHTML.link_usuario) return;
 
     try {
-        let response = await fetch(`${api}/loginDados`);
+        let response = await fetch(`${api.index}/loginDados`);
 
         if (!response.ok) {
             // Se houver erro, limpa o localStorage (usuário não está logado)
