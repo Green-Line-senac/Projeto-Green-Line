@@ -3,7 +3,7 @@ let emailValido;
 let cpfValido;
 const api = {
     online: "https://green-line-web.onrender.com",
-    cadastro: "http://localhost:3005"
+    cadastro: "http://localhost:3000"
 };
 
 const formularioCadastro = document.getElementById('formularioCadastro');

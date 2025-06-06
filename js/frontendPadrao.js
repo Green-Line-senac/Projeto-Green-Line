@@ -1,24 +1,17 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    await verificarEstadoLogin();
-});
-
 let elementosHTML = {
     iconeUsuario: document.getElementById('icone-usuario'),
     badgeCarrinho: document.getElementById('badge-carrinho'),
     link_usuario: document.getElementById('link-usuario'),
     administracao: document.getElementById('admDropdown')
 };
-const api = {
-    online: "https://green-line-web.onrender.com",
-    index: "http://localhost:3002"
-};
+const api = window.GreenLineConfig.api.index;
 
 // Função para verificar estado de login
 async function verificarEstadoLogin() {
     if (!elementosHTML.iconeUsuario || !elementosHTML.badgeCarrinho || !elementosHTML.link_usuario) return;
 
     try {
-        let response = await fetch(`${api.index}/loginDados`);
+        let response = await fetch(`${api}/loginDados`);
 
         if (!response.ok) {
             // Se houver erro, limpa o localStorage (usuário não está logado)
@@ -62,3 +55,7 @@ async function verificarEstadoLogin() {
         console.error("Erro ao verificar login:", erro.message);
     }
 }
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await verificarEstadoLogin();
+});
