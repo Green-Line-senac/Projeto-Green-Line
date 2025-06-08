@@ -19,11 +19,26 @@ CREATE TABLE pessoa (
     data_hora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE enderecos (
+    id_endereco INT PRIMARY KEY AUTO_INCREMENT,
+    uf CHAR(2) NOT NULL,
+    cep VARCHAR(12) NOT NULL,
+    cidade VARCHAR(20) NOT NULL,
+    bairro VARCHAR(50) NULL,
+    endereco TEXT NULL,
+    complemento TEXT NULL,
+    situacao CHAR(1) NOT NULL DEFAULT 'A',
+    id_pessoa INT NOT NULL,
+    FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa) ON DELETE CASCADE
+);
+
 -- Criando a tabela de registros de acessos
 CREATE TABLE acessos (
     id_acesso INT PRIMARY KEY AUTO_INCREMENT, 
     id_pessoa INT NOT NULL,
+    usuario VARCHAR(20) NOT NULL,
     FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa) ON DELETE CASCADE,
+    local VARCHAR(15) NOT NULL,
     data_hora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TABLE produto (
@@ -234,3 +249,47 @@ JOIN
     carrinho c ON ci.id_carrinho = c.id_carrinho
 WHERE 
     p.ativo = TRUE;
+    
+    
+ CREATE VIEW view_pessoa_endereco AS
+SELECT 
+    p.id_pessoa,
+    p.nome,
+    p.email,
+    p.telefone,
+    p.cpf,
+    p.id_tipo_usuario,
+    p.situacao AS situacao_pessoa,
+    p.imagem_perfil,
+    p.data_hora,
+    e.id_endereco,
+    e.uf,
+    e.cep,
+    e.cidade,
+    e.bairro,
+    e.endereco,
+    e.complemento,
+    e.situacao AS situacao_endereco
+FROM 
+    pessoa p
+LEFT JOIN 
+    enderecos e ON p.id_pessoa = e.id_pessoa;   
+ 
+ 
+ <option value="Moda Sustentável">Moda Sustentável</option>
+                                        <option value="Cosméticos Naturais">Cosméticos Naturais</option>
+                                        <option value="Casa Ecológica">Casa Ecológica</option>
+                                        <option value="Alimentos Orgânicos">Alimentos Orgânicos</option>
+                                        <option value="Transporte Sustentável">Transporte Sustentável</option>
+                                        <option value="Reciclagem e Reutilização">Reciclagem e Reutilização</option>
+                                        <option value="Jardinagem Orgânica">Jardinagem Orgânica</option>
+                                        <option value="Educação e Conscientização">Educação e Conscientização</option>
+                                        <option value="Energia Renovável">Energia Renovável</option>
+                                        <option value="Bem-estar Sustentável">Bem-estar Sustentável</option>
+                                        <option value="Tecnologia Verde">Tecnologia Verde</option>   
+
+
+CREATE TABLE categorias(
+	id_categoria INT NOT NULL AUTO_INCREMENT,
+	categoria VARCHAR(50) NOT NULL
+);
