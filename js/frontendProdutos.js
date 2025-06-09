@@ -140,7 +140,7 @@ function criarCardProduto(produto) {
     : `<span class="fs-5">R$ ${produto.preco.toFixed(2)}</span>`;
   card.innerHTML = `
     <div class="card h-100 cursor point" onclick="abrirModalProduto(${JSON.stringify(produto).replace(/"/g, '&quot;')})">
-      <img src="${produto.imagem_1 != null ? produto.imagem_1 : "https://github.com/KauaNca/green_line_desktop/tree/main/imagens/"+produto.imagem_1}" 
+      <img src="${produto.imagem_1 != null ? produto.imagem_1 : "https://github.com/KauaNca/green_line_desktop/tree/main/imagens/produtos/"+produto.imagem_1}" 
            class="card-img-top" 
            alt="${escapeHtml(produto.nome)}"
            loading="lazy"

@@ -275,21 +275,10 @@ FROM
 LEFT JOIN 
     enderecos e ON p.id_pessoa = e.id_pessoa;   
  
- 
- <option value="Moda Sustentável">Moda Sustentável</option>
-                                        <option value="Cosméticos Naturais">Cosméticos Naturais</option>
-                                        <option value="Casa Ecológica">Casa Ecológica</option>
-                                        <option value="Alimentos Orgânicos">Alimentos Orgânicos</option>
-                                        <option value="Transporte Sustentável">Transporte Sustentável</option>
-                                        <option value="Reciclagem e Reutilização">Reciclagem e Reutilização</option>
-                                        <option value="Jardinagem Orgânica">Jardinagem Orgânica</option>
-                                        <option value="Educação e Conscientização">Educação e Conscientização</option>
-                                        <option value="Energia Renovável">Energia Renovável</option>
-                                        <option value="Bem-estar Sustentável">Bem-estar Sustentável</option>
-                                        <option value="Tecnologia Verde">Tecnologia Verde</option>   
 
 
 CREATE TABLE categorias(
 	id_categoria INT NOT NULL AUTO_INCREMENT,
-	categoria VARCHAR(50) NOT NULL
+	categoria VARCHAR(50) NOT NULL,
+	descricao NOT NULL TEXT
 );
