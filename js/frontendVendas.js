@@ -1,3 +1,5 @@
+import { criarPedido } from './api/pedidosApi.js';
+
 const api = {
     online: 'https://green-line-web.onrender.com',
     vendas: 'http://localhost:3009'
@@ -220,10 +222,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (dadosCompra.length > 0) {
         let htmlContent = "";
+        let valorTotal = 0;
 
         dadosCompra.forEach(element => {
             const precoFormatado = parseFloat(element.preco_final).toFixed(2).replace(".", ",");
             const subtotalFormatado = parseFloat(element.subtotal).toFixed(2).replace(".", ",");
+            valorTotal += parseFloat(element.subtotal);
 
             htmlContent += `
             <hr>
@@ -231,68 +235,237 @@ document.addEventListener("DOMContentLoaded", () => {
                 <p><strong>Preço unitário:</strong> R$ ${precoFormatado}</p>
                 <p><strong>Quantidade:</strong> ${element.quantidade}</p>
             `;
-            let totalFinal = total(element.subtotal); // Atualiza o total com o subtotal do produto
-            document.getElementById("contador-subtotal").textContent = `R$ ${totalFinal}`;
-            document.getElementById("contador-total").textContent = `R$ ${totalFinal}`; // Atualiza o total final
         });
 
         containerProdutos.innerHTML = htmlContent;
+        
+        // Atualiza os totais
+        const valorTotalFormatado = valorTotal.toFixed(2).replace(".", ",");
+        document.getElementById("contador-subtotal").textContent = `R$ ${valorTotalFormatado}`;
+        document.getElementById("contador-total").textContent = `R$ ${valorTotalFormatado}`;
     } else {
         containerProdutos.innerHTML = "<p>Nenhum produto selecionado.</p>";
     }
 });
 
+// Função para validar dados do cartão
+function validarCartao(dadosCartao) {
+    const { numeroCartao, nomeCartao, validadeCartao, cvv } = dadosCartao;
+    
+    // Valida número do cartão (usando algoritmo de Luhn)
+    function validarNumeroCartao(numero) {
+        numero = numero.replace(/\D/g, '');
+        if (numero.length < 13 || numero.length > 19) return false;
+        
+        let soma = 0;
+        let dobro = false;
+        
+        for (let i = numero.length - 1; i >= 0; i--) {
+            let digito = parseInt(numero.charAt(i));
+            
+            if (dobro) {
+                digito *= 2;
+                if (digito > 9) digito -= 9;
+            }
+            
+            soma += digito;
+            dobro = !dobro;
+        }
+        
+        return soma % 10 === 0;
+    }
+    
+    // Valida data de validade
+    function validarValidade(validade) {
+        const regex = /^(0[1-9]|1[0-2])\/([0-9]{2})$/;
+        if (!regex.test(validade)) return false;
+        
+        const [mes, ano] = validade.split('/');
+        const dataAtual = new Date();
+        const anoAtual = dataAtual.getFullYear() % 100;
+        const mesAtual = dataAtual.getMonth() + 1;
+        
+        const anoValidade = parseInt(ano);
+        const mesValidade = parseInt(mes);
+        
+        if (anoValidade < anoAtual) return false;
+        if (anoValidade === anoAtual && mesValidade < mesAtual) return false;
+        
+        return true;
+    }
+    
+    // Valida CVV
+    function validarCVV(cvv) {
+        return /^[0-9]{3,4}$/.test(cvv);
+    }
+    
+    // Valida nome
+    function validarNome(nome) {
+        return /^[a-zA-ZÀ-ÿ\s]{3,}$/.test(nome);
+    }
+    
+    const erros = [];
+    
+    if (!validarNumeroCartao(numeroCartao)) {
+        erros.push("Número do cartão inválido");
+    }
+    
+    if (!validarNome(nomeCartao)) {
+        erros.push("Nome no cartão inválido");
+    }
+    
+    if (!validarValidade(validadeCartao)) {
+        erros.push("Data de validade inválida");
+    }
+    
+    if (!validarCVV(cvv)) {
+        erros.push("CVV inválido");
+    }
+    
+    return erros;
+}
 
-document.getElementById("FinalizarCompra").addEventListener("click", (event) => {
+// Função para validar endereço
+function validarEndereco(endereco) {
+    const erros = [];
+    
+    if (!endereco.cep || !/^\d{5}-?\d{3}$/.test(endereco.cep)) {
+        erros.push("CEP inválido");
+    }
+    
+    if (!endereco.bairro || endereco.bairro.length < 3) {
+        erros.push("Bairro inválido");
+    }
+    
+    if (!endereco.endereco || endereco.endereco.length < 3) {
+        erros.push("Endereço inválido");
+    }
+    
+    if (!endereco.cidade || endereco.cidade.length < 3) {
+        erros.push("Cidade inválida");
+    }
+    
+    if (!endereco.estado || !/^[A-Z]{2}$/.test(endereco.estado)) {
+        erros.push("Estado inválido");
+    }
+    
+    if (!endereco.numeroCasa || !/^\d+$/.test(endereco.numeroCasa)) {
+        erros.push("Número da casa inválido");
+    }
+    
+    return erros;
+}
+
+// Função para mostrar erros
+function mostrarErros(erros) {
+    const alertaErro = document.createElement('div');
+    alertaErro.className = 'alert alert-danger alert-dismissible fade show';
+    alertaErro.innerHTML = `
+        <h4 class="alert-heading">Por favor, corrija os seguintes erros:</h4>
+        <ul class="mb-0">
+            ${erros.map(erro => `<li>${erro}</li>`).join('')}
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+    `;
+    
+    const container = document.querySelector('.container');
+    container.insertBefore(alertaErro, container.firstChild);
+}
+
+// Event listener para finalizar compra
+document.getElementById("FinalizarCompra").addEventListener("click", async (event) => {
     event.preventDefault();
-    let endereco = {
-        cep: document.getElementById("cep").value,
-        bairro: document.getElementById("bairro").value,
-        endereco: document.getElementById("endereco").value,
-        cidade: document.getElementById("cidade").value,
-        estado: document.getElementById("estado").value,
-        numeroCasa: document.getElementById("numero-casa").value,
-        complementoCasa: document.getElementById("complemento-casa").value 
-    }
-    let pagamento = document.getElementById("pagamento").value;
-    let dadosPedido;
+    console.log('Iniciando processo de finalização da compra...');
     
-    if (!endereco.cep || !endereco.bairro || !endereco.endereco || !endereco.cidade || !endereco.estado || !endereco.numeroCasa || !endereco.complementoCasa) {
-        alert("Por favor, preencha todos os campos obrigatórios do endereço.");
-        return;
-    } // This closing brace was missing
-
-    if (pagamento == "CC") {
-        dadosPedido = {
-            numeroCartao: document.getElementById("numero-cartao").value,
-            nomeCartao: document.getElementById("nome-cartao").value,
-            validadeCartao: document.getElementById("validade-cartao").value,
-            cvv: document.getElementById("cvv").value,
-            parcelas: document.getElementById("parcelas").value,
-            endereco: endereco,
-            pagamento: pagamento,
-            dadosCompra: lJSON.parse(localStorage.getItem("dadosCompra"))
+    try {
+        // Coleta dados do endereço
+        const endereco = {
+            cep: document.getElementById("cep").value,
+            bairro: document.getElementById("bairro").value,
+            endereco: document.getElementById("endereco").value,
+            cidade: document.getElementById("cidade").value,
+            estado: document.getElementById("estado").value,
+            numeroCasa: document.getElementById("numero-casa").value,
+            complementoCasa: document.getElementById("complemento-casa").value
         };
-        if (!dadosPedido.numeroCartao || !dadosPedido.nomeCartao || !dadosPedido.validadeCartao || !dadosPedido.cvv || !dadosPedido.parcelas) {
-            alert("Por favor, preencha todos os campos obrigatórios do cartão de crédito.");
-            return;
-        }
-    }
+        console.log('Dados do endereço coletados:', endereco);
 
-    if (pagamento == "PIX" || pagamento == "BB") {
-        dadosPedido = {
-            pagamento: document.getElementById("pagamento").value,
-            endereco: endereco,
-            dadosCompra: JSON.parse(localStorage.getItem("dadosCompra"))
-        }
-        if (!dadosPedido.pagamento) {
-            alert("Por favor, selecione um método de pagamento.");
+        // Valida endereço
+        const errosEndereco = validarEndereco(endereco);
+        if (errosEndereco.length > 0) {
+            console.log('Erros de validação do endereço:', errosEndereco);
+            mostrarErros(errosEndereco);
             return;
         }
+
+        // Coleta método de pagamento
+        const pagamento = document.getElementById("pagamento").value;
+        console.log('Método de pagamento selecionado:', pagamento);
+        let dadosPedido;
+
+        // Processa pagamento com cartão
+        if (pagamento === "CC") {
+            const dadosCartao = {
+                numeroCartao: document.getElementById("numero-cartao").value,
+                nomeCartao: document.getElementById("nome-cartao").value,
+                validadeCartao: document.getElementById("validade-cartao").value,
+                cvv: document.getElementById("cvv").value
+            };
+            console.log('Dados do cartão coletados:', {...dadosCartao, numeroCartao: '****'});
+
+            // Valida cartão
+            const errosCartao = validarCartao(dadosCartao);
+            if (errosCartao.length > 0) {
+                console.log('Erros de validação do cartão:', errosCartao);
+                mostrarErros(errosCartao);
+                return;
+            }
+
+            dadosPedido = {
+                ...dadosCartao,
+                parcelas: document.getElementById("parcelas").value,
+                endereco,
+                metodoPagamento: pagamento,
+                produtos: JSON.parse(localStorage.getItem("dadosCompra"))
+            };
+        } else if (pagamento === "PIX" || pagamento === "BB") {
+            dadosPedido = {
+                metodoPagamento: pagamento,
+                endereco,
+                produtos: JSON.parse(localStorage.getItem("dadosCompra"))
+            };
+        } else {
+            console.log('Método de pagamento inválido:', pagamento);
+            mostrarErros(["Selecione um método de pagamento válido"]);
+            return;
+        }
+
+        // Adiciona dados do usuário e timestamp
+        dadosPedido.idUsuario = localStorage.getItem('id_pessoa');
+        dadosPedido.dataPedido = new Date().toISOString();
+        console.log('Dados do pedido completos:', {...dadosPedido, numeroCartao: '****'});
+
+        // Envia pedido para o backend
+        console.log('Enviando pedido para o backend...');
+        const resposta = await criarPedido(dadosPedido);
+        console.log('Pedido criado com sucesso:', resposta);
+
+        // Salva dados do formulário para uso na página de confirmação
+        localStorage.setItem("dadosFormulario", JSON.stringify({
+            ...endereco,
+            metodoPagamento: pagamento,
+            email: localStorage.getItem('email')
+        }));
+        console.log('Dados do formulário salvos no localStorage');
+
+        // Redireciona para página de confirmação
+        console.log('Redirecionando para página de confirmação...');
+        window.location.href = "pedido_confirmado.html";
+
+    } catch (erro) {
+        console.error('Erro detalhado ao processar pedido:', erro);
+        mostrarErros(["Ocorreu um erro ao processar seu pedido. Por favor, tente novamente."]);
     }
-    
-    console.log(dadosPedido);
-    window.location.href = "pedido_confirmado.html"
 });
 
   document.getElementById("Cancelar").addEventListener("click", function() {

@@ -1,4 +1,3 @@
-
 :root {
   --primary-color: #198754;
   --secondary-color: #20c997;
@@ -33,38 +32,27 @@ body {
 
 /* Header de confirmação */
 .confirmation-header {
-  padding: 3rem 0 2rem;
-  background: linear-gradient(135deg, var(--success-light) 0%, #ffffff 100%);
-  border-radius: 20px;
-  margin-bottom: 2rem;
+  padding: 2rem 0;
 }
 
-.success-icon i {
+.success-icon {
   font-size: 4rem;
-  color: var(--success-color);
-  animation: bounceIn 0.8s ease-out;
+  color: #198754;
 }
 
 .confirmation-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--text-dark);
+  color: #198754;
   margin-bottom: 0.5rem;
 }
 
 .confirmation-subtitle {
-  font-size: 1.2rem;
-  color: var(--text-muted);
-  margin-bottom: 1.5rem;
+  color: #6c757d;
+  font-size: 1.1rem;
 }
 
 .order-number {
+  margin-top: 1rem;
   font-size: 1.1rem;
-  padding: 0.75rem 1.5rem;
-  background: white;
-  border-radius: 50px;
-  display: inline-block;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* Cards base */
@@ -73,80 +61,83 @@ body {
 .delivery-info-card,
 .order-summary-card,
 .quick-actions-card {
-  background: white;
-  border-radius: 15px;
-  padding: 2rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  border: 1px solid var(--border-color);
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   margin-bottom: 1.5rem;
 }
 
 .card-title {
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: var(--text-dark);
+  color: #198754;
+  font-size: 1.25rem;
   margin-bottom: 1.5rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 2px solid var(--primary-color);
+  display: flex;
+  align-items: center;
 }
 
 /* Timeline de status */
 .status-timeline {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  position: relative;
+  padding: 0 1rem;
 }
 
 .status-step {
   display: flex;
   align-items: flex-start;
-  gap: 1rem;
+  margin-bottom: 2rem;
   position: relative;
 }
 
-.status-step:not(:last-child)::after {
-  content: "";
-  position: absolute;
-  left: 1.25rem;
-  top: 3rem;
-  width: 2px;
-  height: 2rem;
-  background: var(--border-color);
+.status-step:last-child {
+  margin-bottom: 0;
 }
 
-.status-step.active::after {
-  background: var(--success-color);
+.status-step::before {
+  content: '';
+  position: absolute;
+  left: 1rem;
+  top: 2rem;
+  bottom: -2rem;
+  width: 2px;
+  background: #e9ecef;
+}
+
+.status-step:last-child::before {
+  display: none;
 }
 
 .step-icon {
   width: 2.5rem;
   height: 2.5rem;
+  background: #f8f9fa;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-light);
-  border: 2px solid var(--border-color);
+  margin-right: 1rem;
+  border: 2px solid #dee2e6;
+  font-size: 1rem;
+  color: #6c757d;
   flex-shrink: 0;
 }
 
 .status-step.active .step-icon {
-  background: var(--success-color);
-  border-color: var(--success-color);
+  background: #198754;
+  border-color: #198754;
   color: white;
 }
 
 .step-content h4 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-  color: var(--text-dark);
+  margin: 0;
+  font-size: 1rem;
+  color: #212529;
 }
 
 .step-content p {
-  color: var(--text-muted);
-  margin: 0;
-  font-size: 0.9rem;
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  color: #6c757d;
 }
 
 /* Lista de produtos do pedido */
@@ -157,48 +148,16 @@ body {
 }
 
 .order-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  background: var(--bg-light);
-  border-radius: 10px;
-  border: 1px solid var(--border-color);
-}
-
-.item-image {
-  width: 80px;
-  height: 80px;
-  border-radius: 8px;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
-.item-details {
-  flex: 1;
+  padding: 1rem 0;
 }
 
 .item-name {
-  font-weight: 600;
-  color: var(--text-dark);
+  font-size: 1rem;
   margin-bottom: 0.25rem;
 }
 
-.item-description {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
-}
-
-.item-quantity {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-}
-
-.item-price {
-  font-weight: 600;
-  color: var(--primary-color);
-  font-size: 1.1rem;
+.item-details {
+  font-size: 0.875rem;
 }
 
 /* Informações de entrega */
@@ -231,22 +190,18 @@ body {
 .summary-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 0;
-  font-size: 1rem;
-}
-
-.summary-row.discount {
-  color: var(--success-color);
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
 }
 
 .summary-row.total {
-  font-weight: 700;
-  font-size: 1.2rem;
-  color: var(--text-dark);
-  border-top: 2px solid var(--border-color);
-  padding-top: 1rem;
+  font-size: 1.25rem;
+  font-weight: bold;
   margin-top: 1rem;
+}
+
+.summary-row.discount {
+  color: #198754;
 }
 
 .payment-info h4 {
@@ -270,45 +225,32 @@ body {
 }
 
 .eco-badge {
-  display: inline-block;
-  background: var(--success-color);
-  color: white;
+  background: #e8f5e9;
+  color: #198754;
   padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 600;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
   margin-bottom: 1rem;
 }
 
 .eco-text {
-  color: var(--text-dark);
-  margin: 0;
+  color: #6c757d;
   font-size: 0.95rem;
-  line-height: 1.5;
+  margin: 0;
 }
 
 /* Botões de ação */
 .action-buttons .btn {
   width: 100%;
-  padding: 0.75rem 1rem;
-  font-weight: 600;
-  border-radius: 8px;
-  transition: all 0.3s ease;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.btn-block {
-  display: block;
-  width: 100%;
-}
-
-.btn-success:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-}
-
-.btn-outline-success:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 10px rgba(40, 167, 69, 0.2);
+.action-buttons .btn:last-child {
+  margin-bottom: 0;
 }
 
 /* Produtos relacionados */
@@ -413,16 +355,24 @@ body {
 
 /* Responsividade */
 @media (max-width: 768px) {
-  .confirmation-title {
-    font-size: 2rem;
+  .confirmation-header {
+    padding: 1.5rem 0;
   }
 
-  .confirmation-subtitle {
-    font-size: 1rem;
-  }
-
-  .success-icon i {
+  .success-icon {
     font-size: 3rem;
+  }
+
+  .card-title {
+    font-size: 1.1rem;
+  }
+
+  .summary-row {
+    font-size: 0.9rem;
+  }
+
+  .summary-row.total {
+    font-size: 1.1rem;
   }
 
   .delivery-details {

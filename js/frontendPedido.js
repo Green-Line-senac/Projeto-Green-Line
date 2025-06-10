@@ -1,4 +1,6 @@
+import { buscarPedido, atualizarStatusPedido } from './api/pedidosApi.js';
 
+// Função para gerar número do pedido
 function gerarNumeroPedido() {
   const ano = new Date().getFullYear();
   const numero = String(Math.floor(Math.random() * 999999)).padStart(6, '0');
@@ -15,14 +17,14 @@ function formatarDataHora() {
 
 // Função para formatar endereço completo
 function formatarEndereco(dadosCliente) {
-  if (!dadosCliente || !dadosCliente.nome) {
+  if (!dadosCliente || !dadosCliente.endereco) {
     return `Endereço não informado<br>
             Complete seus dados na próxima compra<br>
             para uma experiência melhor`;
   }
 
-  return `${dadosCliente.nome}<br>
-          ${dadosCliente.endereco}, ${dadosCliente.numero}${dadosCliente.complemento ? ' - ' + dadosCliente.complemento : ''}<br>
+  return `${dadosCliente.nome || 'Cliente'}<br>
+          ${dadosCliente.endereco}, ${dadosCliente.numeroCasa}${dadosCliente.complementoCasa ? ' - ' + dadosCliente.complementoCasa : ''}<br>
           ${dadosCliente.bairro}<br>
           ${dadosCliente.cidade} - ${dadosCliente.estado}, ${dadosCliente.cep}`;
 }
@@ -47,13 +49,27 @@ function determinarMetodoEntrega(cep) {
 
 // Função para calcular previsão de entrega
 function calcularPrevisaoEntrega(metodoEntrega) {
+  const dataBase = new Date();
+  let diasUteis;
+  
   if (metodoEntrega.includes("Expressa")) {
-    return "Previsão: 1-2 dias úteis";
+    diasUteis = 2;
   } else if (metodoEntrega.includes("Padrão")) {
-    return "Previsão: 3-5 dias úteis";
+    diasUteis = 5;
   } else {
-    return "Previsão: 5-7 dias úteis";
+    diasUteis = 7;
   }
+  
+  // Adiciona dias úteis
+  let diasAdicionados = 0;
+  while (diasAdicionados < diasUteis) {
+    dataBase.setDate(dataBase.getDate() + 1);
+    if (dataBase.getDay() !== 0 && dataBase.getDay() !== 6) { // Não conta sábados e domingos
+      diasAdicionados++;
+    }
+  }
+  
+  return `Previsão: ${dataBase.toLocaleDateString('pt-BR')}`;
 }
 
 // Função para formatar forma de pagamento
@@ -78,7 +94,7 @@ function formatarFormaPagamento(dadosFormulario) {
 
 // Função para calcular impacto sustentável
 function calcularImpactoSustentavel(produtos) {
-  const totalProdutos = produtos.length;
+  const totalProdutos = produtos.reduce((total, produto) => total + produto.quantidade, 0);
   const co2Evitado = (totalProdutos * 1.2).toFixed(1); // 1.2kg por produto
   const arvores = Math.ceil(totalProdutos / 2); // 1 árvore a cada 2 produtos
   
@@ -88,8 +104,49 @@ function calcularImpactoSustentavel(produtos) {
   };
 }
 
+// Função para enviar email de confirmação
+async function enviarEmailConfirmacao(pedido) {
+  try {
+    const response = await fetch('https://green-line-web.onrender.com/enviar-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        para: pedido.email,
+        assunto: `Pedido ${pedido.numeroPedido} Confirmado - GreenLine`,
+        corpo: `
+          Olá!
+          
+          Seu pedido ${pedido.numeroPedido} foi confirmado com sucesso!
+          
+          Detalhes do pedido:
+          - Data: ${pedido.dataConfirmacao}
+          - Valor total: R$ ${pedido.total.toFixed(2)}
+          - Previsão de entrega: ${pedido.previsaoEntrega}
+          
+          Você pode acompanhar seu pedido em nosso site.
+          
+          Obrigado por escolher produtos sustentáveis!
+          
+          Atenciosamente,
+          Equipe GreenLine
+        `
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Falha ao enviar email');
+    }
+
+    console.log('Email de confirmação enviado com sucesso');
+  } catch (erro) {
+    console.error('Erro ao enviar email:', erro);
+  }
+}
+
 // Função principal para carregar dados do pedido
-function carregarDadosPedido() {
+async function carregarDadosPedido() {
   try {
     console.log("Iniciando carregamento dos dados do pedido...");
 
@@ -110,7 +167,6 @@ function carregarDadosPedido() {
     let dadosCompra;
     try {
       dadosCompra = JSON.parse(dadosCompraStr);
-      // Se for um objeto único, transforma em array
       if (!Array.isArray(dadosCompra)) {
         dadosCompra = [dadosCompra];
       }
@@ -121,7 +177,7 @@ function carregarDadosPedido() {
       return;
     }
 
-    // Parse dos dados do formulário (opcional)
+    // Parse dos dados do formulário
     let dadosFormulario = {};
     if (dadosFormularioStr) {
       try {
@@ -151,36 +207,37 @@ function carregarDadosPedido() {
 
     // Monta objeto completo do pedido
     const pedido = {
-      numeroPedido: numeroPedido,
-      dataConfirmacao: dataConfirmacao,
-      previsaoEntrega: previsaoEntrega,
+      numeroPedido,
+      dataConfirmacao,
+      previsaoEntrega,
       enderecoEntrega: formatarEndereco(dadosFormulario),
-      metodoEntrega: metodoEntrega,
+      metodoEntrega,
       produtos: dadosCompra.map(item => ({
         nome: item.nome_produto || "Produto",
         quantidade: parseInt(item.quantidade) || 1,
         preco: parseFloat(item.preco_final) || 0,
         subtotal: parseFloat(item.subtotal) || 0
       })),
-      subtotal: subtotal,
-      frete: frete,
-      desconto: desconto,
-      total: total,
+      subtotal,
+      frete,
+      desconto,
+      total,
       formaPagamento: formatarFormaPagamento(dadosFormulario),
       impactoCO2: impacto.co2,
-      arvores: impacto.arvores
+      arvores: impacto.arvores,
+      email: dadosFormulario.email
     };
 
     console.log("Pedido montado:", pedido);
 
     // Preenche a página com os dados
-    preencherPaginaConfirmacao(pedido);
+    await preencherPaginaConfirmacao(pedido);
 
     // Salva dados do pedido para uso futuro
     localStorage.setItem("ultimoPedido", JSON.stringify(pedido));
 
-    // Simula envio de email (apenas log)
-    console.log(`Email de confirmação seria enviado para: ${dadosFormulario.email || 'email não informado'}`);
+    // Envia email de confirmação
+    await enviarEmailConfirmacao(pedido);
 
   } catch (error) {
     console.error("Erro geral ao carregar dados do pedido:", error);
@@ -189,7 +246,7 @@ function carregarDadosPedido() {
 }
 
 // Função para preencher a página de confirmação
-function preencherPaginaConfirmacao(pedido) {
+async function preencherPaginaConfirmacao(pedido) {
   try {
     console.log("Preenchendo página com dados do pedido...");
 
@@ -286,6 +343,33 @@ function preencherPaginaConfirmacao(pedido) {
       ecoTextEl.innerHTML = ecoText;
     }
 
+    // Gera QR Code para PIX se for o método de pagamento
+    if (pedido.formaPagamento.includes('PIX')) {
+      const qrCodeContainer = document.createElement('div');
+      qrCodeContainer.className = 'mt-3 text-center';
+      qrCodeContainer.innerHTML = `
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=00020126580014BR.GOV.BCB.PIX0136123e4567-e89b-12d3-a456-426614174000520400005303986540510.005802BR5913GreenLine Store6008Brasilia62070503***63041234" alt="QR Code PIX" class="img-fluid mb-2">
+        <p class="small text-muted">Escaneie o QR Code para pagar</p>
+      `;
+      formaPagamentoEl.parentNode.appendChild(qrCodeContainer);
+    }
+
+    // Gera código de barras para boleto se for o método de pagamento
+    if (pedido.formaPagamento.includes('Boleto')) {
+      const boletoContainer = document.createElement('div');
+      boletoContainer.className = 'mt-3';
+      boletoContainer.innerHTML = `
+        <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded">
+          <code class="me-3">34191.79001 01043.510047 91020.150008 4 89110000099999</code>
+          <button class="btn btn-sm btn-outline-success" onclick="navigator.clipboard.writeText('34191790010104351004791020150008489110000099999')">
+            <i class="bi bi-clipboard"></i>
+          </button>
+        </div>
+        <p class="small text-muted mt-2">Copie o código para pagar o boleto</p>
+      `;
+      formaPagamentoEl.parentNode.appendChild(boletoContainer);
+    }
+
     console.log("Página preenchida com sucesso!");
 
   } catch (error) {
@@ -326,53 +410,78 @@ function continuarComprando() {
   window.location.href = "produtos.html";
 }
 
-function acompanharPedido() {
+async function acompanharPedido() {
   const ultimoPedido = localStorage.getItem("ultimoPedido");
   if (ultimoPedido) {
     const pedido = JSON.parse(ultimoPedido);
-    alert(`Acompanhe seu pedido ${pedido.numeroPedido} através do nosso WhatsApp ou email de confirmação.`);
+    try {
+      const statusPedido = await buscarPedido(pedido.numeroPedido);
+      const mensagem = `
+        Status do pedido ${pedido.numeroPedido}:
+        - Situação: ${statusPedido.status}
+        - Previsão de entrega: ${pedido.previsaoEntrega}
+        
+        Acompanhe mais detalhes através do nosso WhatsApp ou email.
+      `;
+      alert(mensagem);
+    } catch (erro) {
+      console.error('Erro ao buscar status do pedido:', erro);
+      alert(`Acompanhe seu pedido ${pedido.numeroPedido} através do nosso WhatsApp ou email de confirmação.`);
+    }
   } else {
     alert("Dados do pedido não encontrados.");
   }
 }
 
 function baixarComprovante() {
-  // Simula download do comprovante
   window.print();
 }
 
 function entrarContato() {
-  // Redireciona para página de contato
   window.location.href = "contato.html";
 }
 
-// Função para carregar produtos relacionados (simulação)
-function carregarProdutosRelacionados() {
+// Função para carregar produtos relacionados
+async function carregarProdutosRelacionados() {
   const produtosContainer = document.getElementById("produtosRelacionados");
   if (!produtosContainer) return;
 
-  // Produtos relacionados simulados
-  const produtosRelacionados = [
-    { nome: "Camiseta Orgânica", preco: 45.90, imagem: "../img/produto1.jpg" },
-    { nome: "Mochila Sustentável", preco: 89.90, imagem: "../img/produto2.jpg" },
-    { nome: "Garrafa Reutilizável", preco: 29.90, imagem: "../img/produto3.jpg" }
-  ];
+  try {
+    // Busca produtos da mesma categoria
+    const ultimoPedido = localStorage.getItem("ultimoPedido");
+    if (!ultimoPedido) return;
 
-  produtosRelacionados.forEach(produto => {
-    const produtoHTML = `
-      <div class="col-md-4 mb-3">
-        <div class="card h-100">
-          <img src="${produto.imagem}" class="card-img-top" alt="${produto.nome}" style="height: 200px; object-fit: cover;">
-          <div class="card-body d-flex flex-column">
-            <h5 class="card-title">${produto.nome}</h5>
-            <p class="card-text text-success fw-bold mt-auto">R$ ${produto.preco.toFixed(2).replace('.', ',')}</p>
-            <button class="btn btn-outline-success btn-sm">Ver Produto</button>
+    const pedido = JSON.parse(ultimoPedido);
+    const categorias = pedido.produtos.map(p => p.categoria).filter(Boolean);
+
+    if (categorias.length === 0) return;
+
+    const response = await fetch(`${api.online}/produtos/categoria/${categorias[0]}`);
+    if (!response.ok) throw new Error('Falha ao buscar produtos relacionados');
+
+    const produtos = await response.json();
+    const produtosRelacionados = produtos.slice(0, 3); // Limita a 3 produtos
+
+    produtosRelacionados.forEach(produto => {
+      const produtoHTML = `
+        <div class="col-md-4 mb-3">
+          <div class="card h-100">
+            <img src="${produto.imagem_1}" class="card-img-top" alt="${produto.nome}" style="height: 200px; object-fit: cover;">
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">${produto.nome}</h5>
+              <p class="card-text text-success fw-bold mt-auto">R$ ${produto.preco.toFixed(2).replace('.', ',')}</p>
+              <button class="btn btn-outline-success btn-sm" onclick="window.location.href='produtos.html?id=${produto.id}'">
+                Ver Produto
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    `;
-    produtosContainer.insertAdjacentHTML('beforeend', produtoHTML);
-  });
+      `;
+      produtosContainer.insertAdjacentHTML('beforeend', produtoHTML);
+    });
+  } catch (erro) {
+    console.error('Erro ao carregar produtos relacionados:', erro);
+  }
 }
 
 // Inicialização quando a página carrega
@@ -384,18 +493,9 @@ document.addEventListener("DOMContentLoaded", function() {
   
   // Carrega produtos relacionados
   carregarProdutosRelacionados();
-  
-  // Adiciona event listeners para botões se não estiverem definidos inline
-  const btnContinuar = document.querySelector('button[onclick="continuarComprando()"]');
-  const btnAcompanhar = document.querySelector('button[onclick="acompanharPedido()"]');
-  const btnBaixar = document.querySelector('button[onclick="baixarComprovante()"]');
-  const btnContato = document.querySelector('button[onclick="entrarContato()"]');
-  
-  // Log para debug
-  console.log("Event listeners configurados para os botões de ação");
 });
 
-// Função para limpar dados após confirmação (chamada quando sair da página)
+// Função para limpar dados após confirmação
 window.addEventListener('beforeunload', function() {
   // Mantém dados do último pedido, mas limpa dados temporários após um tempo
   setTimeout(() => {
