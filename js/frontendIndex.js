@@ -44,6 +44,34 @@ async function inicializarApp() {
     estado.carregando = false;
   }
 }
+async function verificarEstadoLogin() {
+  try {
+    console.log('Iniciando verificação de login...');
+    const response = await fetch(`${config.index}/loginDados`, {
+      credentials: 'include'
+    });
+    console.log('Status da resposta:', response.status);
+    if (!response.ok) {
+      throw new Error(`Falha na verificação: HTTP ${response.status}`);
+    }
+
+    const dados = await response.json();
+    console.log('Dados recebidos:', dados);
+
+    if (dados && dados.id_pessoa) {
+      estado.id_pessoa = parseInt(dados.id_pessoa);
+      localStorage.setItem('id_pessoa', estado.id_pessoa);
+      console.log('id_pessoa atualizado:', estado.id_pessoa);
+      return true;
+    } else {
+      console.log('id_pessoa não encontrado nos dados:', dados);
+      return false;
+    }
+  } catch (erro) {
+    console.error('Erro ao verificar login:', erro);
+    return false;
+  }
+}
 
 // ==================== FUNÇÕES DE CARREGAMENTO ====================
 async function carregarProdutosPromocao() {
@@ -95,51 +123,35 @@ function renderizarProdutos() {
 function criarCardProduto(produto) {
   const card = document.createElement('div');
   card.className = 'col-12 col-sm-6 col-md-4 col-lg-3 mb-4';
-  card.setAttribute('data-id', produto.id_produto);
-
-  const dados = {
-    nome: produto.produto || 'Produto',
-    descricao: produto.descricao || 'Descrição não disponível',
-    preco: Number(produto.preco) || 0,
-    preco_promocional: produto.preco_promocional || 0,
-    promocao: Boolean(produto.promocao),
-    imagem: produto.imagem_1 || config.fallbackImage,
-    categoria: produto.categoria || 'Geral',
-    promocao: Boolean(produto.promocao),
-    avaliacao: Math.min(Math.max(Number(produto.avaliacao) || 0, 5), 5),
-    avaliacoes: Math.max(Number(produto.quantidade_avaliacoes) || 0, 0),
-    id_produto: card.getAttribute('data-id'),
-  };
-
-  const precoFormatado = dados.promocao
-    ? `<span style="text-decoration: line-through; font-size: 0.9rem;">R$ ${dados.preco.toFixed(2)}</span>
-       <span class="fs-5 ms-2 text-danger">R$ ${(dados.preco * 0.8).toFixed(2)}</span>`
-    : `<span class="fs-5">R$ ${dados.preco.toFixed(2)}</span>`;
-
-  const dadosEscapados = escapeHtml(JSON.stringify(dados));
-
+  const precoFormatado = produto.promocao
+    ? `<span style="text-decoration: line-through; font-size: 0.9rem;">R$ ${produto.preco.toFixed(2)}</span>
+       <span class="fs-5 ms-2">R$ ${(produto.preco * 0.8).toFixed(2)}</span>`
+    : `<span class="fs-5">R$ ${produto.preco.toFixed(2)}</span>`;
   card.innerHTML = `
-    <div class="card h-100" style="width:350px" onclick="abrirModalProduto('${dadosEscapados}')">
-      <img src="${dados.imagem}" 
+    <div class="card h-100 cursor point" onclick="abrirModalProduto(${JSON.stringify(produto).replace(/"/g, '&quot;')})">
+      <img src="${produto.imagem_1 != null ? produto.imagem_1 : "https://github.com/KauaNca/green_line_desktop/tree/main/imagens/produtos/"+produto.imagem_1}" 
            class="card-img-top" 
-           alt="${dados.nome}"
+           alt="${escapeHtml(produto.nome)}"
            loading="lazy"
            style="height: 200px; object-fit: contain;"
            onerror="this.src='${config.fallbackImage}'">
       <div class="card-body">
-        <h6 class="card-title">${dados.nome}</h6>
+        <h6 class="card-title">${escapeHtml(produto.nome)}</h6>
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <span class="text-warning">${gerarEstrelas(dados.avaliacao)}</span>
-          <small class="text-muted">${dados.avaliacoes} av.</small>
+          <span class="text-warning">${gerarEstrelas(produto.avaliacao)}</span>
+          <small class="text-muted">${produto.numAvaliacoes} av.</small>
         </div>
-        <p class="card-text text-muted small">${dados.descricao.substring(0, 60)}...</p>
-        <p class="fw-bold mb-0 ${dados.promocao ? 'text-dark' : ''}">
+        <p class="card-text text-muted small">${escapeHtml(produto.descricao_curta.substring(0, 60))}${produto.descricao_curta.length > 60 ? '...' : ''}</p>
+        <p class="fw-bold mb-0 ${produto.promocao ? 'text-success' : ''}">
           ${precoFormatado}
+        </p class="">
+        ${!produto.estoque != 0 ? '<span class="badge bg-secondary mt-2">Fora de estoque</span>' : ''}
+        <p class="">
+          ${produto.categoria ? `<span class="badge bg-success mt-2">${produto.categoria}</span>` : ''}
         </p>
       </div>
     </div>
   `;
-
   return card;
 }
 
@@ -162,20 +174,52 @@ function abrirModalProduto(dadosProduto) {
     return;
   }
   
-  // Preencher dados do modal
-  document.getElementById('produtoModalLabel').textContent = produto.nome;
+   // Preencher informações do modal
+   const label = document.getElementById('produtoModalLabel');
+   if (label) label.textContent = produto.nome;
+   
+   const imgEl = document.getElementById('produtoModalImagem');
+   if (imgEl) {
+     imgEl.src = produto.imagem_1 || produto.imagem_2 || produto.imagem_3 || config.fallbackImage;
+     imgEl.onerror = () => imgEl.src = config.fallbackImage;
+   }
   
-  const imgEl = document.getElementById('produtoModalImagem');
-  imgEl.src = produto.imagem || config.fallbackImage;
-  imgEl.onerror = () => imgEl.src = config.fallbackImage;
+   const descEl = document.getElementById('produtoModalDescricao');
+  if (descEl) descEl.textContent = produto.descricao;
   
-  document.getElementById('produtoModalDescricao').textContent = produto.descricao;
-  document.getElementById('produtoModalMarca').textContent = produto.marca;
+  const marcaEl = document.getElementById('produtoModalMarca');
+  if (marcaEl) marcaEl.textContent = produto.marca;
   
   const catEl = document.getElementById('produtoModalCategoria');
   if (catEl) {
     catEl.textContent = produto.categoria;
     catEl.className = `badge mb-2 bg-${produto.promocao ? 'danger' : 'success'}`;
+  }
+  const estoqueEl = document.getElementById('produtoModalEstoque');
+  if (produto.estoque ==  0 || produto.estoque == null) {
+    estoqueEl.innerHTML = `<span class="badge bg-secondary">Fora de estoque</span>`;
+    let botaoComprar = document.querySelector('#btnComprarAgora');
+    let botaoCarrinho = document.querySelector('#btnAddCarrinho');
+    if (botaoComprar) {
+      botaoComprar.disabled = true;
+      botaoComprar.classList.add("text-bg-secondary");
+    }
+    if (botaoCarrinho) {
+      botaoCarrinho.disabled = true;
+      botaoCarrinho.classList.add("text-bg-secondary");
+    }
+  }else{
+    estoqueEl.innerHTML = `<span class="badge bg-success">Em estoque</span>`;
+    let botaoComprar = document.querySelector('#btnComprarAgora');
+    let botaoCarrinho = document.querySelector('#btnAddCarrinho');
+    if (botaoComprar) {
+      botaoComprar.disabled = false;
+      botaoComprar.classList.remove("text-bg-secondary");
+    }
+    if (botaoCarrinho) {
+      botaoCarrinho.disabled = false;
+      botaoCarrinho.classList.remove("text-bg-secondary");
+    }
   }
   
   
@@ -213,21 +257,25 @@ function abrirModalProduto(dadosProduto) {
   
   // Renderizar estrelas de avaliação
   const stars = document.getElementById('produtoModalAvaliacao');
-  stars.innerHTML = '';
-  console.log('Avaliação do produto:', produto.avaliacao);
-  
-  if (produto.avaliacao != null) {
-    const fullStars = Math.floor(produto.avaliacao);
-    const halfStar = produto.avaliacao % 1 >= 0.5;
-    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
-    
-    for (let i = 0; i < fullStars; i++) stars.innerHTML += '<i class="fas fa-star text-yellow-400 text-xs"></i>';
-    if (halfStar) stars.innerHTML += '<i class="fas fa-star-half-alt text-yellow-400 text-xs"></i>';
-    for (let i = 0; i < emptyStars; i++) stars.innerHTML += '<i class="far fa-star text-yellow-400 text-xs"></i>';
-    stars.innerHTML += `<span class="text-xs text-gray-600 ml-1">(${produto.avaliacoes})</span>`;
+  if (stars) {
+    stars.innerHTML = '';
+    if (produto.avaliacao != null) {
+      const fullStars = Math.floor(produto.avaliacao);
+      const halfStar = produto.avaliacao % 1 >= 0.5;
+      const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+      for (let i = 0; i < fullStars; i++) stars.innerHTML += '<i class="fas fa-star text-yellow-400 text-xs"></i>';
+      if (halfStar) stars.innerHTML += '<i class="fas fa-star-half-alt text-yellow-400 text-xs"></i>';
+      for (let i = 0; i < emptyStars; i++) stars.innerHTML += '<i class="far fa-star text-yellow-400 text-xs"></i>';
+      stars.innerHTML += `<span class="text-xs text-gray-600 ml-1">(${produto.numAvaliacoes})</span>`;
+    }
   }
-  
-  elementos.produtoModal.show();
+  // Mostrar o modal
+  if (elementos.produtoModal) {
+    elementos.produtoModal.show();
+  } else {
+    console.error('Modal não inicializado corretamente');
+    mostrarFeedback('Erro ao abrir o modal', 'danger');
+  }
 }
 
 // Função auxiliar para renderizar estrelas
@@ -251,10 +299,18 @@ function renderizarEstrelas(avaliacao) {
 function sanitizarProduto(produto) {
   return {
     ...produto,
+    id_produto: parseInt(produto.id_produto) || null,
     preco: Number(produto.preco) || 0,
-    avaliacoes: Number(produto.avaliacoes) || 0,
-    estoque: Boolean(produto.estoque),
-    promocao: Boolean(produto.promocao)
+    preco_promocional: produto.preco_promocional || 0,
+    promocao: Boolean(produto.promocao),
+    avaliacao: Number(produto.avaliacao) || 0,
+    numAvaliacoes: Number(produto.numAvaliacoes) || 0,
+    estoque: Number(produto.estoque),
+    nome: produto.produto || produto.nome || 'Produto sem nome',
+    descricao: produto.descricao || 'Sem descrição',
+    categoria: produto.categoria || 'Geral',
+    marca: produto.marca || 'Sem marca',
+    imagem_1: produto.imagem_1 || config.fallbackImage
   };
 }
 
@@ -320,79 +376,70 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Botão "Comprar Agora"
 document.getElementById('btnComprarAgora').addEventListener('click', async () => {
-  console.log('Botão Comprar Agora clicado');
-  let usuario = localStorage.getItem('id_pessoa');
-    if (usuario) {
-      estado.id_pessoa = Number(usuario);
-      console.log(`Usuário autenticado: ${estado.id_pessoa}`);
-    }
-  // Verificar se o usuário está logado
-  console.log('id_pessoa:', estado.id_pessoa);
-
-  // Validação de login
-  if (!estado.id_pessoa || estado.id_pessoa === '' || estado.id_pessoa === 'null') {
-    console.log('Usuário não logado, exibindo feedback');
+  if (!estado.id_pessoa) {
     mostrarFeedback("Por favor, faça login ou cadastro para prosseguir", "danger");
     return;
   }
+// Obter quantidade
+const qtdInput = document.getElementById('quantidadeModal');
+const qtd = parseInt(qtdInput.value, 10);
 
-  // Validação da quantidade
-  const quantidadeInput = document.getElementById('quantidadeModal');
-  if (!quantidadeInput) {
-    console.error('Elemento quantidadeModal não encontrado');
-    mostrarFeedback("Erro interno: elemento de quantidade não encontrado", "danger");
-    return;
-  }
-  const qtd = parseInt(quantidadeInput.value, 10);
-  console.log('Quantidade selecionada:', qtd);
-  if (isNaN(qtd) || qtd <= 0) {
-    console.log('Quantidade inválida, exibindo feedback');
-    mostrarFeedback("Quantidade inválida!", 'danger');
-    return;
-  }
-
-  // Extrair dados do produto
-  const nome_produto = document.getElementById('produtoModalLabel').textContent;
-const precoElement = document.getElementById('produtoModalPreco');
-let precoText;
-
-// Obter o texto do preço de forma mais segura
-if (precoElement) {
-  const discountPrice = precoElement.querySelector('span.discount-price');
-  const currentPrice = precoElement.querySelector('span.current-price');
-  
-  precoText = discountPrice ? discountPrice.textContent : 
-             currentPrice ? currentPrice.textContent : '';
-} else {
-  console.error('Elemento de preço não encontrado');
-  mostrarFeedback("Erro: elemento de preço não encontrado", "danger");
-  return;
+// Validar quantidade
+if (isNaN(qtd) || qtd <= 0 || qtd > 100) { 
+mostrarFeedback("Quantidade inválida! Por favor, insira um valor entre 1 e 1F00.", 'danger');
+return;
 }
-  console.log('Texto do preço:', precoText);
+console.log("Quantidade selecionada:", qtd);
 
-  // Validação do preço melhorada
+// Obter nome do produto
+const nome_produto = document.getElementById('produtoModalLabel').textContent.trim();
+
+// Obter elementos de preço
+const originalPriceEl = document.querySelector('#produtoModalPreco .original-price');
+const discountPriceEl = document.querySelector('#produtoModalPreco .discount-price');
+
+if (!originalPriceEl) {
+mostrarFeedback("Erro ao obter preço do produto.", 'danger');
+return;
+}
+
+// Extrair preço de forma segura
+function extrairPreco(elemento) {
+if (!elemento) return null;
+
+const precoTexto = elemento.textContent.trim();
+const precoNumerico = parseFloat(
+  precoTexto
+    .replace(/[^\d,]/g, '')  
+    .replace(',', '.')
+);
+
+return isNaN(precoNumerico) ? null : precoNumerico;
+}
+
+
 let preco_final;
-try {
-  // Remove todos os caracteres não numéricos exceto vírgula e ponto
-  const cleaned = precoText.replace(/[^\d,.-]/g, '')
-                          .replace(/\./g, '')  // Remove pontos de milhar
-                          .replace(',', '.');   // Converte vírgula decimal para ponto
-  
-  preco_final = parseFloat(cleaned);
-  
-  if (isNaN(preco_final)) {
-    throw new Error('Preço inválido após limpeza');
-  }
-  
-  console.log('Preço convertido:', preco_final);
-} catch (error) {
-  console.error('Erro ao converter preço:', error);
-  console.error('Texto original:', precoText);
-  mostrarFeedback("Erro: preço do produto inválido", "danger");
-  return;
+const isPromocao = window.getComputedStyle(originalPriceEl).textDecoration.includes('line-through');
+
+if (isPromocao && discountPriceEl) {
+preco_final = extrairPreco(discountPriceEl);
+} else {
+preco_final = extrairPreco(originalPriceEl);
 }
-  
-  const subtotal = (preco_final * qtd);
+
+// Validar preço
+if (preco_final === null || preco_final <= 0) {
+mostrarFeedback("Preço do produto inválido.", 'danger');
+return;
+}
+
+console.log("Preço final:", preco_final);
+
+// Calcular subtotal com arredondamento
+const subtotal = Math.round((preco_final * qtd) * 100) / 100;
+console.log("Subtotal:", subtotal.toFixed(2));
+
+
   const dadosCompra = {
     nome_produto,
     preco_final,
@@ -404,20 +451,12 @@ try {
 
   console.log("Dados da compra:", dadosCompra);
   localStorage.setItem("dadosCompra", JSON.stringify(dadosCompra));
-  console.log('Redirecionando para vendas.html');
-  window.location.href = "public/vendas.html";
+  window.location.href = "vendas.html";
 });
 
 // Botão "Adicionar ao Carrinho"
 document.getElementById('btnAddCarrinho').addEventListener('click', async () => {
-  // Validação de login
-  let usuario = localStorage.getItem('id_pessoa');
-    if (usuario) {
-      estado.id_pessoa = Number(usuario);
-      console.log(`Usuário autenticado: ${estado.id_pessoa}`);
-    }
-  if (!estado.id_pessoa ||  estado.id_pessoa == '' || estado.id_pessoa == 'null') {
-    console.log('Usuário não logado, exibindo feedback');
+  if (!estado.id_pessoa) {
     mostrarFeedback("Por favor, faça login ou cadastro para prosseguir", "danger");
     return;
   }
@@ -429,7 +468,7 @@ document.getElementById('btnAddCarrinho').addEventListener('click', async () => 
   }
 
   try {
-    const requisicao = await fetch(`${config.produtos}/carrinho`, {
+    const requisicao = await fetch(`${apiProduto.produto}/carrinho`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -445,7 +484,7 @@ document.getElementById('btnAddCarrinho').addEventListener('click', async () => 
     if (resposta.codigo === 1 || resposta.mensagem === "ITEM_DUPLICADO") {
       itemResultado.classList.remove('d-none');
       itemResultado.innerHTML = "⚠️ Este item já está no seu carrinho";
-      setTimeout(() => itemResultado.classList.add('d-none'), 500);
+      setTimeout(() => itemResultado.classList.add('d-none'), 2000);
     } else if (resposta.sucesso) {
       let badge = document.getElementById('badge-carrinho');
       badge.textContent = parseInt(badge.textContent || '0') + 1;
@@ -455,12 +494,12 @@ document.getElementById('btnAddCarrinho').addEventListener('click', async () => 
       setTimeout(() => {
         itemResultado.classList.add('d-none');
         itemResultado.classList.remove('text-success');
-      }, 5000);
+      }, 3000);
     } else {
       itemResultado.classList.remove('d-none');
       itemResultado.innerHTML = `❌ Erro: ${resposta.mensagem || "Erro desconhecido"}`;
       itemResultado.classList.add('text-danger');
-      setTimeout(() => itemResultado.classList.add('d-none'), 500);
+      setTimeout(() => itemResultado.classList.add('d-none'), 2000);
     }
   } catch (erro) {
     console.error("Erro ao adicionar ao carrinho:", erro);
@@ -468,7 +507,7 @@ document.getElementById('btnAddCarrinho').addEventListener('click', async () => 
     itemResultado.classList.remove('d-none');
     itemResultado.innerHTML = "❌ Falha na conexão com o servidor";
     itemResultado.classList.add('text-danger');
-    setTimeout(() => itemResultado.classList.add('d-none'), 500);
+    setTimeout(() => itemResultado.classList.add('d-none'), 2000);
   }
 });
 });
