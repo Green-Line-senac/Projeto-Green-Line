@@ -76,12 +76,13 @@ function gerarEstrelas(nota) {
 function mostrarFeedback(mensagem, tipo = "success") {
   const toast = document.createElement("div");
   toast.className = `toast align-items-center text-white bg-${tipo} border-0 position-fixed top-50 start-50 translate-middle`;
-  toast.style.zIndex = 1100;
+  toast.style.zIndex = "9999"; // Valor alto para garantir que fique acima de tudo
+  toast.style.position = "fixed"; // Redundante, mas para garantir
   toast.innerHTML = `
-    <div class="d-flex">
-      <div class="toast-body">${escapeHtml(mensagem)}</div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-    </div>
+      <div class="d-flex">
+          <div class="toast-body">${escapeHtml(mensagem)}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
   `;
   document.body.appendChild(toast);
   new bootstrap.Toast(toast).show();
@@ -168,12 +169,9 @@ async function carregarProdutos() {
       const data = await response.json();
 
       if (!Array.isArray(data) || data.length === 0) {
-          mostrarFeedback("Nenhum produto encontrado para esta categoria.", "warning");
+          renderizarProdutos();
           return;
       }
-
-      console.log("Produtos recebidos:", data);
-
 
       // Atualizando os produtos na interface
       estado.produtos = data.map(sanitizarProduto);
@@ -435,6 +433,163 @@ async function verificarEstadoLogin() {
     return false;
   }
 }
+function configurarEventos() {
+  // Eventos do modal
+  const produtoModal = document.getElementById('produtoModal');
+  produtoModal.addEventListener('hidden.bs.modal', () => {
+    const inputQuantidade = document.getElementById('quantidadeModal');
+    inputQuantidade.value = 1;
+    estado.id_produto = null;
+    const itemResultado = document.getElementById('item-resultado');
+    itemResultado.classList.add('d-none');
+    itemResultado.innerHTML = '';
+  });
+
+  // Eventos de quantidade
+  document.querySelectorAll('[data-action="increase"]').forEach(btn =>
+    btn.addEventListener('click', () => adjustQuantity('quantidadeModal', 1))
+  );
+
+  document.querySelectorAll('[data-action="decrease"]').forEach(btn =>
+    btn.addEventListener('click', () => adjustQuantity('quantidadeModal', -1))
+  );
+
+  // Eventos de compra/carrinho
+  document.getElementById('btnComprarAgora').addEventListener('click', async () => {
+    if (!estado.id_pessoa) {
+      mostrarFeedback("Por favor, faça login ou cadastro para prosseguir", "danger");
+      return;
+    }
+// Obter quantidade
+const qtdInput = document.getElementById('quantidadeModal');
+const qtd = parseInt(qtdInput.value, 10);
+
+// Validar quantidade
+if (isNaN(qtd) || qtd <= 0 || qtd > 100) { 
+  mostrarFeedback("Quantidade inválida! Por favor, insira um valor entre 1 e 1F00.", 'danger');
+  return;
+}
+console.log("Quantidade selecionada:", qtd);
+
+// Obter nome do produto
+const nome_produto = document.getElementById('produtoModalLabel').textContent.trim();
+
+// Obter elementos de preço
+const originalPriceEl = document.querySelector('#produtoModalPreco .original-price');
+const discountPriceEl = document.querySelector('#produtoModalPreco .discount-price');
+
+if (!originalPriceEl) {
+  mostrarFeedback("Erro ao obter preço do produto.", 'danger');
+  return;
+}
+
+// Extrair preço de forma segura
+function extrairPreco(elemento) {
+  if (!elemento) return null;
+  
+  const precoTexto = elemento.textContent.trim();
+  const precoNumerico = parseFloat(
+    precoTexto
+      .replace(/[^\d,]/g, '')  
+      .replace(',', '.')
+  );
+  
+  return isNaN(precoNumerico) ? null : precoNumerico;
+}
+
+
+let preco_final;
+const isPromocao = window.getComputedStyle(originalPriceEl).textDecoration.includes('line-through');
+
+if (isPromocao && discountPriceEl) {
+  preco_final = extrairPreco(discountPriceEl);
+} else {
+  preco_final = extrairPreco(originalPriceEl);
+}
+
+// Validar preço
+if (preco_final === null || preco_final <= 0) {
+  mostrarFeedback("Preço do produto inválido.", 'danger');
+  return;
+}
+
+console.log("Preço final:", preco_final);
+
+// Calcular subtotal com arredondamento
+const subtotal = Math.round((preco_final * qtd) * 100) / 100;
+console.log("Subtotal:", subtotal.toFixed(2));
+
+
+    const dadosCompra = {
+      nome_produto,
+      preco_final,
+      quantidade: qtd,
+      subtotal,
+      id_pessoa: estado.id_pessoa,
+      data: new Date().toISOString(),
+    };
+
+    console.log("Dados da compra:", dadosCompra);
+    localStorage.setItem("dadosCompra", JSON.stringify(dadosCompra));
+    window.location.href = "vendas.html";
+  });
+
+  document.getElementById('btnAddCarrinho').addEventListener('click', async () => {
+    if (!estado.id_pessoa) {
+      mostrarFeedback("Por favor, faça login ou cadastro para prosseguir", "danger");
+      return;
+    }
+
+    const quantidade = parseInt(document.getElementById('quantidadeModal').value, 10);
+    if (isNaN(quantidade) || quantidade <= 0) {
+      mostrarFeedback("Quantidade inválida!", 'danger');
+      return;
+    }
+
+    try {
+      const requisicao = await fetch(`${apiProduto.produto}/carrinho`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id_pessoa: estado.id_pessoa,
+          id_produto: estado.id_produto,
+          quantidade
+        })
+      });
+
+      const resposta = await requisicao.json();
+      const itemResultado = document.getElementById('item-resultado');
+
+      if (resposta.codigo === 1 || resposta.mensagem === "ITEM_DUPLICADO") {
+        itemResultado.classList.remove('d-none');
+        itemResultado.innerHTML = "⚠️ Este item já está no seu carrinho";
+        setTimeout(() => itemResultado.classList.add('d-none'), 2000);
+      } else if (resposta.sucesso) {
+        let badge = document.getElementById('badge-carrinho');
+        badge.textContent = parseInt(badge.textContent || '0') + 1;
+        itemResultado.classList.remove('d-none');
+        itemResultado.innerHTML = "✔️ Item adicionado ao carrinho!";
+        itemResultado.classList.add('text-success');
+        setTimeout(() => {
+          itemResultado.classList.add('d-none');
+          itemResultado.classList.remove('text-success');
+        }, 3000);
+      } else {
+        itemResultado.classList.remove('d-none');
+        itemResultado.innerHTML = `❌ Erro: ${resposta.mensagem || "Erro desconhecido"}`;
+        itemResultado.classList.add('text-danger');
+        setTimeout(() => itemResultado.classList.add('d-none'), 2000);
+      }
+    } catch (erro) {
+      console.error("Erro ao adicionar ao carrinho:", erro);
+      const itemResultado = document.getElementById('item-resultado');
+      itemResultado.classList.remove('d-none');
+      itemResultado.innerHTML = "❌ Falha na conexão com o servidor";
+      itemResultado.classList.add('text-danger');
+      setTimeout(() => itemResultado.classList.add('d-none'), 2000);
+    }
+  });
+}
 
 // == Inicialização ==
 
@@ -448,6 +603,7 @@ async function inicializarApp() {
     if (storedId) {
       estado.id_pessoa = parseInt(storedId);
     }
+    configurarEventos();
     await Promise.all([carregarProdutos(), verificarEstadoLogin()]);
   } catch (erro) {
     console.error("Erro na inicialização:", erro);
