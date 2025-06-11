@@ -521,8 +521,10 @@ function adjustQuantity(id, change) {
 document.querySelectorAll('[data-categoria]').forEach(categoria => {
   categoria.addEventListener('click', async (e) => {
     try {
+      console.log("Categoria selecionada:", categoria.dataset.categoria);
       const categoriaSelecionada = encodeURIComponent(categoria.dataset.categoria); //devido a presença de espaços e caracteres especiais, tem que codificar a categoria
-      const response = await fetch(`${config.produtos}/produtosEspecificos`, {
+      localStorage.setItem('categoriaSelecionada', categoriaSelecionada);
+      /*const response = await fetch(`${config.produtos}/produtosEspecificos`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({categoria: categoriaSelecionada })
@@ -537,7 +539,7 @@ document.querySelectorAll('[data-categoria]').forEach(categoria => {
       if (!produtos?.length || produtos.codigo === -1) {
         mostrarFeedback("Nenhum produto encontrado nesta categoria.", "warning");
         return;
-      }
+      }*/
       
     } catch (error) {
       console.error("Falha ao enviar a outra página:", error);

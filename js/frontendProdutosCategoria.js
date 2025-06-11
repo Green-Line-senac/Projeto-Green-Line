@@ -145,23 +145,43 @@ function sanitizarProduto(produto) {
  */
 async function carregarProdutos() {
   try {
-    mostrarLoader();
-    const response = await fetch(`${apiProduto.produto}/produtosEspecificos`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    console.log("Produtos recebidos:", data);
-    console.log("Categoria do carrossel:", data[0].categoria);
-    elementos.carroselImagem.src = `../img/index_categorias/${data[0].categoria}.jpg`;
-    elementos.carroselImagem.alt = data[0].categoria;
-    if (Array.isArray(data)) {
+      mostrarLoader();
+
+      // Recuperando a categoria armazenada
+      let categoriaSelecionada = localStorage.getItem("categoriaSelecionada");
+     
+
+      if (!categoriaSelecionada) {
+          throw new Error("Nenhuma categoria foi selecionada.");
+      }
+
+      // Construindo a URL corretamente para passar a categoria como query string
+      const url = `${apiProduto.produto}/produtosEspecificos?categoria=${encodeURIComponent(categoriaSelecionada)}`;
+      console.log("URL da requisição:", url);
+
+      // Fazendo a requisição
+      const response = await fetch(url);
+      let categoria = decodeURIComponent(categoriaSelecionada);
+      // Atualizando a imagem do carrossel
+      elementos.carroselImagem.src = `../img/index_categorias/${categoria}.jpg`;
+      elementos.carroselImagem.alt = categoria;
+      const data = await response.json();
+
+      if (!Array.isArray(data) || data.length === 0) {
+          mostrarFeedback("Nenhum produto encontrado para esta categoria.", "warning");
+          return;
+      }
+
+      console.log("Produtos recebidos:", data);
+
+
+      // Atualizando os produtos na interface
       estado.produtos = data.map(sanitizarProduto);
       renderizarProdutos();
-    } else {
-      throw new Error("Dados inválidos recebidos da API");
-    }
+
   } catch (erro) {
-    console.error("Erro ao carregar produtos:", erro);
-    mostrarErroCarregamento();
+      console.error("Erro ao carregar produtos:", erro);
+      mostrarErroCarregamento();
   }
 }
 

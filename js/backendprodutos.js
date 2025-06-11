@@ -111,46 +111,47 @@ app.post("/carrinho", async (req, res) => {
     });
   }
 });
+/*
 app.put("/produtosEspecificos", async (req, res) => {
-  let categoriaCodificada = req.body.categoria;
-  let categoria = decodeURIComponent(categoriaCodificada);
-
-  console.log("Categoria recebida:", categoria);
-  if (!categoria)
-    return res
-      .status(400)
-      .json({ mensagem: "Categoria não informada", codigo: -1 });
-  try {
-    produtosCategoria = await db.query(
-      "SELECT * FROM produto WHERE categoria = ? AND ativo = TRUE",
-      [categoria]
-    );
-    res.status(200).json(produtosCategoria);
-  } catch (erro) {
-    console.error("Erro ao buscar produtos por categoria:", erro);
-    res.status(500).json({
-      mensagem: "Erro ao buscar produtos por categoria",
-      codigo: -1,
-      detalhes:
-        process.env.NODE_ENV === "development" ? erro.message : undefined,
-    });
-  }
-});
+  
+});*/
 app.get("/produtosEspecificos", async (req, res) => {
-  if (!produtosCategoria)
-    return res
-      .status(404)
-      .json({ mensagem: "Nenhum produto encontrado na categoria" });
   try {
-    res.status(200).json(produtosCategoria);
+      let categoriaCodificada = req.query.categoria;
+
+      if (!categoriaCodificada) {
+          return res.status(400).json({
+              mensagem: "Categoria não informada.",
+              codigo: -1,
+          });
+      }
+
+      // Decodificar a categoria para evitar problemas com caracteres especiais
+      let categoria = decodeURIComponent(categoriaCodificada);
+      console.log("Categoria recebida:", categoria);
+
+      // Consulta no banco de dados com proteção contra injeção SQL
+      produtosCategoria = await db.query(
+          "SELECT * FROM produto WHERE categoria = ? AND ativo = TRUE",
+          [categoria]
+      );
+
+      if (produtosCategoria.length === 0) {
+          return res.status(404).json({
+              mensagem: "Nenhum produto encontrado para essa categoria.",
+              codigo: 0,
+          });
+      }
+
+      res.status(200).json(produtosCategoria);
   } catch (erro) {
-    console.error("Erro ao buscar produtos por categoria:", erro);
-    res.status(500).json({
-      mensagem: "Erro ao buscar produtos por categoria",
-      codigo: -1,
-      detalhes:
-        process.env.NODE_ENV === "development" ? erro.message : undefined,
-    });
+      console.error("Erro ao buscar produtos por categoria:", erro);
+
+      res.status(500).json({
+          mensagem: "Erro interno no servidor ao buscar produtos.",
+          codigo: -1,
+          detalhes: process.env.NODE_ENV === "development" ? erro.message : undefined,
+      });
   }
 });
 
