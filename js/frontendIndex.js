@@ -10,8 +10,7 @@ document.addEventListener("DOMContentLoaded", inicializarApp);
 
 // Cache de elementos DOM
 const elementos = {
-  carrossel: document.getElementById('carousel-imagens'),
-  carrosselContainer: document.getElementById('carousel-index'),
+  carrosselImagem: document.getElementById('carrosel-imagem'),
   produtosContainer: document.getElementById('container-produtos'),
   iconeUsuario: document.getElementById('icone-usuario'),
   produtoModal: new bootstrap.Modal('#produtoModal'),
@@ -20,10 +19,9 @@ const elementos = {
 
 // Estado da aplicação
 let estado = {
-  imagensCarrossel: [],
   produtos: [],
   carregando: false,
-  id_pessoa: null,
+  id_pessoa: null || localStorage.getItem('id_pessoa'),
   id_produto: null,
   quantidadeProdutos: 1,
 };
@@ -145,7 +143,7 @@ function criarCardProduto(produto) {
         <p class="fw-bold mb-0 ${produto.promocao ? 'text-success' : ''}">
           ${precoFormatado}
         </p class="">
-        ${!produto.estoque != 0 ? '<span class="badge bg-secondary mt-2">Fora de estoque</span>' : ''}
+        ${produto.estoque = 0 ? '<span class="badge bg-secondary mt-2">Fora de estoque</span>' : ''}
         <p class="">
           ${produto.categoria ? `<span class="badge bg-success mt-2">${produto.categoria}</span>` : ''}
         </p>
@@ -451,7 +449,7 @@ console.log("Subtotal:", subtotal.toFixed(2));
 
   console.log("Dados da compra:", dadosCompra);
   localStorage.setItem("dadosCompra", JSON.stringify(dadosCompra));
-  window.location.href = "vendas.html";
+  window.location.href = "public/vendas.html";
 });
 
 // Botão "Adicionar ao Carrinho"
@@ -468,7 +466,7 @@ document.getElementById('btnAddCarrinho').addEventListener('click', async () => 
   }
 
   try {
-    const requisicao = await fetch(`${apiProduto.produto}/carrinho`, {
+    const requisicao = await fetch(`${config.produtos}/carrinho`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -477,7 +475,6 @@ document.getElementById('btnAddCarrinho').addEventListener('click', async () => 
         quantidade
       })
     });
-
     const resposta = await requisicao.json();
     const itemResultado = document.getElementById('item-resultado');
 
@@ -508,8 +505,8 @@ document.getElementById('btnAddCarrinho').addEventListener('click', async () => 
     itemResultado.innerHTML = "❌ Falha na conexão com o servidor";
     itemResultado.classList.add('text-danger');
     setTimeout(() => itemResultado.classList.add('d-none'), 2000);
-  }
-});
+    }
+  });
 });
 
 // Função auxiliar para ajustar quantidade
@@ -519,5 +516,34 @@ function adjustQuantity(id, change) {
   value += change;
   if (value < 1) value = 1;
   input.value = value;
-}
+};
 
+document.querySelectorAll('[data-categoria]').forEach(categoria => {
+  categoria.addEventListener('click', async (e) => {
+    try {
+      const categoriaSelecionada = encodeURIComponent(categoria.dataset.categoria); //devido a presença de espaços e caracteres especiais, tem que codificar a categoria
+      const response = await fetch(`${config.produtos}/produtosEspecificos`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({categoria: categoriaSelecionada })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erro HTTP: ${response.status}`);
+      }
+
+      const produtos = await response.json();
+
+      if (!produtos?.length || produtos.codigo === -1) {
+        mostrarFeedback("Nenhum produto encontrado nesta categoria.", "warning");
+        return;
+      }
+      
+    } catch (error) {
+      console.error("Falha ao enviar a outra página:", error);
+      mostrarFeedback("Erro ao carregar produtos. Tente novamente.", "danger");
+    } 
+  });
+});
+
+  

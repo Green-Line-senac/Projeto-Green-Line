@@ -12,7 +12,11 @@ const db = new Conexao();
 
 // Middlewares
 app.use(express.json()); // Para interpretar JSON no corpo das requisições
-app.use(cors()); // Para habilitar CORS
+app.use(cors({
+  origin: '*',                 // Permite qualquer origem (ou especifique domínios)
+  methods: ['GET', 'POST'],    // Métodos permitidos
+  allowedHeaders: ['Content-Type', 'Authorization'], // Headers permitidos
+})); // Para habilitar CORS
 
 let estadoLogin = {
     usuario: null,
