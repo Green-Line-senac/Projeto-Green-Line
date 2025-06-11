@@ -376,7 +376,7 @@ function mostrarErros(erros) {
 document.getElementById("FinalizarCompra").addEventListener("click", async (event) => {
     event.preventDefault();
     console.log('Iniciando processo de finalização da compra...');
-    
+    window.location.href = 'pedido_confirmado.html';
     try {
         // Coleta dados do endereço
         const endereco = {
