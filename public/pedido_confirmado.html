@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
   <link rel="stylesheet" href="../css/pedido_confirmado.css">
-  <script type="module" src="frontendPedido.js"></script>
+  <script type="module" src="../js/frontendPedido.js"></script>
   <link rel="stylesheet" href="../css/menu_rodape.css">
 </head>
 
@@ -247,22 +247,22 @@
               </h3>
               
               <div class="action-buttons">
-                <button class="btn btn-success btn-block mb-2" onclick="continuarComprando()">
+                <button class="btn btn-success btn-block mb-2" id="btnContinuarComprando">
                   <i class="bi bi-arrow-left me-2"></i>
                   Continuar Comprando
                 </button>
                 
-                <button class="btn btn-outline-success btn-block mb-2" onclick="acompanharPedido()">
+                <button class="btn btn-outline-success btn-block mb-2" id="btnAcompanharPedido">
                   <i class="bi bi-search me-2"></i>
                   Acompanhar Pedido
                 </button>
                 
-                <button class="btn btn-outline-success btn-block mb-2" onclick="baixarComprovante()">
+                <button class="btn btn-outline-success btn-block mb-2" id="btnBaixarComprovante">
                   <i class="bi bi-download me-2"></i>
                   Baixar Comprovante
                 </button>
                 
-                <button class="btn btn-outline-success btn-block" onclick="entrarContato()">
+                <button class="btn btn-outline-success btn-block" id="btnEntrarContato">
                   <i class="bi bi-headset me-2"></i>
                   Falar com Suporte
                 </button>
@@ -326,9 +326,83 @@
     </div>
   </footer>
 
+  <!-- Modal de Acompanhamento -->
+  <div class="modal fade" id="modalAcompanhamento" tabindex="-1" aria-labelledby="modalAcompanhamentoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-success">
+          <h5 class="modal-title" id="modalAcompanhamentoLabel">
+            <i class="bi bi-truck me-2"></i>
+            Acompanhamento do Pedido
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="tracking-details">
+            <!-- Informações do Pedido -->
+            <div class="order-info">
+              <div class="row align-items-center">
+                <div class="col-md-6">
+                  <h6 class="mb-2">
+                    <i class="bi bi-box-seam me-2"></i>
+                    Número do Pedido: 
+                    <span id="modalNumeroPedido" class="text-success"></span>
+                  </h6>
+                </div>
+                <div class="col-md-6 text-md-end">
+                  <p class="text-muted mb-0">
+                    <i class="bi bi-calendar-event me-2"></i>
+                    Data do Pedido: 
+                    <span id="modalDataPedido"></span>
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Timeline de Status -->
+            <div class="timeline-tracking">
+              <!-- Status serão preenchidos via JavaScript -->
+            </div>
+
+            <!-- Informações Adicionais -->
+            <div class="tracking-info mt-4">
+              <div class="alert alert-success" role="alert">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                Acompanhe as atualizações do seu pedido em tempo real.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x-lg me-2"></i>
+            Fechar
+          </button>
+          <button type="button" class="btn btn-success" id="btnEnviarAtualizacoes">
+            <i class="bi bi-envelope me-2"></i>
+            Receber Atualizações por Email
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
     crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <!-- Container para os Toasts -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <i class="bi me-2"></i>
+        <strong class="me-auto" id="toastTitle"></strong>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Fechar"></button>
+      </div>
+      <div class="toast-body" id="toastMessage"></div>
+    </div>
+  </div>
   
 </body>
 

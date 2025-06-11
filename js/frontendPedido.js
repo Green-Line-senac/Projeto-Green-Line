@@ -191,7 +191,9 @@ async function carregarDadosPedido() {
 
     // Calcula valores financeiros
     const subtotal = dadosCompra.reduce((total, item) => {
-      return total + (parseFloat(item.subtotal) || 0);
+      const preco = typeof item.preco_final === 'string' ? parseFloat(item.preco_final.replace(',', '.')) : Number(item.preco_final);
+      const quantidade = Number(item.quantidade) || 1;
+      return total + (preco * quantidade);
     }, 0);
     
     const frete = 19.90; // Valor fixo do frete
@@ -378,67 +380,227 @@ async function preencherPaginaConfirmacao(pedido) {
   }
 }
 
-// Função para mostrar erro na página
+// Função para mostrar toast
+function mostrarToast(tipo, titulo, mensagem) {
+    const toast = document.getElementById('liveToast');
+    const toastTitle = document.getElementById('toastTitle');
+    const toastMessage = document.getElementById('toastMessage');
+    const iconElement = toast.querySelector('.toast-header i');
+    
+    // Configura o ícone e cores baseado no tipo
+    switch (tipo) {
+        case 'success':
+            iconElement.className = 'bi bi-check-circle-fill text-success me-2';
+            toast.classList.remove('bg-danger', 'text-white');
+            toast.querySelector('.toast-header').classList.remove('bg-danger', 'text-white');
+            break;
+        case 'error':
+            iconElement.className = 'bi bi-exclamation-circle-fill text-danger me-2';
+            toast.classList.add('bg-danger', 'text-white');
+            toast.querySelector('.toast-header').classList.add('bg-danger', 'text-white');
+            break;
+        case 'info':
+            iconElement.className = 'bi bi-info-circle-fill text-primary me-2';
+            toast.classList.remove('bg-danger', 'text-white');
+            toast.querySelector('.toast-header').classList.remove('bg-danger', 'text-white');
+            break;
+    }
+    
+    toastTitle.textContent = titulo;
+    toastMessage.textContent = mensagem;
+    
+    const bsToast = new bootstrap.Toast(toast, {
+        animation: true,
+        autohide: true,
+        delay: 5000
+    });
+    bsToast.show();
+}
+
+// Função para mostrar erro
 function mostrarErro(mensagem) {
-  const main = document.querySelector("main");
-  if (main) {
-    const errorDiv = document.createElement("div");
-    errorDiv.className = "alert alert-danger mx-3 mt-3";
-    errorDiv.innerHTML = `
-      <h4><i class="bi bi-exclamation-triangle me-2"></i>Ops! Algo deu errado</h4>
-      <p>${mensagem}</p>
-      <div class="mt-3">
-        <button class="btn btn-success me-2" onclick="window.location.href='vendas.html'">
-          <i class="bi bi-arrow-left me-2"></i>Voltar para Vendas
-        </button>
-        <button class="btn btn-outline-success" onclick="window.location.href='produtos.html'">
-          <i class="bi bi-shop me-2"></i>Ver Produtos
-        </button>
-      </div>
-    `;
-    main.insertBefore(errorDiv, main.firstChild);
-  }
+    mostrarToast('error', 'Erro', mensagem);
+}
+
+// Função para mostrar sucesso
+function mostrarSucesso(mensagem) {
+    mostrarToast('success', 'Sucesso', mensagem);
+}
+
+// Função para mostrar informação
+function mostrarInfo(mensagem) {
+    mostrarToast('info', 'Informação', mensagem);
 }
 
 // Funções para os botões de ação
 function continuarComprando() {
-  // Limpa dados da compra atual
-  localStorage.removeItem("dadosCompra");
-  localStorage.removeItem("dadosFormulario");
-  
-  // Redireciona para produtos
-  window.location.href = "produtos.html";
+    mostrarInfo('Redirecionando para a página de produtos...');
+    setTimeout(() => {
+        window.location.href = '/public/produtos.html';
+    }, 1000);
 }
 
 async function acompanharPedido() {
-  const ultimoPedido = localStorage.getItem("ultimoPedido");
-  if (ultimoPedido) {
-    const pedido = JSON.parse(ultimoPedido);
-    try {
-      const statusPedido = await buscarPedido(pedido.numeroPedido);
-      const mensagem = `
-        Status do pedido ${pedido.numeroPedido}:
-        - Situação: ${statusPedido.status}
-        - Previsão de entrega: ${pedido.previsaoEntrega}
-        
-        Acompanhe mais detalhes através do nosso WhatsApp ou email.
+  const numeroPedido = document.getElementById('numeroPedido').textContent;
+  const dataConfirmacao = document.getElementById('dataConfirmacao').textContent;
+  
+  // Atualiza informações básicas no modal
+  document.getElementById('modalNumeroPedido').textContent = numeroPedido;
+  document.getElementById('modalDataPedido').textContent = dataConfirmacao;
+  
+  // Monta a timeline de status
+  const timelineTracking = document.querySelector('.timeline-tracking');
+  const statusList = [
+      {
+          status: 'Pedido Confirmado',
+          data: dataConfirmacao,
+          icon: 'bi-check-circle-fill',
+          active: true
+      },
+      {
+          status: 'Em Preparação',
+          data: 'Em breve',
+          icon: 'bi-box-seam',
+          active: false
+      },
+      {
+          status: 'Em Transporte',
+          data: 'Em breve',
+          icon: 'bi-truck',
+          active: false
+      },
+      {
+          status: 'Entregue',
+          data: document.getElementById('previsaoEntrega').textContent,
+          icon: 'bi-house-door',
+          active: false
+      }
+  ];
+  
+  // Limpa a timeline atual
+  timelineTracking.innerHTML = '';
+  
+  // Cria os elementos da timeline
+  statusList.forEach((item, index) => {
+      const statusElement = document.createElement('div');
+      statusElement.className = `status-step ${item.active ? 'active' : ''}`;
+      statusElement.innerHTML = `
+          <div class="step-icon">
+              <i class="bi ${item.icon}"></i>
+          </div>
+          <div class="step-content">
+              <h4>${item.status}</h4>
+              <p>${item.data}</p>
+          </div>
       `;
-      alert(mensagem);
-    } catch (erro) {
-      console.error('Erro ao buscar status do pedido:', erro);
-      alert(`Acompanhe seu pedido ${pedido.numeroPedido} através do nosso WhatsApp ou email de confirmação.`);
-    }
-  } else {
-    alert("Dados do pedido não encontrados.");
-  }
+      timelineTracking.appendChild(statusElement);
+      
+      // Adiciona linha conectora entre os status (exceto o último)
+      if (index < statusList.length - 1) {
+          const connector = document.createElement('div');
+          connector.className = 'status-connector';
+          timelineTracking.appendChild(connector);
+      }
+  });
+  
+  // Abre o modal
+  const modal = new bootstrap.Modal(document.getElementById('modalAcompanhamento'));
+  modal.show();
 }
 
 function baixarComprovante() {
-  window.print();
+    mostrarInfo('Gerando seu comprovante...');
+    const numeroPedido = document.getElementById('numeroPedido').textContent;
+    const dataConfirmacao = document.getElementById('dataConfirmacao').textContent;
+    const total = document.getElementById('total').textContent;
+    
+    // Cria o conteúdo do comprovante
+    const comprovante = `
+COMPROVANTE DE COMPRA - GREENLINE
+================================
+
+Número do Pedido: ${numeroPedido}
+Data: ${dataConfirmacao}
+
+RESUMO DO PEDIDO
++---------------
+${document.getElementById('produtosPedido').innerText}
+
+VALORES
++-------
+Subtotal: ${document.getElementById('subtotal').textContent}
+Frete: ${document.getElementById('frete').textContent}
+Desconto: ${document.getElementById('desconto').textContent}
+Total: ${total}
+
+ENDEREÇO DE ENTREGA
+------------------
+${document.getElementById('enderecoEntrega').innerText}
+
+FORMA DE PAGAMENTO
++----------------
+${document.getElementById('formaPagamento').innerText}
+
+================================
+Obrigado por escolher produtos sustentáveis!
+    `;
+    
+    // Cria o blob e faz o download
+    const blob = new Blob([comprovante], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `comprovante_${numeroPedido.replace('#', '')}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+
+    // Após o download
+    mostrarSucesso('Comprovante gerado com sucesso!');
 }
 
 function entrarContato() {
-  window.location.href = "contato.html";
+    mostrarInfo('Redirecionando para a página de contato...');
+    setTimeout(() => {
+        window.location.href = '/public/contato.html';
+    }, 1000);
+}
+
+// Função para enviar solicitação de atualizações por email
+async function enviarAtualizacoes() {
+    const email = localStorage.getItem('email');
+    const numeroPedido = document.getElementById('modalNumeroPedido').textContent;
+    
+    if (!email) {
+        mostrarErro('Por favor, faça login para receber atualizações por email.');
+        return;
+    }
+    
+    try {
+        const response = await fetch('https://green-line-web.onrender.com/solicitar-atualizacoes', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email,
+                numeroPedido: numeroPedido
+            })
+        });
+
+        if (response.ok) {
+            mostrarSucesso('Você receberá atualizações sobre seu pedido por email!');
+            // Fecha o modal após sucesso
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalAcompanhamento'));
+            if (modal) modal.hide();
+        } else {
+            throw new Error('Falha ao solicitar atualizações');
+        }
+    } catch (erro) {
+        console.error('Erro ao solicitar atualizações:', erro);
+        mostrarErro('Não foi possível configurar as atualizações por email. Tente novamente mais tarde.');
+    }
 }
 
 // Função para carregar produtos relacionados
@@ -484,15 +646,20 @@ async function carregarProdutosRelacionados() {
   }
 }
 
-// Inicialização quando a página carrega
-document.addEventListener("DOMContentLoaded", function() {
-  console.log("Página de confirmação carregada - GreenLine");
-  
-  // Carrega dados do pedido
-  carregarDadosPedido();
-  
-  // Carrega produtos relacionados
-  carregarProdutosRelacionados();
+// Inicialização do módulo
+document.addEventListener('DOMContentLoaded', () => {
+    // Carrega dados do pedido
+    carregarDadosPedido();
+
+    // Event listeners para os botões
+    document.getElementById('btnContinuarComprando').addEventListener('click', continuarComprando);
+    document.getElementById('btnAcompanharPedido').addEventListener('click', acompanharPedido);
+    document.getElementById('btnBaixarComprovante').addEventListener('click', baixarComprovante);
+    document.getElementById('btnEntrarContato').addEventListener('click', entrarContato);
+    document.getElementById('btnEnviarAtualizacoes').addEventListener('click', enviarAtualizacoes);
+
+    // Carrega produtos relacionados
+    carregarProdutosRelacionados();
 });
 
 // Função para limpar dados após confirmação

@@ -451,3 +451,367 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #157347;
 }
+
+/* Estilos para o modal de acompanhamento */
+.timeline-tracking {
+    background-color: white;
+    border-radius: 10px;
+    padding: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+/* Linha central */
+.timeline-tracking::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #e9ecef;
+    transform: translateX(-50%);
+}
+
+.timeline-tracking .status-step {
+    background-color: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.timeline-tracking .status-step:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-tracking .step-icon {
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #f8f9fa;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+    z-index: 2;
+}
+
+.timeline-tracking .status-step.active .step-icon {
+    border-color: #198754;
+    background-color: #198754;
+    box-shadow: 0 0 0 4px rgba(25, 135, 84, 0.2);
+}
+
+.timeline-tracking .step-content {
+    width: calc(50% - 50px);
+    padding: 0 2rem;
+    text-align: right;
+}
+
+.timeline-tracking .status-step:nth-child(even) .step-content {
+    margin-left: auto;
+    text-align: left;
+    order: 1;
+}
+
+.timeline-tracking .step-content h4 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: #198754;
+    font-weight: 600;
+}
+
+.timeline-tracking .step-content p {
+    font-size: 0.9rem;
+    margin: 0;
+    color: #6c757d;
+}
+
+.timeline-tracking .status-step::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: calc(50% - 50px);
+    height: 2px;
+    background-color: #e9ecef;
+}
+
+.timeline-tracking .status-step::before {
+    left: 0;
+}
+
+.timeline-tracking .status-step:nth-child(even)::before {
+    left: auto;
+    right: 0;
+}
+
+.timeline-tracking .status-step.active::before {
+    background-color: #198754;
+}
+
+/* Responsividade do Modal */
+@media (max-width: 768px) {
+    .timeline-tracking::before {
+        left: 30px;
+    }
+
+    .timeline-tracking .status-step {
+        flex-direction: column;
+        align-items: flex-start;
+        padding-left: 70px;
+    }
+
+    .timeline-tracking .step-icon {
+        left: 30px;
+        transform: translateY(-50%);
+    }
+
+    .timeline-tracking .step-content {
+        width: 100%;
+        padding-left: 1rem;
+        text-align: left;
+    }
+
+    .timeline-tracking .status-step:nth-child(even) .step-content {
+        text-align: left;
+        padding-left: 1rem;
+    }
+
+    .timeline-tracking .status-step::before {
+        width: 30px;
+        left: 30px;
+    }
+
+    .timeline-tracking .status-step:nth-child(even)::before {
+        left: 30px;
+        right: auto;
+    }
+}
+
+/* Status do Pedido */
+.order-status-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.order-status-card .card-title {
+    color: #198754;
+    font-size: 1.25rem;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.status-timeline {
+    position: relative;
+    padding: 20px 0;
+}
+
+.status-step {
+    display: flex;
+    align-items: flex-start;
+    position: relative;
+    padding-left: 45px;
+    margin-bottom: 30px;
+}
+
+.status-step:last-child {
+    margin-bottom: 0;
+}
+
+.status-step::before {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 40px;
+    bottom: -30px;
+    width: 2px;
+    background-color: #e9ecef;
+}
+
+.status-step:last-child::before {
+    display: none;
+}
+
+.status-step.active::before {
+    background-color: #198754;
+}
+
+.step-icon {
+    position: absolute;
+    left: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    transition: all 0.3s ease;
+}
+
+.step-icon i {
+    font-size: 1.2rem;
+    color: #6c757d;
+    transition: all 0.3s ease;
+}
+
+.status-step.active .step-icon {
+    background-color: #198754;
+    box-shadow: 0 0 0 4px rgba(25, 135, 84, 0.2);
+}
+
+.status-step.active .step-icon i {
+    color: white;
+}
+
+.step-content {
+    padding-left: 15px;
+}
+
+.step-content h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.step-content p {
+    margin: 5px 0 0;
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+/* Modal de Acompanhamento */
+.modal-content {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header.bg-success {
+    background: linear-gradient(45deg, #198754, #20c997) !important;
+    color: white;
+    border-radius: 15px 15px 0 0;
+    padding: 1.5rem;
+}
+
+.modal-header .modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.modal-header .modal-title i {
+    font-size: 1.5rem;
+}
+
+.modal-header .btn-close-white {
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 0.75rem;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.modal-header .btn-close-white:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+.modal-body {
+    background-color: #f8f9fa;
+}
+
+/* Informações do Pedido no Modal */
+.order-info {
+    background-color: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.order-info h6 {
+    color: #333;
+    font-size: 1.1rem;
+    margin-bottom: 0;
+}
+
+.order-info .text-success {
+    font-weight: 600;
+}
+
+.order-info .text-muted {
+    font-size: 0.9rem;
+}
+
+/* Informações Adicionais */
+.tracking-info .alert {
+    border: none;
+    border-radius: 10px;
+    background-color: rgba(25, 135, 84, 0.1);
+    border-left: 4px solid #198754;
+    padding: 1rem;
+    margin: 0;
+}
+
+/* Modal Footer */
+.modal-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    border-radius: 0 0 15px 15px;
+    padding: 1rem 1.5rem;
+}
+
+.modal-footer .btn {
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.modal-footer .btn-outline-secondary {
+    color: #6c757d;
+    border-color: #dee2e6;
+}
+
+.modal-footer .btn-outline-secondary:hover {
+    background-color: #6c757d;
+    color: white;
+    border-color: #6c757d;
+}
+
+.modal-footer .btn-success {
+    background: linear-gradient(45deg, #198754, #20c997);
+    border: none;
+    box-shadow: 0 2px 4px rgba(25, 135, 84, 0.2);
+}
+
+.modal-footer .btn-success:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(25, 135, 84, 0.3);
+}
+
+/* Animação de Entrada do Modal */
+.modal.fade .modal-dialog {
+    transform: scale(0.95);
+    opacity: 0;
+    transition: all 0.3s ease-in-out;
+}
+
+.modal.show .modal-dialog {
+    transform: scale(1);
+    opacity: 1;
+}

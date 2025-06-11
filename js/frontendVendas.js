@@ -376,94 +376,55 @@ function mostrarErros(erros) {
 document.getElementById("FinalizarCompra").addEventListener("click", async (event) => {
     event.preventDefault();
     console.log('Iniciando processo de finalização da compra...');
-    window.location.href = 'pedido_confirmado.html';
+    
+    // Verifica se existem dados da compra
+    const dadosCompraStr = localStorage.getItem("dadosCompra");
+    if (!dadosCompraStr) {
+        console.error("Dados da compra não encontrados");
+        mostrarErros(["Não foi possível encontrar os dados da sua compra. Por favor, tente novamente."]);
+        return;
+    }
+    
     try {
         // Coleta dados do endereço
-        const endereco = {
-            cep: document.getElementById("cep").value,
-            bairro: document.getElementById("bairro").value,
-            endereco: document.getElementById("endereco").value,
-            cidade: document.getElementById("cidade").value,
-            estado: document.getElementById("estado").value,
-            numeroCasa: document.getElementById("numero-casa").value,
-            complementoCasa: document.getElementById("complemento-casa").value
+        const dadosEndereco = {
+            cep: document.getElementById('cep').value,
+            endereco: document.getElementById('endereco').value,
+            numeroCasa: document.getElementById('numero').value,
+            complementoCasa: document.getElementById('complemento').value,
+            bairro: document.getElementById('bairro').value,
+            cidade: document.getElementById('cidade').value,
+            estado: document.getElementById('estado').value
         };
-        console.log('Dados do endereço coletados:', endereco);
 
-        // Valida endereço
-        const errosEndereco = validarEndereco(endereco);
-        if (errosEndereco.length > 0) {
-            console.log('Erros de validação do endereço:', errosEndereco);
-            mostrarErros(errosEndereco);
-            return;
+        // Coleta dados do pagamento
+        const metodoPagamento = document.getElementById('pagamento').value;
+        let dadosPagamento = { metodoPagamento };
+
+        if (metodoPagamento === 'CC') {
+            dadosPagamento = {
+                ...dadosPagamento,
+                numeroCartao: document.getElementById('numero-cartao').value,
+                nomeCartao: document.getElementById('nome-cartao').value,
+                validadeCartao: document.getElementById('validade-cartao').value,
+                cvv: document.getElementById('cvv').value,
+                parcelas: document.getElementById('parcelas').value
+            };
         }
 
-        // Coleta método de pagamento
-        const pagamento = document.getElementById("pagamento").value;
-        console.log('Método de pagamento selecionado:', pagamento);
-        let dadosPedido;
+        // Combina todos os dados do formulário
+        const dadosFormulario = {
+            ...dadosEndereco,
+            ...dadosPagamento
+        };
 
-        // Processa pagamento com cartão
-        if (pagamento === "CC") {
-            const dadosCartao = {
-                numeroCartao: document.getElementById("numero-cartao").value,
-                nomeCartao: document.getElementById("nome-cartao").value,
-                validadeCartao: document.getElementById("validade-cartao").value,
-                cvv: document.getElementById("cvv").value
-            };
-            console.log('Dados do cartão coletados:', {...dadosCartao, numeroCartao: '****'});
-
-            // Valida cartão
-            const errosCartao = validarCartao(dadosCartao);
-            if (errosCartao.length > 0) {
-                console.log('Erros de validação do cartão:', errosCartao);
-                mostrarErros(errosCartao);
-                return;
-            }
-
-            dadosPedido = {
-                ...dadosCartao,
-                parcelas: document.getElementById("parcelas").value,
-                endereco,
-                metodoPagamento: pagamento,
-                produtos: JSON.parse(localStorage.getItem("dadosCompra"))
-            };
-        } else if (pagamento === "PIX" || pagamento === "BB") {
-            dadosPedido = {
-                metodoPagamento: pagamento,
-                endereco,
-                produtos: JSON.parse(localStorage.getItem("dadosCompra"))
-            };
-        } else {
-            console.log('Método de pagamento inválido:', pagamento);
-            mostrarErros(["Selecione um método de pagamento válido"]);
-            return;
-        }
-
-        // Adiciona dados do usuário e timestamp
-        dadosPedido.idUsuario = localStorage.getItem('id_pessoa');
-        dadosPedido.dataPedido = new Date().toISOString();
-        console.log('Dados do pedido completos:', {...dadosPedido, numeroCartao: '****'});
-
-        // Envia pedido para o backend
-        console.log('Enviando pedido para o backend...');
-        const resposta = await criarPedido(dadosPedido);
-        console.log('Pedido criado com sucesso:', resposta);
-
-        // Salva dados do formulário para uso na página de confirmação
-        localStorage.setItem("dadosFormulario", JSON.stringify({
-            ...endereco,
-            metodoPagamento: pagamento,
-            email: localStorage.getItem('email')
-        }));
-        console.log('Dados do formulário salvos no localStorage');
-
-        // Redireciona para página de confirmação
-        console.log('Redirecionando para página de confirmação...');
-        window.location.href = "pedido_confirmado.html";
-
-    } catch (erro) {
-        console.error('Erro detalhado ao processar pedido:', erro);
+        // Salva os dados no localStorage
+        localStorage.setItem('dadosFormulario', JSON.stringify(dadosFormulario));
+        
+        // Redireciona para a página de confirmação
+        window.location.href = '/public/pedido_confirmado.html';
+    } catch (error) {
+        console.error('Erro detalhado ao processar pedido:', error);
         mostrarErros(["Ocorreu um erro ao processar seu pedido. Por favor, tente novamente."]);
     }
 });
