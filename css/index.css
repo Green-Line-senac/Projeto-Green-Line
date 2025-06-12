@@ -49,6 +49,16 @@ body {
   background-color: #28a745;
   border-color: #28a745;
 }
+.largura-card {
+  width: 18rem;
+}
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  filter: invert(1); /* Inverte a cor do ícone */
+}
+.justify {
+  text-align: justify;
+}
 
 /* Ajustes responsivos */
 @media (max-width: 768px) {
