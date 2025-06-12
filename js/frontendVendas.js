@@ -390,8 +390,8 @@ document.getElementById("FinalizarCompra").addEventListener("click", async (even
         const dadosEndereco = {
             cep: document.getElementById('cep').value,
             endereco: document.getElementById('endereco').value,
-            numeroCasa: document.getElementById('numero').value,
-            complementoCasa: document.getElementById('complemento').value,
+            numeroCasa: document.getElementById('numeroCasa').value,
+            complementoCasa: document.getElementById('complementoCasa').value,
             bairro: document.getElementById('bairro').value,
             cidade: document.getElementById('cidade').value,
             estado: document.getElementById('estado').value

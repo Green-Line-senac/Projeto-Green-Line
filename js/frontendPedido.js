@@ -350,9 +350,9 @@ async function preencherPaginaConfirmacao(pedido) {
       const qrCodeContainer = document.createElement('div');
       qrCodeContainer.className = 'mt-3 text-center';
       qrCodeContainer.innerHTML = `
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=00020126580014BR.GOV.BCB.PIX0136123e4567-e89b-12d3-a456-426614174000520400005303986540510.005802BR5913GreenLine Store6008Brasilia62070503***63041234" alt="QR Code PIX" class="img-fluid mb-2">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.google.com.br/?hl=pt-BR" alt="QR Code de teste"> 
         <p class="small text-muted">Escaneie o QR Code para pagar</p>
-      `;
+      `; //Add IMG
       formaPagamentoEl.parentNode.appendChild(qrCodeContainer);
     }
 
@@ -604,47 +604,47 @@ async function enviarAtualizacoes() {
 }
 
 // Função para carregar produtos relacionados
-async function carregarProdutosRelacionados() {
-  const produtosContainer = document.getElementById("produtosRelacionados");
-  if (!produtosContainer) return;
+// async function carregarProdutosRelacionados() {
+//   const produtosContainer = document.getElementById("produtosRelacionados");
+//   if (!produtosContainer) return;
 
-  try {
-    // Busca produtos da mesma categoria
-    const ultimoPedido = localStorage.getItem("ultimoPedido");
-    if (!ultimoPedido) return;
+//   try {
+//     // Busca produtos da mesma categoria
+//     const ultimoPedido = localStorage.getItem("ultimoPedido");
+//     if (!ultimoPedido) return;
 
-    const pedido = JSON.parse(ultimoPedido);
-    const categorias = pedido.produtos.map(p => p.categoria).filter(Boolean);
+//     const pedido = JSON.parse(ultimoPedido);
+//     const categorias = pedido.produtos.map(p => p.categoria).filter(Boolean);
 
-    if (categorias.length === 0) return;
+//     if (categorias.length === 0) return;
 
-    const response = await fetch(`${api.online}/produtos/categoria/${categorias[0]}`);
-    if (!response.ok) throw new Error('Falha ao buscar produtos relacionados');
+//     const response = await fetch(`${api.online}/produtos/categoria/${categorias[0]}`);
+//     if (!response.ok) throw new Error('Falha ao buscar produtos relacionados');
 
-    const produtos = await response.json();
-    const produtosRelacionados = produtos.slice(0, 3); // Limita a 3 produtos
+//     const produtos = await response.json();
+//     const produtosRelacionados = produtos.slice(0, 3); // Limita a 3 produtos
 
-    produtosRelacionados.forEach(produto => {
-      const produtoHTML = `
-        <div class="col-md-4 mb-3">
-          <div class="card h-100">
-            <img src="${produto.imagem_1}" class="card-img-top" alt="${produto.nome}" style="height: 200px; object-fit: cover;">
-            <div class="card-body d-flex flex-column">
-              <h5 class="card-title">${produto.nome}</h5>
-              <p class="card-text text-success fw-bold mt-auto">R$ ${produto.preco.toFixed(2).replace('.', ',')}</p>
-              <button class="btn btn-outline-success btn-sm" onclick="window.location.href='produtos.html?id=${produto.id}'">
-                Ver Produto
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
-      produtosContainer.insertAdjacentHTML('beforeend', produtoHTML);
-    });
-  } catch (erro) {
-    console.error('Erro ao carregar produtos relacionados:', erro);
-  }
-}
+//     produtosRelacionados.forEach(produto => {
+//       const produtoHTML = `
+//         <div class="col-md-4 mb-3">
+//           <div class="card h-100">
+//             <img src="${produto.imagem_1}" class="card-img-top" alt="${produto.nome}" style="height: 200px; object-fit: cover;">
+//             <div class="card-body d-flex flex-column">
+//               <h5 class="card-title">${produto.nome}</h5>
+//               <p class="card-text text-success fw-bold mt-auto">R$ ${produto.preco.toFixed(2).replace('.', ',')}</p>
+//               <button class="btn btn-outline-success btn-sm" onclick="window.location.href='produtos.html?id=${produto.id}'">
+//                 Ver Produto
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+//       `;
+//       produtosContainer.insertAdjacentHTML('beforeend', produtoHTML);
+//     });
+//   } catch (erro) {
+//     console.error('Erro ao carregar produtos relacionados:', erro);
+//   }
+// }
 
 // Inicialização do módulo
 document.addEventListener('DOMContentLoaded', () => {
