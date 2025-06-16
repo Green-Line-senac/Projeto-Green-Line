@@ -184,7 +184,7 @@ async function mascaraCEP() {
     
     try {
         console.log('Iniciando requisição...');
-        const response = await fetch(`${api.vendas}/checar-cep?cep=${cep}`);
+        const response = await fetch(`${api.online}/checar-cep?cep=${cep}`);
         console.log('Resposta recebida:', response);
         
         const data = await response.json();

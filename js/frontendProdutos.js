@@ -114,7 +114,7 @@ function sanitizarProduto(produto) {
 async function carregarProdutos() {
   try {
     mostrarLoader();
-    const response = await fetch(`${apiProduto.produto}/produto`);
+    const response = await fetch(`${apiProduto.online}/produto`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     console.log('Produtos recebidos:', data);
@@ -447,7 +447,7 @@ function abrirModalProduto(dadosProduto) {
 async function verificarEstadoLogin() {
   try {
     console.log('Iniciando verificação de login...');
-    const response = await fetch(`${apiProduto.index}/loginDados`, {
+    const response = await fetch(`${apiProduto.online}/loginDados`, {
       credentials: 'include'
     });
     console.log('Status da resposta:', response.status);
@@ -617,7 +617,7 @@ console.log("Subtotal:", subtotal.toFixed(2));
     }
 
     try {
-      const requisicao = await fetch(`${apiProduto.produto}/carrinho`, {
+      const requisicao = await fetch(`${apiProduto.online}/carrinho`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -25,7 +25,7 @@ async function verificarEstadoLogin() {
     return;
 
   try {
-    let response = await fetch(`${api.index}/loginDados`);
+    let response = await fetch(`${api.online}/loginDados`);
 
     if (!response.ok) {
       // Se houver erro, limpa o localStorage (usuário não está logado)

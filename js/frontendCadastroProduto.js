@@ -125,7 +125,7 @@
                 imagem_2: urlsImagem[1] || null
             };
 
-            const response = await fetch(`${api.cadastro_produto}/cadastro-produto`, {
+            const response = await fetch(`${api.online}/cadastro-produto`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(dados)

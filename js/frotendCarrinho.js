@@ -14,7 +14,7 @@ async function inicializar() {
     try {
         console.log("Iniciando carregamento...");
 
-        const respostaLogin = await fetch(`${api.index}/loginDados`);
+        const respostaLogin = await fetch(`${api.online}/loginDados`);
         if (!respostaLogin.ok) throw new Error("Erro na requisição de login");
 
         const dados = await respostaLogin.json();
@@ -36,7 +36,7 @@ async function buscarProdutos() {
     try {
         console.log("Buscando produtos para ID:", estado.id_pessoa);
 
-        const resposta = await fetch(`${api.carrinho}/buscar-produtos`, {
+        const resposta = await fetch(`${api.online}/buscar-produtos`, {
             method: 'POST',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id_pessoa: estado.id_pessoa })
@@ -130,7 +130,7 @@ function subtotal() {
 // Função para remover produto
 async function excluirProduto(id_produto, id_carrinho, elemento) {
     try {
-        let requisicao = await fetch(`${api.carrinho}/excluir-produtos`, {
+        let requisicao = await fetch(`${api.online}/excluir-produtos`, {
             method: 'POST',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id_pessoa: estado.id_pessoa, id_produto, id_carrinho })

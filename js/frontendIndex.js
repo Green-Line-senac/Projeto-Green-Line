@@ -45,7 +45,7 @@ async function inicializarApp() {
 async function verificarEstadoLogin() {
   try {
     console.log('Iniciando verificação de login...');
-    const response = await fetch(`${config.index}/loginDados`, {
+    const response = await fetch(`${config.online}/loginDados`, {
       credentials: 'include'
     });
     console.log('Status da resposta:', response.status);
@@ -76,7 +76,7 @@ async function carregarProdutosPromocao() {
   try {
     mostrarLoader();
 
-    const response = await fetch(`${config.index}/produtos`);
+    const response = await fetch(`${config.online}/produtos`);
     const { success, data, message } = await response.json();
 
     if (!success || !Array.isArray(data)) {
@@ -466,7 +466,7 @@ document.getElementById('btnAddCarrinho').addEventListener('click', async () => 
   }
 
   try {
-    const requisicao = await fetch(`${config.produtos}/carrinho`, {
+    const requisicao = await fetch(`${config.online}/carrinho`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -524,22 +524,6 @@ document.querySelectorAll('[data-categoria]').forEach(categoria => {
       console.log("Categoria selecionada:", categoria.dataset.categoria);
       const categoriaSelecionada = encodeURIComponent(categoria.dataset.categoria); //devido a presença de espaços e caracteres especiais, tem que codificar a categoria
       localStorage.setItem('categoriaSelecionada', categoriaSelecionada);
-      /*const response = await fetch(`${config.produtos}/produtosEspecificos`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({categoria: categoriaSelecionada })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Erro HTTP: ${response.status}`);
-      }
-
-      const produtos = await response.json();
-
-      if (!produtos?.length || produtos.codigo === -1) {
-        mostrarFeedback("Nenhum produto encontrado nesta categoria.", "warning");
-        return;
-      }*/
       
     } catch (error) {
       console.error("Falha ao enviar a outra página:", error);

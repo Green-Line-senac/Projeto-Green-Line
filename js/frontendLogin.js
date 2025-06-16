@@ -31,7 +31,7 @@ formularioLogin.addEventListener('submit', async function (e) {
     }
 
     try {
-        const resposta = await fetch(`${api.login}/verificarConta`, {
+        const resposta = await fetch(`${api.online}/verificarConta`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ usuario, senha })
@@ -48,7 +48,7 @@ formularioLogin.addEventListener('submit', async function (e) {
                 mostrarMensagem("Email não verificado. Verifique sua caixa de entrada.", "warning");
                 if (usuario.includes("@")) {
                     try {
-                        await fetch(`${api.login}/enviarEmail`, {
+                        await fetch(`${api.online}/enviarEmail`, {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({ usuario })
@@ -62,7 +62,7 @@ formularioLogin.addEventListener('submit', async function (e) {
             case 2:
                 try {
                     console.log(usuario);
-                    await fetch(`${api.index}/loginDados`, {
+                    await fetch(`${api.online}/loginDados`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({

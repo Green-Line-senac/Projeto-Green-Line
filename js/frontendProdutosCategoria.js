@@ -157,7 +157,7 @@ async function carregarProdutos() {
       }
 
       // Construindo a URL corretamente para passar a categoria como query string
-      const url = `${apiProduto.produto}/produtosEspecificos?categoria=${encodeURIComponent(categoriaSelecionada)}`;
+      const url = `${apiProduto.online}/produtosEspecificos?categoria=${encodeURIComponent(categoriaSelecionada)}`;
       console.log("URL da requisição:", url);
 
       // Fazendo a requisição
@@ -415,7 +415,7 @@ function abrirModalProduto(dadosProduto) {
  */
 async function verificarEstadoLogin() {
   try {
-    const response = await fetch(`${apiProduto.index}/loginDados`, {
+    const response = await fetch(`${apiProduto.online}/loginDados`, {
       credentials: "include",
     });
     if (!response.ok) {
@@ -547,7 +547,7 @@ console.log("Subtotal:", subtotal.toFixed(2));
     }
 
     try {
-      const requisicao = await fetch(`${apiProduto.produto}/carrinho`, {
+      const requisicao = await fetch(`${apiProduto.online}/carrinho`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
