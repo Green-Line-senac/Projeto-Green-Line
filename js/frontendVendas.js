@@ -422,7 +422,7 @@ document.getElementById("FinalizarCompra").addEventListener("click", async (even
         localStorage.setItem('dadosFormulario', JSON.stringify(dadosFormulario));
         
         // Redireciona para a página de confirmação
-        window.location.href = '/public/pedido_confirmado.html';
+        window.location.href = '../public/pedido_confirmado.html'
     } catch (error) {
         console.error('Erro detalhado ao processar pedido:', error);
         mostrarErros(["Ocorreu um erro ao processar seu pedido. Por favor, tente novamente."]);
