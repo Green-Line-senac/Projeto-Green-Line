@@ -588,5 +588,5 @@ app.get("/teste", (req, res) => {
 
 // ==================== INICIAR SERVIDOR ====================
 app.listen(3010, () => {
-  console.log("🚀 Servidor rodando em backendCadastro: http://localhost:3010");
+  console.log("🚀 SERVIDOR RODANDO NO ONLINE");
 });
