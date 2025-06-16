@@ -271,9 +271,8 @@ async function carregarDadosPedido() {
             ],
       email: dadosFormulario.email,
     };
-    const resposta = await salvarPedido(pedido);
-    let requisicao = resposta;
-    console.log("Pedido salvo com sucesso:", requisicao);
+    await salvarPedido(pedido);
+    
 
     // Preenche a página com os dados
     await preencherPaginaConfirmacao(pedido);
