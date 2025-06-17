@@ -197,14 +197,17 @@
   }
 }
 
-@media (max-width: 576px) {
+@media (max-width: 1920px) {
   .carousel-slide-wrapper {
-    height: 250px;
+    height: auto;
   }
 
   .carousel-image {
-    height: 250px !important;
+    width: 100%;
+    height: auto !important;
+    object-fit: contain !important; /* mostra a imagem inteira */
   }
+}
 
   .carousel-title {
     font-size: 1.5rem;
@@ -214,4 +217,5 @@
     font-size: 0.9rem;
     margin-bottom: 1.5rem;
   }
-}
+
+  
