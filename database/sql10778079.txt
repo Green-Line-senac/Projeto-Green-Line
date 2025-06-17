@@ -478,27 +478,60 @@ INSERT INTO produto (
  'Casa Ecológica');
 
 
--- Criando a tabela de pagamentos
-CREATE TABLE pagamento (
-    id_pagamento INT PRIMARY KEY AUTO_INCREMENT,
-tipo ENUM("CRÉDITO","DÉBITO","BOLETO BANCÁRIO","PIX") NOT NULL DEFAULT "CRÉDITO",
-    pagamento_situacao ENUM('Em aberto', 'Pago', 'Cancelado') NOT NULL DEFAULT "Em aberto",
-    valor DECIMAL(10,2) NOT NULL,
-    num_parcelas INT DEFAULT 1,
-    bandeira_cartao VARCHAR(20) NULL,
-);
-
--- Criando a tabela de pedidos
 CREATE TABLE pedidos (
     id_pedido INT PRIMARY KEY AUTO_INCREMENT,
+    -- Informações básicas do pedido
+    numero_pedido VARCHAR(20) NOT NULL UNIQUE,
     data_hora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    situacao CHAR(1) NOT NULL DEFAULT 'P',
+    situacao ENUM('Pendente', 'Processando', 'Enviado', 'Entregue', 'Cancelado') NOT NULL DEFAULT 'Pendente',
     id_pessoa INT NOT NULL,
-    FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa),
-    id_pagamento INT NOT NULL,
-    FOREIGN KEY (id_pagamento) REFERENCES pagamento(id_pagamento),
-    cep_entrega TEXT NULL,
-    metodo_entrega VARCHAR(50) NULL
+    
+    -- Informações de pagamento (antiga tabela pagamento)
+    tipo_pagamento ENUM('CRÉDITO', 'DÉBITO', 'BOLETO BANCÁRIO', 'PIX') NOT NULL DEFAULT 'CRÉDITO',
+    pagamento_situacao ENUM('Em aberto', 'Pago', 'Cancelado', 'Estornado') NOT NULL DEFAULT 'Em aberto',
+    valor_total DECIMAL(10,2) NOT NULL,
+    num_parcelas INT DEFAULT 1,
+    
+    -- Campos específicos para cartão
+    bandeira_cartao VARCHAR(20) NULL,
+    numero_cartao VARCHAR(20) NULL,
+    nome_cartao VARCHAR(100) NULL,
+    validade_cartao VARCHAR(7) NULL, -- MM/AAAA
+    cvv VARCHAR(4) NULL,
+    
+    -- Campos específicos para PIX
+    chave_pix VARCHAR(255) NULL,
+    qrcode_pix TEXT NULL,
+    
+    -- Informações comuns de pagamento
+    nome_titular VARCHAR(100) NULL,
+    cpf_titular VARCHAR(14) NULL,
+    codigo_transacao VARCHAR(100) NULL,
+    data_pagamento TIMESTAMP NULL,
+    
+    -- Informações de entrega
+    metodo_entrega VARCHAR(100) NULL,
+    previsao_entrega VARCHAR(50) NULL,
+    valor_frete DECIMAL(10,2) DEFAULT 0,
+    
+    -- Dados financeiros
+    subtotal DECIMAL(10,2) NOT NULL,
+    desconto DECIMAL(10,2) DEFAULT 0,
+    
+    -- Chave estrangeira
+    FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa)
+);
+
+CREATE TABLE pedido_produto (
+    id_pedido_produto INT PRIMARY KEY AUTO_INCREMENT,
+    id_pedido INT NOT NULL,
+    id_produto INT NOT NULL,
+    quantidade INT NOT NULL DEFAULT 1,
+    preco_unitario DECIMAL(10,2) NOT NULL,
+    nome_produto VARCHAR(100) NOT NULL, -- Armazena o nome no momento da compra
+    -- Chaves estrangeiras
+    FOREIGN KEY (id_pedido) REFERENCES pedidos(id_pedido),
+    FOREIGN KEY (id_produto) REFERENCES produto(id_produto)
 );
 
 CREATE TABLE carrinho (
@@ -517,16 +550,6 @@ CREATE TABLE carrinho_itens (
     FOREIGN KEY (id_produto) REFERENCES produto(id_produto),
     quantidade INT NOT NULL DEFAULT 1,
     situacao CHAR(1) NOT NULL DEFAULT 'P' -- 'P' para pendente, 'R' para removido, 'C' para comprado
-);
-
-CREATE TABLE pedido_produto (
-    id_pedido_produto INT PRIMARY KEY AUTO_INCREMENT,
-    id_pedido INT NOT NULL,
-    id_produto INT NOT NULL,
-    quantidade INT NOT NULL DEFAULT 1,
-    preco_unitario DECIMAL(10,2) NOT NULL,
-    FOREIGN KEY (id_pedido) REFERENCES pedidos(id_pedido),
-    FOREIGN KEY (id_produto) REFERENCES produto(id_produto)
 );
 
 //VIEWS
