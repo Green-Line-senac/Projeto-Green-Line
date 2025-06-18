@@ -409,7 +409,7 @@ async function atualizarImagemPerfil(imageData) {
 // Logout
 async function logout() {
     try {
-        const respostaLogout = await fetch(`${api.index}/logout`, {
+        const respostaLogout = await fetch(`${api.online}/logout`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

@@ -75,8 +75,8 @@ function gerarEstrelas(nota) {
  */
 function mostrarFeedback(mensagem, tipo = "success") {
   const toast = document.createElement("div");
-  toast.className = `toast align-items-center text-white bg-${tipo} border-0 position-fixed top-50 start-50 translate-middle`;
-  toast.style.zIndex = "9999"; // Valor alto para garantir que fique acima de tudo
+  toast.className = `toast align-items-center text-white bg-${tipo} border-0 position-fixed bottom-0 end-0 m-3`;
+  toast.style.zIndex = 1050;
   toast.style.position = "fixed"; // Redundante, mas para garantir
   toast.innerHTML = `
       <div class="d-flex">
@@ -440,9 +440,6 @@ function configurarEventos() {
     const inputQuantidade = document.getElementById('quantidadeModal');
     inputQuantidade.value = 1;
     estado.id_produto = null;
-    const itemResultado = document.getElementById('item-resultado');
-    itemResultado.classList.add('d-none');
-    itemResultado.innerHTML = '';
   });
 
   // Eventos de quantidade
@@ -558,36 +555,26 @@ console.log("Subtotal:", subtotal.toFixed(2));
       });
 
       const resposta = await requisicao.json();
-      const itemResultado = document.getElementById('item-resultado');
+     
 
       if (resposta.codigo === 1 || resposta.mensagem === "ITEM_DUPLICADO") {
-        itemResultado.classList.remove('d-none');
-        itemResultado.innerHTML = "⚠️ Este item já está no seu carrinho";
-        setTimeout(() => itemResultado.classList.add('d-none'), 2000);
-      } else if (resposta.sucesso) {
-        let badge = document.getElementById('badge-carrinho');
-        badge.textContent = parseInt(badge.textContent || '0') + 1;
-        itemResultado.classList.remove('d-none');
-        itemResultado.innerHTML = "✔️ Item adicionado ao carrinho!";
-        itemResultado.classList.add('text-success');
-        setTimeout(() => {
-          itemResultado.classList.add('d-none');
-          itemResultado.classList.remove('text-success');
-        }, 3000);
-      } else {
-        itemResultado.classList.remove('d-none');
-        itemResultado.innerHTML = `❌ Erro: ${resposta.mensagem || "Erro desconhecido"}`;
-        itemResultado.classList.add('text-danger');
-        setTimeout(() => itemResultado.classList.add('d-none'), 2000);
-      }
-    } catch (erro) {
-      console.error("Erro ao adicionar ao carrinho:", erro);
-      const itemResultado = document.getElementById('item-resultado');
-      itemResultado.classList.remove('d-none');
-      itemResultado.innerHTML = "❌ Falha na conexão com o servidor";
-      itemResultado.classList.add('text-danger');
-      setTimeout(() => itemResultado.classList.add('d-none'), 2000);
-    }
+          mostrarFeedback("⚠️ Este item já está no seu carrinho", "warning");
+        } else if (resposta.sucesso) {
+          let badge = document.getElementById("badge-carrinho");
+          badge.textContent = parseInt(badge.textContent || "0") + 1;
+          mostrarFeedback(
+            "✅ Item adicionado ao carrinho com sucesso!",
+            "success"
+          );
+        } else {
+          mostrarFeedback("❌ Falha ao adicionar item ao carrinho", "danger");
+        }
+      } catch (erro) {
+        console.error("Erro ao adicionar ao carrinho:", erro);
+        mostrarFeedback(
+          "❌ Ocorreu um erro ao adicionar o item ao carrinho",
+          "danger"
+        )}
   });
 }
 

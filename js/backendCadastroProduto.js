@@ -18,7 +18,7 @@ app.post('/cadastro-produto', async (req, res) => {
     try {
         const { imagem_1, imagem_2, ...outrosDados } = req.body;
 
-        if (!outrosDados.nome || !outrosDados.categoria) {
+        if (!outrosDados.produto || !outrosDados.categoria) {
             return res.status(400).json({ error: "Nome e categoria são obrigatórios" });
         }
 
@@ -41,8 +41,8 @@ app.post('/cadastro-produto', async (req, res) => {
             outrosDados.marca || '',
             parseInt(outrosDados.avaliacao) || 0,
             parseInt(outrosDados.quantidade_avaliacao) || 0,
-            parseInt(outrosDados.estoque) || 0,
-            parseInt(outrosDados.parcelas) || 0,
+            parseInt(outrosDados.estoque) || 1,
+            parseInt(outrosDados.parcelas) || 1,
             parseFloat(outrosDados.peso) || 0,
             outrosDados.dimensoes || '0x0x0',
             outrosDados.ativo ? 1 : 0,
