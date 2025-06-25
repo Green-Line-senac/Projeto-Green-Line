@@ -80,7 +80,7 @@ function validarCampos(usuario, senha) {
 }
 
 async function fazerRequisicaoLogin(usuario, senha) {
-    return await fetch(`${api.login}/verificarConta`, {
+    return await fetch(`${api.online}/verificarConta`, {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
@@ -126,7 +126,7 @@ async function tratarContaNaoVerificada(dados, usuario) {
     
     if (usuario.includes("@")) {
         try {
-            await fetch(`${api.login}/enviarEmail`, {
+            await fetch(`${api.online}/enviarEmail`, {
                 method: "POST",
                 headers: { 
                     "Content-Type": "application/json",
