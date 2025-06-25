@@ -48,7 +48,7 @@ async function verificarEstadoLogin() {
     if (dados?.trocarDeConta === 1 || dados?.trocar === 1) {
       elementosHTML.iconeUsuario.className = "bi bi-person-check text-success";
       elementosHTML.iconeUsuario.title = "Usuário logado";
-      elementosHTML.link_usuario.href = "../public/perfil.html";
+      elementosHTML.link_usuario.href = "/green_line_web/public/perfil.html" || "../public/perfil.html";
     } else {
       // Reseta para estado não logado
       elementosHTML.iconeUsuario.className = "bi bi-person";
