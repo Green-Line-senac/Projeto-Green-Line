@@ -509,7 +509,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       console.log("Dados da compra:", dadosCompra);
       localStorage.setItem("dadosCompra", JSON.stringify(dadosCompra));
-      window.location.href = "public/vendas.html";
+      window.location.href = "/green_line_web/public/vendas.html" || "../public/vendas.html";
     });
 
   // Botão "Adicionar ao Carrinho"

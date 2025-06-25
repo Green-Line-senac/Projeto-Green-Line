@@ -71,7 +71,7 @@ formularioCadastro.addEventListener("submit", function (e) {
       .then((data) => {
         console.log("Resposta do servidor:", data);
         // Redireciona após o sucesso do cadastro
-        window.location.href = "/public/login.html";
+        window.location.href = "/green_line_web/public/login.html" || "../public/login.html";
       })
       .catch((error) => console.error("Erro ao cadastrar:", error));
   } else {

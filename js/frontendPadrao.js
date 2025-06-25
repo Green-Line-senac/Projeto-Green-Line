@@ -53,7 +53,7 @@ async function verificarEstadoLogin() {
       // Reseta para estado não logado
       elementosHTML.iconeUsuario.className = "bi bi-person";
       elementosHTML.iconeUsuario.title = "Fazer login";
-      elementosHTML.link_usuario.href = "../public/login.html";
+      elementosHTML.link_usuario.href = "/green_line_web/public/login.html" || "../public/login.html";
     }
 
     // Atualiza carrinho
