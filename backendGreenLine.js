@@ -27,6 +27,7 @@ app.use(express.static(path.join(__dirname, '..')));
 const db = new Database();
 const funcoesUteis = new funcoes();
 const segredo = process.env.SEGREDO_JWT;
+
 //BACKEND CADASTRO
 app.post("/cadastrarUsuario", async (req, res) => {
   const { nome, email, cpf, telefone, senha } = req.body;
@@ -54,8 +55,7 @@ app.post("/cadastrarUsuario", async (req, res) => {
     try {
       await funcoesUteis.enviarEmail(email);
     } catch (erro) {
-      console.log("Erro ao enviar o email");
-      return;
+      return res.status(500).json({ erro: "Erro ao enviar o email" });
     }
     res
       .status(200)
@@ -64,10 +64,10 @@ app.post("/cadastrarUsuario", async (req, res) => {
           "Cadastro realizado com sucesso! Verifique seu e-mail para confirmação.",
       });
   } catch (err) {
-    console.error("Erro no cadastro:", err);
     res.status(500).json({ erro: "Erro durante o processo de cadastro." });
   }
 });
+
 app.get("/validar", async (req, res) => {
   const { token } = req.query;
   const atualizarSituacao =
@@ -85,23 +85,22 @@ app.get("/validar", async (req, res) => {
       const id_pessoa = resultado[0].id_pessoa;
       try {
         await db.query(atualizarSituacao, [id_pessoa]);
-        res.sendFile(path.resolve(__dirname, "../public/erro.html"), (err) => {
+        res.sendFile(path.resolve(__dirname, "public/confirmacaoLogin.html"), (err) => {
           if (err) {
             res.status(404).send("Página não encontrada!");
           }
         });
       } catch (erro) {
-        console.error("Erro ao atualizar:", erro);
-        res.sendFile(path.resolve(__dirname, "../public/erro.html"));
+        res.sendFile(path.resolve(__dirname, "public/erro.html"));
       }
     } else {
-      res.sendFile(path.resolve(__dirname, "../public/erro.html"));
+      res.sendFile(path.resolve(__dirname, "public/erro.html"));
     }
   } catch (erro) {
-    console.error("Token inválido ou expirado:", erro);
-    res.sendFile(path.join(__dirname, "..", "tokenExpirado.html"));
+    res.sendFile(path.join(__dirname, "public/tokenExpirado.html"));
   }
 });
+
 app.get("/verificarEmail", async (req, res) => {
   const { email } = req.query;
   const sql = "SELECT COUNT(*) AS total FROM pessoa WHERE email = ?";
@@ -109,13 +108,12 @@ app.get("/verificarEmail", async (req, res) => {
   try {
     const verificacao = await db.query(sql, [email]);
     const existe = verificacao[0].total > 0;
-
     res.json({ existe });
   } catch (erro) {
-    console.error("Erro ao verificar o email: ", erro);
-    res.status(500);
+    res.status(500).json({ erro: "Erro ao verificar o email" });
   }
 });
+
 app.get("/verificarCPF", async (req, res) => {
   const { cpf } = req.query;
   const sql = "SELECT COUNT(*) AS total FROM pessoa WHERE cpf = ?";
@@ -125,7 +123,7 @@ app.get("/verificarCPF", async (req, res) => {
     const existe = verificacao[0].total > 0;
     res.json({ existe });
   } catch (erro) {
-    console.error("Erro ao verificar o cpf");
+    res.status(500).json({ erro: "Erro ao verificar o cpf" });
   }
 });
 
@@ -140,7 +138,6 @@ app.get("/produto", async (req, res) => {
 
     res.json(produtos);
   } catch (err) {
-    console.error("Erro ao buscar produtos:", err);
     res.status(500).json({
       erro: "Erro ao buscar produtos",
       detalhes:
@@ -148,14 +145,13 @@ app.get("/produto", async (req, res) => {
     });
   }
 });
+
 app.post("/pedidos", async (req, res) => {
-  let venda = req.body;
-  console.log(venda);
-  res.status(200).json({ mensagem: "Pedido recebido" }); // Adicionei resposta
+  res.status(200).json({ mensagem: "Pedido recebido" });
 });
+
 app.post("/carrinho", async (req, res) => {
   let { id_pessoa, id_produto, quantidade } = req.body;
-  console.log("Dados recebidos:", req.body);
 
   if (!id_pessoa || !id_produto || !quantidade) {
     return res.status(400).json({
@@ -165,7 +161,6 @@ app.post("/carrinho", async (req, res) => {
   }
 
   try {
-    // Verificar se já existe um carrinho pendente para o usuário (com await)
     let carrinhos = await db.query(
       "SELECT id_carrinho FROM carrinho WHERE id_pessoa = ? AND situacao = ?",
       [id_pessoa, "P"]
@@ -174,7 +169,6 @@ app.post("/carrinho", async (req, res) => {
     let id_carrinho;
 
     if (carrinhos.length === 0) {
-      // Criar novo carrinho
       let result = await db.query(
         'INSERT INTO carrinho (id_pessoa, situacao) VALUES (?, "P")',
         [id_pessoa]
@@ -184,7 +178,6 @@ app.post("/carrinho", async (req, res) => {
       id_carrinho = carrinhos[0].id_carrinho;
     }
 
-    // Verificar se o produto já está no carrinho (com await)
     const itens = await db.query(
       "SELECT * FROM view_carrinho_produtos WHERE id_pessoa = ? AND id_produto = ? AND situacao_item = ? ",
       [id_pessoa, id_produto, "P"]
@@ -198,7 +191,6 @@ app.post("/carrinho", async (req, res) => {
       });
     }
 
-    // Adicionar item ao carrinho (com await)
     await db.query(
       "INSERT INTO carrinho_itens (id_carrinho, id_produto, quantidade) VALUES (?, ?, ?)",
       [id_carrinho, id_produto, quantidade]
@@ -211,14 +203,14 @@ app.post("/carrinho", async (req, res) => {
       id_carrinho: id_carrinho,
     });
   } catch (error) {
-    console.error("Erro no servidor:", error);
     res.status(500).json({
       codigo: -1,
-      mensagem: "Erro interno no servidor: " + error.message,
+      mensagem: "Erro interno no servidor",
       sucesso: false,
     });
   }
 });
+
 app.get("/produtosEspecificos", async (req, res) => {
   try {
     let categoriaCodificada = req.query.categoria;
@@ -230,11 +222,7 @@ app.get("/produtosEspecificos", async (req, res) => {
       });
     }
 
-    // Decodificar a categoria para evitar problemas com caracteres especiais
     let categoria = decodeURIComponent(categoriaCodificada);
-    console.log("Categoria recebida:", categoria);
-
-    // Consulta no banco de dados com proteção contra injeção SQL
     produtosCategoria = await db.query(
       "SELECT * FROM produto WHERE categoria = ? AND ativo = TRUE",
       [categoria]
@@ -249,8 +237,6 @@ app.get("/produtosEspecificos", async (req, res) => {
 
     res.status(200).json(produtosCategoria);
   } catch (erro) {
-    console.error("Erro ao buscar produtos por categoria:", erro);
-
     res.status(500).json({
       mensagem: "Erro interno no servidor ao buscar produtos.",
       codigo: -1,
@@ -271,7 +257,6 @@ app.get("/enviar-email", async (req, res) => {
         await funcoesUteis.enviarEmail(email);
         return res.json({ conclusao: 2, mensagem: "Email enviado com sucesso" });
     } catch (erro) {
-        console.error("Erro ao enviar o email:", erro);
         return res.status(500).json({ conclusao: 3, mensagem: "Falha ao enviar email" });
     }
 });
@@ -306,7 +291,6 @@ app.post('/verificarConta', async (req, res) => {
             return res.json({ dadosValidos: 3, mensagem: "Usuário ou senha incorretos." });
         }
 
-        // Retorna o id_pessoa no caso de sucesso
         return res.json({ 
             dadosValidos: 2, 
             mensagem: "Autenticação bem-sucedida.",
@@ -315,19 +299,18 @@ app.post('/verificarConta', async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Erro ao verificar conta:", error);
         return res.status(500).json({ error: "Erro interno do servidor. Tente novamente mais tarde." });
     }
 });
+
 app.post("/enviarEmail", async (req, res) => {
     const { usuario } = req.body;
     await funcoesUteis.enviarEmail(usuario);
     res.json({ mensagem: "E-mail enviado com sucesso." });
 });
+
 // ==================== BACKEND INDEX ====================
 app.post("/loginDados", async (req, res) => {
-    console.log("Corpo recebido:", req.body); 
-
     if (!req.body || !req.body.usuario) {
         return res.status(400).json({ erro: "Usuário é obrigatório" });
     }
@@ -368,10 +351,10 @@ app.post("/loginDados", async (req, res) => {
             atualizadoEm: estadoLogin.ultimaAtualizacao
         });
     } catch (error) {
-        console.error("Erro no login:", error);
         res.status(500).json({ erro: "Erro interno no servidor", detalhes: error.message });
     }
 });
+
 app.get("/loginDados", async (req, res) => {
     try {
         let respostaCarrinho = await db.query(
@@ -383,13 +366,11 @@ app.get("/loginDados", async (req, res) => {
 
         res.json(estadoLogin);
     } catch (error) {
-        console.error("Erro ao buscar estado de login:", error);
         res.status(500).json({ erro: "Erro ao buscar estado de login", detalhes: error.message });
     }
 });
+
 app.post('/logout', (req, res) => {
-    console.log("Requisição de logout recebida");
-    
     estadoLogin = {
         usuario: null,
         id_pessoa: null,
@@ -398,11 +379,10 @@ app.post('/logout', (req, res) => {
         trocarDeConta: 0,
         ultimaAtualizacao: null
     };
-
-    console.log("Estado de login após logout:", estadoLogin);
     
     res.status(200).json({ status: "sucesso", mensagem: "Usuário desconectado com sucesso" });
 });
+
 app.get("/produtos", async (req, res) => {
     try {
         const produtos = await db.query(`
@@ -411,14 +391,12 @@ app.get("/produtos", async (req, res) => {
             ORDER BY id_produto DESC
             LIMIT 12
         `);
-        console.log("Produtos encontrados:", produtos);
 
         res.json({
             success: true,
             data: produtos || []
         });
     } catch (err) {
-        console.error("Erro ao buscar produtos:", err);
         res.status(500).json({
             erro: "Erro ao buscar produtos",
             detalhes: process.env.NODE_ENV === "development" ? err.message : undefined
@@ -471,13 +449,13 @@ app.post('/cadastro-produto', async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Erro no cadastro:", error);
         res.status(500).json({
             error: "Erro interno no servidor",
             detalhes: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }
 });
+
 // ==================== BACKEND CARRINHO ====================
 app.post('/buscar-produtos', async (req, res) => {
     try {
@@ -490,9 +468,6 @@ app.post('/buscar-produtos', async (req, res) => {
             });
         }
 
-        console.log(`Buscando produtos para ID: ${id_pessoa}`);
-
-        // Consulta ao banco de dados - forma correta
         const resultado = await db.query("SELECT * FROM vw_carrinho_itens_detalhados WHERE id_pessoa = ? AND situacao_item = 'P'", [id_pessoa]);
 
         return res.json({
@@ -500,10 +475,7 @@ app.post('/buscar-produtos', async (req, res) => {
             produtos: resultado
         });
 
-
-
     } catch (erro) {
-        console.error("Erro ao buscar produtos:", erro);
         return res.status(500).json({
             sucesso: false,
             mensagem: "Erro interno no servidor",
@@ -511,6 +483,7 @@ app.post('/buscar-produtos', async (req, res) => {
         });
     }
 });
+
 app.post('/excluir-produtos', async (req, res) => {
     try {
         const { id_produto, id_carrinho } = req.body;
@@ -522,13 +495,9 @@ app.post('/excluir-produtos', async (req, res) => {
             });
         }
 
-        console.log(`Buscando produtos do ID carrinho: ${id_carrinho}`);
-
-        // Consulta ao banco de dados - forma correta
         try {
             await db.query("UPDATE carrinho_itens SET situacao ='R' WHERE id_produto = ? AND id_carrinho = ?;", [id_produto, id_carrinho]);
         } catch (erro) {
-            console.log("Erro ao excluir", erro);
             return res.json({
                 sucesso: false,
                 mensagem: "Item não excluido",
@@ -541,10 +510,7 @@ app.post('/excluir-produtos', async (req, res) => {
             codigo: 3
         });
 
-
-
     } catch (erro) {
-        console.error("Erro ao buscar produtos:", erro);
         return res.status(500).json({
             sucesso: false,
             mensagem: "Erro interno no servidor",
@@ -557,7 +523,6 @@ app.post('/excluir-produtos', async (req, res) => {
 // ==================== BACKEND VENDAS ====================
 app.get("/checar-cep",async(req,res) => {
     let cep = req.query.cep;
-    console.log("CEP recebido:", cep);
     if (!cep) {
         return res.status(400).json({ error: "CEP não informado",codigo: -1 });
     }
@@ -569,16 +534,14 @@ app.get("/checar-cep",async(req,res) => {
     }
     try{
         let requisicao = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
-        let resposta = requisicao.data; //necessário o data para pegar somente os dados
+        let resposta = requisicao.data;
         if(resposta.erro){
             return res.status(404).json({ error: "CEP não encontrado", codigo: -4 });
         }
         return res.status(200).json(resposta);  
     }catch (error) {
-        console.error("Erro ao consultar CEP:", error);
         return res.status(500).json({ error: "Erro ao consultar CEP", codigo: -2 });
     }
-
 });
 
 // ==================== ROTA DE TESTE ====================
