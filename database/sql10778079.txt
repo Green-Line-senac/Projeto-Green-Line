@@ -45,24 +45,22 @@ CREATE TABLE produto (
     id_produto INT PRIMARY KEY AUTO_INCREMENT,
     produto VARCHAR(80) NOT NULL UNIQUE,
     descricao TEXT NOT NULL,
-    descricao_curta VARCHAR(160) NULL,
+    descricao_curta VARCHAR(160) NOT NULL,
     preco DECIMAL(10,2) NOT NULL,
-    preco_promocional DECIMAL(10,2) NULL,
+    preco_promocional DECIMAL(10,2) NOT NULL,
     promocao BOOLEAN DEFAULT FALSE,
-    marca VARCHAR(20) NULL DEFAULT NULL,
-    avaliacao DECIMAL(5,2) NULL DEFAULT NULL,
+    marca VARCHAR(20) NULL DEFAULT "Geral",
+    avaliacao DECIMAL(5,2) NULL DEFAULT 0,
     quantidade_avaliacoes INT DEFAULT 0,
     estoque INT NOT NULL,
     parcelas_permitidas INT NOT NULL DEFAULT 1,
-    peso_kg DECIMAL(6,3) NULL,
-    dimensoes VARCHAR(20) NULL,
+    peso_kg DECIMAL(6,3) DEFAULT 0,
+    dimensoes VARCHAR(20) DEFAULT "0X0X0",
     ativo BOOLEAN DEFAULT TRUE,
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     data_alteracao DATETIME NULL,
     imagem_1 VARCHAR(255) NOT NULL,
-    imagem_2 VARCHAR(255) NULL DEFAULT NULL,
-    imagem_3 VARCHAR(255) NULL DEFAULT NULL,
-    imagem_4 VARCHAR(255) NULL DEFAULT NULL,
+    imagem_2 VARCHAR(255) NOT NULL DEFAULT "Nenhuma",
     categoria VARCHAR(50) NOT NULL
 );
 
@@ -97,8 +95,6 @@ INSERT INTO produto (
     ativo, 
     imagem_1, 
     imagem_2, 
-    imagem_3, 
-    imagem_4, 
     categoria
 ) VALUES
 -- Produto 1 (Promoção)
@@ -118,8 +114,6 @@ INSERT INTO produto (
  TRUE, 
  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-Apd-5qaDSGuKucXJMEhmqPELT7w_7ywxPA&s', 
  'https://example.com/camisa2.jpg', 
- 'https://example.com/camisa3.jpg', 
- NULL, 
  'Moda Sustentável'),
 
 -- Produto 2 (Promoção)
@@ -139,8 +133,6 @@ INSERT INTO produto (
  TRUE, 
  'https://cdnv2.moovin.com.br/napolitanacalcados/imagens/produtos/det/tenis-adidas-hp5930-649e2a507d880757d804772fd961402d.jpg', 
  'https://example.com/tenis2.jpg', 
- NULL, 
- NULL, 
  'Moda Sustentável'),
 
 -- Produto 3 (Sem promoção)
@@ -159,9 +151,7 @@ INSERT INTO produto (
  '2x2x15', 
  TRUE, 
  'https://images.tcdn.com.br/img/img_prod/671855/kit_com_10_escovas_de_dente_de_bambu_2079_1_5888ce07ca6053a48a94fa12f2b07d6f.jpg', 
- NULL, 
- NULL, 
- NULL, 
+ 'Nenhuma', 
  'Casa Ecológica'),
 
 -- Produto 4 (Promoção)
@@ -181,8 +171,6 @@ INSERT INTO produto (
  TRUE, 
  'https://acdn-us.mitiendanube.com/stores/001/492/053/products/14250195559-shampoo-solido-1-cd29735917944cd23016297759347332-1024-1024.jpg', 
  'https://example.com/shampoo2.jpg', 
- NULL, 
- NULL, 
  'Cosméticos Naturais'),
 
 -- Produto 5 (Sem promoção)
@@ -201,9 +189,7 @@ INSERT INTO produto (
  '15x2x2', 
  TRUE, 
  'https://images.tcdn.com.br/img/img_prod/1004735/kit_com_4_canudos_inox_reutilizaveis_reto_curvo_com_escova_higienica_75_1_046d7c7267c8fc31f95ee618b4e8fb43.jpg', 
- NULL, 
- NULL, 
- NULL, 
+ 'Nenhuma', 
  'Casa Ecológica'),
 
 -- Produto 6 (Sem promoção)
@@ -223,8 +209,6 @@ INSERT INTO produto (
  TRUE, 
  'https://m.media-amazon.com/images/I/81-RFKZmXML._AC_UF894,1000_QL80_.jpg', 
  'https://example.com/beewrap2.jpg', 
- NULL, 
- NULL, 
  'Casa Ecológica'),
 
 -- Produto 7 (Promoção)
@@ -243,9 +227,7 @@ INSERT INTO produto (
  '8x8x25', 
  TRUE, 
  'https://70730.cdn.simplo7.net/static/70730/sku/brindes-garrafas-e-squeezes-squeeze-garrafa-termica-sustentavel-550-ml-aco-inox-e-tampa-bambu-brindes-personalizados-bebidas-quentes-e-frias-p-1726872734169.jpg', 
- NULL, 
- NULL, 
- NULL, 
+ 'Nenhuma', 
  'Casa Ecológica'),
 
 -- Produto 8 (Sem promoção)
@@ -264,9 +246,7 @@ INSERT INTO produto (
  '5x5x2', 
  TRUE, 
  'https://cdn.awsli.com.br/2500x2500/244/244021/produto/111766578/7698b71eca.jpg', 
- NULL, 
- NULL, 
- NULL, 
+ 'Nenhuma', 
  'Cosméticos Naturais'),
 
 -- Produto 9 (Sem promoção)
@@ -285,9 +265,7 @@ INSERT INTO produto (
  '40x40x5', 
  TRUE, 
  'https://images.tcdn.com.br/img/img_prod/604546/ecobag_sacola_100_algodao_cru_agora_sou_eco_media_1281_1_9e9b6bf5e238586371f9cf21a10ffcc5.jpg', 
- NULL, 
- NULL, 
- NULL, 
+ 'Nenhuma', 
  'Moda Sustentável'),
 
 -- Produto 10 (Sem promoção)
@@ -306,9 +284,7 @@ INSERT INTO produto (
  '8x8x15', 
  TRUE, 
  'https://images.tcdn.com.br/img/img_prod/671855/copo_eco_retratil_dobravel_de_silicone_200ml_227_3_20230310111530.jpg', 
- NULL, 
- NULL, 
- NULL, 
+ 'Nenhuma', 
  'Casa Ecológica'),
 
 -- Produto 11 (Sem promoção)
@@ -327,9 +303,7 @@ INSERT INTO produto (
  '10x5x5', 
  TRUE, 
  'https://images.tcdn.com.br/img/img_prod/604546/sabonete_natural_artesanal_vegano_ares_do_mato_115g_andiroba_argila_verde_e_capim_limao_901_1_20191118161720.jpg', 
- NULL, 
- NULL, 
- NULL, 
+ 'Nenhuma', 
  'Cosméticos Naturais'),
 
 -- Produto 12 (Sem promoção)
@@ -349,8 +323,6 @@ INSERT INTO produto (
  TRUE, 
  'https://cdn.awsli.com.br/2500x2500/1293/1293859/produto/97248829/inserir-um-t-tulo--2--q6569ubosb.jpg', 
  'https://example.com/kit2.jpg', 
- NULL, 
- NULL, 
  'Cosméticos Naturais'),
 
 -- Produto 13 (Sem promoção)
@@ -369,9 +341,7 @@ INSERT INTO produto (
  '10x10x5', 
  TRUE, 
  'https://down-br.img.susercontent.com/file/d19117650cf6bfa783cae28cd2269df4', 
- NULL, 
- NULL, 
- NULL, 
+ 'Nenhuma', 
  'Casa Ecológica'),
 
 -- Produto 14 (Sem promoção)
@@ -390,9 +360,7 @@ INSERT INTO produto (
  '30x30x1', 
  TRUE, 
  'https://m.media-amazon.com/images/I/71Xe8ArIhjL.jpg', 
- NULL, 
- NULL, 
- NULL, 
+ 'Nenhuma', 
  'Casa Ecológica'),
 
 -- Produto 15 (Sem promoção)
@@ -412,8 +380,6 @@ INSERT INTO produto (
  TRUE, 
  'https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcS4r-3WVbdheERAvrg30D4cZJkBjwKFSHapBeQxyIyKMC8PZ0DbKCH10mApZU2R2F3fDg-ISG3cU2K-Ri2pvrG9r1KNd_z0ftXwzFEhxqfKF8af_hV8ru1BuQ', 
  'https://example.com/roupa2.jpg', 
- 'https://example.com/roupa3.jpg', 
- NULL, 
  'Moda Sustentável'),
 
 -- Produto 16 (Sem promoção)
@@ -432,9 +398,7 @@ INSERT INTO produto (
  '15x21x1', 
  TRUE, 
  'https://ajg.im/img/produtos/3/Caderno-A5-Papel-Reciclado-19249d4-1716561407.jpg', 
- NULL, 
- NULL, 
- NULL, 
+ 'Nenhuma', 
  'Reciclagem e Reutilização'),
 
 -- Produto 17 (Sem promoção)
@@ -454,8 +418,6 @@ INSERT INTO produto (
  TRUE, 
  'https://m.media-amazon.com/images/I/51yjDO9eeuL._AC_UF1000,1000_QL80_.jpg', 
  'https://example.com/carregador2.jpg', 
- NULL, 
- NULL, 
  'Energia Renovável'),
 
 -- Produto 18 (Sem promoção)
@@ -474,9 +436,7 @@ INSERT INTO produto (
  '8x8x10', 
  TRUE, 
  'https://cdn.awsli.com.br/800x800/1682/1682897/produto/263210254/wiskie-cha--branco-vlsss2l8p3.jpg', 
- NULL, 
- NULL, 
- NULL, 
+ 'Nenhuma', 
  'Bem-estar Sustentável'),
 
 -- Produto 19 (Sem promoção)
@@ -495,9 +455,7 @@ INSERT INTO produto (
  '20x3x3', 
  TRUE, 
  'https://cdn.awsli.com.br/2500x2500/2626/2626263/produto/229421116/complesto-2qwc2xczyi.jpg', 
- NULL, 
- NULL, 
- NULL, 
+ 'Nenhuma', 
  'Casa Ecológica'),
 
 -- Produto 20 (Sem promoção)
@@ -516,33 +474,64 @@ INSERT INTO produto (
  '15x15x1', 
  TRUE, 
  'https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTxZ-jMOayxx44wbD-3ZlHw2o_RM2x9zFdeL9vcHua_TEYITo7FJG77SDE9K6Qn8yuB-L7hy3AV3pJPYmS5Dxsd2z2Z5ooSgTXuF4y6XIi5HHCLIkmy9sQfbUhE', 
- NULL, 
- NULL, 
- NULL, 
+ 'Nenhuma', 
  'Casa Ecológica');
 
 
--- Criando a tabela de pagamentos
-CREATE TABLE pagamento (
-    id_pagamento INT PRIMARY KEY AUTO_INCREMENT,
-tipo ENUM("CRÉDITO","DÉBITO","BOLETO BANCÁRIO","PIX") NOT NULL DEFAULT "CRÉDITO",
-    pagamento_situacao ENUM('Em aberto', 'Pago', 'Cancelado') NOT NULL DEFAULT "Em aberto",
-    valor DECIMAL(10,2) NOT NULL,
-    num_parcelas INT DEFAULT 1,
-    bandeira_cartao VARCHAR(20) NULL,
-);
-
--- Criando a tabela de pedidos
 CREATE TABLE pedidos (
     id_pedido INT PRIMARY KEY AUTO_INCREMENT,
+    -- Informações básicas do pedido
+    numero_pedido VARCHAR(20) NOT NULL UNIQUE,
     data_hora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    situacao CHAR(1) NOT NULL DEFAULT 'P',
+    situacao ENUM('Pendente', 'Processando', 'Enviado', 'Entregue', 'Cancelado') NOT NULL DEFAULT 'Pendente',
     id_pessoa INT NOT NULL,
-    FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa),
-    id_pagamento INT NOT NULL,
-    FOREIGN KEY (id_pagamento) REFERENCES pagamento(id_pagamento),
-    cep_entrega TEXT NULL,
-    metodo_entrega VARCHAR(50) NULL
+    
+    -- Informações de pagamento (antiga tabela pagamento)
+    tipo_pagamento ENUM('CRÉDITO', 'DÉBITO', 'BOLETO BANCÁRIO', 'PIX') NOT NULL DEFAULT 'CRÉDITO',
+    pagamento_situacao ENUM('Em aberto', 'Pago', 'Cancelado', 'Estornado') NOT NULL DEFAULT 'Em aberto',
+    valor_total DECIMAL(10,2) NOT NULL,
+    num_parcelas INT DEFAULT 1,
+    
+    -- Campos específicos para cartão
+    bandeira_cartao VARCHAR(20) NULL,
+    numero_cartao VARCHAR(20) NULL,
+    nome_cartao VARCHAR(100) NULL,
+    validade_cartao VARCHAR(7) NULL, -- MM/AAAA
+    cvv VARCHAR(4) NULL,
+    
+    -- Campos específicos para PIX
+    chave_pix VARCHAR(255) NULL,
+    qrcode_pix TEXT NULL,
+    
+    -- Informações comuns de pagamento
+    nome_titular VARCHAR(100) NULL,
+    cpf_titular VARCHAR(14) NULL,
+    codigo_transacao VARCHAR(100) NULL,
+    data_pagamento TIMESTAMP NULL,
+    
+    -- Informações de entrega
+    metodo_entrega VARCHAR(100) NULL,
+    previsao_entrega VARCHAR(50) NULL,
+    valor_frete DECIMAL(10,2) DEFAULT 0,
+    
+    -- Dados financeiros
+    subtotal DECIMAL(10,2) NOT NULL,
+    desconto DECIMAL(10,2) DEFAULT 0,
+    
+    -- Chave estrangeira
+    FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa)
+);
+
+CREATE TABLE pedido_produto (
+    id_pedido_produto INT PRIMARY KEY AUTO_INCREMENT,
+    id_pedido INT NOT NULL,
+    id_produto INT NOT NULL,
+    quantidade INT NOT NULL DEFAULT 1,
+    preco_unitario DECIMAL(10,2) NOT NULL,
+    nome_produto VARCHAR(100) NOT NULL, -- Armazena o nome no momento da compra
+    -- Chaves estrangeiras
+    FOREIGN KEY (id_pedido) REFERENCES pedidos(id_pedido),
+    FOREIGN KEY (id_produto) REFERENCES produto(id_produto)
 );
 
 CREATE TABLE carrinho (
@@ -561,16 +550,6 @@ CREATE TABLE carrinho_itens (
     FOREIGN KEY (id_produto) REFERENCES produto(id_produto),
     quantidade INT NOT NULL DEFAULT 1,
     situacao CHAR(1) NOT NULL DEFAULT 'P' -- 'P' para pendente, 'R' para removido, 'C' para comprado
-);
-
-CREATE TABLE pedido_produto (
-    id_pedido_produto INT PRIMARY KEY AUTO_INCREMENT,
-    id_pedido INT NOT NULL,
-    id_produto INT NOT NULL,
-    quantidade INT NOT NULL DEFAULT 1,
-    preco_unitario DECIMAL(10,2) NOT NULL,
-    FOREIGN KEY (id_pedido) REFERENCES pedidos(id_pedido),
-    FOREIGN KEY (id_produto) REFERENCES produto(id_produto)
 );
 
 //VIEWS

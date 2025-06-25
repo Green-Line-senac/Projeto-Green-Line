@@ -32,19 +32,11 @@ app.get("/produto", async (req, res) => {
     });
   }
 });
-
-// Rota padrão para verificar se o servidor está rodando
-app.get("/", (req, res) => {
-  res.json({ mensagem: "API de produtos está funcionando" });
-});
-
 app.post("/pedidos", async (req, res) => {
   let venda = req.body;
   console.log(venda);
   res.status(200).json({ mensagem: "Pedido recebido" }); // Adicionei resposta
 });
-
-// Rota para adicionar item ao carrinho (CORRIGIDA)
 app.post("/carrinho", async (req, res) => {
   let { id_pessoa, id_produto, quantidade } = req.body;
   console.log("Dados recebidos:", req.body);
@@ -111,10 +103,6 @@ app.post("/carrinho", async (req, res) => {
     });
   }
 });
-/*
-app.put("/produtosEspecificos", async (req, res) => {
-  
-});*/
 app.get("/produtosEspecificos", async (req, res) => {
   try {
       let categoriaCodificada = req.query.categoria;
@@ -154,7 +142,10 @@ app.get("/produtosEspecificos", async (req, res) => {
       });
   }
 });
-
+// Rota padrão para verificar se o servidor está rodando
+app.get("/", (req, res) => {
+  res.json({ mensagem: "API de produtos está funcionando" });
+});
 const porta = process.env.PORTA4 || 3003;
 app.listen(porta, () => {
   console.log(`Servidor rodando -backendprodutos- na porta ${porta}`);

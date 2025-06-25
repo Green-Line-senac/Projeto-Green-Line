@@ -3,6 +3,7 @@ body {
     font-family: "Roboto", sans-serif; /* Define a fonte principal como Roboto, com fallback para sans-serif */
     background-color: #fff; /* Define a cor de fundo como branco */
     overflow-x: hidden; /* Remove o deslocamento horizontal caso o conteúdo exceda a largura */
+    position: relative;
 }
 
 /* Classe para margens personalizadas */

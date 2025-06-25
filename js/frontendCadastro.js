@@ -62,7 +62,7 @@ formularioCadastro.addEventListener("submit", function (e) {
     btEnviar.innerHTML =
       '<span class="spinner-border spinner-border-sm" role:"status" aria-hidden:"true"></span>';
     dadosUsuario = { nome, email, cpf, telefone, senha };
-    fetch(`${api.cadastro}/cadastrar`, {
+    fetch(`${api.online}/cadastrarUsuario`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(dadosUsuario),
@@ -90,7 +90,7 @@ async function verificarEmail() {
 
   try {
     const verificacao = await fetch(
-      `${api.cadastro}/verificar-email?email=${email}`
+      `${api.online}/verificarEmail?email=${email}`
     );
     const resposta = await verificacao.json();
 
@@ -120,7 +120,7 @@ async function verificarCPF() {
   if (!cpf) return;
 
   try {
-    const verificacao = await fetch(`${api.cadastro}/verificarCPF?cpf=${cpf}`);
+    const verificacao = await fetch(`${api.online}/verificarCPF?cpf=${cpf}`);
     const resposta = await verificacao.json();
 
     if (resposta.existe) {

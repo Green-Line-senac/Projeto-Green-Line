@@ -184,7 +184,7 @@ async function mascaraCEP() {
     
     try {
         console.log('Iniciando requisição...');
-        const response = await fetch(`${api.vendas}/checar-cep?cep=${cep}`);
+        const response = await fetch(`${api.online}/checar-cep?cep=${cep}`);
         console.log('Resposta recebida:', response);
         
         const data = await response.json();
@@ -390,8 +390,8 @@ document.getElementById("FinalizarCompra").addEventListener("click", async (even
         const dadosEndereco = {
             cep: document.getElementById('cep').value,
             endereco: document.getElementById('endereco').value,
-            numeroCasa: document.getElementById('numero').value,
-            complementoCasa: document.getElementById('complemento').value,
+            numeroCasa: document.getElementById('numeroCasa').value,
+            complementoCasa: document.getElementById('complementoCasa').value,
             bairro: document.getElementById('bairro').value,
             cidade: document.getElementById('cidade').value,
             estado: document.getElementById('estado').value
@@ -422,7 +422,7 @@ document.getElementById("FinalizarCompra").addEventListener("click", async (even
         localStorage.setItem('dadosFormulario', JSON.stringify(dadosFormulario));
         
         // Redireciona para a página de confirmação
-        window.location.href = '/public/pedido_confirmado.html';
+        window.location.href = '../public/pedido_confirmado.html'
     } catch (error) {
         console.error('Erro detalhado ao processar pedido:', error);
         mostrarErros(["Ocorreu um erro ao processar seu pedido. Por favor, tente novamente."]);

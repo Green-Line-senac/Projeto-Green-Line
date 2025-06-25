@@ -18,7 +18,7 @@ const segredo = process.env.SEGREDO_JWT;
 
 
 // Cadastro de usuário
-app.post("/cadastrar", async (req, res) => {
+app.post("/cadastrarUsuario", async (req, res) => {
     const { nome, email, cpf, telefone, senha } = req.body;
 
     const inserirPessoa = `INSERT INTO pessoa(nome, email, cpf, telefone,id_tipo_usuario, senha, situacao, imagem_perfil) 
@@ -46,7 +46,6 @@ app.post("/cadastrar", async (req, res) => {
         res.status(500).json({ erro: "Erro durante o processo de cadastro." });
     }
 });
-
 // Validação do token (acesso via link de e-mail)
 app.get("/validar", async (req, res) => {
     const { token } = req.query;
@@ -82,9 +81,7 @@ app.get("/validar", async (req, res) => {
 
     }
 });
-
-
-app.get("/verificar-email", async (req, res) => {
+app.get("/verificarEmail", async (req, res) => {
     const { email } = req.query;
     const sql = "SELECT COUNT(*) AS total FROM pessoa WHERE email = ?";
 

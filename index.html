@@ -46,16 +46,16 @@
       <div class="collapse navbar-collapse" id="navbarContent">
         <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link active" href="../index.html" aria-current="page">Início</a>
+            <a class="nav-link active" href="index.html" aria-current="page">Início</a>
           </li>
           <li class="nav-item dropdown">
-            <a class="nav-link active" href="/public/produtos.html" aria-current="page">Produtos</a>
+            <a class="nav-link active" href="public/produtos.html" aria-current="page">Produtos</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/public/manutencao.html">Ofertas</a>
+            <a class="nav-link" href="public/manutencao.html">Ofertas</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/public/sobre.html">Sobre</a>
+            <a class="nav-link" href="public/sobre.html">Sobre</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="public/contato.html">Contato</a>
@@ -74,7 +74,7 @@
 
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link icon-btn" href="/public/carrinho.html" aria-label="Carrinho de compras">
+            <a class="nav-link icon-btn" href="public/carrinho.html" aria-label="Carrinho de compras">
               <i class="bi bi-cart position-relative" aria-hidden="true">
                 <span
                   class="badge text-bg-success position-absolute top-0 start-100 translate-middle rounded-circle border border-light badge-sm"
@@ -83,7 +83,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link icon-btn" href="../public/login.html" id="link-usuario" aria-label="Área do usuário"><i
+            <a class="nav-link icon-btn" href="public/login.html" id="link-usuario" aria-label="Área do usuário"><i
                 id="icone-usuario" class="bi bi-person" aria-hidden="true"></i></a>
           </li>
         </ul>
@@ -93,7 +93,7 @@
 
   <!-- Conteúdo Principal -->
   <main class="p-0" style="margin-top: 6.5rem;">
-    <div class="container-fluid d-none d-sm-block">
+    <div class="container-fluid d-block">
       <div class="carousel slide carousel-fade" data-bs-ride="carousel" id="carousel-index"
         aria-label="Destaques da loja">
 
@@ -108,19 +108,19 @@
         <!-- Imagens do carrossel -->
         <div class="carousel-inner" id="carousel-imagens" role="listbox">
           <div class="carousel-item active">
-            <img src="img/index_carousel/carrossel1.jpg" class="d-block w-100" style="height: 30rem; object-fit: cover;"
+            <img src="img/index_carousel/carrossel1.jpg" class="d-block w-100" style="height: auto; object-fit: contain;"
               alt="Imagem do carrossel 1" loading="lazy" onerror="this.src='${config.fallbackImage}'">
           </div>
           <div class="carousel-item">
-            <img src="img/index_carousel/carrossel2.jpg" class="d-block w-100" style="height: 30rem; object-fit: cover;"
+            <img src="img/index_carousel/carrossel2.jpg" class="d-block w-100" style="height: auto; object-fit: contain;"
               alt="Imagem do carrossel 2" loading="lazy" onerror="this.src='${config.fallbackImage}'">
           </div>
           <div class="carousel-item">
-            <img src="img/index_carousel/carrossel3.jpg" class="d-block w-100" style="height: 30rem; object-fit: cover;"
+            <img src="img/index_carousel/carrossel3.jpg" class="d-block w-100" style="height: auto; object-fit: contain;"
               alt="Imagem do carrossel 3" loading="lazy" onerror="this.src='${config.fallbackImage}'">
           </div>
           <div class="carousel-item">
-            <img src="img/index_carousel/carrossel4.jpg" class="d-block w-100" style="height: 30rem; object-fit: cover;"
+            <img src="img/index_carousel/carrossel4.jpg" class="d-block w-100" style="height: auto; object-fit: contain;"
               alt="Imagem do carrossel 4" loading="lazy" onerror="this.src='${config.fallbackImage}'">
           </div>
         </div>
@@ -138,129 +138,349 @@
       <aria-hidden= class="bi bi-collection-fill me-2" aria-hidden="true"></i>
       Categorias
     </p>
-    <div class="container-fluid mt-5">
-      <div class="row justify-content-center">
-        <!-- 1 - Produtos Ecológicos -->
-        <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-4 categoria" data-categoria="Ecológicos">
-          <a class="text-decoration-none link-categoria" href="public/produtosCategoria.html">
-            <div class="card h-100">
-              <img
-                src="img/index_categorias/Ecológicos.jpg"
-                class="card-img-top"
-                alt="Produtos ecológicos sustentáveis"
-              />
-              <div class="card-body">
-                <h5 class="card-title">Produtos Ecológicos</h5>
-                <p class="card-text">
-                  Descubra itens sustentáveis para um estilo de vida
-                  eco-friendly. De acessórios a utensílios, tudo pensado para
-                  reduzir impactos ambientais.
-                </p>
+    <div class="container-fluid d-flex justify-content-center">
+      <div
+        id="productCarousel"
+        class="carousel slide w-100 w-md-75"
+        data-bs-ride="carousel"
+      >
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <div class="d-flex flex-wrap justify-content-center gap-2">
+              <!-- 1 - Produtos Ecológicos -->
+              <div
+                class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 categoria largura-card justify"
+                data-categoria="Ecológicos"
+              >
+                <a
+                  class="text-decoration-none link-categoria"
+                  href="public/produtosCategoria.html"
+                >
+                  <div class="card h-100">
+                    <img
+                      src="img/index_categorias/produtos_eco_pequena.jpg"
+                      class="card-img-top img-fluid"
+                      alt="Produtos ecológicos sustentáveis"
+                    />
+                    <div class="card-body">
+                      <h5 class="card-title">Produtos Ecológicos</h5>
+                      <p class="card-text">
+                        Descubra itens sustentáveis para um estilo de vida
+                        eco-friendly. De acessórios a utensílios, tudo pensado
+                        para reduzir impactos ambientais.
+                      </p>
+                    </div>
+                  </div>
+                </a>
+              </div>
+              <!-- 2 - Moda Sustentável -->
+              <div
+                class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 categoria largura-card justify"
+                data-categoria="Moda Sustentável"
+              >
+                <a
+                  class="text-decoration-none"
+                  href="public/produtosCategoria.html"
+                >
+                  <div class="card h-100">
+                    <img
+                      src="img/index_categorias/roupas_pequena.jpg"
+                      class="card-img-top img-fluid"
+                      alt="Moda sustentável"
+                    />
+                    <div class="card-body">
+                      <h5 class="card-title">Moda Sustentável</h5>
+                      <p class="card-text">
+                        Roupas e acessórios feitos com materiais orgânicos e
+                        processos éticos. Conforto e estilo sem agredir o
+                        planeta.
+                      </p>
+                    </div>
+                  </div>
+                </a>
+              </div>
+              <!-- 3 - Cuidados Pessoais -->
+              <div
+                class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 categoria largura-card justify"
+                data-categoria="Cosméticos Naturais"
+              >
+                <a
+                  class="text-decoration-none"
+                  href="public/produtosCategoria.html"
+                >
+                  <div class="card h-100">
+                    <img
+                      src="img/index_categorias/cuidados_pessoais_pequena.jpg"
+                      class="card-img-top img-fluid"
+                      alt="Cosméticos naturais"
+                    />
+                    <div class="card-body">
+                      <h5 class="card-title">Cuidados Pessoais</h5>
+                      <p class="card-text">
+                        Produtos de higiene e beleza naturais, veganos e livres
+                        de crueldade animal. Cuide de você e do meio ambiente.
+                      </p>
+                    </div>
+                  </div>
+                </a>
+              </div>
+              <!-- 4 - Artigos Esportivos -->
+              <div
+                class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 categoria largura-card justify"
+                data-categoria="Artigos Esportivos"
+              >
+                <a
+                  class="text-decoration-none"
+                  href="public/produtosCategoria.html"
+                >
+                  <div class="card h-100">
+                    <img
+                      src="img/index_categorias/artigos_esportivos_pequena.jpg"
+                      class="card-img-top img-fluid"
+                      alt="Equipamentos esportivos ecológicos"
+                    />
+                    <div class="card-body">
+                      <h5 class="card-title">Artigos Esportivos</h5>
+                      <p class="card-text">
+                        Equipamentos feitos com materiais reciclados e
+                        sustentáveis para sua rotina de exercícios com
+                        consciência ecológica.
+                      </p>
+                    </div>
+                  </div>
+                </a>
               </div>
             </div>
-          </a>
-        </div>
-
-        <!-- 2 - Moda Sustentável -->
-        <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-4 categoria" data-categoria="Moda Sustentável">
-          <a class="text-decoration-none" href="public/produtosCategoria.html">
-            <div class="card h-100">
-              <img
-                src="img/index_categorias/Moda Sustentável.jpg"
-                class="card-img-top"
-                alt="Moda sustentável"
-              />
-              <div class="card-body">
-                <h5 class="card-title">Moda Sustentável</h5>
-                <p class="card-text">
-                  Roupas e acessórios feitos com materiais orgânicos e processos
-                  éticos. Conforto e estilo sem agredir o planeta.
-                </p>
+          </div>
+          <div class="carousel-item">
+            <div class="d-flex flex-wrap justify-content-center gap-2">
+              <!-- 5 - Eletrônicos Verdes -->
+              <div
+                class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 categoria largura-card justify"
+                data-categoria="Tecnologia Verde"
+              >
+                <a
+                  class="text-decoration-none"
+                  href="public/produtosCategoria.html"
+                >
+                  <div class="card h-100">
+                    <img
+                      src="img/index_categorias/eletronicos_pequena.jpg"
+                      class="card-img-top img-fluid"
+                      alt="Eletrônicos sustentáveis"
+                    />
+                    <div class="card-body">
+                      <h5 class="card-title">Eletrônicos Verdes</h5>
+                      <p class="card-text">
+                        Tecnologia com eficiência energética, feita de materiais
+                        recicláveis e com baixo impacto ambiental.
+                      </p>
+                    </div>
+                  </div>
+                </a>
+              </div>
+              <!-- 6 - Livros e Educação -->
+              <div
+                class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 categoria largura-card justify"
+                data-categoria="Educação e Conscientização"
+              >
+                <a
+                  class="text-decoration-none"
+                  href="public/produtosCategoria.html"
+                >
+                  <div class="card h-100">
+                    <img
+                      src="img/index_categorias/livros_pequena.jpg"
+                      class="card-img-top img-fluid"
+                      alt="Livros sobre sustentabilidade"
+                    />
+                    <div class="card-body">
+                      <h5 class="card-title">Livros e Educação</h5>
+                      <p class="card-text">
+                        Publicações sobre sustentabilidade, vida eco-friendly e
+                        inovação verde. Conhecimento para transformar seu
+                        impacto no mundo.
+                      </p>
+                    </div>
+                  </div>
+                </a>
+              </div>
+              <!-- 7 - Jardinagem Orgânica -->
+              <div
+                class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 categoria largura-card justify"
+                data-categoria="Jardinagem Orgânica"
+              >
+                <a
+                  class="text-decoration-none"
+                  href="public/produtosCategoria.html"
+                >
+                  <div class="card h-100">
+                    <img
+                      src="img/index_categorias/jardinagem_org_pequena.jpg"
+                      class="card-img-top img-fluid"
+                      alt="Jardinagem Orgânica"
+                    />
+                    <div class="card-body">
+                      <h5 class="card-title">Jardinagem Orgânica</h5>
+                      <p class="card-text">
+                        Práticas naturais para cultivar plantas sem pesticidas,
+                        promovendo um ambiente saudável.
+                      </p>
+                    </div>
+                  </div>
+                </a>
+              </div>
+              <!-- 8 - Alimentos Orgânicos -->
+              <div
+                class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 categoria largura-card justify"
+                data-categoria="Alimentos Orgânicos"
+              >
+                <a
+                  class="text-decoration-none"
+                  href="public/produtosCategoria.html"
+                >
+                  <div class="card h-100">
+                    <img
+                      src="img/index_categorias/alimentos_org_pequena.jpg"
+                      class="card-img-top img-fluid"
+                      alt="Alimentos Orgânicos"
+                    />
+                    <div class="card-body">
+                      <h5 class="card-title">Alimentos Orgânicos</h5>
+                      <p class="card-text">
+                        Produtos naturais e sustentáveis, cultivados sem
+                        agrotóxicos para uma vida mais saudável.
+                      </p>
+                    </div>
+                  </div>
+                </a>
               </div>
             </div>
-          </a>
-        </div>
-
-        <!-- 3 - Cuidados Pessoais -->
-         <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-4 categoria" data-categoria="Cosméticos Naturais">
-          <a class="text-decoration-none" href="public/produtosCategoria.html">
-            <div class="card h-100">
-              <img
-                src="img/index_categorias/Cosméticos Naturais.jpg"
-                class="card-img-top"
-                alt="Cosméticos naturais"
-              />
-              <div class="card-body">
-                <h5 class="card-title">Cuidados Pessoais</h5>
-                <p class="card-text">
-                  Produtos de higiene e beleza naturais, veganos e livres de
-                  crueldade animal. Cuide de você e do meio ambiente.
-                </p>
+          </div>
+          <div class="carousel-item">
+            <div class="d-flex flex-wrap justify-content-center gap-2">
+              <!-- 9 - Transporte Sustentável -->
+              <div
+                class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 categoria largura-card justify"
+                data-categoria="Transporte Sustentável"
+              >
+                <a
+                  class="text-decoration-none"
+                  href="public/produtosCategoria.html"
+                >
+                  <div class="card h-100">
+                    <img
+                      src="img/index_categorias/transporte_sus_pequena.jpg"
+                      class="card-img-top img-fluid"
+                      alt="Transporte Sustentável"
+                    />
+                    <div class="card-body">
+                      <h5 class="card-title">Transporte Sustentável</h5>
+                      <p class="card-text">
+                        Alternativas ecológicas para mobilidade urbana,
+                        reduzindo emissões e impacto ambiental.
+                      </p>
+                    </div>
+                  </div>
+                </a>
+              </div>
+              <!-- 10 - Reciclagem e Reutilização -->
+              <div
+                class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 categoria largura-card justify"
+                data-categoria="Reciclagem e Reutilização"
+              >
+                <a
+                  class="text-decoration-none"
+                  href="public/produtosCategoria.html"
+                >
+                  <div class="card h-100">
+                    <img
+                      src="img/index_categorias/reci_e_reu_pequena.jpg"
+                      class="card-img-top img-fluid"
+                      alt="Reciclagem e Reutilização"
+                    />
+                    <div class="card-body">
+                      <h5 class="card-title">Reciclagem e Reutilização</h5>
+                      <p class="card-text">
+                        Soluções sustentáveis para reaproveitamento de materiais
+                        e redução de resíduos.
+                      </p>
+                    </div>
+                  </div>
+                </a>
+              </div>
+              <!-- 11 - Energia Renovável -->
+              <div
+                class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 categoria largura-card justify"
+                data-categoria="Energia Renovável"
+              >
+                <a
+                  class="text-decoration-none"
+                  href="public/produtosCategoria.html"
+                >
+                  <div class="card h-100">
+                    <img
+                      src="img/index_categorias/energia_reno_pequena.jpg"
+                      class="card-img-top img-fluid"
+                      alt="Energia Renovável"
+                    />
+                    <div class="card-body">
+                      <h5 class="card-title">Energia Renovável</h5>
+                      <p class="card-text">
+                        Fontes limpas e sustentáveis de energia para um futuro
+                        mais verde.
+                      </p>
+                    </div>
+                  </div>
+                </a>
+              </div>
+              <!-- 12 - Bem-estar Sustentável -->
+              <div
+                class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 categoria largura-card justify"
+                data-categoria="Bem-estar Sustentável"
+              >
+                <a
+                  class="text-decoration-none"
+                  href="public/produtosCategoria.html"
+                >
+                  <div class="card h-100">
+                    <img
+                      src="img/index_categorias/bem_estar_sus_pequena.jpg"
+                      class="card-img-top img-fluid"
+                      alt="Bem-estar Sustentável"
+                    />
+                    <div class="card-body">
+                      <h5 class="card-title">Bem-estar Sustentável</h5>
+                      <p class="card-text">
+                        Produtos e práticas para cuidar do corpo e da mente com
+                        consciência ambiental.
+                      </p>
+                    </div>
+                  </div>
+                </a>
               </div>
             </div>
-          </a>
+          </div>
         </div>
-
-        <!-- 4 - Artigos Esportivos -->
-        <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-4 categoria" data-categoria="Artigos Esportivos">
-          <a class="text-decoration-none" href="public/produtosCategoria.html">
-            <div class="card h-100">
-              <img
-                src="img/index_categorias/Artigos Esportivos.jpg"
-                class="card-img-top"
-                alt="Equipamentos esportivos ecológicos"
-              />
-              <div class="card-body">
-                <h5 class="card-title">Artigos Esportivos</h5>
-                <p class="card-text">
-                  Equipamentos feitos com materiais reciclados e sustentáveis
-                  para sua rotina de exercícios com consciência ecológica.
-                </p>
-              </div>
-            </div>
-          </a>
-        </div>
-
-        <!-- 5 - Eletrônicos Verdes -->
-       <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-4 categoria" data-categoria="Tecnologia Verde">
-          <a class="text-decoration-none" href="public/produtosCategoria.html">
-            <div class="card h-100">
-              <img
-                src="img/index_categorias/Tecnologia Verde.jpg"
-                class="card-img-top"
-                alt="Eletrônicos sustentáveis"
-              />
-              <div class="card-body">
-                <h5 class="card-title">Eletrônicos Verdes</h5>
-                <p class="card-text">
-                  Tecnologia com eficiência energética, feita de materiais
-                  recicláveis e com baixo impacto ambiental.
-                </p>
-              </div>
-            </div>
-          </a>
-        </div>
-
-        <!-- 6 - Livros e Educação -->
-       <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-4 categoria" data-categoria="Educação e Conscientização">
-          <a class="text-decoration-none" href="public/produtosCategoria.html">
-            <div class="card h-100">
-              <img
-                src="img/index_categorias/Educação e Conscientização.jpg"
-                class="card-img-top"
-                alt="Livros sobre sustentabilidade"
-              />
-              <div class="card-body">
-                <h5 class="card-title">Livros e Educação</h5>
-                <p class="card-text">
-                  Publicações sobre sustentabilidade, vida eco-friendly e
-                  inovação verde. Conhecimento para transformar seu impacto no
-                  mundo.
-                </p>
-              </div>
-            </div>
-          </a>
-        </div>
+        <button
+          class="carousel-control-prev"
+          type="button"
+          data-bs-target="#productCarousel"
+          data-bs-slide="prev"
+        >
+          <span
+            class="carousel-control-prev-icon text-dark"
+            aria-hidden="true"
+          ></span>
+        </button>
+        <button
+          class="carousel-control-next"
+          type="button"
+          data-bs-target="#productCarousel"
+          data-bs-slide="next"
+        >
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        </button>
       </div>
     </div>
     <div class="container-fluid d-flex align-items-center mt-3" id="comunidade">
@@ -320,10 +540,6 @@
       </div>
 
       <div class="modal-body p-6">
-        <div
-          class="d-none alert alert-danger text-center fw-bold position-absolute top-50 start-50 translate-middle-x w-25"
-          id="item-resultado">
-        </div>
         <div class="row g-4">
           <!-- Imagem do produto -->
           <div class="col-md-6 text-center">

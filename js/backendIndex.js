@@ -27,7 +27,6 @@ let estadoLogin = {
     ultimaAtualizacao: null
 };
 
-// Rota POST com validação
 app.post("/loginDados", async (req, res) => {
     console.log("Corpo recebido:", req.body); 
 
@@ -75,9 +74,6 @@ app.post("/loginDados", async (req, res) => {
         res.status(500).json({ erro: "Erro interno no servidor", detalhes: error.message });
     }
 });
-
-// Rota GET
-//O login não muda, mas o carrinho, sim;
 app.get("/loginDados", async (req, res) => {
     try {
         let respostaCarrinho = await db.query(
@@ -93,7 +89,6 @@ app.get("/loginDados", async (req, res) => {
         res.status(500).json({ erro: "Erro ao buscar estado de login", detalhes: error.message });
     }
 });
-
 app.post('/logout', (req, res) => {
     console.log("Requisição de logout recebida");
     
@@ -110,8 +105,6 @@ app.post('/logout', (req, res) => {
     
     res.status(200).json({ status: "sucesso", mensagem: "Usuário desconectado com sucesso" });
 });
-
-// Rota para buscar produtos em promoção
 app.get("/produtos", async (req, res) => {
     try {
         const produtos = await db.query(`
