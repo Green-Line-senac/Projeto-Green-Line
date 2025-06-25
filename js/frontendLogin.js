@@ -158,13 +158,14 @@ async function tratarLoginBemSucedido(dados) {
   try {
     // Armazenar dados do usuário de forma segura
     armazenarDadosUsuario(dados);
-    console.log("Dados do usuário armazenados com sucesso:", dados);
+    console.log("Dados do usuário armazenados com sucesso:", dados.user.id_pessoa + " " + dados.user.email);
     console.log("Usuário logado:", usuario);
     await fetch(`${api.online}/loginDados`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        usuario: usuario,
+        usuario: dados.user.email,
+        id_pessoa: dados.user.id_pessoa,
         trocar: 2,
       }),
     });
@@ -183,7 +184,7 @@ function armazenarDadosUsuario(dados) {
   try {
     localStorage.setItem("usuario", dados.user.email);
     localStorage.setItem("userToken", dados.token);
-    localStorage.setItem("id_pessoa", dados.user.id_pessoa); // Corrigido para id_pessoa
+    localStorage.setItem("id_pessoa", dados.user.id_pessoa);
     localStorage.setItem("userEmail", dados.user.email);
     localStorage.setItem("userType", dados.user.tipo_usuario);
     localStorage.setItem("isAdmin", dados.user.isAdmin);
