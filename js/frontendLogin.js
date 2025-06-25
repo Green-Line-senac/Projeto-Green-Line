@@ -166,7 +166,7 @@ async function tratarLoginBemSucedido(dados) {
       body: JSON.stringify({
         usuario: dados.user.email,
         id_pessoa: dados.user.id_pessoa,
-        trocar: 2,
+        trocar: 1,
       }),
     });
     // Redirecionar conforme tipo de usuário
