@@ -452,26 +452,11 @@ async function atualizarImagemPerfil(imageData) {
 // Logout
 async function logout() {
     try {
-<<<<<<< HEAD
         // Limpar todos os dados de autenticação
         const itemsToRemove = [
             'userToken', 'id_pessoa', 'userEmail', 
             'userType', 'usuario', 'loginTime'
         ];
-=======
-        const respostaLogout = await fetch(`${api.online}/logout`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-        });
-
-        if (!respostaLogout.ok) {
-            throw new Error('Erro ao fazer logout - Status: ' + respostaLogout.status);
-        }
-
-        const resposta = await respostaLogout.json();
->>>>>>> 603328637d7344749ce61706623ecc3ada39f0eb
         
         itemsToRemove.forEach(item => localStorage.removeItem(item));
         
