@@ -402,6 +402,7 @@ app.post("/loginDados", async (req, res) => {
     }
 
     const { usuario, trocar } = req.body;
+    console.log("Dados recebidos para login:", { usuario, trocar });
 
     try {
         const respostaPessoa = await db.query(
@@ -426,6 +427,7 @@ app.post("/loginDados", async (req, res) => {
         estadoLogin.usuario = usuario;
         estadoLogin.trocarDeConta = Number(trocar) || 0;
         estadoLogin.ultimaAtualizacao = new Date();
+        console.log(estadoLogin);
 
         res.json({
             status: "sucesso",
