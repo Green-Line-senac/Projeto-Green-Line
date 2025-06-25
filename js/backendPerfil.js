@@ -1,14 +1,31 @@
 require('dotenv').config();
 const express = require('express');
-const conexao = require('../conexao.js');
+const conexao = require('./conexao.js');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const cors = require('cors');
+const multer = require('multer');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 let db = new conexao();
 app.use(express.json());
 app.use(cors());
+
+
+const verificarToken = (req, res, next) => {
+    const token = req.headers['authorization'];
+    if (!token) return res.status(401).json({ error: 'Token não fornecido.' });
+
+    try {
+        const tokenFormatado = token.replace('Bearer ', '');
+        const decoded = jwt.verify(tokenFormatado, process.env.SEGREDO_JWT);
+        req.usuario = decoded;
+        next();
+    } catch (error) {
+        return res.status(403).json({ error: 'Token inválido ou expirado.' });
+    }
+};
 
 /*
 // Configuração do MySQL
@@ -27,6 +44,33 @@ mysql.createConnection({
 .catch(err => {
   console.error('❌ Erro no MySQL:', err.message);
 });*/
+
+
+
+// Configuração do multer para upload de imagens
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, '../img/index_carousel') // Pasta onde as imagens serão salvas
+  },
+  filename: function (req, file, cb) {
+    // Gera um nome único para o arquivo
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    cb(null, 'carrossel-' + uniqueSuffix + '.' + file.originalname.split('.').pop())
+  }
+})
+
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // Limite de 5MB
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true)
+    } else {
+      cb(new Error('Apenas arquivos de imagem são permitidos!'), false)
+    }
+  }
+})
+
 
 // ==================== FUNÇÕES AUXILIARES ====================
 const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -118,46 +162,102 @@ app.post('/pessoa', async (req, res) => {
 
 // [2] LOGIN (POST)
 app.post('/login', async (req, res) => {
-  const { email, senha } = req.body;
-
-  if (!email || !senha) {
-    return res.status(400).json({ error: 'E-mail e senha são obrigatórios' });
-  }
-
   try {
-    // Busca pessoa
-    const [pessoa] = await db.query('SELECT * FROM pessoa WHERE email = ?', [email]);
-    if (pessoa.length === 0) {
+    const { email, senha } = req.body;
+    
+    // Buscar usuário
+    const [users] = await db.query(
+      'SELECT id_pessoa, nome, email, senha, id_tipo_usuario FROM pessoa WHERE email = ?', 
+      [email]
+    );
+    
+    if (users.length === 0) {
       return res.status(401).json({ error: 'Credenciais inválidas' });
     }
-
-    const user = pessoa[0];
-
-    // Verifica senha
-    const senhaValida = await bcrypt.compare(senha, user.senha_hash);
+    
+    const user = users[0];
+    
+    // Buscar informações de login
+    const [logins] = await db.query('SELECT * FROM login WHERE id_pessoa = ?', [user.id_pessoa]);
+    if (logins.length === 0) {
+      return res.status(401).json({ error: 'Credenciais inválidas' });
+    }
+    
+    const login = logins[0];
+    
+    // Verificar senha
+    const senhaValida = await bcrypt.compare(senha, login.senha_hash);
     if (!senhaValida) {
       return res.status(401).json({ error: 'Credenciais inválidas' });
     }
+    
+    
+    const token = jwt.sign(
+  { 
+    userId: user.id_pessoa, // Certifique-se que está usando id_pessoa
+    email: user.email,
+    tipo_usuario: user.id_tipo_usuario 
+  },
+  process.env.SEGREDO_JWT,
+  { expiresIn: '1h' }
+);
 
-    // Gera token simples (em produção, use JWT)
-    const token = crypto.randomBytes(16).toString('hex');
+    console.log('Token JWT gerado:', token);
+    
+    const isAdmin = user.email === "greenl.adm@gmail.com" || user.id_tipo_usuario === 1;
 
-    res.json({
-      id_pessoa: user.id_pessoa,
-      nome: user.nome,
-      email: user.email,
-      telefone: user.telefone,
-      cpf: user.cpf,
-      id_tipo_usuario: user.id_tipo_usuario,
-      situacao: user.situacao,
-      imagem_perfil: user.imagem_perfil,
-      token
-    });
+      // Retornar token e user com isAdmin
+      res.json({ 
+        token, 
+        user: { 
+          id_pessoa: user.id_pessoa,
+          email: user.email,
+          tipo_usuario: user.id_tipo_usuario,
+          isAdmin 
+        } 
+      });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro no servidor' });
+  }
 
-  } catch (err) {
+  // Middleware de autenticação
+
+
+});
+
+app.get('/profile', async (req, res) => {
+  try {
+    // Verificar token
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ error: 'Token não fornecido' });
+    }
+    
+    const decoded = jwt.verify(token, SEGREDO_JWT);
+    
+    // Buscar usuário
+    const [users] = await db.query('SELECT * FROM pessoa WHERE id_pessoa = ?', [decoded.id_pessoa]);
+    console.log('Usuários encontrados:', users);
+    if (users.length === 0) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+    
+    const user = users[0];
+    
+    // Remover dados sensíveis antes de enviar
+    delete user.cpf;
+    
+    res.json(user);
+  } catch (error) {
+    console.error(error);
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ error: 'Token inválido' });
+    }
     res.status(500).json({ error: 'Erro no servidor' });
   }
 });
+
 
 // [3] LISTAR USUÁRIOS (GET)
 app.get('/pessoa', async (req, res) => {
@@ -172,8 +272,10 @@ app.get('/pessoa', async (req, res) => {
   }
 });
 
+
+
 // [4] BUSCAR USUÁRIO POR ID (GET)
-app.get('/pessoa/:id_pessoa', async (req, res) => {
+app.get('/pessoa/:id_pessoa', verificarToken, async (req, res) => {
   try {
     console.log('Buscando usuário com ID:', req.params.id_pessoa);
     const id = parseInt(req.params.id_pessoa);
@@ -237,6 +339,26 @@ app.delete('/pessoa/:id_pessoa', async (req, res) => {
     res.status(204).end();
   } catch (err) {
     res.status(500).json({ error: 'Erro ao deletar usuário' });
+  }
+});
+
+// buscar pedidos do usuário
+app.get('/pessoa/:id_pessoa/pedidos', async (req, res) => {
+  try {
+    const idPessoa = req.params.id_pessoa;
+    const [rows] = await db.query(
+      'SELECT * FROM pedidos WHERE id_pessoa = ?',
+      [idPessoa]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Nenhum pedido encontrado para este usuário' });
+    }
+
+    res.json(rows);
+  } catch (err) {
+    console.error('Erro ao buscar pedidos:', err);
+    res.status(500).json({ error: 'Erro ao buscar pedidos', details: err.message });
   }
 });
 
@@ -338,40 +460,160 @@ app.put('/pessoa/:id_pessoa/endereco', async (req, res) => {
 });
 
 // [10] ROTAS PARA MÉTODOS DE PAGAMENTO
-app.get('/pessoa/:id_pessoa/pagamentos', async (req, res) => {
+// app.get('/pessoa/:id_pessoa/pagamentos', async (req, res) => {
+//     try {
+//         const [rows] = await db.query('SELECT id, tipo, numero FROM metodos_pagamento WHERE id_pessoa = ?', [req.params.id_pessoa]);
+//         res.json(rows);
+//     } catch (err) {
+//         res.status(500).json({ error: 'Erro ao buscar métodos de pagamento' });
+//     }
+// });
+
+// app.post('/pessoa/:id_pessoa/pagamentos', async (req, res) => {
+//     try {
+//         const { tipo, numero } = req.body;
+//         await db.query(
+//             'INSERT INTO metodos_pagamento (id_pessoa, tipo, numero) VALUES (?, ?, ?)',
+//             [req.params.id_pessoa, tipo, numero]
+//         );
+//         res.status(201).json({ message: 'Método de pagamento adicionado' });
+//     } catch (err) {
+//         res.status(500).json({ error: 'Erro ao adicionar método de pagamento' });
+//     }
+// });
+
+// app.delete('/pessoa/:id_pessoa/pagamentos/:id', async (req, res) => {
+//     try {
+//         await db.query('DELETE FROM metodos_pagamento WHERE id = ? AND id_pessoa = ?', [req.params.id, req.params.id_pessoa]);
+//         res.status(204).end();
+//     } catch (err) {
+//         res.status(500).json({ error: 'Erro ao remover método de pagamento' });
+//     }
+// });
+
+
+
+// Rota para listar todos os usuários (apenas para ADMs)
+app.get('/pessoa', async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT id, tipo, numero FROM metodos_pagamento WHERE id_pessoa = ?', [req.params.id_pessoa]);
+        // Verificar se o usuário é ADM
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ error: 'Token não fornecido' });
+        }else{ console.log('Token do ADM recebido:', token);}
+        
+        const decoded = jwt.verify(token, SEGREDO_JWT);
+       
+        
+        // Verificar se o usuário é administrador
+        const [isAdmin] = await db.query('SELECT email FROM pessoa WHERE id_pessoa = ?', [decoded.id_pessoa]);
+        if (isAdmin.length === 0 || isAdmin[0].email !== "greenl.adm@gmail.com") {
+          console.log('Usuário não é administrador:', decoded.id_pessoa)
+          return res.status(403).json({ error: 'Acesso negado - apenas administradores' });
+        }
+        
+        // Buscar todos os usuários (exceto senhas)
+        const [rows] = await db.query(`SELECT id_pessoa, nome, email, telefone, cpf, id_tipo_usuario, situacao, imagem_perfil 
+            FROM pessoa`);
+        
         res.json(rows);
     } catch (err) {
-        res.status(500).json({ error: 'Erro ao buscar métodos de pagamento' });
+        console.error('Erro ao listar usuários:', err);
+        res.status(500).json({ error: 'Erro ao listar usuários' });
     }
 });
 
-app.post('/pessoa/:id_pessoa/pagamentos', async (req, res) => {
+//Rota atualizar tipo de usuário
+app.put('/pessoa/:id_pessoa/tipo', async (req, res) => {
     try {
-        const { tipo, numero } = req.body;
-        await db.query(
-            'INSERT INTO metodos_pagamento (id_pessoa, tipo, numero) VALUES (?, ?, ?)',
-            [req.params.id_pessoa, tipo, numero]
+        const { id_tipo_usuario } = req.body;
+        const idPessoa = parseInt(req.params.id_pessoa);
+        
+        if (isNaN(idPessoa) || idPessoa <= 0) {
+            return res.status(400).json({ error: 'ID inválido' });
+        }
+
+        // Verifica se o tipo de usuário é válido
+        if (![1, 2].includes(id_tipo_usuario)) {
+            return res.status(400).json({ error: 'Tipo de usuário inválido' });
+        }
+
+        const [result] = await db.query(
+            'UPDATE pessoa SET id_tipo_usuario = ? WHERE id_pessoa = ?',
+            [id_tipo_usuario, idPessoa]
         );
-        res.status(201).json({ message: 'Método de pagamento adicionado' });
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Usuário não encontrado' });
+        }
+        
+        res.json({ message: 'Tipo de usuário atualizado com sucesso' });
     } catch (err) {
-        res.status(500).json({ error: 'Erro ao adicionar método de pagamento' });
+        console.error('Erro ao atualizar tipo de usuário:', err);
+        res.status(500).json({ error: 'Erro ao atualizar tipo de usuário' });
     }
 });
 
-app.delete('/pessoa/:id_pessoa/pagamentos/:id', async (req, res) => {
+// Rota para obter imagens do carrossel
+app.get('/carousel-images', (req, res) => {
     try {
-        await db.query('DELETE FROM metodos_pagamento WHERE id = ? AND id_pessoa = ?', [req.params.id, req.params.id_pessoa]);
-        res.status(204).end();
+        // Simulando leitura do arquivo JSON
+        const carouselData = require('./carousel-index.json');
+        res.json(carouselData);
     } catch (err) {
-        res.status(500).json({ error: 'Erro ao remover método de pagamento' });
+        console.error('Erro ao carregar imagens do carrossel:', err);
+        res.status(500).json({ error: 'Erro ao carregar imagens do carrossel' });
     }
 });
 
+// Rota para deletar imagem do carrossel
+app.post('/delete-carousel-image', (req, res) => {
+    try {
+        const { imageName } = req.body;
+        
+        // Simulando atualização do arquivo JSON
+        const carouselData = require('./carousel-index.json');
+        const updatedData = carouselData.filter(img => img.nomeImagem !== imageName);
+        
+        // Aqui você salvaria o updatedData de volta no arquivo JSON
+        // fs.writeFileSync('./carousel-index.json', JSON.stringify(updatedData, null, 2));
+        
+        res.json({ success: true, message: 'Imagem removida com sucesso' });
+    } catch (err) {
+        console.error('Erro ao remover imagem do carrossel:', err);
+        res.status(500).json({ success: false, message: 'Erro ao remover imagem' });
+    }
+});
 
-
-
+// Rota para upload de novas imagens do carrossel
+app.post('/upload-carousel-images', upload.array('carouselImages'), (req, res) => {
+    try {
+        const files = req.files;
+        if (!files || files.length === 0) {
+            return res.status(400).json({ success: false, message: 'Nenhuma imagem enviada' });
+        }
+        
+        // Simulando atualização do carrossel
+        const carouselData = require('./carousel-index.json');
+        
+        files.forEach(file => {
+            // Aqui você moveria o arquivo para o diretório de imagens
+            // e adicionaria ao carrossel-index.json
+            const newImage = {
+                nomeImagem: file.originalname
+            };
+            carouselData.push(newImage);
+        });
+        
+        // Aqui você salvaria o carouselData de volta no arquivo JSON
+        // fs.writeFileSync('./carousel-index.json', JSON.stringify(carouselData, null, 2));
+        
+        res.json({ success: true, message: 'Imagens adicionadas com sucesso' });
+    } catch (err) {
+        console.error('Erro ao adicionar imagens ao carrossel:', err);
+        res.status(500).json({ success: false, message: 'Erro ao adicionar imagens' });
+    }
+});
 
 // ==================== INICIAR SERVIDOR ====================
 const PORTA8 = process.env.PORTA8 || 3008;

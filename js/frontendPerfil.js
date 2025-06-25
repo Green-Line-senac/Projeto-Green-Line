@@ -8,33 +8,57 @@ const api = {
 }
 
 // Função para carregar dados do usuário
+// Função para carregar dados do usuário - VERSÃO CORRIGIDA
 async function carregarDadosUsuario() {
     try {
-        const idPessoa = Number(localStorage.getItem('id_pessoa'));
-        console.log(idPessoa);
+        // 1. Verificar se o usuário está autenticado
+        const token = localStorage.getItem('userToken');
+        const idPessoa = localStorage.getItem('id_pessoa'); // Ou 'id_pessoa' dependendo do que você usa
         
-        if (!idPessoa) {
+        if (!token || !idPessoa) {
+            console.error('Usuário não autenticado - redirecionando para login');
             window.location.href = '../index.html';
             return;
         }
 
-        const response = await fetch(`${api.perfil}/pessoa/${idPessoa}`);
+        // 2. Fazer a requisição com o token de autenticação
+        const response = await fetch(`${api.perfil}/pessoa/${idPessoa}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
         
+        // 3. Verificar se a resposta foi bem sucedida
         if (!response.ok) {
-            throw new Error('Erro ao carregar dados do usuário');
+            if (response.status === 401 || response.status === 403) {
+                // Token inválido ou expirado - forçar logout
+                logout();
+                return;
+            }
+            throw new Error(`Erro HTTP: ${response.status}`);
         }
 
-        usuarioLogado = await response.json();
-        console.log(usuarioLogado);
+        // 4. Processar os dados do usuário
+        const usuarioLogado = await response.json();
         
+        if (!usuarioLogado || usuarioLogado.length === 0) {
+            throw new Error('Dados do usuário não encontrados');
+        }
+
+        console.log('Dados do usuário carregados:', usuarioLogado);
         await mostrarPerfil(usuarioLogado);
+        
     } catch (error) {
         console.error('Erro ao carregar perfil:', error);
-        alert('Erro ao carregar perfil. Redirecionando para login...');
-        window.location.href = '../index.html';
+        
+        // Em caso de erro, fazer logout para limpar dados inválidos
+        logout();
+        
+        // Mostrar mensagem amigável (opcional)
+        alert('Sua sessão expirou ou ocorreu um erro. Você será redirecionado para a página de login.');
     }
 }
-
 const semphoto = 'https://w7.pngwing.com/pngs/81/570/png-transparent-profile-logo-computer-icons-user-user-blue-heroes-logo-thumbnail.png';
 
 // Mostrar perfil com dados do usuário
@@ -145,6 +169,25 @@ function setupEventListeners() {
         }
     });
 }
+
+// pedidos
+async function carregarPedidos() {
+    try {
+        const idPessoa = localStorage.getItem('id_pessoa');
+        const response = await fetch(`${api.perfil}/pessoa/${idPessoa}/pedidos`);
+
+        if (!response.ok) {
+            throw new Error('Erro ao carregar pedidos');
+        }
+
+        const pedidos = await response.json();
+        mostrarPedidos(pedidos);
+    } catch (error) {
+        console.error('Erro ao carregar pedidos:', error);
+        alert('Erro ao carregar pedidos. Tente novamente mais tarde.');
+    }
+}
+
 
 // Configurações do usuário
 function setupSettings() {
@@ -409,34 +452,21 @@ async function atualizarImagemPerfil(imageData) {
 // Logout
 async function logout() {
     try {
-        const respostaLogout = await fetch(`${api.index}/logout`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-        });
-
-        if (!respostaLogout.ok) {
-            throw new Error('Erro ao fazer logout - Status: ' + respostaLogout.status);
-        }
-
-        const resposta = await respostaLogout.json();
+        // Limpar todos os dados de autenticação
+        const itemsToRemove = [
+            'userToken', 'id_pessoa', 'userEmail', 
+            'userType', 'usuario', 'loginTime'
+        ];
         
-        if(resposta.status == "sucesso") {
-            console.log('Logout realizado com sucesso');
-            localStorage.removeItem('usuario');
-            localStorage.removeItem('id_pessoa');
-            localStorage.clear();
-            window.location.href = '../index.html'; 
-        } else {
-            console.error('Erro ao realizar logout:', resposta.mensagem);
-            alert('Erro ao realizar logout. Tente novamente.');
-        }
+        itemsToRemove.forEach(item => localStorage.removeItem(item));
+        
+        // Redirecionar para login
+        window.location.href = 'login.html?logout=success';
     } catch (error) {
         console.error('Erro ao fazer logout:', error);
-        alert('Erro ao fazer logout. Tente novamente.');
+        window.location.href = 'login.html';
     }
-};
+}
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {

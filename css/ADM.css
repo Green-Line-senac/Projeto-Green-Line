@@ -1,0 +1,207 @@
+/* Estilos específicos para a versão ADM */
+
+.profile-badge {
+    background-color: #dc3545;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-top: 5px;
+    display: inline-block;
+}
+
+.nav-item.adm-item {
+    background-color: rgba(220, 53, 69, 0.1);
+    border-left: 3px solid #dc3545;
+}
+
+.nav-item.adm-item:hover, .nav-item.adm-item.active {
+    background-color: #dc3545;
+    color: white;
+}
+
+.admin-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.btn-warning:hover {
+    background-color: #e0a800;
+    color: #212529;
+}
+
+.search-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.search-bar input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.users-list, .products-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px;
+}
+
+.user-card, .product-card {
+    background: var(--secondary-color);
+    padding: 15px;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.user-card:hover, .product-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.user-name, .product-name {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.user-email, .product-category {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
+
+.user-status, .product-stock {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-top: 5px;
+}
+
+.user-status.active {
+    background-color: #28a745;
+    color: white;
+}
+
+.user-status.inactive {
+    background-color: #6c757d;
+    color: white;
+}
+
+.user-status.pending {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.product-stock.in-stock {
+    background-color: #28a745;
+    color: white;
+}
+
+.product-stock.low-stock {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.product-stock.out-of-stock {
+    background-color: #dc3545;
+    color: white;
+}
+
+.user-actions, .product-actions {
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.carousel-preview {
+    margin-bottom: 30px;
+}
+
+.current-carousel-image {
+    display: inline-block;
+    margin-right: 15px;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.current-carousel-image img {
+    width: 200px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.current-carousel-image .delete-image {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: rgba(220, 53, 69, 0.8);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.image-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.image-preview-item {
+    position: relative;
+    width: 150px;
+    height: 90px;
+}
+
+.image-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.image-preview-item .remove-image {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: rgba(220, 53, 69, 0.8);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.7rem;
+}
+
+/* Dark mode adjustments */
+body.dark-mode .user-card,
+body.dark-mode .product-card {
+    background-color: #2d2d2d;
+}
+
+body.dark-mode .user-email,
+body.dark-mode .product-category {
+    color: #aaa;
+}

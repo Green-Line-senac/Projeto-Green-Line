@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil - Administrador</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../img/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon/favicon.svg" />
+    <link rel="shortcut icon" href="../img/favicon/favicon/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../img/favicon/favicon/apple-touch-icon.png" />
+    <link rel="manifest" href="../img/favicon/favicon/site.webmanifest" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/ADM.css">
+    <link rel="stylesheet" href="../css/perfil.css">
+    <script src="../js/frontendPerfilAdm.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <img id="profileAvatar" src="https://w7.pngwing.com/pngs/81/570/png-transparent-profile-logo-computer-icons-user-user-blue-heroes-logo-thumbnail.png" alt="Avatar">
+                    <label class="change-avatar" for="avatarInput">
+                        <i class="fas fa-camera"></i>
+                        <input type="file" id="avatarInput" accept="image/*">
+                    </label>
+                </div>
+                <h2 class="profile-name" id="profileName">Carregando...</h2>
+                <div class="profile-email" id="profileEmail">carregando...</div>
+                <div class="profile-badge">ADMINISTRADOR</div>
+            </div>
+            
+            <div class="nav-menu">
+                <div class="nav-item active" data-section="personal">
+                    <i class="fas fa-user"></i> Informações Pessoais
+                </div>
+                <div class="nav-item" data-section="orders">
+                    <i class="fas fa-shopping-bag"></i> Meus Pedidos
+                </div>
+                <div class="nav-item" data-section="saved">
+                    <i class="fas fa-heart"></i> Produtos Salvos
+                </div>
+                
+                <!-- Seções exclusivas para ADM -->
+                <div class="nav-item adm-item" data-section="admin-products">
+                    <i class="fas fa-box-open"></i> Gerenciar Produtos
+                </div>
+                <div class="nav-item adm-item" data-section="admin-users">
+                    <i class="fas fa-users-cog"></i> Gerenciar Usuários
+                </div>
+                <div class="nav-item adm-item" data-section="admin-carousel">
+                    <i class="fas fa-images"></i> Gerenciar Carrossel
+                </div>
+                
+                <div class="nav-item" data-section="gears">
+                    <i class="fa-solid fa-gear"></i> Configurações
+                </div>
+                <div class="nav-item" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Seção de Informações Pessoais -->
+            <div id="personal-section">
+                <h2 class="section-title">Informações Pessoais</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Nome Completo</div>
+                        <div class="info-value editable" id="profileFullName">Carregando...</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">E-mail</div>
+                        <div class="info-value" id="profileEmailContent">carregando...</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Telefone</div>
+                        <div class="info-value editable" id="profilePhone">carregando...</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">CPF</div>
+                        <div class="info-value" id="profileCpf">carregando...</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Status</div>
+                        <div class="info-value" id="profileStatus">carregando...</div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" id="savePersonalBtn" style="margin-top: 20px;">Salvar Alterações</button>
+            </div>
+            
+            <!-- Seção de Pedidos -->
+            <div id="orders-section" class="hidden">
+                <h2 class="section-title">Meus Pedidos</h2>
+                <div id="ordersContent">
+                    <p>Seus pedidos aparecerão aqui</p>
+                </div>
+            </div>
+            
+            <!-- Seção de Produtos Salvos -->
+            <div id="saved-section" class="hidden">
+                <h2 class="section-title">Produtos Salvos</h2>
+                <div id="savedProductsContent">
+                    <p>Seus produtos salvos aparecerão aqui</p>
+                </div>
+            </div>
+            
+            <!-- Seção de Gerenciamento de Produtos (ADM) -->
+            <div id="admin-products-section" class="hidden">
+                <h2 class="section-title">Gerenciar Produtos</h2>
+                <div class="admin-actions">
+                    <button class="btn btn-primary" id="addProductBtn">
+                        <i class="fas fa-plus"></i> Adicionar Novo Produto
+                    </button>
+                    <button class="btn btn-secondary" id="editProductBtn">
+                        <i class="fas fa-edit"></i> Editar Produto Existente
+                    </button>
+                    <button class="btn btn-warning" id="manageStockBtn">
+                        <i class="fas fa-boxes"></i> Gerenciar Estoque
+                    </button>
+                </div>
+                <div class="products-list" id="adminProductsList">
+                    <!-- Lista de produtos será carregada aqui -->
+                </div>
+            </div>
+            
+            <!-- Seção de Gerenciamento de Usuários (ADM) -->
+            <div id="admin-users-section" class="hidden">
+                <h2 class="section-title">Gerenciar Usuários</h2>
+                <div class="search-bar">
+                    <input type="text" id="userSearch" placeholder="Buscar usuário por nome ou e-mail">
+                    <button class="btn btn-primary" id="searchUserBtn">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                </div>
+                <div class="users-list" id="adminUsersList">
+                    <!-- Lista de usuários será carregada aqui -->
+                </div>
+            </div>
+            
+            <!-- Seção de Gerenciamento do Carrossel (ADM) -->
+            <div id="admin-carousel-section" class="hidden">
+                <h2 class="section-title">Gerenciar Carrossel</h2>
+                <div class="carousel-preview">
+                    <h3>Imagens Atuais do Carrossel</h3>
+                    <div id="currentCarouselImages">
+                        <!-- Imagens atuais serão carregadas aqui -->
+                    </div>
+                </div>
+                <div class="carousel-upload">
+                    <h3>Adicionar/Substituir Imagens</h3>
+                    <input type="file" id="carouselImageInput" accept="image/*" multiple>
+                    <button class="btn btn-primary" id="uploadCarouselBtn">
+                        <i class="fas fa-upload"></i> Enviar Imagens
+                    </button>
+                    <div class="image-preview" id="carouselImagePreview">
+                        <!-- Pré-visualização das novas imagens -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Seção de Configurações -->
+            <div id="gears-section" class="hidden">
+                <h2 class="section-title">Configurações</h2>
+                
+                <div class="settings-grid">
+                    <!-- Modo Noturno -->
+                    <div class="setting-item">
+                        <div class="setting-label">Modo Noturno</div>
+                        <label class="switch">
+                            <input type="checkbox" id="darkModeToggle">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    
+                    <!-- Endereço -->
+                    <div class="setting-item">
+                        <div class="setting-label">Meu Endereço</div>
+                        <div class="address-card" id="addressContent">
+                            <p>Carregando endereço...</p>
+                        </div>
+                        <button class="btn btn-primary" id="updateAddressBtn">Atualizar Endereço</button>
+                    </div>
+                    
+                    <!-- Método de Pagamento -->
+                    <div class="setting-item">
+                        <div class="setting-label">Método de Pagamento</div>
+                        <div class="payment-methods" id="paymentMethods">
+                            <p>Carregando métodos...</p>
+                        </div>
+                        <button class="btn btn-primary" id="addPaymentMethodBtn">Adicionar Método</button>
+                    </div>
+                    
+                    <!-- Deletar Conta -->
+                    <div class="setting-item danger-zone">
+                        <div class="setting-label">Zona de Perigo</div>
+                        <button class="btn btn-danger" id="deleteAccountBtn">
+                            <i class="fas fa-exclamation-triangle"></i> Deletar Minha Conta
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para deletar conta -->
+    <div id="deleteModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3>Confirmar Exclusão de Conta</h3>
+            <p>Tem certeza que deseja deletar sua conta? Esta ação não pode ser desfeita.</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="cancelDeleteBtn">Cancelar</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn">Confirmar Exclusão</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para atualizar endereço -->
+    <div id="addressModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3>Atualizar Endereço</h3>
+            <form id="addressForm">
+                <div class="form-group">
+                    <label for="cep">CEP</label>
+                    <input type="text" id="cep" name="cep" required>
+                </div>
+                <div class="form-group">
+                    <label for="logradouro">Endereço</label>
+                    <input type="text" id="logradouro" name="logradouro" required>
+                </div>
+                <div class="form-group">
+                    <label for="numero">Número</label>
+                    <input type="text" id="numero" name="numero" required>
+                </div>
+                <div class="form-group">
+                    <label for="complemento">Complemento</label>
+                    <input type="text" id="complemento" name="complemento">
+                </div>
+                <div class="form-group">
+                    <label for="cidade">Cidade</label>
+                    <input type="text" id="cidade" name="cidade" required>
+                </div>
+                <div class="form-group">
+                    <label for="estado">Estado</label>
+                    <input type="text" id="estado" name="estado" required maxlength="2">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelAddressBtn">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Endereço</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para adicionar método de pagamento -->
+    <div id="paymentModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3>Adicionar Método de Pagamento</h3>
+            <form id="paymentForm">
+                <div class="form-group">
+                    <label for="paymentType">Tipo</label>
+                    <select id="paymentType" name="paymentType" required>
+                        <option value="VISA">Visa</option>
+                        <option value="MASTERCARD">Mastercard</option>
+                        <option value="AMEX">American Express</option>
+                        <option value="ELO">Elo</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cardNumber">Número do Cartão</label>
+                    <input type="text" id="cardNumber" name="cardNumber" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelPaymentBtn">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Adicionar Cartão</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para gerenciar usuários (ADM) -->
+    <div id="userManagementModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3 id="userModalTitle">Editar Usuário</h3>
+            <form id="userManagementForm">
+                <input type="hidden" id="userId">
+                <div class="form-group">
+                    <label for="userName">Nome</label>
+                    <input type="text" id="userName" name="userName" required>
+                </div>
+                <div class="form-group">
+                    <label for="userEmail">E-mail</label>
+                    <input type="email" id="userEmail" name="userEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="userPhone">Telefone</label>
+                    <input type="text" id="userPhone" name="userPhone" required>
+                </div>
+                <div class="form-group">
+                    <label for="userStatus">Status</label>
+                    <select id="userStatus" name="userStatus" required>
+                        <option value="A">Ativo</option>
+                        <option value="I">Inativo</option>
+                        <option value="P">Pendente</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="userType">Tipo de Usuário</label>
+                    <select id="userType" name="userType" required>
+                        <option value="1">Administrador</option>
+                        <option value="2">Usuário Comum</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelUserEditBtn">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    <button type="button" class="btn btn-danger" id="deleteUserBtn">Deletar Usuário</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

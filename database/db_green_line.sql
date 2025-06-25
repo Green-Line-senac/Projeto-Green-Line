@@ -292,3 +292,5 @@ INNER JOIN pessoa ON pessoa.id_pessoa = usuario.id_pessoa;
 
 
 
+
+
