@@ -101,6 +101,42 @@ app.get("/validar", async (req, res) => {
     res.sendFile(path.join(__dirname, "public/tokenExpirado.html"));
   }
 });
+app.get("/redefinir-senha", async (req, res) => {
+  const { token } = req.query;
+  const senhaCriptografada = await bcrypt.hash(senha, 10);
+  const atualizarSituacao =
+    "UPDATE pessoa SET senha = ? WHERE id_pessoa = ?";
+  const sql =
+    "SELECT id_pessoa FROM pessoa WHERE situacao = 'A' AND email = ?;";
+
+  try {
+    const payload = jwt.verify(token, segredo);
+    const email = payload.email;
+
+    const resultado = await db.query(sql, [email]);
+
+    if (resultado.length > 0) {
+      const id_pessoa = resultado[0].id_pessoa;
+      try {
+        await db.query(atualizarSituacao, [senhaCriptografada, id_pessoa]);
+        res.sendFile(
+          path.resolve(__dirname, "public/senhaRedefinida.html"),
+          (err) => {
+            if (err) {
+              res.status(404).send("Página não encontrada!");
+            }
+          }
+        );
+      } catch (erro) {
+        res.sendFile(path.resolve(__dirname, "public/erro.html"));
+      }
+    } else {
+      res.sendFile(path.resolve(__dirname, "public/erro.html"));
+    }
+  } catch (erro) {
+    res.sendFile(path.join(__dirname, "public/tokenExpirado.html"));
+  }
+});
 
 app.get("/verificarEmail", async (req, res) => {
   const { email } = req.query;
@@ -249,13 +285,14 @@ app.get("/produtosEspecificos", async (req, res) => {
 
 // ==================== BACKEND PADRÃO ====================
 app.get("/enviar-email", async (req, res) => {
-  const email = req.query.email?.trim();
+  const {email,assunto,tipo} = req.body;
+  email = req.query.email?.trim();
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return res.status(400).json({ conclusao: 1, mensagem: "Email inválido" });
   }
 
   try {
-    await funcoesUteis.enviarEmail(email);
+    await funcoesUteis.enviarEmail(email,assunto,tipo);
     return res.json({ conclusao: 2, mensagem: "Email enviado com sucesso" });
   } catch (erro) {
     return res
@@ -645,6 +682,153 @@ app.get("/checar-cep", async (req, res) => {
     return res.status(200).json(resposta);
   } catch (error) {
     return res.status(500).json({ error: "Erro ao consultar CEP", codigo: -2 });
+  }
+});
+app.post("/salvar-pedido", async (req, res) => {
+  let pedido = req.body;
+  console.log("Pedido recebido:", pedido);
+
+  try {
+    // Validação básica
+    if (
+      !pedido ||
+      !pedido.numeroPedido ||
+      !pedido.produtos ||
+      pedido.produtos.length === 0 ||
+      !pedido.idPessoa
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Dados do pedido inválidos", codigo: -1 });
+    }
+
+    // Processar pagamento
+    if (
+      pedido.formaPagamentoVendas === "PIX" ||
+      pedido.formaPagamentoVendas === "BB"
+    ) {
+      console.log("Processando pagamento PIX/BB...");
+      const sql = `
+        INSERT INTO pedidos(
+          numero_pedido,
+          id_pessoa,
+          tipo_pagamento,
+          valor_total,
+          nome_titular,
+          metodo_entrega,
+          previsao_entrega,
+          valor_frete,
+          subtotal,
+          desconto
+        ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+      await db.query(sql, [
+        pedido.numeroPedido,
+        pedido.idPessoa,
+        pedido.formaPagamentoVendas, // Aqui é direto "PIX" ou "BB"
+        pedido.total,
+        pedido.nomeTitular,
+        pedido.metodoEntrega,
+        pedido.previsaoEntrega,
+        pedido.frete,
+        pedido.subtotal,
+        pedido.desconto,
+      ]);
+    } else if (
+      pedido.formaPagamentoVendas.metodoPagamento === "CC" ||
+      pedido.formaPagamentoVendas.metodoPagamento === "DEB"
+    ) {
+      console.log("Processando pagamento com cartão...");
+      const tipoPagamento =
+        pedido.formaPagamentoVendas.metodoPagamento === "CC"
+          ? "CRÉDITO"
+          : "DÉBITO";
+
+      const sql = `
+        INSERT INTO pedidos(
+          numero_pedido,
+          id_pessoa,
+          tipo_pagamento,
+          valor_total,
+          num_parcelas,
+          numero_cartao,
+          nome_cartao,
+          validade_cartao,
+          cvv,
+          nome_titular,
+          metodo_entrega,
+          previsao_entrega,
+          valor_frete,
+          subtotal,
+          desconto
+        ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+      await db.query(sql, [
+        pedido.numeroPedido,
+        pedido.idPessoa,
+        tipoPagamento,
+        pedido.total,
+        pedido.formaPagamentoVendas.parcelas?.replace("x", "") || 1,
+        pedido.formaPagamentoVendas.numeroCartao,
+        pedido.formaPagamentoVendas.nomeCartao,
+        pedido.formaPagamentoVendas.validadeCartao,
+        pedido.formaPagamentoVendas.cvv,
+        pedido.nomeTitular,
+        pedido.metodoEntrega,
+        pedido.previsaoEntrega,
+        pedido.frete,
+        pedido.subtotal,
+        pedido.desconto,
+      ]);
+    } else {
+      return res
+        .status(400)
+        .json({ error: "Método de pagamento inválido", codigo: -3 });
+    }
+
+    // Restante do código permanece igual...
+    const ultimoPedido = await db.query(
+      "SELECT id_pedido FROM pedidos WHERE numero_pedido = ? ORDER BY id_pedido DESC LIMIT 1",
+      [pedido.numeroPedido],
+    );
+    const idPedido = ultimoPedido[0].id_pedido;
+    console.log("ID do pedido inserido:", idPedido);
+
+    // Inserir produtos do pedido
+    for (const produto of pedido.produtos) {
+      const produtoExistente = await db.query(
+        "SELECT id_produto FROM produto WHERE produto = ? LIMIT 1",
+        [produto.nome]
+      );
+
+      if (!produtoExistente || produtoExistente.length === 0) {
+        console.error(`Produto não encontrado: ${produto.nome}`);
+        continue;
+      }
+
+      await db.query(
+        `INSERT INTO pedido_produto(
+          id_pedido, id_produto, quantidade, preco_unitario, nome_produto
+        ) VALUES(?, ?, ?, ?, ?)`,
+        [
+          idPedido,
+          produtoExistente[0].id_produto,
+          produto.quantidade,
+          produto.preco,
+          produto.nome,
+        ]
+      );
+    }
+
+    return res.status(200).json({
+      mensagem: "Pedido cadastrado com sucesso",
+      idPedido: idPedido,
+    });
+  } catch (erro) {
+    console.error("Erro ao salvar pedido:", erro);
+    return res
+      .status(500)
+      .json({ erro: "Erro ao processar pedido", codigo: -2 });
   }
 });
 

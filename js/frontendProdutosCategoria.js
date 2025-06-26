@@ -149,7 +149,7 @@ async function carregarProdutos() {
       mostrarLoader();
 
       // Recuperando a categoria armazenada
-      let categoriaSelecionada = localStorage.getItem("categoriaSelecionada");
+      let categoriaSelecionada = sessionStorage.getItem("categoriaSelecionada");
      
 
       if (!categoriaSelecionada) {
@@ -424,7 +424,7 @@ async function verificarEstadoLogin() {
     const dados = await response.json();
     if (dados && dados.id_pessoa) {
       estado.id_pessoa = parseInt(dados.id_pessoa);
-      localStorage.setItem("id_pessoa", estado.id_pessoa);
+      sessionStorage.setItem("id_pessoa", estado.id_pessoa);
       return true;
     }
     return false;
@@ -527,7 +527,7 @@ console.log("Subtotal:", subtotal.toFixed(2));
     };
 
     console.log("Dados da compra:", dadosCompra);
-    localStorage.setItem("dadosCompra", JSON.stringify(dadosCompra));
+    sessionStorage.setItem("dadosCompra", JSON.stringify(dadosCompra));
     window.location.href = "vendas.html";
   });
 
@@ -586,7 +586,7 @@ console.log("Subtotal:", subtotal.toFixed(2));
 async function inicializarApp() {
   try {
     estado.carregando = true;
-    const storedId = localStorage.getItem("id_pessoa");
+    const storedId = sessionStorage.getItem("id_pessoa");
     if (storedId) {
       estado.id_pessoa = parseInt(storedId);
     }

@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Verificar se o usuário é ADM
-    const userEmail = localStorage.getItem('userEmail') || '';
-    const isAdmin = localStorage.getItem('isAdmin') === 'true';
+    const userEmail = sessionStorage.getItem('userEmail') || '';
+    const isAdmin = sessionStorage.getItem('isAdmin') === 'true';
 
     
     if (!isAdmin) {
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Carregar lista de usuários (para a seção ADM)
     function loadUsersList() {
         //  requisição AJAX
-        const token = localStorage.getItem('userToken');
+        const token = sessionStorage.getItem('userToken');
         fetch("http://localhost:3008/pessoa", {
             method: "GET",
             headers: {
@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Abrir modal de edição de usuário
     function openUserEditModal(userId) {
         // Simulando requisição AJAX para obter dados do usuário
-         const token = localStorage.getItem('userToken');
+         const token = sessionStorage.getItem('userToken');
         fetch("http://localhost:3008/pessoa" + `/${userId}`, {
             headers: {
                 "Authorization": `Bearer ${token}`
@@ -293,7 +293,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         
         // Simulando requisição AJAX
-        const token = localStorage.getItem('userToken');
+        const token = sessionStorage.getItem('userToken');
         fetch(`http://localost:3008/pessoa/ ${userId}`, {
             method: 'PUT',
             headers: {
@@ -357,8 +357,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Logout
     window.logout = function() {
-        localStorage.removeItem('userToken');
-        localStorage.removeItem('userEmail');
+        sessionStorage.removeItem('userToken');
+        sessionStorage.removeItem('userEmail');
         window.location.href = '../index.html';
     };
 });

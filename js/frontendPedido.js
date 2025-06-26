@@ -130,32 +130,16 @@ function calcularImpactoSustentavel(produtos) {
 async function enviarEmailConfirmacao(pedido) {
   try {
     const response = await fetch(
-      "https://green-line-web.onrender.com/emailCompraConcluida",
+      "https://green-line-web.onrender.com/enviar-email",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          para: pedido.email,
+          email: pedido.email,
           assunto: `Pedido ${pedido.numeroPedido} Confirmado - GreenLine`,
-          corpo: `
-          Olá!
-          
-          Seu pedido ${pedido.numeroPedido} foi confirmado com sucesso!
-          
-          Detalhes do pedido:
-          - Data: ${pedido.dataConfirmacao}
-          - Valor total: R$ ${pedido.total.toFixed(2)}
-          - Previsão de entrega: ${pedido.previsaoEntrega}
-          
-          Você pode acompanhar seu pedido em nosso site.
-          
-          Obrigado por escolher produtos sustentáveis!
-          
-          Atenciosamente,
-          Equipe GreenLine
-        `,
+          tipo: "compra-concluida"
         }),
       }
     );
@@ -176,11 +160,11 @@ async function carregarDadosPedido() {
     console.log("Iniciando carregamento dos dados do pedido...");
 
     // Carrega dados da compra
-    const dadosCompraStr = localStorage.getItem("dadosCompra");
-    const dadosFormularioStr = localStorage.getItem("dadosFormulario");
+    const dadosCompraStr = sessionStorage.getItem("dadosCompra");
+    const dadosFormularioStr = sessionStorage.getItem("dadosFormulario");
 
     if (!dadosCompraStr) {
-      console.error("Dados da compra não encontrados no localStorage");
+      console.error("Dados da compra não encontrados no sessionStorage");
       mostrarErro(
         "Dados da compra não encontrados. Redirecionando para a página de vendas..."
       );
@@ -239,8 +223,8 @@ async function carregarDadosPedido() {
 
     // Monta objeto completo do pedido
     const pedido = {
-      idPessoa: localStorage.getItem("id_pessoa"),
-      nomeTitular: localStorage.getItem("usuario") || "Cliente",
+      idPessoa: sessionStorage.getItem("id_pessoa"),
+      nomeTitular: sessionStorage.getItem("usuario") || "Cliente",
       numeroPedido,
       dataConfirmacao,
       previsaoEntrega,
@@ -278,7 +262,7 @@ async function carregarDadosPedido() {
     await preencherPaginaConfirmacao(pedido);
 
     // Salva dados do pedido para uso futuro
-    localStorage.setItem("ultimoPedido", JSON.stringify(pedido));
+    sessionStorage.setItem("ultimoPedido", JSON.stringify(pedido));
 
     // Envia email de confirmação
     await enviarEmailConfirmacao(pedido);
@@ -289,7 +273,7 @@ async function carregarDadosPedido() {
 }
 async function salvarPedido(pedido) {
   try {
-    const response = await fetch(`${apiPedido.vendas}/salvar-pedido`, {
+    const response = await fetch(`${apiPedido.online}/salvar-pedido`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -335,7 +319,7 @@ async function preencherPaginaConfirmacao(pedido) {
     const enderecoEntregaEl = document.getElementById("enderecoEntrega");
     if (enderecoEntregaEl) {
       enderecoEntregaEl.innerHTML = `
-      ${localStorage.getItem("usuario") || "Cliente"}<br>
+      ${sessionStorage.getItem("usuario") || "Cliente"}<br>
           ${pedido.enderecoEntrega.endereco}, ${
         pedido.enderecoEntrega.numeroCasa
       }${
@@ -669,7 +653,7 @@ function entrarContato() {
 
 // Função para enviar solicitação de atualizações por email
 async function enviarAtualizacoes() {
-  const email = localStorage.getItem("email");
+  const email = sessionStorage.getItem("email");
   const numeroPedido = document.getElementById("modalNumeroPedido").textContent;
 
   if (!email) {
@@ -717,7 +701,7 @@ async function enviarAtualizacoes() {
 
 //   try {
 //     // Busca produtos da mesma categoria
-//     const ultimoPedido = localStorage.getItem("ultimoPedido");
+//     const ultimoPedido = sessionStorage.getItem("ultimoPedido");
 //     if (!ultimoPedido) return;
 
 //     const pedido = JSON.parse(ultimoPedido);
@@ -783,7 +767,7 @@ document.addEventListener("DOMContentLoaded", () => {
 window.addEventListener("beforeunload", function () {
   // Mantém dados do último pedido, mas limpa dados temporários após um tempo
   setTimeout(() => {
-    localStorage.removeItem("dadosCompra");
-    localStorage.removeItem("dadosFormulario");
+    sessionStorage.removeItem("dadosCompra");
+    sessionStorage.removeItem("dadosFormulario");
   }, 300000); // Remove após 5 minutos
 });

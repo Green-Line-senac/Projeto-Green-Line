@@ -174,10 +174,10 @@ const dados = {
   preco: formatPriceForDB(document.getElementById("preco").value),
   preco_promocional: document.getElementById("promocao").checked 
     ? formatPriceForDB(document.getElementById("preco-promocional").value)
-    : "0.00",
+    : 0.00,
   promocao: document.getElementById("promocao").checked,
   marca: document.getElementById("marca-produto").value || "Geral",
-  avaliacao: document.getElementById("avaliacao").value || "0.00",
+  avaliacao: document.getElementById("avaliacao").value || 0.00,
   quantidade_avaliacoes: document.getElementById("quantidade-avaliacoes").value || 0,
   estoque: document.getElementById("estoque").value || 0,
   parcelas_permitidas: document.getElementById("parcelas").value || 1,

@@ -159,6 +159,6 @@ const finalizarVenda = document.getElementById('finalizar-venda');
 
 finalizarVenda.addEventListener("click",()=>{
     let produtos = estado.produtos;
-    localStorage.setItem("dadosCompra",JSON.stringify(produtos));
+    sessionStorage.setItem("dadosCompra",JSON.stringify(produtos));
     window.location.href = "vendas.html";
 })

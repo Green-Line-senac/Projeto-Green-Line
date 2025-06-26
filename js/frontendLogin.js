@@ -182,17 +182,17 @@ async function tratarLoginBemSucedido(dados) {
 
 function armazenarDadosUsuario(dados) {
   try {
-    localStorage.setItem("usuario", dados.user.email);
-    localStorage.setItem("userToken", dados.token);
-    localStorage.setItem("id_pessoa", dados.user.id_pessoa);
-    localStorage.setItem("userEmail", dados.user.email);
-    localStorage.setItem("userType", dados.user.tipo_usuario);
-    localStorage.setItem("isAdmin", dados.user.isAdmin);
+    sessionStorage.setItem("usuario", dados.user.email);
+    sessionStorage.setItem("userToken", dados.token);
+    sessionStorage.setItem("id_pessoa", dados.user.id_pessoa);
+    sessionStorage.setItem("userEmail", dados.user.email);
+    sessionStorage.setItem("userType", dados.user.tipo_usuario);
+    sessionStorage.setItem("isAdmin", dados.user.isAdmin);
 
     // Armazenar data de login para controle de sessão
-    localStorage.setItem("loginTime", new Date().getTime());
+    sessionStorage.setItem("loginTime", new Date().getTime());
   } catch (e) {
-    console.error("Erro ao armazenar dados no localStorage:", e);
+    console.error("Erro ao armazenar dados no sessionStorage:", e);
     throw new Error("Falha ao armazenar dados do usuário");
   }
 }
@@ -219,7 +219,7 @@ function logout() {
     "loginTime",
   ];
 
-  itemsToRemove.forEach((item) => localStorage.removeItem(item));
+  itemsToRemove.forEach((item) => sessionStorage.removeItem(item));
 
   // Redirecionar para login com parâmetro de logout
   window.location.href = "login.html?logout=success";

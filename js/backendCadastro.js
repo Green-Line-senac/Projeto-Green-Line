@@ -34,7 +34,7 @@ app.post("/cadastrarUsuario", async (req, res) => {
             return res.status(400).json({ erro: "Erro ao recuperar o ID da pessoa." });
         }
         try {
-            await funcoesUteis.enviarEmail(email);
+            await funcoesUteis.enviarEmail(email,"Confirmação de email", "confirmacao");
         } catch (erro) {
             console.log("Erro ao enviar o email");
             return;

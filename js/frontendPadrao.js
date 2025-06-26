@@ -28,8 +28,8 @@ async function verificarEstadoLogin() {
     let response = await fetch(`${api.online}/loginDados`);
 
     if (!response.ok) {
-      // Se houver erro, limpa o localStorage (usuário não está logado)
-      localStorage.removeItem("id_pessoa");
+      // Se houver erro, limpa o sessionStorage (usuário não está logado)
+      sessionStorage.removeItem("id_pessoa");
       console.error("Erro na resposta do servidor:", response.statusText);
       return;
     }
@@ -37,11 +37,11 @@ async function verificarEstadoLogin() {
     let dados = await response.json();
     console.log("Dados do login:", dados);
 
-    // SÓ armazena no localStorage se houver um usuário válido logado
+    // SÓ armazena no sessionStorage se houver um usuário válido logado
     if (dados.id_pessoa) {
-      localStorage.setItem("id_pessoa", dados.id_pessoa);
+      sessionStorage.setItem("id_pessoa", dados.id_pessoa);
     } else {
-      localStorage.removeItem("id_pessoa"); // Limpa se não estiver logado
+      sessionStorage.removeItem("id_pessoa"); // Limpa se não estiver logado
     }
 
     // Restante da sua lógica...
@@ -70,54 +70,12 @@ async function verificarEstadoLogin() {
       }
     }
   } catch (erro) {
-    localStorage.removeItem("id_pessoa"); // Limpa em caso de erro
+    sessionStorage.removeItem("id_pessoa"); // Limpa em caso de erro
     console.error("Erro ao verificar login:", erro.message);
-  }
-}
-async function logout() {
-  try {
-    //1 - Fazer a requisição de logout
-    let requisicao = await fetch(`${api.online}/logout`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    //2 - Verificar se a requisição foi bem sucedida
-    if (!requisicao.ok) {
-      throw new Error("Erro ao fazer logout");
-    }
-    //3 - Converter a resposta para JSON
-    let resposta = await requisicao.json();
-    if (resposta.status !== "success") {
-        window.location.href = "../index.html";
-      throw new Error("Erro ao fazer logout: " + resposta.message);
-    } else {
-      // Limpar todos os dados de autenticação
-      const itemsToRemove = [
-        "userToken",
-        "id_pessoa",
-        "userEmail",
-        "userType",
-        "usuario",
-        "loginTime",
-      ];
-
-      itemsToRemove.forEach((item) => localStorage.removeItem(item));
-      localStorage.clear();
-
-      // Redirecionar para login
-      window.location.href = "login.html?logout=success";
-    }
-  } catch (error) {
-    console.error("Erro ao fazer logout:", error);
-    window.location.href = "login.html";
   }
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
   await verificarEstadoLogin();
 });
-window.addEventListener("unload", () => {
-  logout();
-});
+

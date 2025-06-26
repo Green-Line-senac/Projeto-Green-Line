@@ -22,7 +22,7 @@ const elementos = {
 let estado = {
   produtos: [],
   carregando: false,
-  id_pessoa: null || localStorage.getItem("id_pessoa"),
+  id_pessoa: null || sessionStorage.getItem("id_pessoa"),
   id_produto: null,
   quantidadeProdutos: 1,
 };
@@ -508,7 +508,7 @@ document.addEventListener("DOMContentLoaded", () => {
       };
 
       console.log("Dados da compra:", dadosCompra);
-      localStorage.setItem("dadosCompra", JSON.stringify(dadosCompra));
+      sessionStorage.setItem("dadosCompra", JSON.stringify(dadosCompra));
       window.location.href = "/green_line_web/public/vendas.html" || "../public/vendas.html";
     });
 
@@ -583,7 +583,7 @@ document.querySelectorAll("[data-categoria]").forEach((categoria) => {
       const categoriaSelecionada = encodeURIComponent(
         categoria.dataset.categoria
       ); //devido a presença de espaços e caracteres especiais, tem que codificar a categoria
-      localStorage.setItem("categoriaSelecionada", categoriaSelecionada);
+      sessionStorage.setItem("categoriaSelecionada", categoriaSelecionada);
     } catch (error) {
       console.error("Falha ao enviar a outra página:", error);
       mostrarFeedback("Erro ao carregar produtos. Tente novamente.", "danger");

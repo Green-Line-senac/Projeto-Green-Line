@@ -74,7 +74,7 @@ document.getElementById("pagamento").addEventListener("change", function () {
 </div>
         `;
 
-                  const dadosCompra = JSON.parse(localStorage.getItem("dadosCompra"));
+                  const dadosCompra = JSON.parse(sessionStorage.getItem("dadosCompra"));
         if (dadosCompra) {
             const selectParcelas = document.getElementById("parcelas");
             
@@ -204,7 +204,7 @@ async function mascaraCEP() {
 
 // Exibe informações do produto selecionado
 document.addEventListener("DOMContentLoaded", () => {
-    let dadosCompra = localStorage.getItem("dadosCompra");
+    let dadosCompra = sessionStorage.getItem("dadosCompra");
 
     if (dadosCompra) {
         dadosCompra = JSON.parse(dadosCompra); // Converte de string para objeto
@@ -378,7 +378,7 @@ document.getElementById("FinalizarCompra").addEventListener("click", async (even
     console.log('Iniciando processo de finalização da compra...');
     
     // Verifica se existem dados da compra
-    const dadosCompraStr = localStorage.getItem("dadosCompra");
+    const dadosCompraStr = sessionStorage.getItem("dadosCompra");
     if (!dadosCompraStr) {
         console.error("Dados da compra não encontrados");
         mostrarErros(["Não foi possível encontrar os dados da sua compra. Por favor, tente novamente."]);
@@ -418,8 +418,8 @@ document.getElementById("FinalizarCompra").addEventListener("click", async (even
             ...dadosPagamento
         };
 
-        // Salva os dados no localStorage
-        localStorage.setItem('dadosFormulario', JSON.stringify(dadosFormulario));
+        // Salva os dados no sessionStorage
+        sessionStorage.setItem('dadosFormulario', JSON.stringify(dadosFormulario));
         
         // Redireciona para a página de confirmação
         window.location.href = '../public/pedido_confirmado.html'

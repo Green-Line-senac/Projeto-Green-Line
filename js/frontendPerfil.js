@@ -12,8 +12,8 @@ const api = {
 async function carregarDadosUsuario() {
   try {
     // 1. Verificar se o usuário está autenticado
-    const token = localStorage.getItem("userToken");
-    const idPessoa = localStorage.getItem("id_pessoa"); // Ou 'id_pessoa' dependendo do que você usa
+    const token = sessionStorage.getItem("userToken");
+    const idPessoa = sessionStorage.getItem("id_pessoa"); // Ou 'id_pessoa' dependendo do que você usa
 
     if (!token || !idPessoa) {
       console.error("Usuário não autenticado - redirecionando para login");
@@ -160,7 +160,7 @@ function setupEventListeners() {
     .getElementById("savePersonalBtn")
     .addEventListener("click", async function () {
       try {
-        const idPessoa = localStorage.getItem("id_pessoa");
+        const idPessoa = sessionStorage.getItem("id_pessoa");
         const updatedData = {
           nome: document.getElementById("profileFullName").textContent,
           telefone: document.getElementById("profilePhone").textContent,
@@ -190,7 +190,7 @@ function setupEventListeners() {
 // pedidos
 async function carregarPedidos() {
   try {
-    const idPessoa = localStorage.getItem("id_pessoa");
+    const idPessoa = sessionStorage.getItem("id_pessoa");
     const response = await fetch(`${api.perfil}/pessoa/${idPessoa}/pedidos`);
 
     if (!response.ok) {
@@ -258,12 +258,12 @@ function setupSettings() {
 function toggleDarkMode() {
   const isDarkMode = document.getElementById("darkModeToggle").checked;
   document.body.classList.toggle("dark-mode", isDarkMode);
-  localStorage.setItem("darkMode", isDarkMode);
+  sessionStorage.setItem("darkMode", isDarkMode);
 }
 
 function loadSettings() {
   // Carrega modo noturno
-  const darkMode = localStorage.getItem("darkMode") === "true";
+  const darkMode = sessionStorage.getItem("darkMode") === "true";
   document.getElementById("darkModeToggle").checked = darkMode;
   document.body.classList.toggle("dark-mode", darkMode);
 
@@ -276,7 +276,7 @@ function loadSettings() {
 
 async function loadUserAddress() {
   try {
-    const idPessoa = localStorage.getItem("id_pessoa");
+    const idPessoa = sessionStorage.getItem("id_pessoa");
     const response = await fetch(`${api.perfil}/pessoa/${idPessoa}/endereco`);
 
     if (response.ok) {
@@ -310,7 +310,7 @@ async function loadUserAddress() {
 
 async function loadPaymentMethods() {
   try {
-    const idPessoa = localStorage.getItem("id_pessoa");
+    const idPessoa = sessionStorage.getItem("id_pessoa");
     const response = await fetch(`${api.perfil}/pessoa/${idPessoa}/pagamentos`);
 
     if (response.ok) {
@@ -359,7 +359,7 @@ function hideDeleteModal() {
 
 async function deleteAccount() {
   try {
-    const idPessoa = localStorage.getItem("id_pessoa");
+    const idPessoa = sessionStorage.getItem("id_pessoa");
     const response = await fetch(`${api.perfil}/pessoa/${idPessoa}`, {
       method: "DELETE",
     });
@@ -389,7 +389,7 @@ function hideAddressModal() {
 async function saveAddress(e) {
   e.preventDefault();
   try {
-    const idPessoa = localStorage.getItem("id_pessoa");
+    const idPessoa = sessionStorage.getItem("id_pessoa");
     const formData = {
       cep: document.getElementById("cep").value,
       logradouro: document.getElementById("logradouro").value,
@@ -431,7 +431,7 @@ function hidePaymentModal() {
 async function addPaymentMethod(e) {
   e.preventDefault();
   try {
-    const idPessoa = localStorage.getItem("id_pessoa");
+    const idPessoa = sessionStorage.getItem("id_pessoa");
     const formData = {
       tipo: document.getElementById("paymentType").value,
       numero: document.getElementById("cardNumber").value,
@@ -464,7 +464,7 @@ async function addPaymentMethod(e) {
 async function removePaymentMethod(e) {
   const methodId = e.currentTarget.dataset.id;
   try {
-    const idPessoa = localStorage.getItem("id_pessoa");
+    const idPessoa = sessionStorage.getItem("id_pessoa");
     const response = await fetch(
       `${api.perfil}/pessoa/${idPessoa}/pagamentos/${methodId}`,
       {
@@ -487,7 +487,7 @@ async function removePaymentMethod(e) {
 // Função para atualizar imagem de perfil
 async function atualizarImagemPerfil(imageData) {
   try {
-    const idPessoa = localStorage.getItem("id_pessoa");
+    const idPessoa = sessionStorage.getItem("id_pessoa");
     const response = await fetch(`${api.perfil}/pessoa/${idPessoa}/imagem`, {
       method: "PUT",
       headers: {
@@ -535,8 +535,8 @@ async function logout() {
         "loginTime",
       ];
 
-      itemsToRemove.forEach((item) => localStorage.removeItem(item));
-      localStorage.clear();
+      itemsToRemove.forEach((item) => sessionStorage.removeItem(item));
+      sessionStorage.clear();
 
       // Redirecionar para login
       window.location.href = "login.html?logout=success";

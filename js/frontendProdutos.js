@@ -527,7 +527,7 @@ async function verificarEstadoLogin() {
 
     if (dados && dados.id_pessoa) {
       estado.id_pessoa = parseInt(dados.id_pessoa);
-      localStorage.setItem("id_pessoa", estado.id_pessoa);
+      sessionStorage.setItem("id_pessoa", estado.id_pessoa);
       console.log("id_pessoa atualizado:", estado.id_pessoa);
       return true;
     } else {
@@ -680,7 +680,7 @@ function configurarEventos() {
       };
 
       console.log("Dados da compra:", dadosCompra);
-      localStorage.setItem("dadosCompra", JSON.stringify(dadosCompra));
+      sessionStorage.setItem("dadosCompra", JSON.stringify(dadosCompra));
       window.location.href = "vendas.html";
     });
 
@@ -744,7 +744,7 @@ async function inicializarApp() {
   try {
     estado.carregando = true;
     // Carrega id_pessoa do localStorage como fallback inicial
-    const storedId = localStorage.getItem("id_pessoa");
+    const storedId = sessionStorage.getItem("id_pessoa");
     if (storedId) {
       estado.id_pessoa = parseInt(storedId);
       console.log("id_pessoa carregado do localStorage:", estado.id_pessoa);
