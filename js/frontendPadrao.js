@@ -74,7 +74,50 @@ async function verificarEstadoLogin() {
     console.error("Erro ao verificar login:", erro.message);
   }
 }
+async function logout() {
+  try {
+    //1 - Fazer a requisição de logout
+    let requisicao = await fetch(`${api.online}/logout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    //2 - Verificar se a requisição foi bem sucedida
+    if (!requisicao.ok) {
+      throw new Error("Erro ao fazer logout");
+    }
+    //3 - Converter a resposta para JSON
+    let resposta = await requisicao.json();
+    if (resposta.status !== "success") {
+        window.location.href = "../index.html";
+      throw new Error("Erro ao fazer logout: " + resposta.message);
+    } else {
+      // Limpar todos os dados de autenticação
+      const itemsToRemove = [
+        "userToken",
+        "id_pessoa",
+        "userEmail",
+        "userType",
+        "usuario",
+        "loginTime",
+      ];
+
+      itemsToRemove.forEach((item) => localStorage.removeItem(item));
+      localStorage.clear();
+
+      // Redirecionar para login
+      window.location.href = "login.html?logout=success";
+    }
+  } catch (error) {
+    console.error("Erro ao fazer logout:", error);
+    window.location.href = "login.html";
+  }
+}
 
 document.addEventListener("DOMContentLoaded", async () => {
   await verificarEstadoLogin();
+});
+window.addEventListener("unload", () => {
+  logout();
 });
