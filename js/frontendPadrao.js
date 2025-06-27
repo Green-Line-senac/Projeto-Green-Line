@@ -111,8 +111,4 @@ function logout() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   await verificarEstadoLogin();
-
-  window.addEventListener("beforeunload", async () => {
-    logout();
-  });
 });
