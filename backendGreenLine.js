@@ -285,19 +285,51 @@ app.get("/produtosEspecificos", async (req, res) => {
 
 // ==================== BACKEND PADRÃO ====================
 app.post("/enviar-email", async (req, res) => {
-  const {email,assunto,tipo} = req.body;
-  email = req.query.email?.trim();
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return res.status(400).json({ conclusao: 1, mensagem: "Email inválido" });
+  // 1. Extrai e valida campos obrigatórios
+  const { assunto, tipo, email: rawEmail } = req.body;
+  
+  if (!assunto || !tipo) {
+    return res.status(400).json({ 
+      conclusao: 1, 
+      mensagem: "Assunto e tipo são obrigatórios" 
+    });
+  }
+
+  // 2. Limpeza e validação do email
+  const email = rawEmail?.trim().toLowerCase();
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  
+  if (!email || !emailRegex.test(email)) {
+    return res.status(400).json({ 
+      conclusao: 1, 
+      mensagem: "Email inválido ou não fornecido" 
+    });
   }
 
   try {
-    await funcoesUteis.enviarEmail(email,assunto,tipo);
-    return res.json({ conclusao: 2, mensagem: "Email enviado com sucesso" });
+    console.log(`Preparando para enviar email para ${email}`, { tipo, assunto });
+    
+    await funcoesUteis.enviarEmail(email, assunto, tipo);
+    
+    console.log(`Email enviado com sucesso para ${email}`);
+    
+    return res.json({ 
+      conclusao: 2, 
+      mensagem: "Email enviado com sucesso",
+      detalhes: { email, tipo } 
+    });
   } catch (erro) {
-    return res
-      .status(500)
-      .json({ conclusao: 3, mensagem: "Falha ao enviar email" });
+    console.error("Falha no envio de email:", {
+      erro: erro.message,
+      email,
+      tipo
+    });
+    
+    return res.status(500).json({ 
+      conclusao: 3, 
+      mensagem: "Falha ao enviar email",
+      erro: process.env.NODE_ENV === 'development' ? erro.message : undefined
+    });
   }
 });
 
