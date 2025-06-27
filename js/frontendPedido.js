@@ -129,6 +129,7 @@ function calcularImpactoSustentavel(produtos) {
 // Função para enviar email de confirmação
 async function enviarEmailConfirmacao(pedido) {
   try {
+    console.log(pedido);
     const response = await fetch(
       "https://green-line-web.onrender.com/enviar-email",
       {
