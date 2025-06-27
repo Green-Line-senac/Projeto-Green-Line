@@ -72,12 +72,8 @@ class FuncaoUteis {
         html: mensagem,
       });
       console.log("✅ E-mail enviado com sucesso.");
-      res.status(200).json({ mensagem: "E-mail enviado com sucesso." });
     } catch (erro) {
       console.error("Erro ao enviar o email:", erro);
-      if (res) {
-        res.status(500).json({ erro: "Erro durante o processo envio" });
-      }
     }
   }
 }
