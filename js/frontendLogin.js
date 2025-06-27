@@ -160,17 +160,8 @@ async function tratarLoginBemSucedido(dados) {
     armazenarDadosUsuario(dados);
     console.log("Dados do usuário armazenados com sucesso:", dados.user.id_pessoa + " " + dados.user.email);
     console.log("Usuário logado:", usuario);
-    await fetch(`${api.online}/loginDados`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        usuario: dados.user.email,
-        id_pessoa: dados.user.id_pessoa,
-        trocar: 1,
-      }),
-    });
+    mostrarMensagem("Login realizado com sucesso!", "success");
     // Redirecionar conforme tipo de usuário
-    const email = dados.user.email;
     const redirectUrl = dados.user.isAdmin ? "perfilAdm.html" : "../index.html";
     window.location.href = redirectUrl;
   } catch (erro) {
@@ -182,12 +173,14 @@ async function tratarLoginBemSucedido(dados) {
 
 function armazenarDadosUsuario(dados) {
   try {
+    console.log("Armazenando dados do usuário:", dados);
     sessionStorage.setItem("usuario", dados.user.email);
     sessionStorage.setItem("userToken", dados.token);
     sessionStorage.setItem("id_pessoa", dados.user.id_pessoa);
     sessionStorage.setItem("userEmail", dados.user.email);
     sessionStorage.setItem("userType", dados.user.tipo_usuario);
     sessionStorage.setItem("isAdmin", dados.user.isAdmin);
+    sessionStorage.setItem("carrinho", dados.user.carrinho || 0);
 
     // Armazenar data de login para controle de sessão
     sessionStorage.setItem("loginTime", new Date().getTime());

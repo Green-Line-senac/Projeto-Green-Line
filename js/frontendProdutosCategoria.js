@@ -30,7 +30,7 @@ const elementos = {
 // Estado da aplicação
 let estado = {
   produtos: [],
-  id_pessoa: null,
+  id_pessoa: null || sessionStorage.getItem("id_pessoa"),
   id_produto: null,
   quantidadeProduto: null,
   carregando: false,
@@ -406,33 +406,6 @@ function abrirModalProduto(dadosProduto) {
     mostrarFeedback("Erro ao abrir o modal", "danger");
   }
 }
-
-// == Autenticação ==
-
-/**
- * Verifica se o usuário está logado e atualiza o estado.
- * @returns {Promise<boolean>} Verdadeiro se logado, falso caso contrário.
- */
-async function verificarEstadoLogin() {
-  try {
-    const response = await fetch(`${apiProduto.online}/loginDados`, {
-      credentials: "include",
-    });
-    if (!response.ok) {
-      throw new Error(`Falha na verificação: HTTP ${response.status}`);
-    }
-    const dados = await response.json();
-    if (dados && dados.id_pessoa) {
-      estado.id_pessoa = parseInt(dados.id_pessoa);
-      sessionStorage.setItem("id_pessoa", estado.id_pessoa);
-      return true;
-    }
-    return false;
-  } catch (erro) {
-    console.error("Erro ao verificar login:", erro);
-    return false;
-  }
-}
 function configurarEventos() {
   // Eventos do modal
   const produtoModal = document.getElementById('produtoModal');
@@ -591,7 +564,7 @@ async function inicializarApp() {
       estado.id_pessoa = parseInt(storedId);
     }
     configurarEventos();
-    await Promise.all([carregarProdutos(), verificarEstadoLogin()]);
+    await Promise.all([carregarProdutos()]);
   } catch (erro) {
     console.error("Erro na inicialização:", erro);
     mostrarFeedback("Opa, algo deu errado! Tente recarregar.", "danger");

@@ -284,7 +284,7 @@ app.get("/produtosEspecificos", async (req, res) => {
 });
 
 // ==================== BACKEND PADRÃO ====================
-app.get("/enviar-email", async (req, res) => {
+app.post("/enviar-email", async (req, res) => {
   const {email,assunto,tipo} = req.body;
   email = req.query.email?.trim();
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -344,7 +344,7 @@ app.post("/verificarConta", async (req, res) => {
       : `SELECT * FROM pessoa WHERE nome = ?`;
 
     const pesquisa = await db.query(sql, [usuario]);
-
+    
     if (pesquisa.length === 0) {
       return res.status(404).json({
         dadosValidos: 0,
@@ -385,6 +385,14 @@ app.post("/verificarConta", async (req, res) => {
         mensagem: "Conta admin requer verificação adicional.",
       });
     }
+    let respostaCarrinho = await db.query(
+      "SELECT SUM(quantidade_pendente) AS numero_carrinho FROM vw_quantidade_pendente WHERE id_pessoa = ?",
+      [id_pessoa]
+    );
+     let carrinho = respostaCarrinho.length > 0
+        ? Number(respostaCarrinho[0].numero_carrinho || 0)
+        : 0;
+
 
     // Geração do token JWT
     const token = jwt.sign(
@@ -408,6 +416,7 @@ app.post("/verificarConta", async (req, res) => {
         id_pessoa,
         email,
         isAdmin,
+        carrinho
       },
     });
   } catch (error) {
@@ -439,80 +448,6 @@ app.post("/enviarEmail", async (req, res) => {
       error: "Erro ao enviar e-mail de verificação.",
     });
   }
-});
-
-// ==================== BACKEND INDEX ====================
-app.post("/loginDados", async (req, res) => {
-  if (!req.body || !req.body.usuario) {
-    return res.status(400).json({ erro: "Usuário é obrigatório" });
-  }
-
-  const { usuario, id_pessoa, trocar } = req.body;
-  console.log("Dados recebidos para login:", { usuario, id_pessoa, trocar });
-
-  try {
-    let respostaCarrinho = await db.query(
-      "SELECT SUM(quantidade_pendente) AS numero_carrinho FROM vw_quantidade_pendente WHERE id_pessoa = ?",
-      [id_pessoa]
-    );
-    estadoLogin.quantidade_produtos =
-      respostaCarrinho.length > 0
-        ? Number(respostaCarrinho[0].numero_carrinho || 0)
-        : 0;
-
-    estadoLogin.usuario = usuario;
-    estadoLogin.id_pessoa = id_pessoa;
-    estadoLogin.trocarDeConta = Number(trocar) || 0;
-    estadoLogin.ultimaAtualizacao = new Date();
-    console.log(estadoLogin);
-
-    res.json({
-      status: "sucesso",
-      atualizadoEm: estadoLogin.ultimaAtualizacao,
-    });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ erro: "Erro interno no servidor", detalhes: error.message });
-  }
-});
-
-app.get("/loginDados", async (req, res) => {
-  try {
-    let respostaCarrinho = await db.query(
-      "SELECT SUM(quantidade_pendente) AS numero_carrinho FROM vw_quantidade_pendente WHERE id_pessoa = ?",
-      [estadoLogin.id_pessoa]
-    );
-
-    estadoLogin.quantidade_produtos =
-      respostaCarrinho.length > 0
-        ? Number(respostaCarrinho[0].numero_carrinho || 0)
-        : 0;
-
-    res.json(estadoLogin);
-  } catch (error) {
-    res
-      .status(500)
-      .json({
-        erro: "Erro ao buscar estado de login",
-        detalhes: error.message,
-      });
-  }
-});
-
-app.post("/logout", (req, res) => {
-  estadoLogin = {
-    usuario: null,
-    id_pessoa: null,
-    tipo_usuario: 2,
-    quantidade_produtos: 0,
-    trocarDeConta: 0,
-    ultimaAtualizacao: null,
-  };
-
-  res
-    .status(200)
-    .json({ status: "sucesso", mensagem: "Usuário desconectado com sucesso" });
 });
 
 app.get("/produtos", async (req, res) => {

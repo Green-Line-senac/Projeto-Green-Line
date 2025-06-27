@@ -1,5 +1,5 @@
 let estado = {
-    id_pessoa: null,
+    id_pessoa: null || sessionStorage.getItem("id_pessoa"),
     produtos: []
 };
 
@@ -12,17 +12,6 @@ const api = {
 // Inicializa o sistema
 async function inicializar() {
     try {
-        console.log("Iniciando carregamento...");
-
-        const respostaLogin = await fetch(`${api.online}/loginDados`);
-        if (!respostaLogin.ok) throw new Error("Erro na requisição de login");
-
-        const dados = await respostaLogin.json();
-        if (!dados.id_pessoa) throw new Error("ID de pessoa não encontrado");
-
-        estado.id_pessoa = dados.id_pessoa;
-        console.log("ID Pessoa carregado:", estado.id_pessoa);
-
         await buscarProdutos();
         await renderizarProdutos();
 

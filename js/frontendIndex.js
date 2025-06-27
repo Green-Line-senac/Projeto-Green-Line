@@ -40,34 +40,7 @@ async function inicializarApp() {
     estado.carregando = false;
   }
 }
-async function verificarEstadoLogin() {
-  try {
-    console.log("Iniciando verificação de login...");
-    const response = await fetch(`${config.online}/loginDados`, {
-      credentials: "include",
-    });
-    console.log("Status da resposta:", response.status);
-    if (!response.ok) {
-      throw new Error(`Falha na verificação: HTTP ${response.status}`);
-    }
 
-    const dados = await response.json();
-    console.log("Dados recebidos:", dados);
-
-    if (dados && dados.id_pessoa) {
-      estado.id_pessoa = parseInt(dados.id_pessoa);
-      localStorage.setItem("id_pessoa", estado.id_pessoa);
-      console.log("id_pessoa atualizado:", estado.id_pessoa);
-      return true;
-    } else {
-      console.log("id_pessoa não encontrado nos dados:", dados);
-      return false;
-    }
-  } catch (erro) {
-    console.error("Erro ao verificar login:", erro);
-    return false;
-  }
-}
 
 // ==================== FUNÇÕES DE CARREGAMENTO ====================
 async function carregarProdutosPromocao() {

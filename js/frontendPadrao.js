@@ -2,7 +2,6 @@ let elementosHTML = {
   iconeUsuario: document.getElementById("icone-usuario"),
   badgeCarrinho: document.getElementById("badge-carrinho"),
   link_usuario: document.getElementById("link-usuario"),
-  administracao: document.getElementById("admDropdown")
 };
 const api = {
   online: "https://green-line-web.onrender.com",
@@ -15,6 +14,20 @@ const api = {
   cadastro_produto: "http://localhost:3005",
   cadastro: "http://localhost:3000",
 };
+function mostrarFeedback(mensagem, tipo = "success") {
+  const toast = document.createElement("div");
+  toast.className = `toast align-items-center text-white bg-${tipo} border-0 position-fixed bottom-0 end-0`;
+  toast.style.zIndex = 1100;
+  toast.innerHTML = `
+    <div class="d-flex">
+      <div class="toast-body">${escapeHtml(mensagem)}</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  `;
+  document.body.appendChild(toast);
+  new bootstrap.Toast(toast).show();
+  setTimeout(() => toast.remove(), 5000);
+}
 // Função para verificar estado de login
 async function verificarEstadoLogin() {
   if (
@@ -25,92 +38,74 @@ async function verificarEstadoLogin() {
     return;
 
   try {
-    let response = await fetch(`${api.online}/loginDados`);
-
-    if (!response.ok) {
-      // Se houver erro, limpa o sessionStorage (usuário não está logado)
-      sessionStorage.removeItem("id_pessoa");
-      console.error("Erro na resposta do servidor:", response.statusText);
-      return;
+    //1 - Verifica se o usuário está logado por meio do Session Storage
+    let dadosUsuario = {
+      id_pessoa: sessionStorage.getItem("id_pessoa") || null,
+      email: sessionStorage.getItem("userEmail") || null,
+      adm: sessionStorage.getItem("isAdmin") || false,
+      usuario: sessionStorage.getItem("usuario") || null,
+      quantidade_produtos: sessionStorage.getItem("carrinho") || 0,
+      logado: false,
+    };
+    if (dadosUsuario.id_pessoa) {
+      dadosUsuario.logado = true;
     }
 
-    let dados = await response.json();
-    console.log("Dados do login:", dados);
-
-    // Restante da sua lógica...
-    if (dados?.trocarDeConta === 1 || dados?.trocar === 1) {
+    if (dadosUsuario?.logado === true) {
       elementosHTML.iconeUsuario.className = "bi bi-person-check text-success";
       elementosHTML.iconeUsuario.title = "Usuário logado";
-      elementosHTML.link_usuario.href = "/green_line_web/public/perfil.html" || "../public/perfil.html";
+      if (dadosUsuario?.adm === true) {
+        // Se for administrador
+        elementosHTML.link_usuario.href =
+          "/green_line_web/public/perfilAdm.html" || "/public/perfilAdm.html";
+      } else {
+        // Se for usuário comum
+        elementosHTML.link_usuario.href =
+          "/green_line_web/public/perfil.html" || "/public/perfil.html";
+      }
     } else {
       // Reseta para estado não logado
       elementosHTML.iconeUsuario.className = "bi bi-person";
       elementosHTML.iconeUsuario.title = "Fazer login";
-      elementosHTML.link_usuario.href = "/green_line_web/public/login.html" || "/public/login.html";
+      elementosHTML.link_usuario.href =
+        "/green_line_web/public/login.html" || "/public/login.html";
     }
 
     // Atualiza carrinho
     elementosHTML.badgeCarrinho.innerText =
-      dados?.quantidade_produtos > 0 ? dados.quantidade_produtos : "";
-
-      let tipo_usuario = Number(dados?.tipo_usuario || 2);
-    // Administração
-    if (elementosHTML.administracao) {
-      if (tipo_usuario === 1) {
-        elementosHTML.administracao.classList.remove("d-none");
-      } else {
-        elementosHTML.administracao.classList.add("d-none");
-      }
-    }
+      dadosUsuario?.quantidade_produtos > 0 ? dadosUsuario.quantidade_produtos : "";
   } catch (erro) {
-    sessionStorage.removeItem("id_pessoa"); // Limpa em caso de erro
+    sessionStorage.clear(); // Limpa em caso de erro
     console.error("Erro ao verificar login:", erro.message);
+    mostrarFeedback(erro.message, "danger");
+    dadosUsuario = {
+      id_pessoa: null,
+      email: null,
+      adm: false,
+      usuario: null,
+      quantidade_produtos: 0,
+      logado: false,
+    };
   }
 }
-async function logout() {
+function logout() {
   try {
-    //1 - Fazer a requisição de logout
-    let requisicao = await fetch(`${api.online}/logout`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    //2 - Verificar se a requisição foi bem sucedida
-    if (!requisicao.ok) {
-      throw new Error("Erro ao fazer logout");
-    }
-    //3 - Converter a resposta para JSON
-    let resposta = await requisicao.json();
-    if (resposta.status !== "success") {
-        window.location.href = "../index.html";
-      throw new Error("Erro ao fazer logout: " + resposta.message);
-    } else {
-      // Limpar todos os dados de autenticação
-      const itemsToRemove = [
-        "userToken",
-        "id_pessoa",
-        "userEmail",
-        "userType",
-        "usuario",
-        "loginTime",
-      ];
+    // Limpar apenas os itens específicos do sessionStorage
+    const itemsToRemove = [
+      "userToken",
+      "id_pessoa",
+      "userEmail",
+      "userType",
+      "usuario",
+      "loginTime",
+    ];
 
-      itemsToRemove.forEach((item) => sessionStorage.removeItem(item));
-      sessionStorage.clear();
-      localStorage.clear();
-      elementosHTML.badgeCarrinho.innerText = 0
-      // Reseta para estado não logado
-      elementosHTML.iconeUsuario.className = "bi bi-person";
-      elementosHTML.iconeUsuario.title = "Fazer login";
-      elementosHTML.link_usuario.href = "/green_line_web/public/login.html" || "/public/login.html";
+    itemsToRemove.forEach((item) => sessionStorage.removeItem(item));
+    sessionStorage.clear();
 
-      // Redirecionar para login
-      window.location.href = "login.html?logout=success";
-    }
+    console.log("SessionStorage limpo com sucesso.");
   } catch (error) {
-    console.error("Erro ao fazer logout:", error);
-    window.location.href = "login.html";
+    console.error("Erro ao limpar sessionStorage:", error);
   }
 }
 
@@ -119,7 +114,5 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   window.addEventListener("beforeunload", async () => {
     logout();
-    
   });
 });
-

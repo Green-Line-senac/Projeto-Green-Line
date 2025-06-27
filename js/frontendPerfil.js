@@ -506,44 +506,25 @@ async function atualizarImagemPerfil(imageData) {
 }
 
 // Logout
-async function logout() {
+function logout() {
   try {
-    //1 - Fazer a requisição de logout
-    let requisicao = await fetch(`${api.online}/logout`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    //2 - Verificar se a requisição foi bem sucedida
-    if (!requisicao.ok) {
-      throw new Error("Erro ao fazer logout");
-    }
-    //3 - Converter a resposta para JSON
-    let resposta = await requisicao.json();
-    if (resposta.status !== "success") {
-        window.location.href = "../index.html";
-      throw new Error("Erro ao fazer logout: " + resposta.message);
-    } else {
-      // Limpar todos os dados de autenticação
-      const itemsToRemove = [
-        "userToken",
-        "id_pessoa",
-        "userEmail",
-        "userType",
-        "usuario",
-        "loginTime",
-      ];
+    // Limpar apenas os itens específicos do sessionStorage
+    const itemsToRemove = [
+      "userToken",
+      "id_pessoa",
+      "userEmail",
+      "userType",
+      "usuario",
+      "loginTime",
+    ];
 
-      itemsToRemove.forEach((item) => sessionStorage.removeItem(item));
-      sessionStorage.clear();
+    itemsToRemove.forEach((item) => sessionStorage.removeItem(item));
+    sessionStorage.clear();
+    window.location.href = "/public/login.html"; 
 
-      // Redirecionar para login
-      window.location.href = "login.html?logout=success";
-    }
+    console.log("SessionStorage limpo com sucesso.");
   } catch (error) {
-    console.error("Erro ao fazer logout:", error);
-    window.location.href = "login.html";
+    console.error("Erro ao limpar sessionStorage:", error);
   }
 }
 

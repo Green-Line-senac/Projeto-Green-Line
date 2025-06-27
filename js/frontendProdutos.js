@@ -20,7 +20,7 @@ const apiProduto = {
 let estado = {
   produtos: [],
   paginaAtual: 1,
-  id_pessoa: null,
+  id_pessoa: null || sessionStorage.getItem("id_pessoa"),
   id_produto: null,
   quantidadeProduto: null,
   carregando: false,
@@ -510,36 +510,6 @@ function abrirModalProduto(dadosProduto) {
   }
 }
 
-// Funções de autenticação
-async function verificarEstadoLogin() {
-  try {
-    console.log("Iniciando verificação de login...");
-    const response = await fetch(`${apiProduto.online}/loginDados`, {
-      credentials: "include",
-    });
-    console.log("Status da resposta:", response.status);
-    if (!response.ok) {
-      throw new Error(`Falha na verificação: HTTP ${response.status}`);
-    }
-
-    const dados = await response.json();
-    console.log("Dados recebidos:", dados);
-
-    if (dados && dados.id_pessoa) {
-      estado.id_pessoa = parseInt(dados.id_pessoa);
-      sessionStorage.setItem("id_pessoa", estado.id_pessoa);
-      console.log("id_pessoa atualizado:", estado.id_pessoa);
-      return true;
-    } else {
-      console.log("id_pessoa não encontrado nos dados:", dados);
-      return false;
-    }
-  } catch (erro) {
-    console.error("Erro ao verificar login:", erro);
-    return false;
-  }
-}
-
 // Funções de inicialização e configuração
 function configurarEventos() {
   // Eventos de filtro
@@ -749,7 +719,7 @@ async function inicializarApp() {
       estado.id_pessoa = parseInt(storedId);
       console.log("id_pessoa carregado do localStorage:", estado.id_pessoa);
     }
-    await Promise.all([carregarProdutos(), verificarEstadoLogin()]);
+    await Promise.all([carregarProdutos()]);
     configurarEventos();
     console.log("Estado após inicialização:", estado);
   } catch (erro) {
