@@ -11,7 +11,7 @@ botaoEnviar.addEventListener("click", async (event) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: inputEmail,assunto: "Redefinir senha", tipo: "recuperacao" }),
+        body: JSON.stringify({ email: inputEmail,assunto: "Redefinir senha", tipo: "recuperacao", pedido: null }),
       }
     );
     const dado = await resposta.json();

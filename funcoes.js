@@ -6,7 +6,7 @@ class FuncaoUteis {
   criarToken(email) {
     return jwt.sign({ email }, process.env.SEGREDO_JWT, { expiresIn: "10m" });
   }
-  async enviarEmail(email, assunto, tipo) {
+  async enviarEmail(email, assunto, tipo, pedido = null) {
     try {
       const transportador = nodemailer.createTransport({
         host: "smtp.gmail.com",

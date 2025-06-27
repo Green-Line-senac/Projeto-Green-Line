@@ -139,7 +139,13 @@ async function enviarEmailConfirmacao(pedido) {
         body: JSON.stringify({
           email: pedido.email,
           assunto: `Pedido ${pedido.numeroPedido} Confirmado - GreenLine`,
-          tipo: "compra-concluida"
+          tipo: "compra-concluida",
+          pedido: {
+            numeroPedido: pedido.numeroPedido,
+            dataConfirmacao: pedido.dataConfirmacao,
+            total: pedido.total.toFixed(2),
+            previsaoEntrega: pedido.previsaoEntrega,
+          },
         }),
       }
     );
@@ -256,7 +262,6 @@ async function carregarDadosPedido() {
       email: dadosFormulario.email,
     };
     await salvarPedido(pedido);
-    
 
     // Preenche a página com os dados
     await preencherPaginaConfirmacao(pedido);

@@ -53,7 +53,7 @@ app.post("/cadastrarUsuario", async (req, res) => {
         .json({ erro: "Erro ao recuperar o ID da pessoa." });
     }
     try {
-      await funcoesUteis.enviarEmail(email);
+       await funcoesUteis.enviarEmail(email,"Confirmação de email", "confirmacao",null);
     } catch (erro) {
       return res.status(500).json({ erro: "Erro ao enviar o email" });
     }
@@ -286,7 +286,7 @@ app.get("/produtosEspecificos", async (req, res) => {
 // ==================== BACKEND PADRÃO ====================
 app.post("/enviar-email", async (req, res) => {
   // 1. Extrai e valida campos obrigatórios
-  const { assunto, tipo, email: rawEmail } = req.body;
+  const { assunto, tipo, email: rawEmail,pedido} = req.body;
   
   if (!assunto || !tipo) {
     return res.status(400).json({ 
@@ -309,7 +309,7 @@ app.post("/enviar-email", async (req, res) => {
   try {
     console.log(`Preparando para enviar email para ${email}`, { tipo, assunto });
     
-    await funcoesUteis.enviarEmail(email, assunto, tipo);
+    await funcoesUteis.enviarEmail(email, assunto, tipo, pedido);
     
     console.log(`Email enviado com sucesso para ${email}`);
     
