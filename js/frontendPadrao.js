@@ -99,6 +99,11 @@ async function logout() {
       itemsToRemove.forEach((item) => sessionStorage.removeItem(item));
       sessionStorage.clear();
       localStorage.clear();
+      elementosHTML.badgeCarrinho.innerText = 0
+      // Reseta para estado não logado
+      elementosHTML.iconeUsuario.className = "bi bi-person";
+      elementosHTML.iconeUsuario.title = "Fazer login";
+      elementosHTML.link_usuario.href = "/green_line_web/public/login.html" || "/public/login.html";
 
       // Redirecionar para login
       window.location.href = "login.html?logout=success";
@@ -114,6 +119,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   window.addEventListener("beforeunload", async () => {
     logout();
+    
   });
 });
 
