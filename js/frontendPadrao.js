@@ -53,7 +53,7 @@ async function verificarEstadoLogin() {
       // Reseta para estado não logado
       elementosHTML.iconeUsuario.className = "bi bi-person";
       elementosHTML.iconeUsuario.title = "Fazer login";
-      elementosHTML.link_usuario.href = "/green_line_web/public/login.html" || "../public/login.html";
+      elementosHTML.link_usuario.href = "/green_line_web/public/login.html" || "/public/login.html";
     }
 
     // Atualiza carrinho
@@ -74,8 +74,52 @@ async function verificarEstadoLogin() {
     console.error("Erro ao verificar login:", erro.message);
   }
 }
+async function logout() {
+  try {
+    //1 - Fazer a requisição de logout
+    let requisicao = await fetch(`${api.online}/logout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    //2 - Verificar se a requisição foi bem sucedida
+    if (!requisicao.ok) {
+      throw new Error("Erro ao fazer logout");
+    }
+    //3 - Converter a resposta para JSON
+    let resposta = await requisicao.json();
+    if (resposta.status !== "success") {
+        window.location.href = "../index.html";
+      throw new Error("Erro ao fazer logout: " + resposta.message);
+    } else {
+      // Limpar todos os dados de autenticação
+      const itemsToRemove = [
+        "userToken",
+        "id_pessoa",
+        "userEmail",
+        "userType",
+        "usuario",
+        "loginTime",
+      ];
+
+      itemsToRemove.forEach((item) => sessionStorage.removeItem(item));
+      sessionStorage.clear();
+
+      // Redirecionar para login
+      window.location.href = "login.html?logout=success";
+    }
+  } catch (error) {
+    console.error("Erro ao fazer logout:", error);
+    window.location.href = "login.html";
+  }
+}
 
 document.addEventListener("DOMContentLoaded", async () => {
   await verificarEstadoLogin();
+
+  window.addEventListener("beforeunload", async () => {
+    await logout();
+  });
 });
 
