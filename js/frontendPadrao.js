@@ -37,13 +37,6 @@ async function verificarEstadoLogin() {
     let dados = await response.json();
     console.log("Dados do login:", dados);
 
-    // SÓ armazena no sessionStorage se houver um usuário válido logado
-    if (dados.id_pessoa) {
-      sessionStorage.setItem("id_pessoa", dados.id_pessoa);
-    } else {
-      sessionStorage.removeItem("id_pessoa"); // Limpa se não estiver logado
-    }
-
     // Restante da sua lógica...
     if (dados?.trocarDeConta === 1 || dados?.trocar === 1) {
       elementosHTML.iconeUsuario.className = "bi bi-person-check text-success";
@@ -105,6 +98,7 @@ async function logout() {
 
       itemsToRemove.forEach((item) => sessionStorage.removeItem(item));
       sessionStorage.clear();
+      localStorage.clear();
 
       // Redirecionar para login
       window.location.href = "login.html?logout=success";
@@ -119,7 +113,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await verificarEstadoLogin();
 
   window.addEventListener("beforeunload", async () => {
-    await logout();
+    logout();
   });
 });
 
