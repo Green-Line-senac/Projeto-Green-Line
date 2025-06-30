@@ -216,7 +216,13 @@ async function carregarDadosPedido() {
       return total + preco * quantidade;
     }, 0);
 
-    const frete = 19.9; // Valor fixo do frete
+    // Frete dinâmico: pega do sessionStorage se existir, senão usa valor fixo
+    let frete = 19.9;
+    const freteSalvo = sessionStorage.getItem("frete");
+    if (freteSalvo && !isNaN(parseFloat(freteSalvo))) {
+      frete = parseFloat(freteSalvo);
+    }
+
     const desconto = subtotal > 100 ? 10.0 : 0; // Desconto eco para compras acima de R$ 100
     const total = subtotal + frete - desconto;
 
@@ -227,21 +233,31 @@ async function carregarDadosPedido() {
     const previsaoEntrega = calcularPrevisaoEntrega(metodoEntrega);
     const impacto = calcularImpactoSustentavel(dadosCompra);
 
+    // Recupera idPessoa e email do sessionStorage
+    const idPessoa = sessionStorage.getItem("id_pessoa");
+    const email = sessionStorage.getItem("email");
+    if (!idPessoa) {
+      mostrarErro("Você precisa estar logado para finalizar a compra. Redirecionando para o login...");
+      setTimeout(() => {
+        window.location.href = "/public/login.html";
+      }, 2000);
+      return;
+    }
+
     // Monta objeto completo do pedido
     const pedido = {
-      idPessoa: sessionStorage.getItem("id_pessoa"),
-      nomeTitular: sessionStorage.getItem("usuario") || "Cliente",
       numeroPedido,
-      dataConfirmacao,
-      previsaoEntrega,
-      enderecoEntrega: dadosFormulario,
+      idPessoa,
+      email,
+      nomeTitular: sessionStorage.getItem("usuario") || "Cliente",
       metodoEntrega,
+      previsaoEntrega,
       produtos: dadosCompra.map((item) => ({
-        nome: item.nome_produto || "Produto",
+        nome: item.nome_produto || item.nome || 'Produto',
         quantidade: parseInt(item.quantidade) || 1,
         preco: parseFloat(item.preco_final) || 0,
-        subtotal: parseFloat(item.subtotal) || 0,
-      })),
+        subtotal: (parseFloat(item.preco_final) || 0) * (parseInt(item.quantidade) || 1),
+      })).filter(p => p.nome && p.quantidade > 0),
       subtotal,
       frete,
       desconto,
@@ -252,15 +268,18 @@ async function carregarDadosPedido() {
         dadosFormulario.metodoPagamento === "DEB" ||
         dadosFormulario.metodoPagamento === "BB"
           ? dadosFormulario.metodoPagamento
-          : [
-              dadosFormulario.numeroCartao,
-              dadosFormulario.nomeCartao,
-              dadosFormulario.validadeCartao,
-              dadosFormulario.cvv,
-              dadosFormulario.parcelas ? `${dadosFormulario.parcelas}x` : "1x",
-            ],
-      email: dadosFormulario.email,
+          : {
+              metodoPagamento: dadosFormulario.metodoPagamento,
+              numeroCartao: dadosFormulario.numeroCartao,
+              nomeCartao: dadosFormulario.nomeCartao,
+              validadeCartao: dadosFormulario.validadeCartao,
+              cvv: dadosFormulario.cvv,
+              parcelas: dadosFormulario.parcelas ? `${dadosFormulario.parcelas}x` : "1x",
+            },
+      impactoCO2: impacto.co2,
+      arvores: impacto.arvores,
     };
+    console.log('Pedido enviado para backend:', pedido);
     await salvarPedido(pedido);
 
     // Preenche a página com os dados
@@ -323,23 +342,16 @@ async function preencherPaginaConfirmacao(pedido) {
     // Endereço de entrega
     const enderecoEntregaEl = document.getElementById("enderecoEntrega");
     if (enderecoEntregaEl) {
-      enderecoEntregaEl.innerHTML = `
-      ${sessionStorage.getItem("usuario") || "Cliente"}<br>
-          ${pedido.enderecoEntrega.endereco}, ${
-        pedido.enderecoEntrega.numeroCasa
-      }${
-        pedido.enderecoEntrega.complementoCasa
-          ? " - " + pedido.enderecoEntrega.complementoCasa
-          : ""
-      }<br>
-          ${pedido.enderecoEntrega.bairro}<br>
-          ${pedido.enderecoEntrega.cidade} - ${
-        pedido.enderecoEntrega.estado
-      }, ${pedido.enderecoEntrega.cep}`;
-    } else {
-      `Endereço não informado<br>
-            Complete seus dados na próxima compra<br>
-            para uma experiência melhor`;
+      const endereco = JSON.parse(sessionStorage.getItem('enderecoEntrega') || '{}');
+      if (endereco && endereco.logradouro) {
+        enderecoEntregaEl.innerHTML = `
+        ${sessionStorage.getItem("usuario") || "Cliente"}<br>
+        ${endereco.logradouro}, ${endereco.numeroCasa || ''}${endereco.complementoCasa ? ' - ' + endereco.complementoCasa : ''}<br>
+        ${endereco.bairro}<br>
+        ${endereco.cidade} - ${endereco.uf}, ${endereco.cep}`;
+      } else {
+        enderecoEntregaEl.innerHTML = `Endereço não informado<br>Complete seus dados na próxima compra<br>para uma experiência melhor`;
+      }
     }
 
     // Método de entrega
@@ -748,21 +760,16 @@ document.addEventListener("DOMContentLoaded", () => {
   carregarDadosPedido();
 
   // Event listeners para os botões
-  document
-    .getElementById("btnContinuarComprando")
-    .addEventListener("click", continuarComprando);
-  document
-    .getElementById("btnAcompanharPedido")
-    .addEventListener("click", acompanharPedido);
-  document
-    .getElementById("btnBaixarComprovante")
-    .addEventListener("click", baixarComprovante);
-  document
-    .getElementById("btnEntrarContato")
-    .addEventListener("click", entrarContato);
-  document
-    .getElementById("btnEnviarAtualizacoes")
-    .addEventListener("click", enviarAtualizacoes);
+  const btnContinuar = document.getElementById("btnContinuarComprando");
+  if (btnContinuar) btnContinuar.addEventListener("click", continuarComprando);
+  const btnAcompanhar = document.getElementById("btnAcompanharPedido");
+  if (btnAcompanhar) btnAcompanhar.addEventListener("click", acompanharPedido);
+  const btnBaixar = document.getElementById("btnBaixarComprovante");
+  if (btnBaixar) btnBaixar.addEventListener("click", baixarComprovante);
+  const btnContato = document.getElementById("btnEntrarContato");
+  if (btnContato) btnContato.addEventListener("click", entrarContato);
+  const btnAtualizacoes = document.getElementById("btnEnviarAtualizacoes");
+  if (btnAtualizacoes) btnAtualizacoes.addEventListener("click", enviarAtualizacoes);
 
   // Carrega produtos relacionados
   //carregarProdutosRelacionados();

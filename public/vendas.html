@@ -40,8 +40,7 @@
                                 <div class="col-12 col-md-6"> <!-- CEP ocupa metade em desktop -->
                                     <div class="form-floating py-2 mb-3">
                                         <input type="text" name="cep" class="form-control" id="cep"
-                                            placeholder="Digite o CEP" required maxlength="9" 
-                                            onchange="formatarCEP(this)" oninput="validarCEP(this)" autocomplete="postal-code">
+                                            placeholder="Digite o CEP" required maxlength="9">
                                         <label for="cep">CEP*</label>
                                         <div class="invalid-feedback">Por favor, insira um CEP válido.</div>
                                     </div>
@@ -49,7 +48,7 @@
                                 <div class="col-12 col-md-6"> <!-- Bairro ocupa outra metade -->
                                     <div class="form-floating py-2 mb-3">
                                         <input type="text" name="bairro" class="form-control" id="bairro"
-                                            placeholder="Digite o seu bairro" maxlength="30" autocomplete="address-level2">
+                                            placeholder="Digite o seu bairro" maxlength="30" readonly>
                                         <label for="bairro">Bairro</label>
                                         <div class="invalid-feedback"></div>
                                     </div>
@@ -58,8 +57,8 @@
 
                             <!-- Endereço completo -->
                             <div class="form-floating py-2 mb-3">
-                                <input type="text" name="endereco" class="form-control" id="endereco"
-                                    placeholder="Digite o seu endereço" required maxlength="60" autocomplete="street-address">
+                                <input type="text" name="endereco" class="form-control" id="logradouro"
+                                    placeholder="Digite o seu endereço" required maxlength="60" readonly>
                                 <label for="endereco">Endereço*</label>
                                 <div class="invalid-feedback">Por favor, insira um endereço válido.</div>
                             </div>
@@ -69,7 +68,7 @@
                                 <div class="col-12 col-sm-4 col-md-3 py-2">
                                     <div class="form-floating mb-3 py-2">
                                         <input type="text" name="numero" class="form-control" id="numeroCasa"
-                                            placeholder="Número" required maxlength="9" autocomplete="address-line2">
+                                            placeholder="Número" required maxlength="9" readonly>
                                         <label for="numero">Número*</label>
                                         <div class="invalid-feedback">Por favor, insira o número.</div>
                                     </div>
@@ -77,7 +76,7 @@
                                 <div class="col-12 col-sm-8 col-md-9 py-2">
                                     <div class="form-floating mb-3">
                                         <input type="text" name="complemento" class="form-control" id="complementoCasa"
-                                            placeholder="Complemento de endereço" maxlength="30">
+                                            placeholder="Complemento de endereço" maxlength="30" readonly>
                                         <label for="complemento">Complemento</label>
                                         <div class="invalid-feedback"></div>
                                     </div>
@@ -89,16 +88,15 @@
                                 <div class="col-12 col-md-8"> <!-- Cidade maior -->
                                     <div class="form-floating py-2 mb-3">
                                         <input type="text" name="cidade" class="form-control" id="cidade"
-                                            placeholder="Cidade" required maxlength="25" autocomplete="address-level2">
+                                            placeholder="Cidade" required maxlength="25" readonly>
                                         <label for="cidade">Cidade*</label>
                                         <div class="invalid-feedback">Por favor, insira a cidade.</div>
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-4"> <!-- Estado menor -->
                                     <div class="form-floating py-2 mb-3">
-                                        <select name="estado" class="form-select" id="estado" required autocomplete="address-level1">
+                                        <select name="estado" class="form-select" id="uf" required readonly>
                                             <option value="" selected disabled>Selecione</option>
-                                                                                        <option value="" selected disabled>Selecione</option>
                                             <option value="AC">Acre</option>
                                             <option value="AL">Alagoas</option>
                                             <option value="AP">Amapá</option>
@@ -197,6 +195,15 @@
         </div>
     </div>
 </main>
+<script src="../js/freteCep.js"></script>
+<!-- Garantir todos os campos necessários para freteCep.js -->
+<input type="hidden" id="logradouro">
+<input type="hidden" id="bairro">
+<input type="hidden" id="cidade">
+<input type="hidden" id="uf">
+<input type="hidden" id="frete">
+<input type="hidden" id="numeroCasa">
+<input type="hidden" id="complementoCasa">
 </body>
 
 </html>

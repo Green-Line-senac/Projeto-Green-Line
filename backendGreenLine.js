@@ -808,3 +808,55 @@ app.get("/teste", (req, res) => {
 app.listen(3010, () => {
   console.log("🚀 SERVIDOR RODANDO NO ONLINE");
 });
+
+// Endpoint para registrar avaliação
+app.post("/avaliacao", async (req, res) => {
+  const { id_produto, id_pessoa, nota, comentario } = req.body;
+  if (!id_produto || !id_pessoa || !nota) {
+    return res.status(400).json({ sucesso: false, mensagem: "Dados incompletos" });
+  }
+  try {
+    // Verifica se já existe avaliação desse usuário para o produto
+    const existe = await db.query(
+      "SELECT id_avaliacao FROM avaliacao WHERE id_produto = ? AND id_pessoa = ?",
+      [id_produto, id_pessoa]
+    );
+    if (existe.length > 0) {
+      // Atualiza avaliação existente
+      await db.query(
+        "UPDATE avaliacao SET nota = ?, comentario = ?, data = NOW() WHERE id_avaliacao = ?",
+        [nota, comentario || null, existe[0].id_avaliacao]
+      );
+      return res.json({ sucesso: true, mensagem: "Avaliação atualizada com sucesso" });
+    } else {
+      // Insere nova avaliação
+      await db.query(
+        "INSERT INTO avaliacao (id_produto, id_pessoa, nota, comentario, data) VALUES (?, ?, ?, ?, NOW())",
+        [id_produto, id_pessoa, nota, comentario || null]
+      );
+      return res.json({ sucesso: true, mensagem: "Avaliação registrada com sucesso" });
+    }
+  } catch (err) {
+    res.status(500).json({ sucesso: false, mensagem: "Erro ao registrar avaliação" });
+  }
+});
+
+// Endpoint para buscar avaliações de um produto
+app.get("/avaliacoes", async (req, res) => {
+  const { id_produto } = req.query;
+  if (!id_produto) {
+    return res.status(400).json({ sucesso: false, mensagem: "ID do produto não informado" });
+  }
+  try {
+    const avaliacoes = await db.query(
+      "SELECT id_pessoa, nota, comentario, data FROM avaliacao WHERE id_produto = ? ORDER BY data DESC",
+      [id_produto]
+    );
+    // Calcular média e total
+    const total = avaliacoes.length;
+    const media = total > 0 ? (avaliacoes.reduce((soma, a) => soma + a.nota, 0) / total).toFixed(2) : 0;
+    res.json({ sucesso: true, media, total, avaliacoes });
+  } catch (err) {
+    res.status(500).json({ sucesso: false, mensagem: "Erro ao buscar avaliações" });
+  }
+});

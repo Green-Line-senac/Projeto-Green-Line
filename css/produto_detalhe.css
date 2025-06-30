@@ -1,0 +1,121 @@
+/* Estilos para página de detalhes do produto */
+.produto-detalhe-container {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px 0 #0001;
+  padding: 1.2rem 0.5rem;
+  margin-top: 2rem;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 100px;
+}
+.produto-detalhe-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2rem;
+  min-height: 340px;
+}
+.produto-img, .carousel-item img {
+  border-radius: 10px;
+  background: #f8f9fa;
+  padding: 0.5rem;
+  max-width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  box-shadow: 0 1px 8px 0 #0001;
+  margin: 0 auto;
+  display: block;
+}
+.produto-img-col {
+  flex: 0 0 320px;
+  max-width: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+}
+.produto-info-col {
+  flex: 1 1 0%;
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.produto-nome {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2e8b57;
+}
+.produto-preco {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #059669;
+}
+.produto-preco .original-price {
+  font-size: 1rem;
+  color: #888;
+  text-decoration: line-through;
+  margin-right: 0.5rem;
+}
+.produto-preco .discount-price {
+  color: #059669;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+.produto-categoria, .produto-marca {
+  font-size: 1rem;
+  color: #666;
+}
+.produto-estoque {
+  font-size: 1rem;
+  font-weight: 500;
+}
+.bloco-compra {
+  background: #f6fdf7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 8px 0 #0001;
+}
+.bloco-avaliacao, #avaliacoes-recentes {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1.5rem;
+  box-shadow: 0 1px 8px 0 #0001;
+}
+.avaliacao-card {
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px 0 #0001;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+}
+@media (max-width: 991px) {
+  .produto-detalhe-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.5rem;
+  }
+  .produto-img-col {
+    max-width: 100%;
+    min-height: unset;
+    margin-bottom: 1rem;
+  }
+  .produto-info-col {
+    min-width: 0;
+  }
+}
+@media (max-width: 767px) {
+  .produto-detalhe-container {
+    padding: 0.5rem 0.2rem;
+  }
+  .produto-nome {
+    font-size: 1.1rem;
+  }
+  .produto-preco {
+    font-size: 1.1rem;
+  }
+} 

@@ -278,3 +278,6 @@ input[type=number] {
   font-weight: bold;
 }
 
+/* Card de produto: cursor pointer ao passar o mouse */
+.card { cursor: pointer; }
+

@@ -231,7 +231,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             htmlContent += `
             <hr>
-                <p><strong>Produto:</strong> ${element.nome_produto}</p>
+                <p><strong>Produto:</strong> ${element.nome_produto || element.nome || 'Produto'}</p>
                 <p><strong>Preço unitário:</strong> R$ ${precoFormatado}</p>
                 <p><strong>Quantidade:</strong> ${element.quantidade}</p>
             `;
@@ -389,12 +389,12 @@ document.getElementById("FinalizarCompra").addEventListener("click", async (even
         // Coleta dados do endereço
         const dadosEndereco = {
             cep: document.getElementById('cep').value,
-            endereco: document.getElementById('endereco').value,
+            logradouro: document.getElementById('logradouro').value,
             numeroCasa: document.getElementById('numeroCasa').value,
             complementoCasa: document.getElementById('complementoCasa').value,
             bairro: document.getElementById('bairro').value,
             cidade: document.getElementById('cidade').value,
-            estado: document.getElementById('estado').value
+            uf: document.getElementById('uf').value
         };
 
         // Coleta dados do pagamento
@@ -438,4 +438,35 @@ function total(valor) {
     somar += parseFloat(valor) || 0; 
     return somar.toFixed(2).replace(".", ",");
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Função para atualizar o resumo do pedido com o frete
+  function atualizarResumoFrete() {
+    const subtotalEl = document.getElementById('contador-subtotal');
+    const freteEl = document.getElementById('contador-frete');
+    const totalEl = document.getElementById('contador-total');
+    let subtotal = 0;
+    let frete = 0;
+    if (subtotalEl) {
+      subtotal = parseFloat((subtotalEl.textContent || '0').replace(/[^\d,\.]/g, '').replace(',', '.')) || 0;
+    }
+    const freteInput = document.getElementById('frete');
+    if (freteInput && freteInput.value) {
+      // Garante conversão correta
+      frete = Number(freteInput.value.replace(/[^0-9,\.]/g, '').replace(',', '.')) || 0;
+      if (freteEl) freteEl.textContent = `R$ ${frete.toFixed(2)}`;
+    } else {
+      if (freteEl) freteEl.textContent = 'R$ 0,00';
+    }
+    if (totalEl) totalEl.textContent = `R$ ${(subtotal + frete).toFixed(2)}`;
+  }
+
+  // Atualiza o resumo sempre que o campo frete mudar
+  const freteInput = document.getElementById('frete');
+  if (freteInput) {
+    freteInput.addEventListener('input', atualizarResumoFrete);
+    // Atualiza também ao carregar a página
+    atualizarResumoFrete();
+  }
+});
 
