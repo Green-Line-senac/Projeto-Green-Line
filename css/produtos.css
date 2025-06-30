@@ -28,19 +28,19 @@ body {
 
 .pagination .page-link {
     color: #ffffff; /* Cor do texto */
-    background-color: #2e8b56cc; /* Cor de fundo dos links */
-    border: 35px #2E8B57; /* Borda dos links */
+    background-color: #198754; /* Cor de fundo dos links */
+    border: 35px #198754; /* Borda dos links */
 }
 
 .pagination .page-link:hover {
     color: #ffffffc2; /* Cor do texto ao passar o mouse */
-    background-color: #6FC933; /* Cor de fundo ao passar o mouse */
-    border-color: #40A82F; /* Borda ao passar o mouse */
+    background-color: #2E8B57; /* Cor de fundo ao passar o mouse */
+    border-color: #2E8B57; /* Borda ao passar o mouse */
 }
 
 .pagination .active .page-link {
     color: #fff; /* Cor do texto do item ativo */
-    background-color: #3fa82f; /* Cor de fundo do item ativo */
+    background-color: #1D4435; /* Cor de fundo do item ativo */
     border-color: #FFF2CF; /* Borda do item ativo */
 }
 
