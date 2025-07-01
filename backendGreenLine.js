@@ -798,17 +798,6 @@ app.post("/salvar-pedido", async (req, res) => {
       .json({ erro: "Erro ao processar pedido", codigo: -2 });
   }
 });
-
-// ==================== ROTA DE TESTE ====================
-app.get("/teste", (req, res) => {
-  res.json({ mensagem: "API está funcionando!" });
-});
-
-// ==================== INICIAR SERVIDOR ====================
-app.listen(3010, () => {
-  console.log("🚀 SERVIDOR RODANDO NO ONLINE");
-});
-
 // Endpoint para registrar avaliação
 app.post("/avaliacoes", async (req, res) => {
   // Debug: Exibe o corpo recebido
@@ -854,7 +843,6 @@ app.post("/avaliacoes", async (req, res) => {
   }
 });
 
-
 // Endpoint para buscar avaliações de um produto
 app.get("/avaliacoes", async (req, res) => {
   const { id_produto } = req.query;
@@ -874,4 +862,16 @@ app.get("/avaliacoes", async (req, res) => {
     res.status(500).json({ sucesso: false, mensagem: "Erro ao buscar avaliações" });
   }
 });
+
+// ==================== ROTA DE TESTE ====================
+app.get("/teste", (req, res) => {
+  res.json({ mensagem: "API está funcionando!" });
+});
+
+// ==================== INICIAR SERVIDOR ====================
+app.listen(3010, () => {
+  console.log("🚀 SERVIDOR RODANDO NO ONLINE");
+});
+
+
 
