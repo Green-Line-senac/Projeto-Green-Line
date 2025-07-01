@@ -103,7 +103,7 @@ function renderProduto(produto) {
     </div>
     <div class="col-md-7">
       <h2 class="produto-nome">${nomeProduto}</h2>
-      <div class="mb-2">${renderEstrelas(produto.avaliacao)} <small>(${produto.numAvaliacoes || 0} avaliações)</small></div>
+      <div class="mb-2">${renderEstrelas(produto.avaliacoes)} <small>(${produto.numAvaliacoes || 0} avaliações)</small></div>
       <div class="mb-3">${produto.descricao || ''}</div>
       <div class="mb-3"><strong>Categoria:</strong> ${produto.categoria || 'N/A'}</div>
       <div class="mb-3"><strong>Marca:</strong> ${produto.marca || 'N/A'}</div>
@@ -327,6 +327,12 @@ btnEnviar.onclick = async () => {
   feedbackEl.className = 'text-muted small mt-1';
 
   btnEnviar.onclick = async () => {
+    console.log('Dados sendo enviados:', {
+      id_produto,
+      id_pessoa: Number(id_pessoa),
+      nota: notaSelecionada,
+      comentario: comentarioEl.value.trim()
+    });
     try {
       const response = await fetch('https://green-line-web.onrender.com/avaliacoes', {
         method: 'POST',
@@ -338,7 +344,7 @@ btnEnviar.onclick = async () => {
           comentario: comentarioEl.value.trim()
         })
       });
-      
+
       // Verifica se a resposta é JSON
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {

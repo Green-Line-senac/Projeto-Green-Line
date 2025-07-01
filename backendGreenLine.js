@@ -818,7 +818,7 @@ app.post("/avaliacoes", async (req, res) => {
   try {
     // Verifica se já existe avaliação desse usuário para o produto
     const existe = await db.query(
-      "SELECT id_avaliacoes FROM avaliacoes WHERE id_produto = ? AND id_pessoa = ?",
+      "SELECT id_avaliacao FROM avaliacoes WHERE id_produto = ? AND id_pessoa = ?",
       [id_produto, id_pessoa]
     );
     if (existe.length > 0) {
