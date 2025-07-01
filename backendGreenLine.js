@@ -849,7 +849,7 @@ app.get("/avaliacoes", async (req, res) => {
   }
   try {
     const avaliacoes = await db.query(
-      "SELECT id_pessoa, nota, comentario, data FROM avaliacao WHERE id_produto = ? ORDER BY data DESC",
+      "SELECT id_pessoa, nota, comentario, data FROM avaliacoes WHERE id_produto = ? ORDER BY data DESC",
       [id_produto]
     );
     // Calcular média e total

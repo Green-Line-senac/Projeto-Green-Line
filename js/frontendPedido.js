@@ -217,7 +217,7 @@ async function carregarDadosPedido() {
     }, 0);
 
     // Frete dinâmico: pega do sessionStorage se existir, senão usa valor fixo
-    let frete = 19.9;
+    let frete = 0.0;
     const freteSalvo = sessionStorage.getItem("frete");
     if (freteSalvo && !isNaN(parseFloat(freteSalvo))) {
       frete = parseFloat(freteSalvo);
