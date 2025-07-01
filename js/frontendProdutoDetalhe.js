@@ -230,6 +230,7 @@ function adicionarAoCarrinho(produto, quantidade = 1, variacao = '') {
 
 // Função para carregar avaliações e exibir média/total
 async function carregarAvaliacoes(id_produto) {
+  console.log('Carregando avaliações para o produto:', id_produto);
   const mediaEl = document.getElementById('avaliacao-media');
   const estrelasEl = document.getElementById('avaliacao-estrelas');
   const btnEnviar = document.getElementById('btnEnviarAvaliacao');
@@ -315,6 +316,7 @@ async function carregarAvaliacoes(id_produto) {
       estrelasEl.appendChild(star);
     }
     // Modifique a função de envio de avaliação para:
+    console.log('Usuário logado, permitindo avaliação');
 btnEnviar.onclick = async () => {
   if (!notaSelecionada) {
     feedbackEl.textContent = 'Selecione uma nota!';
@@ -326,19 +328,12 @@ btnEnviar.onclick = async () => {
   feedbackEl.textContent = jaAvaliou ? 'Editando avaliação...' : 'Enviando avaliação...';
   feedbackEl.className = 'text-muted small mt-1';
 
-  btnEnviar.onclick = async () => {
-    console.log('Dados sendo enviados:', {
-      id_produto,
-      id_pessoa: Number(id_pessoa),
-      nota: notaSelecionada,
-      comentario: comentarioEl.value.trim()
-    });
     try {
       const response = await fetch('https://green-line-web.onrender.com/avaliacoes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id_produto,
+          id_produto: id_produto,
           id_pessoa: Number(id_pessoa),
           nota: notaSelecionada,
           comentario: comentarioEl.value.trim()
@@ -366,7 +361,6 @@ btnEnviar.onclick = async () => {
       feedbackEl.textContent = error.message;
       feedbackEl.className = 'text-danger small mt-1';
     }
-  };
 };
   } else {
     estrelasEl.innerHTML = '<span class="text-muted">Faça login para avaliar</span>';
