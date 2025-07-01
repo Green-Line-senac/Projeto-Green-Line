@@ -293,7 +293,7 @@ async function carregarAvaliacoes(id_produto) {
   // Permitir avaliar se usuário estiver logado
   const id_pessoa = sessionStorage.getItem('id_pessoa');
   if (id_pessoa) {
-    // Estrelas clicáveis
+    // Estrelas clicáveis 
     for (let i = 1; i <= 5; i++) {
       const star = document.createElement('span');
       star.innerHTML = '★';
@@ -340,7 +340,7 @@ btnEnviar.onclick = async () => {
         })
       });
 
-      // Verifica se a resposta é JSON
+      // Verifica se a resposta é JSON//
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
         const text = await response.text();
