@@ -810,7 +810,7 @@ app.listen(3010, () => {
 });
 
 // Endpoint para registrar avaliação
-app.post("/avaliacao", async (req, res) => {
+app.post("/avaliacoes", async (req, res) => {
   const { id_produto, id_pessoa, nota, comentario } = req.body;
   if (!id_produto || !id_pessoa || !nota) {
     return res.status(400).json({ sucesso: false, mensagem: "Dados incompletos" });
@@ -818,20 +818,20 @@ app.post("/avaliacao", async (req, res) => {
   try {
     // Verifica se já existe avaliação desse usuário para o produto
     const existe = await db.query(
-      "SELECT id_avaliacao FROM avaliacao WHERE id_produto = ? AND id_pessoa = ?",
+      "SELECT id_avaliacoes FROM avaliacoes WHERE id_produto = ? AND id_pessoa = ?",
       [id_produto, id_pessoa]
     );
     if (existe.length > 0) {
       // Atualiza avaliação existente
       await db.query(
-        "UPDATE avaliacao SET nota = ?, comentario = ?, data = NOW() WHERE id_avaliacao = ?",
+        "UPDATE avaliacoes SET nota = ?, comentario = ?, data = NOW() WHERE id_avaliacao = ?",
         [nota, comentario || null, existe[0].id_avaliacao]
       );
       return res.json({ sucesso: true, mensagem: "Avaliação atualizada com sucesso" });
     } else {
       // Insere nova avaliação
       await db.query(
-        "INSERT INTO avaliacao (id_produto, id_pessoa, nota, comentario, data) VALUES (?, ?, ?, ?, NOW())",
+        "INSERT INTO avaliacoes (id_produto, id_pessoa, nota, comentario, data) VALUES (?, ?, ?, ?, NOW())",
         [id_produto, id_pessoa, nota, comentario || null]
       );
       return res.json({ sucesso: true, mensagem: "Avaliação registrada com sucesso" });
@@ -860,3 +860,4 @@ app.get("/avaliacoes", async (req, res) => {
     res.status(500).json({ sucesso: false, mensagem: "Erro ao buscar avaliações" });
   }
 });
+

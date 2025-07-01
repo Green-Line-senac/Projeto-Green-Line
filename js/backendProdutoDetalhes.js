@@ -70,6 +70,8 @@ router.get('/', async (req, res) => {
       });
     }
 
+
+    
     // Busca avaliações
     const [avaliacoes] = await db.query(
       `SELECT a.*, p.nome as nome_pessoa 

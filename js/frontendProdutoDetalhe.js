@@ -338,7 +338,7 @@ btnEnviar.onclick = async () => {
           comentario: comentarioEl.value.trim()
         })
       });
-  
+      
       // Verifica se a resposta é JSON
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
