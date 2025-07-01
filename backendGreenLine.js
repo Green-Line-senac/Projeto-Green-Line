@@ -810,49 +810,47 @@ app.listen(3010, () => {
 });
 
 // Endpoint para registrar avaliação
-router.post('/', async (req, res) => {
-  try {
-    const { id_produto, id_pessoa, nota, comentario } = req.body;
-    
-    // Validações básicas
-    if (!id_produto || !id_pessoa || !nota) {
-      return res.status(400).json({ 
-        sucesso: false,
-        mensagem: 'Dados incompletos' 
-      });
-    }
+app.post("/avaliacoes", async (req, res) => {
+  // Debug: Exibe o corpo recebido
+  console.log("📥 Requisição recebida:", req.body);
 
-    // Verifica se o usuário já avaliou este produto
-    const [avaliacaoExistente] = await db.query(
-      'SELECT * FROM avaliacoes WHERE id_produto = ? AND id_pessoa = ?',
+  const { id_produto, id_pessoa, nota, comentario } = req.body;
+
+  // Validação básica dos dados
+  if (!id_produto || !id_pessoa || !nota) {
+    console.warn("⚠️ Dados incompletos:", { id_produto, id_pessoa, nota });
+    return res.status(400).json({ sucesso: false, mensagem: "Dados incompletos" });
+  }
+
+  try {
+    // Verifica se já existe avaliação para o mesmo produto e pessoa
+    const existe = await db.query(
+      "SELECT id_avaliacao FROM avaliacoes WHERE id_produto = ? AND id_pessoa = ?",
       [id_produto, id_pessoa]
     );
+    console.log("🔍 Avaliação existente:", existe);
 
-    if (avaliacaoExistente.length > 0) {
+    if (existe.length > 0) {
       // Atualiza avaliação existente
       await db.query(
-        'UPDATE avaliacoes SET nota = ?, comentario = ? WHERE id_avaliacao = ?',
-        [nota, comentario, avaliacaoExistente[0].id_avaliacao]
+        "UPDATE avaliacoes SET nota = ?, comentario = ?, data = NOW() WHERE id_avaliacao = ?",
+        [nota, comentario || null, existe[0].id_avaliacao]
       );
+      console.log("📝 Avaliação atualizada:", { id_produto, id_pessoa, nota, comentario });
+      return res.json({ sucesso: true, mensagem: "Avaliação atualizada com sucesso" });
     } else {
-      // Cria nova avaliação
+      // Insere nova avaliação
       await db.query(
-        'INSERT INTO avaliacoes (id_produto, id_pessoa, nota, comentario) VALUES (?, ?, ?, ?)',
-        [id_produto, id_pessoa, nota, comentario]
+        "INSERT INTO avaliacoes (id_produto, id_pessoa, nota, comentario, data) VALUES (?, ?, ?, ?, NOW())",
+        [id_produto, id_pessoa, nota, comentario || null]
       );
+      console.log("✅ Nova avaliação registrada:", { id_produto, id_pessoa, nota, comentario });
+      return res.json({ sucesso: true, mensagem: "Avaliação registrada com sucesso" });
     }
-
-    res.json({ 
-      sucesso: true,
-      mensagem: 'Avaliação salva com sucesso!' 
-    });
-
-  } catch (error) {
-    console.error('Erro ao salvar avaliação:', error);
-    res.status(500).json({ 
-      sucesso: false,
-      mensagem: 'Erro interno no servidor' 
-    });
+  } catch (err) {
+    // Debug de erro
+    console.error("💥 Erro ao processar avaliação:", err);
+    res.status(500).json({ sucesso: false, mensagem: "Erro ao registrar avaliação" });
   }
 });
 
