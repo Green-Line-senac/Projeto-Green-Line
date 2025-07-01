@@ -314,42 +314,54 @@ async function carregarAvaliacoes(id_produto) {
       };
       estrelasEl.appendChild(star);
     }
-    btnEnviar.onclick = async () => {
-      if (!notaSelecionada) {
-        feedbackEl.textContent = 'Selecione uma nota!';
-        feedbackEl.className = 'text-danger small mt-1';
-        return;
+    // Modifique a função de envio de avaliação para:
+btnEnviar.onclick = async () => {
+  if (!notaSelecionada) {
+    feedbackEl.textContent = 'Selecione uma nota!';
+    feedbackEl.className = 'text-danger small mt-1';
+    return;
+  }
+
+  btnEnviar.disabled = true;
+  feedbackEl.textContent = jaAvaliou ? 'Editando avaliação...' : 'Enviando avaliação...';
+  feedbackEl.className = 'text-muted small mt-1';
+
+  btnEnviar.onclick = async () => {
+    try {
+      const response = await fetch('https://green-line-web.onrender.com/avaliacoes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id_produto,
+          id_pessoa: Number(id_pessoa),
+          nota: notaSelecionada,
+          comentario: comentarioEl.value.trim()
+        })
+      });
+  
+      // Verifica se a resposta é JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        throw new Error(`Resposta inválida: ${text.substring(0, 100)}...`);
       }
-      btnEnviar.disabled = true;
-      feedbackEl.textContent = jaAvaliou ? 'Editando avaliação...' : 'Enviando avaliação...';
-      feedbackEl.className = 'text-muted small mt-1';
-      try {
-        const res = await fetch('https://green-line-web.onrender.com/avaliacao', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            id_produto,
-            id_pessoa: Number(id_pessoa),
-            nota: notaSelecionada,
-            comentario: comentarioEl.value.trim()
-          })
-        });
-        const data = await res.json();
-        if (data.sucesso) {
-          feedbackEl.textContent = jaAvaliou ? 'Avaliação editada!' : 'Avaliação enviada!';
-          feedbackEl.className = 'text-success small mt-1';
-          btnEnviar.style.display = 'none';
-          carregarAvaliacoes(id_produto);
-        } else {
-          feedbackEl.textContent = data.mensagem || 'Erro ao enviar avaliação.';
-          feedbackEl.className = 'text-danger small mt-1';
-        }
-      } catch {
-        feedbackEl.textContent = 'Erro ao enviar avaliação.';
-        feedbackEl.className = 'text-danger small mt-1';
+  
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.mensagem || 'Erro no servidor');
       }
-      btnEnviar.disabled = false;
-    };
+  
+      // Sucesso
+      feedbackEl.textContent = 'Avaliação enviada!';
+      
+    } catch (error) {
+      console.error('Erro na avaliação:', error);
+      feedbackEl.textContent = error.message;
+      feedbackEl.className = 'text-danger small mt-1';
+    }
+  };
+};
   } else {
     estrelasEl.innerHTML = '<span class="text-muted">Faça login para avaliar</span>';
     comentarioEl.disabled = true;

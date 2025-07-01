@@ -64,6 +64,16 @@ CREATE TABLE produto (
     categoria VARCHAR(50) NOT NULL
 );
 
+CREATE TABLE avaliacoes (
+  id_avaliacao INT PRIMARY KEY AUTO_INCREMENT,
+  id_produto INT NOT NULL,
+  id_pessoa INT NOT NULL,
+  nota INT NOT NULL,
+  comentario TEXT,
+  data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (id_produto) REFERENCES produtos(id_produto),
+  FOREIGN KEY (id_pessoa) REFERENCES pessoas(id_pessoa)
+);
 
 -- Inserindo tipos de usuários
 INSERT INTO tipo_usuario (tipo) VALUES
