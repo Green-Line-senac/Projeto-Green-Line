@@ -9,15 +9,6 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
-let estadoLogin = {
-  usuario: null,
-  id_pessoa: null,
-  tipo_usuario: 2,
-  quantidade_produtos: 0,
-  trocarDeConta: 0,
-  ultimaAtualizacao: null,
-};
-
 const app = express();
 app.use(express.json({ limit: "100mb" }));
 app.use(cors());
@@ -526,7 +517,7 @@ app.post("/cadastro-produto", async (req, res) => {
 
     const result = await db.query(sql, [
       outrosDados.nome,
-      outrosDados.descricao_detalhada || "",
+      outrosDados.descricao || "",
       outrosDados.descricao_curta || "",
       parseFloat(outrosDados.preco) || 0,
       parseFloat(outrosDados.preco_promocional) || 0,
