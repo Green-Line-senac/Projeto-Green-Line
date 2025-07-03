@@ -1,4 +1,3 @@
-
 <h1 align="center">🌿 Green Line - E-commerce Sustentável 🌱</h1>
 
 <p align="center">
@@ -11,25 +10,67 @@
 
 ---
 
-## 📖 Sobre o Projeto
 
-A **Green Line** é uma plataforma de e-commerce voltada ao **consumo consciente**. Criada como projeto integrador, ela simula uma loja online de produtos **ecológicos**, como itens **reutilizáveis**, **biodegradáveis** e **produzidos de forma ética**.
+## 📖 Sobre o Projeto  
+Plataforma de e-commerce para **consumo consciente**, com produtos ecológicos (reutilizáveis, biodegradáveis e de produção ética).  
 
-Nosso objetivo é **inspirar práticas sustentáveis** através da tecnologia, promovendo uma experiência de compra simples, eficiente e com impacto positivo.
+**Objetivo:**  
+- Oferecer experiência de compra sustentável  
+- Promover impacto ambiental positivo  
+
+---
+
+## 💾 Versões  
+
+| Versão       | Descrição                          | Status            | Repositório       |  
+|--------------|-----------------------------------|-------------------|-------------------|  
+| 🌐 **Web**   | Frontend responsivo (HTML/CSS/JS) | 🟢 Funcional      | [Link](https://github.com/KauaNca/green_line_web)         |  
+| 📱 **Android**| App (JAVA)               | 🟡 Em desenvolvimento | [Link](https://github.com/KauaNca/green_line_mobile)      |  
+| 🖥️ **Desktop**| Sistema administrativo (Java)     | 🟢 Funcional      | [Link](https://github.com/KauaNca/green_line_desktop)|  
 
 ---
 
-## 💾 Versões do Projeto
+## 🛠️ Tecnologias Utilizadas
 
-Este repositório contém duas versões complementares:
+### Web
+<p align="center">
+  <img src="https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white">
+  <img src="https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white">
+  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black">
+  <img src="https://img.shields.io/badge/Bootstrap-563D7C?style=flat-square&logo=bootstrap&logoColor=white">
+</p>
 
-- 🌐 **Versão Web**  
-  Interface para o consumidor final com layout responsivo, catálogo de produtos, e interatividade via navegador.
+### Android
+<p align="center">
+  <img src="https://img.shields.io/badge/Java-ED8B00?style=flat-square&logo=openjdk&logoColor=white">
+  <img src="https://img.shields.io/badge/Android_Studio-3DDC84?style=flat-square&logo=android-studio&logoColor=white">
+</p>
 
-- 🖥️ **Versão Desktop**  
-  Aplicação administrativa desenvolvida em Java com Swing, conectada a banco de dados MySQL. Permite cadastrar, editar e gerenciar produtos e usuários.
+### Desktop
+<p align="center">
+  <img src="https://img.shields.io/badge/Java-ED8B00?style=flat-square&logo=openjdk&logoColor=white">
+  <img src="https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=mysql&logoColor=white">
+  <img src="https://img.shields.io/badge/Swing-0176C6?style=flat-square">
+</p>
 
 ---
+
+## 📁 Estrutura do Projeto
+
+```bash
+📦 Green-Line-Web/
+├── index.html # Página principal
+├── css/ # Estilos
+│ └── style.css
+├── js/ # Scripts
+│ ├── conexao.js # Conexão com backend
+│ └── funcoes.js # Lógica principal
+├── img/ # Imagens
+├── backendGreen/ # Backend Node.js (se aplicável)
+├── LICENSE
+└── README.md
+```
+
 
 ## 🎯 Público-Alvo
 
@@ -58,50 +99,6 @@ O Green Line é ideal para quem:
 
 ---
 
-## 💻 Tecnologias Utilizadas
-
-### Web
-
-<p align="center">
-  <img src="https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white">
-  <img src="https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white">
-  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black">
-  <img src="https://img.shields.io/badge/Bootstrap-563D7C?style=flat-square&logo=bootstrap&logoColor=white">
-</p>
-
-### Desktop
-
-- Java (Swing)
-- MySQL
-- JDBC
-
----
-
-## 📁 Estrutura do Projeto
-
-```bash
-📦 Green-Line/
-├── index.html              # Página principal da versão web
-├── css/                    # Estilos CSS
-├── js/                     # Scripts JavaScript
-├── img/                    # Imagens do projeto
-├── desktop/                # Aplicação Java Desktop
-│   ├── src/                # Códigos-fonte Java
-│   ├── lib/                # Bibliotecas externas
-│   └── README_DESKTOP.md   # Instruções de uso da versão desktop
-└── README.md               # Este arquivo
-```
-
----
-
-## 📸 Prévia do Projeto
-
-<p align="center">
-  <img src="preview.jpg" alt="Preview do Green Line" width="600">
-</p>
-
----
-
 ## 🚀 Como Visualizar Localmente
 
 ### Web
@@ -110,12 +107,6 @@ O Green Line é ideal para quem:
    git clone https://github.com/seuusuario/green-line-web.git
    ```
 2. Abra o arquivo `index.html` no navegador.
-
-### Desktop
-1. Navegue até a pasta `/desktop`
-2. Importe o projeto em uma IDE Java (como NetBeans ou IntelliJ)
-3. Configure o banco de dados MySQL
-4. Execute a classe principal
 
 ---
 
@@ -135,17 +126,6 @@ O Green Line é ideal para quem:
 | Desenvolvimento Desktop    | ⚙️ Em andamento |
 | Testes                     | 🔜 Em breve |
 | Documentação Final         | 🔜 Em breve |
-
----
-
-## 📊 Tarefas / To-Do
-
-- [x] Criar layout responsivo com Bootstrap  
-- [x] Implementar catálogo de produtos  
-- [x] Desenvolver sistema de cadastro Java  
-- [ ] Integrar backend com banco de dados  
-- [ ] Adicionar login de administrador  
-- [ ] Finalizar documentação técnica
 
 ---
 
