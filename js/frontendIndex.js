@@ -92,15 +92,11 @@ function criarCardProduto(produto) {
   const card = document.createElement("div");
   card.className = "col-12 col-sm-6 col-md-4 col-lg-3 mb-4";
   const precoFormatado = produto.promocao
-    ? `<span style="text-decoration: line-through; font-size: 0.9rem;">R$ ${produto.preco.toFixed(
-        2
-      )}</span>
+    ? `<span style="text-decoration: line-through; font-size: 0.9rem;">R$ ${produto.preco.toFixed(2)}</span>
        <span class="fs-5 ms-2">R$ ${(produto.preco * 0.8).toFixed(2)}</span>`
     : `<span class="fs-5">R$ ${produto.preco.toFixed(2)}</span>`;
   card.innerHTML = `
-    <div class="card h-100 cursor point" onclick="abrirModalProduto(${JSON.stringify(
-      produto
-    ).replace(/"/g, "&quot;")})">
+    <div class="card h-100 cursor point">
       <img src="${
         produto.imagem_1 != null
           ? produto.imagem_1
@@ -115,7 +111,7 @@ function criarCardProduto(produto) {
       <div class="card-body">
         <h6 class="card-title">${escapeHtml(produto.nome)}</h6>
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <span class="text-warning">${gerarEstrelas(produto.avaliacao)}</span>
+          <span class="text-warning">${gerarEstrelas(Number(produto.avaliacao))}</span>
           <small class="text-muted">${produto.numAvaliacoes} av.</small>
         </div>
         <p class="card-text text-muted small">${escapeHtml(
@@ -137,170 +133,11 @@ function criarCardProduto(produto) {
       </div>
     </div>
   `;
-  return card;
-}
-
-function abrirModalProduto(dadosProduto) {
-  let produto;
-  try {
-    produto =
-      typeof dadosProduto === "string"
-        ? JSON.parse(dadosProduto)
-        : dadosProduto;
-  } catch (e) {
-    console.error("JSON inválido:", e);
-    mostrarFeedback("Erro ao abrir produto", "danger");
-    return;
-  }
-
-  console.log("Abrindo modal para produto:", produto);
-  estado.id_produto = produto.id_produto || null;
-  console.log("ID do produto:", estado.id_produto);
-  if (!estado.id_produto) {
-    console.error("ID do produto não encontrado");
-    mostrarFeedback("Produto inválido", "danger");
-    return;
-  }
-
-  // Preencher informações do modal
-  const label = document.getElementById("produtoModalLabel");
-  if (label) label.textContent = produto.nome;
-
-  const imgEl = document.getElementById("produtoModalImagem");
-  if (imgEl) {
-    imgEl.src =
-      produto.imagem_1 ||
-      produto.imagem_2 ||
-      produto.imagem_3 ||
-      config.fallbackImage;
-    imgEl.onerror = () => (imgEl.src = config.fallbackImage);
-  }
-
-  const descEl = document.getElementById("produtoModalDescricao");
-  if (descEl) descEl.textContent = produto.descricao;
-
-  const marcaEl = document.getElementById("produtoModalMarca");
-  if (marcaEl) marcaEl.textContent = produto.marca;
-
-  const catEl = document.getElementById("produtoModalCategoria");
-  if (catEl) {
-    catEl.textContent = produto.categoria;
-    catEl.className = `badge mb-2 bg-${
-      produto.promocao ? "danger" : "success"
-    }`;
-  }
-  const estoqueEl = document.getElementById("produtoModalEstoque");
-  if (produto.estoque == 0 || produto.estoque == null) {
-    estoqueEl.innerHTML = `<span class="badge bg-secondary">Fora de estoque</span>`;
-    let botaoComprar = document.querySelector("#btnComprarAgora");
-    let botaoCarrinho = document.querySelector("#btnAddCarrinho");
-    if (botaoComprar) {
-      botaoComprar.disabled = true;
-      botaoComprar.classList.add("text-bg-secondary");
-    }
-    if (botaoCarrinho) {
-      botaoCarrinho.disabled = true;
-      botaoCarrinho.classList.add("text-bg-secondary");
-    }
-  } else {
-    estoqueEl.innerHTML = `<span class="badge bg-success">Em estoque</span>`;
-    let botaoComprar = document.querySelector("#btnComprarAgora");
-    let botaoCarrinho = document.querySelector("#btnAddCarrinho");
-    if (botaoComprar) {
-      botaoComprar.disabled = false;
-      botaoComprar.classList.remove("text-bg-secondary");
-    }
-    if (botaoCarrinho) {
-      botaoCarrinho.disabled = false;
-      botaoCarrinho.classList.remove("text-bg-secondary");
-    }
-  }
-
-  // ÁREA REFORMULADA - EXIBIÇÃO DE PREÇOS
-  const precoContainer = document.getElementById("produtoModalPreco");
-  const precoBase = (Number(produto.preco) || 0).toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
+  // Ao clicar no card, redireciona para a página de detalhes do produto
+  card.addEventListener('click', () => {
+    window.location.href = `produto.html?id=${produto.id_produto}`;
   });
-
-  if (produto.promocao && produto.preco_promocional) {
-    const precoPromo = (Number(produto.preco_promocional) || 0).toLocaleString(
-      "pt-BR",
-      {
-        style: "currency",
-        currency: "BRL",
-      }
-    );
-
-    precoContainer.innerHTML = `
-      <div class="price-container">
-        <span class="original-price">${precoBase}</span>
-        <span class="discount-price">${precoPromo}</span>
-        ${
-          produto.preco_promocional
-            ? `<span class="discount-badge">
-            ${Math.round(
-              100 - (produto.preco_promocional / produto.preco) * 100
-            )}% OFF
-          </span>`
-            : ""
-        }
-      </div>
-    `;
-  } else {
-    precoContainer.innerHTML = `
-      <div class="price-container">
-        <span class="current-price">${precoBase}</span>
-      </div>
-    `;
-  }
-
-  // Renderizar estrelas de avaliação
-  const stars = document.getElementById("produtoModalAvaliacao");
-  if (stars) {
-    stars.innerHTML = "";
-    if (produto.avaliacao != null) {
-      const fullStars = Math.floor(produto.avaliacao);
-      const halfStar = produto.avaliacao % 1 >= 0.5;
-      const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
-      for (let i = 0; i < fullStars; i++)
-        stars.innerHTML +=
-          '<i class="fas fa-star text-yellow-400 text-xs"></i>';
-      if (halfStar)
-        stars.innerHTML +=
-          '<i class="fas fa-star-half-alt text-yellow-400 text-xs"></i>';
-      for (let i = 0; i < emptyStars; i++)
-        stars.innerHTML +=
-          '<i class="far fa-star text-yellow-400 text-xs"></i>';
-      stars.innerHTML += `<span class="text-xs text-gray-600 ml-1">(${produto.numAvaliacoes})</span>`;
-    }
-  }
-  // Mostrar o modal
-  if (elementos.produtoModal) {
-    elementos.produtoModal.show();
-  } else {
-    console.error("Modal não inicializado corretamente");
-    mostrarFeedback("Erro ao abrir o modal", "danger");
-  }
-}
-
-// Função auxiliar para renderizar estrelas
-function renderizarEstrelas(avaliacao) {
-  if (!avaliacao)
-    return '<span class="text-sm text-gray-500">Sem avaliações</span>';
-
-  const fullStars = Math.floor(avaliacao);
-  const halfStar = avaliacao % 1 >= 0.5;
-  const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
-
-  let html = "";
-  for (let i = 0; i < fullStars; i++)
-    html += '<i class="fas fa-star text-yellow-400"></i>';
-  if (halfStar) html += '<i class="fas fa-star-half-alt text-yellow-400"></i>';
-  for (let i = 0; i < emptyStars; i++)
-    html += '<i class="far fa-star text-yellow-400"></i>';
-
-  return html;
+  return card;
 }
 
 // ==================== FUNÇÕES AUXILIARES ====================
@@ -333,13 +170,9 @@ function escapeHtml(str) {
 }
 
 function gerarEstrelas(nota) {
-  const estrelasCheias = Math.floor(nota);
-  const temMeia = nota % 1 >= 0.5;
-  return (
-    "★".repeat(estrelasCheias) +
-    (temMeia ? "½" : "") +
-    "☆".repeat(5 - estrelasCheias - (temMeia ? 1 : 0))
-  );
+  if (!nota) return "☆☆☆☆☆";
+  const estrelasCheias = Math.round(nota);
+  return "★".repeat(estrelasCheias) + "☆".repeat(5 - estrelasCheias);
 }
 
 function mostrarLoader() {

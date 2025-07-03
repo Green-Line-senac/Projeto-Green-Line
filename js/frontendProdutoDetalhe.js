@@ -103,7 +103,7 @@ function renderProduto(produto) {
     </div>
     <div class="col-md-7">
       <h2 class="produto-nome">${nomeProduto}</h2>
-      <div class="mb-2">${renderEstrelas(produto.avaliacoes)} <small>(${produto.numAvaliacoes || 0} avaliações)</small></div>
+      <div class="mb-2">${renderEstrelas(produto.avaliacao)} <small>(${produto.numAvaliacoes || 0} avaliações)</small></div>
       <div class="mb-3">${produto.descricao || ''}</div>
       <div class="mb-3"><strong>Categoria:</strong> ${produto.categoria || 'N/A'}</div>
       <div class="mb-3"><strong>Marca:</strong> ${produto.marca || 'N/A'}</div>
@@ -174,9 +174,8 @@ function renderProduto(produto) {
 
 function renderEstrelas(nota) {
   if (!nota) return '☆☆☆☆☆';
-  const estrelasCheias = Math.floor(nota);
-  const temMeia = nota % 1 >= 0.5;
-  return '★'.repeat(estrelasCheias) + (temMeia ? '½' : '') + '☆'.repeat(5 - estrelasCheias - (temMeia ? 1 : 0));
+  const estrelasCheias = Math.round(nota);
+  return '★'.repeat(estrelasCheias) + '☆'.repeat(5 - estrelasCheias);
 }
 
 function comprar(produto, quantidade = 1, variacao = '') {

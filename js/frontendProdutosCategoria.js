@@ -55,17 +55,12 @@ function escapeHtml(str) {
 /**
  * Gera representação visual de estrelas com base na nota.
  * @param {number} nota - Nota do produto (0 a 5).
- * @returns {string} String com estrelas (★, ½, ☆).
+ * @returns {string} String com estrelas (★, ☆).
  */
 function gerarEstrelas(nota) {
   if (!nota) return "☆☆☆☆☆";
-  const estrelasCheias = Math.floor(nota);
-  const temMeia = nota % 1 >= 0.5;
-  return (
-    "★".repeat(estrelasCheias) +
-    (temMeia ? "½" : "") +
-    "☆".repeat(5 - estrelasCheias - (temMeia ? 1 : 0))
-  );
+  const estrelasCheias = Math.round(nota);
+  return "★".repeat(estrelasCheias) + "☆".repeat(5 - estrelasCheias);
 }
 
 /**
@@ -130,7 +125,7 @@ function sanitizarProduto(produto) {
     preco_promocional: Number(produto.preco_promocional) || 0,
     promocao: Boolean(produto.promocao),
     avaliacao: Number(produto.avaliacao) || 0,
-    numAvaliacoes: Number(produto.quantidade_avaliacoes) || 0,
+    numAvaliacoes: Number(produto.numAvaliacoes) || 0,
     estoque: Number(produto.estoque) || 0,
     nome: produto.produto || produto.nome || "Produto sem nome",
     descricao: produto.descricao || "Sem descrição",
@@ -233,7 +228,7 @@ function criarCardProduto(produto) {
       <div class="card-body">
         <h6 class="card-title">${escapeHtml(produto.nome)}</h6>
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <span class="text-warning">${gerarEstrelas(produto.avaliacao)}</span>
+          <span class="text-warning">${gerarEstrelas(Number(produto.avaliacao))}</span>
           <small class="text-muted">${produto.numAvaliacoes} av.</small>
         </div>
         <p class="card-text text-muted small">${escapeHtml(
@@ -382,15 +377,11 @@ function abrirModalProduto(dadosProduto) {
   if (stars) {
     stars.innerHTML = "";
     if (produto.avaliacao) {
-      const fullStars = Math.floor(produto.avaliacao);
-      const halfStar = produto.avaliacao % 1 >= 0.5;
-      const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+      const fullStars = Math.round(Number(produto.avaliacao));
+      const emptyStars = 5 - fullStars;
       for (let i = 0; i < fullStars; i++)
         stars.innerHTML +=
           '<i class="fas fa-star text-yellow-400 text-xs"></i>';
-      if (halfStar)
-        stars.innerHTML +=
-          '<i class="fas fa-star-half-alt text-yellow-400 text-xs"></i>';
       for (let i = 0; i < emptyStars; i++)
         stars.innerHTML +=
           '<i class="far fa-star text-yellow-400 text-xs"></i>';

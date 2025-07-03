@@ -158,7 +158,14 @@ app.get("/verificarCPF", async (req, res) => {
 // ==================== BACKEND PRODUTOS ====================
 app.get("/produto", async (req, res) => {
   try {
-    const produtos = await db.query("SELECT * FROM produto");
+    const produtos = await db.query(`
+      SELECT p.*, 
+             AVG(a.nota) AS avaliacao, 
+             COUNT(DISTINCT a.id_avaliacao) AS numAvaliacoes
+      FROM produto p
+      LEFT JOIN avaliacoes a ON a.id_produto = p.id_produto
+      GROUP BY p.id_produto
+    `);
 
     if (!produtos || produtos.length === 0) {
       return res.status(404).json({ mensagem: "Nenhum produto encontrado" });
@@ -252,7 +259,13 @@ app.get("/produtosEspecificos", async (req, res) => {
 
     let categoria = decodeURIComponent(categoriaCodificada);
     produtosCategoria = await db.query(
-      "SELECT * FROM produto WHERE categoria = ? AND ativo = TRUE",
+      `SELECT p.*, 
+              AVG(a.nota) AS avaliacao, 
+              COUNT(DISTINCT a.id_avaliacao) AS numAvaliacoes
+       FROM produto p
+       LEFT JOIN avaliacoes a ON a.id_produto = p.id_produto
+       WHERE p.categoria = ? AND p.ativo = TRUE
+       GROUP BY p.id_produto`,
       [categoria]
     );
 
