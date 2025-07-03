@@ -174,7 +174,7 @@ async function tratarLoginBemSucedido(dados) {
 function armazenarDadosUsuario(dados) {
   try {
     console.log("Armazenando dados do usuário:", dados);
-    sessionStorage.setItem("usuario", dados.user.email);
+    sessionStorage.setItem("usuario", dados.user.nome || dados.user.nome_completo || dados.user.email);
     sessionStorage.setItem("userToken", dados.token);
     sessionStorage.setItem("id_pessoa", dados.user.id_pessoa);
     sessionStorage.setItem("userEmail", dados.user.email);

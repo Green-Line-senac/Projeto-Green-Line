@@ -366,17 +366,22 @@ async function preencherPaginaConfirmacao(pedido) {
       produtosContainer.innerHTML = ""; // Limpa conteúdo anterior
 
       pedido.produtos.forEach((produto, index) => {
+        // Tenta pegar a imagem do produto (nome pode variar conforme origem dos dados)
+        const imagem = produto.imagem_principal || produto.imagem_1 || produto.imagem || '../img/imagem-nao-disponivel.png';
         const produtoHTML = `
           <div class="order-item d-flex justify-content-between align-items-center py-3 ${
             index < pedido.produtos.length - 1 ? "border-bottom" : ""
           }">
-            <div class="item-info">
-              <h5 class="item-name mb-1">${produto.nome}</h5>
-              <p class="item-details text-muted mb-0">
-                Quantidade: ${produto.quantidade} × R$ ${produto.preco
+            <div class="item-info d-flex align-items-center">
+              <img src="${imagem}" alt="${produto.nome}" class="rounded me-3" style="width: 56px; height: 56px; object-fit: cover; background: #f8f9fa; border: 1px solid #eee;">
+              <div>
+                <h5 class="item-name mb-1">${produto.nome}</h5>
+                <p class="item-details text-muted mb-0">
+                  Quantidade: ${produto.quantidade} × R$ ${produto.preco
           .toFixed(2)
           .replace(".", ",")}
-              </p>
+                </p>
+              </div>
             </div>
             <div class="item-total">
               <strong>R$ ${produto.subtotal
