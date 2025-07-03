@@ -207,11 +207,54 @@ function preencherCamposProduto(produto) {
   if (btnMais) btnMais.style.marginLeft = '0';
   if (qtdEl) qtdEl.style.margin = '0 2px';
 
-  // Botões de ação (exemplo: alert)
+  // Botões de ação
   const btnComprar = document.getElementById('btnComprarAgora');
-  if (btnComprar) btnComprar.onclick = () => alert('Comprar: ' + (produto.nome || produto.produto));
   const btnCarrinho = document.getElementById('btnAddCarrinho');
-  if (btnCarrinho) btnCarrinho.onclick = () => alert('Adicionar ao carrinho: ' + (produto.nome || produto.produto));
+  if (btnComprar && qtdEl) btnComprar.onclick = () => {
+    const quantidade = Math.max(1, Math.min(Number(qtdEl.value) || 1, maxEstoque));
+    const preco_final = emPromocao ? produto.preco_promocional : produto.preco;
+    const subtotal = Math.round(preco_final * quantidade * 100) / 100;
+    const dadosCompra = {
+      nome_produto: produto.nome || produto.produto,
+      preco_final,
+      quantidade,
+      subtotal,
+      id_produto: produto.id_produto,
+      data: new Date().toISOString(),
+    };
+    sessionStorage.setItem('dadosCompra', JSON.stringify(dadosCompra));
+    window.location.href = 'vendas.html';
+  };
+  if (btnCarrinho && qtdEl) btnCarrinho.onclick = () => {
+    const quantidade = Math.max(1, Math.min(Number(qtdEl.value) || 1, maxEstoque));
+    const id_pessoa = sessionStorage.getItem('id_pessoa');
+    if (!id_pessoa) {
+      alert('Por favor, faça login ou cadastro para adicionar ao carrinho.');
+      return;
+    }
+    fetch('https://green-line-web.onrender.com/carrinho', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id_pessoa: Number(id_pessoa),
+        id_produto: produto.id_produto,
+        quantidade
+      })
+    })
+      .then(res => res.json())
+      .then(resposta => {
+        if (resposta.codigo === 1 || resposta.mensagem === 'ITEM_DUPLICADO') {
+          alert('⚠️ Este item já está no seu carrinho');
+        } else if (resposta.sucesso) {
+          alert('✅ Item adicionado ao carrinho com sucesso!');
+        } else {
+          alert('❌ Falha ao adicionar item ao carrinho');
+        }
+      })
+      .catch(() => {
+        alert('❌ Ocorreu um erro ao adicionar o item ao carrinho');
+      });
+  };
 }
 
 function gerarEstrelas(nota) {

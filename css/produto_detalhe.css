@@ -220,6 +220,7 @@
   }
   .produto-detalhe-container {
     padding: 1.2rem 0.5rem;
+    padding-top: 90px;
   }
   #produto-nome {
     font-size: 1.2rem;
@@ -231,6 +232,7 @@
 @media (max-width: 767px) {
   .produto-detalhe-container {
     padding: 0.5rem 0.2rem;
+    padding-top: 70px;
   }
   .produto-img-col {
     min-height: 180px;
