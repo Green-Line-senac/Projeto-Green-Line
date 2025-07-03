@@ -9,10 +9,16 @@ body {
     overflow-x: hidden;
     font-family: "Roboto", sans-serif;
     background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 #comunidade{
     background-color: #2e8b57;
-    height: 12rem;
+    height: 8rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+    padding: 0.5rem 0 0 0;
 }
 .btn-tamanho-fixo {
     width: 140px; /* ou qualquer valor desejado */
@@ -73,4 +79,113 @@ body {
   #produtoModal .col-md-6 {
     width: 100%;
   }
+}
+
+/* Carrossel de categorias aprimorado e corrigido */
+#productCarousel {
+  padding: 0 0.2vw 0.5rem 0.2vw;
+  margin-bottom: 0.5rem;
+}
+#productCarousel .carousel-inner {
+  /* Remover flex para não quebrar animação do Bootstrap */
+}
+#productCarousel .carousel-item > .d-flex {
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: stretch;
+  gap: 0.2rem;
+}
+#productCarousel .categoria {
+  min-width: 260px;
+  max-width: 320px;
+  flex: 1 1 28%;
+  margin: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border-radius: 12px;
+  background: #fff;
+  transition: box-shadow 0.2s;
+  min-height: 380px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+#productCarousel .categoria:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+}
+#productCarousel .categoria .card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+#productCarousel .categoria .card-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 120px;
+  max-height: none;
+  overflow: visible;
+}
+#productCarousel .categoria .card-title {
+  min-height: 2.2em;
+  margin-bottom: 0.5em;
+  text-align: center;
+}
+#productCarousel .categoria .card-text {
+  flex: 1 1 auto;
+  overflow: visible;
+  text-overflow: initial;
+  text-align: center;
+}
+#productCarousel .card-img-top {
+  border-radius: 12px 12px 0 0;
+  object-fit: cover;
+  height: 120px;
+}
+#productCarousel .carousel-control-prev,
+#productCarousel .carousel-control-next {
+  width: 36px;
+  height: 36px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #198754;
+  opacity: 0.85;
+  z-index: 2;
+}
+#productCarousel .carousel-control-prev-icon,
+#productCarousel .carousel-control-next-icon {
+  filter: invert(0.5);
+  background-color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  width: 24px;
+  height: 24px;
+}
+#productCarousel .carousel-indicators [data-bs-target] {
+  background-color: #198754;
+}
+@media (max-width: 991px) {
+  #productCarousel .categoria {
+    min-width: 48vw;
+    max-width: 54vw;
+    flex: 1 1 54%;
+    min-height: 380px;
+    max-height: 440px;
+  }
+}
+@media (max-width: 767px) {
+  #productCarousel .categoria {
+    min-width: 95vw;
+    max-width: 98vw;
+    flex: 1 1 98vw;
+    min-height: 320px;
+    max-height: 380px;
+  }
+}
+main {
+  flex: 1 0 auto;
+}
+footer {
+  flex-shrink: 0;
 }

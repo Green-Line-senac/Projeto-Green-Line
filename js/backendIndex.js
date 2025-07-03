@@ -110,13 +110,13 @@ app.get("/produtos", async (req, res) => {
         const produtos = await db.query(`
             SELECT p.*, 
                    AVG(a.nota) AS avaliacao, 
-                   COUNT(a.id_avaliacao) AS numAvaliacoes
+                   COUNT(DISTINCT a.id_avaliacao) AS numAvaliacoes
             FROM produto p
             LEFT JOIN avaliacoes a ON a.id_produto = p.id_produto
             WHERE p.promocao = true AND p.ativo = true
             GROUP BY p.id_produto
             ORDER BY p.id_produto DESC
-            LIMIT 12
+            LIMIT 15
         `);
         console.log("Produtos encontrados:", produtos);
 
