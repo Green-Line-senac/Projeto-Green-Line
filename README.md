@@ -64,9 +64,8 @@ Plataforma de e-commerce para **consumo consciente**, com produtos ecológicos (
 │ └── style.css
 ├── js/ # Scripts
 │ ├── conexao.js # Conexão com backend
-│ └── funcoes.js # Lógica principal
 ├── img/ # Imagens
-├── backendGreen/ # Backend Node.js (se aplicável)
+├── backendGreen/ # Backend Node.js
 ├── LICENSE
 └── README.md
 ```
