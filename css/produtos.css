@@ -182,25 +182,6 @@ body {
 
   }
 
-
-  .btn-comprar-agora{
-    background-color: #2BBD31;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 10px;
-    font-size: 18px;
-  }
-
-  .btn-adicionar-carrinho{
-    background-color: #2BBD31;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 10px;
-    font-size: 18px;
-  }
-
   #quantidadeModal {
     width: 3rem; /* equivalente a w-16 */
     text-align: center;
@@ -230,19 +211,6 @@ body {
 #btnAumentar:hover {
   transform: scale(1.1);
 }
-  /* Remove as setinhas no Chrome, Edge, Safari */
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
-  -webkit-appearance: none; 
-  margin: 0; 
-}
-
-/* Remove as setinhas no Firefox */
-input[type=number] {
-  -moz-appearance: textfield;
-
-}
-
 .price-container {
   display: flex;
   align-items: center;
@@ -276,6 +244,7 @@ input[type=number] {
   border-radius: 4px;
   font-size: 0.8rem;
   font-weight: bold;
+  
 }
 
 /* Card de produto: cursor pointer ao passar o mouse */

@@ -37,8 +37,8 @@ document.addEventListener('DOMContentLoaded', function() {
         cidadeInput.value = data.localidade;
         ufInput.value = data.uf;
         // Cálculo de frete simples
-        let frete = 30;
-        if (data.uf === 'SP') frete = 20;
+        let frete = 19.99;
+        if (data.uf === 'DF') frete = 0;
         freteInput.value = `R$ ${frete.toFixed(2)}`;
         if (typeof Event === 'function') {
           freteInput.dispatchEvent(new Event('input'));

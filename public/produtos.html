@@ -277,10 +277,9 @@
             <div class="search-enhanced">
               <form class="d-flex justify-content-start" role="search">
                 <div class="input-group input-group-lg">
-                  <span class="input-group-text bg-white border-end-0 ">
-                    <i class="bi bi-search text-success"></i>
+                  
                   </span>
-                  <input type="text" id="inputBusca" class="form-control border-start-0 ps-0"
+                  <input type="text" id="inputBusca" class="form-control border-start-1 "
                     placeholder="Buscar produtos ecológicos, cosméticos, roupas..."
                     aria-label="Buscar produtos por nome" />
                   <button class="btn btn-success btn-sm" type="button" id="botaoBusca" aria-label="Pesquisar">
@@ -332,41 +331,7 @@
             </div>
             <!-- Detalhes do produto -->
             <div class="col-md-6">
-              <div class="w-full md:w-2/3">
-                <!-- Avaliação -->
-                <div class="flex items-center space-x-1 mb-1" id="produtoModalAvaliacao">
-                  <i class="fas fa-star text-yellow-400 text-xs"></i>
-                  <i class="fas fa-star text-yellow-400 text-xs"></i>
-                  <i class="fas fa-star text-yellow-400 text-xs"></i>
-                  <i class="fas fa-star text-yellow-400 text-xs"></i>
-                  <i class="fas fa-star-half-alt text-yellow-400 text-xs"></i>
-                  <span class="text-xs text-gray-600">(0)</span>
-                </div>
-                <div class="flex items-center space-x-2 mb-3" id="produtoModalEstoque">
 
-                </div>
-
-                <!-- Marca -->
-                <p class="text-xs mb-3" id="produtoModalMarca">Marca não disponível</p>
-
-                <!-- Preço -->
-                <div class="mb-3" id="produtoModalPreco">
-                  <p id="produtoModalPreco">R$ 00,00</p>
-                </div>
-                <p class="text-xs mb-3">ou em até 2x no cartão de crédito</p>
-              </div>
-              <!-- Fim do MD -->
-
-              <!-- Quantidade -->
-              <div id="quantidadeWrapper" class="flex items-center space-x-2 mb-4">
-                <label id="quantidadeLabel" for="quantidadeModal">Quantidade</label>
-                <input id="quantidadeModal" min="1" name="quantidade" type="number" value="1" />
-                <button id="btnDiminuir" aria-label="Diminuir quantidade" type="button"
-                  onclick="adjustQuantity('quantidadeModal', -1)">–</button>
-                <button id="btnAumentar" aria-label="Aumentar quantidade" type="button"
-                  onclick="adjustQuantity('quantidadeModal', 1)">+</button>
-              </div>
-              <!-- Botões principais -->
               <div class="mb-6">
                 <div class="botoes-compra">
                   <button class="btn-comprar-agora" id="btnComprarAgora">Comprar agora</button>
@@ -374,12 +339,7 @@
                 </div>
               </div>
             </div>
-            <!-- Descrição -->
-            <div class="mt-6">
-              <hr>
-              <h2 class="text-sm font-semibold border-b border-gray-400 pb-1 mb-2">Descrição</h2>
-              <p class="text-xs mb-3 leading-relaxed" id="produtoModalDescricao">Descrição não disponível.</p>
-            </div>
+
           </div>
         </div>
       </div>

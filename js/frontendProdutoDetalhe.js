@@ -169,8 +169,11 @@ function preencherCamposProduto(produto) {
     qtdEl.value = 1;
   }
   // Texto de máximo
-  const maxTextEl = qtdEl ? qtdEl.parentElement.parentElement.querySelector('small.text-muted') : null;
-  if (maxTextEl) maxTextEl.textContent = `Máximo ${maxEstoque} unidade${maxEstoque > 1 ? 's' : ''} por pedido`;
+  const maxTextEl = qtdEl ? qtdEl.closest('.mb-2').querySelector('small.text-muted') : null;
+if (maxTextEl) {
+  maxTextEl.textContent = `Máximo ${maxEstoque} unidade${maxEstoque > 1 ? 's' : ''} por pedido`;
+}
+
 
   // Botões de quantidade (declarar antes de atualizarTotal)
   const btnMenos = document.getElementById('btnDiminuir');
@@ -210,21 +213,32 @@ function preencherCamposProduto(produto) {
   // Botões de ação
   const btnComprar = document.getElementById('btnComprarAgora');
   const btnCarrinho = document.getElementById('btnAddCarrinho');
-  if (btnComprar && qtdEl) btnComprar.onclick = () => {
-    const quantidade = Math.max(1, Math.min(Number(qtdEl.value) || 1, maxEstoque));
-    const preco_final = emPromocao ? produto.preco_promocional : produto.preco;
-    const subtotal = Math.round(preco_final * quantidade * 100) / 100;
-    const dadosCompra = {
-      nome_produto: produto.nome || produto.produto,
-      preco_final,
-      quantidade,
-      subtotal,
-      id_produto: produto.id_produto,
-      data: new Date().toISOString(),
+  if (btnComprar && qtdEl && produto) {
+    btnComprar.onclick = () => {
+      const id_pessoa = sessionStorage.getItem('id_pessoa');
+      if (!id_pessoa) {
+        alert('Por favor, faça login ou cadastro para continuar sua compra.',"danger");
+        return;
+      }
+  
+      const quantidade = Math.max(1, Math.min(Number(qtdEl.value) || 1, maxEstoque));
+      const preco_final = emPromocao ? produto.preco_promocional : produto.preco;
+      const subtotal = Number((preco_final * quantidade).toFixed(2));
+  
+      const dadosCompra = {
+        nome_produto: produto.nome || produto.produto || 'Produto',
+        preco_final,
+        quantidade,
+        subtotal,
+        id_produto: produto.id_produto || null,
+        data: new Date().toISOString(),
+      };
+  
+      sessionStorage.setItem('dadosCompra', JSON.stringify(dadosCompra));
+      window.location.href = 'vendas.html';
     };
-    sessionStorage.setItem('dadosCompra', JSON.stringify(dadosCompra));
-    window.location.href = 'vendas.html';
-  };
+  }
+  
   if (btnCarrinho && qtdEl) btnCarrinho.onclick = () => {
     const quantidade = Math.max(1, Math.min(Number(qtdEl.value) || 1, maxEstoque));
     const id_pessoa = sessionStorage.getItem('id_pessoa');
@@ -232,6 +246,9 @@ function preencherCamposProduto(produto) {
       alert('Por favor, faça login ou cadastro para adicionar ao carrinho.');
       return;
     }
+
+
+    
     fetch('https://green-line-web.onrender.com/carrinho', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
