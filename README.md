@@ -19,7 +19,18 @@ Plataforma de e-commerce para **consumo consciente**, com produtos ecológicos (
 - Promover impacto ambiental positivo  
 
 ---
+## Para Fins de Teste
+Disponibilizamos duas contas para que usuários testem a aplicação: uma de Administrador, outra de um Cliente.
 
+--Cliente--
+Usuário: Cliente
+Senha: 123GL
+
+--Administrador--
+Usuário: Administrador
+Senha: 123AD
+
+---
 ## 💾 Versões  
 
 | Versão       | Descrição                          | Status            | Repositório       |  
