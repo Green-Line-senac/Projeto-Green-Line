@@ -10,27 +10,47 @@
 
 ---
 
+## 📖 Sobre o Projeto
 
-## 📖 Sobre o Projeto  
-Plataforma de e-commerce para **consumo consciente**, com produtos ecológicos (reutilizáveis, biodegradáveis e de produção ética).  
+Este projeto é resultado da colaboração entre os alunos da turma de **Análise e Desenvolvimento de Sistemas** do **SENAC** como parte do **Trabalho de Conclusão de Curso (TCC)**.
 
-**Objetivo:**  
+Plataforma de e-commerce para **consumo consciente**, com produtos ecológicos (reutilizáveis, biodegradáveis e de produção ética).
+
+**Objetivo:**
 - Oferecer experiência de compra sustentável  
-- Promover impacto ambiental positivo  
+- Promover impacto ambiental positivo
 
 ---
-## Para Fins de Teste
-Disponibilizamos duas contas para que usuários testem a aplicação: uma de Administrador, outra de um Cliente.
+## 🔐 Contas de Teste
 
---Cliente--
-Usuário: Cliente
-Senha: 123GL
+Disponibilizamos duas contas para que os usuários possam acessar as versões **Web**, **Android** e **Desktop** do sistema para fins de teste.
 
---Administrador--
-Usuário: Administrador
-Senha: 123AD
+> 💡 Apenas a conta de **Administrador** tem permissão para acessar a versão **Desktop**.
+
+### 👤 Cliente
+- **Usuário:** `Cliente`
+- **Senha:** `123GL`
+
+### 🛠️ Administrador (acesso exclusivo à versão Desktop)
+- **Usuário:** `Administrador`
+- **Senha:** `12GLA`
+
+Para mais informações sobre as demais versões do sistema, acesse os outros repositórios da **Green Line** nos links abaixo
+
+## 🌐 Acesso à Versão Web
+
+Acesse o site do sistema por meio do seguinte link:  
+🔗 [green_line_web](https://kauanca.github.io/green_line_web/)
 
 ---
+
+## ⬇️ Downloads para Testes
+Faça o download das versões em fase de testes abaixo:
+
+- 📱 **Android** → [Download APK](https://drive.google.com/file/d/1boV4tKh74tGHVYdIwVufuM1JS_F8x4XN/view?usp=sharing)  
+- 🖥️ **Desktop** → [Download Executável](https://drive.google.com/drive/folders/1m10LnylS3dkNuxwOceKg5xuNIX2L7jxB?usp=sharing)
+
+
 ## 💾 Versões  
 
 | Versão       | Descrição                          | Status            | Repositório       |  
