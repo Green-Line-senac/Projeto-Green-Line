@@ -32,8 +32,8 @@ Disponibilizamos duas contas para que os usuários possam acessar as versões **
 - **Senha:** `123GL`
 
 ### 🛠️ Administrador (acesso exclusivo à versão Desktop)
-- **Usuário:** `Administrador`
-- **Senha:** `12GLA`
+- **Usuário:** `AdmTeste`
+- **Senha:** Manutenção
 
 Para mais informações sobre as demais versões do sistema, acesse os outros repositórios da **Green Line** nos links abaixo
 
