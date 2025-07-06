@@ -130,6 +130,7 @@ async function excluirProduto(id_produto, id_carrinho, elemento) {
 
         if (dados.codigo === 3) {
             elemento.remove();
+            sessionStorage.setItem("carrinho", (Number(sessionStorage.getItem("carrinho") || 0) - 1));
             estado.produtos = estado.produtos.filter(item => item.id_produto !== id_produto);
             subtotal();
         }

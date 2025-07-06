@@ -135,7 +135,7 @@ function criarCardProduto(produto) {
   `;
   // Ao clicar no card, redireciona para a página de detalhes do produto
   card.addEventListener('click', () => {
-    window.location.href = `produto.html?id=${produto.id_produto}`;
+    window.location.href = `../public/produto.html?id=${produto.id_produto}`;
   });
   return card;
 }

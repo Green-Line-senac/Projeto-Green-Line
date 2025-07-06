@@ -14,6 +14,10 @@ const api = {
   cadastro_produto: "http://localhost:3005",
   cadastro: "http://localhost:3000",
 };
+const basePath = window.location.pathname.includes("green_line_web")
+          ? "/green_line_web/public"
+          : "/public";
+
 function mostrarFeedback(mensagem, tipo = "success") {
   const toast = document.createElement("div");
   toast.className = `toast align-items-center text-white bg-${tipo} border-0 position-fixed bottom-0 end-0`;
@@ -56,24 +60,23 @@ async function verificarEstadoLogin() {
       elementosHTML.iconeUsuario.title = "Usuário logado";
       if (dadosUsuario?.adm === true) {
         // Se for administrador
-        elementosHTML.link_usuario.href =
-          "/green_line_web/public/perfilAdm.html" || "/public/perfilAdm.html";
+        elementosHTML.link_usuario.href = `${basePath}/perfilAdm.html`;
       } else {
-        // Se for usuário comum
-        elementosHTML.link_usuario.href =
-          "/green_line_web/public/perfil.html" || "/public/perfil.html";
+        elementosHTML.link_usuario.href = `${basePath}/perfil.html`;
       }
     } else {
       // Reseta para estado não logado
       elementosHTML.iconeUsuario.className = "bi bi-person";
       elementosHTML.iconeUsuario.title = "Fazer login";
-      elementosHTML.link_usuario.href =
-        "/green_line_web/public/login.html" || "/public/login.html";
+
+      elementosHTML.link_usuario.href = `${basePath}/login.html`;
     }
 
     // Atualiza carrinho
     elementosHTML.badgeCarrinho.innerText =
-      dadosUsuario?.quantidade_produtos > 0 ? dadosUsuario.quantidade_produtos : "";
+      dadosUsuario?.quantidade_produtos > 0
+        ? dadosUsuario.quantidade_produtos
+        : "";
   } catch (erro) {
     sessionStorage.clear(); // Limpa em caso de erro
     console.error("Erro ao verificar login:", erro.message);

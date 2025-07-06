@@ -217,7 +217,7 @@ if (maxTextEl) {
     btnComprar.onclick = () => {
       const id_pessoa = sessionStorage.getItem('id_pessoa');
       if (!id_pessoa) {
-        alert('Por favor, faça login ou cadastro para continuar sua compra.',"danger");
+        showAlert('Por favor, faça login ou cadastro para continuar sua compra.',"danger");
         return;
       }
   
@@ -243,7 +243,7 @@ if (maxTextEl) {
     const quantidade = Math.max(1, Math.min(Number(qtdEl.value) || 1, maxEstoque));
     const id_pessoa = sessionStorage.getItem('id_pessoa');
     if (!id_pessoa) {
-      alert('Por favor, faça login ou cadastro para adicionar ao carrinho.');
+      showAlert('Por favor, faça login ou cadastro para adicionar ao carrinho.',"danger");
       return;
     }
 
@@ -261,15 +261,19 @@ if (maxTextEl) {
       .then(res => res.json())
       .then(resposta => {
         if (resposta.codigo === 1 || resposta.mensagem === 'ITEM_DUPLICADO') {
-          alert('⚠️ Este item já está no seu carrinho');
+          showAlert('Este item já está no seu carrinho',"warning");
         } else if (resposta.sucesso) {
-          alert('✅ Item adicionado ao carrinho com sucesso!');
+          sessionStorage.setItem('carrinho', (Number(sessionStorage.getItem('carrinho') || 0) + 1));
+          const badgeCarrinho = document.getElementById('badge-carrinho');
+          if (badgeCarrinho) {
+            badgeCarrinho.textContent = (Number(badgeCarrinho.textContent) || 0) + quantidade;}
+          showAlert('Item adicionado ao carrinho com sucesso!',"success");
         } else {
-          alert('❌ Falha ao adicionar item ao carrinho');
+          showAlert('❌ Falha ao adicionar item ao carrinho');
         }
       })
       .catch(() => {
-        alert('❌ Ocorreu um erro ao adicionar o item ao carrinho');
+        showAlert('❌ Ocorreu um erro ao adicionar o item ao carrinho');
       });
   };
 }
@@ -306,7 +310,7 @@ function adicionarAoCarrinho(produto, quantidade = 1, variacao = '') {
   quantidade = Math.max(1, quantidade);
   const id_pessoa = sessionStorage.getItem('id_pessoa');
   if (!id_pessoa) {
-    alert('Por favor, faça login ou cadastro para adicionar ao carrinho.');
+    showAlert('Por favor, faça login ou cadastro para adicionar ao carrinho.');
     return;
   }
   fetch('https://green-line-web.onrender.com/carrinho', {
@@ -322,15 +326,15 @@ function adicionarAoCarrinho(produto, quantidade = 1, variacao = '') {
     .then(res => res.json())
     .then(resposta => {
       if (resposta.codigo === 1 || resposta.mensagem === 'ITEM_DUPLICADO') {
-        alert('⚠️ Este item já está no seu carrinho');
+        showAlert('Este item já está no seu carrinho', 'warning');
       } else if (resposta.sucesso) {
-        alert('✅ Item adicionado ao carrinho com sucesso!');
+        showAlert('Item adicionado ao carrinho com sucesso!', 'success');
       } else {
-        alert('❌ Falha ao adicionar item ao carrinho');
+        showAlert('❌ Falha ao adicionar item ao carrinho');
       }
     })
     .catch(() => {
-      alert('❌ Ocorreu um erro ao adicionar o item ao carrinho');
+      showAlert('❌ Ocorreu um erro ao adicionar o item ao carrinho');
     });
 }
 
@@ -496,8 +500,11 @@ btnEnviar.onclick = async () => {
 
 function showAlert(msg, type = 'danger') {
   const alertDiv = document.createElement('div');
-  alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`;
+  alertDiv.className = `alert alert-dismissible fade show text-white bg-${type} border-0 position-fixed bottom-0 end-0`;
   alertDiv.style.zIndex = 2000;
+  alertDiv.style.fontSize = '0.8rem';
+  alertDiv.style.width = '15rem';
+  alertDiv.style.margin = '10px';
   alertDiv.innerHTML = `
     <span>${msg}</span>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>

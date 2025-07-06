@@ -156,11 +156,11 @@ async function carregarProdutos() {
       console.log("URL da requisição:", url);
 
       // Fazendo a requisição
-      const response = await fetch(url);
       let categoria = decodeURIComponent(categoriaSelecionada);
       // Atualizando a imagem do carrossel
       elementos.carroselImagem.src = `../img/index_categorias/${categoria}.jpg`;
       elementos.carroselImagem.alt = categoria;
+      const response = await fetch(url);
       const data = await response.json();
 
       if (!Array.isArray(data) || data.length === 0) {
