@@ -26,6 +26,9 @@ let estado = {
   id_produto: null,
   quantidadeProdutos: 1,
 };
+const caminho = window.location.pathname.includes("green_line_web")
+          ? "/green_line_web/public"
+          : "/public";
 
 // ==================== FUNÇÕES PRINCIPAIS ====================
 
@@ -135,7 +138,7 @@ function criarCardProduto(produto) {
   `;
   // Ao clicar no card, redireciona para a página de detalhes do produto
   card.addEventListener('click', () => {
-    window.location.href = `../public/produto.html?id=${produto.id_produto}`;
+    window.location.href = `${caminho}/produto.html?id=${produto.id_produto}`;
   });
   return card;
 }
@@ -315,7 +318,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       console.log("Dados da compra:", dadosCompra);
       sessionStorage.setItem("dadosCompra", JSON.stringify(dadosCompra));
-      window.location.href = "/green_line_web/public/vendas.html" || "../public/vendas.html";
+      window.location.href = `${caminho}/vendas.html`;
     });
 
   // Botão "Adicionar ao Carrinho"

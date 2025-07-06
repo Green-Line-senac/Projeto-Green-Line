@@ -18,6 +18,9 @@ const config = {
   fallbackImage:
     "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGZpbGw9IiM5OTkiPk5lbmh1bWEgSW1hZ2VtPC90ZXh0Pjwvc3ZnPg==",
 };
+const caminho = window.location.pathname.includes("green_line_web")
+  ? "/green_line_web/public"
+  : "/public";
 
 // Elementos DOM
 const elementos = {
@@ -141,40 +144,41 @@ function sanitizarProduto(produto) {
  */
 async function carregarProdutos() {
   try {
-      mostrarLoader();
+    mostrarLoader();
 
-      // Recuperando a categoria armazenada
-      let categoriaSelecionada = sessionStorage.getItem("categoriaSelecionada");
-     
+    // Recuperando a categoria armazenada
+    let categoriaSelecionada = sessionStorage.getItem("categoriaSelecionada");
 
-      if (!categoriaSelecionada) {
-          throw new Error("Nenhuma categoria foi selecionada.");
-      }
+    if (!categoriaSelecionada) {
+      throw new Error("Nenhuma categoria foi selecionada.");
+    }
 
-      // Construindo a URL corretamente para passar a categoria como query string
-      const url = `${apiProduto.online}/produtosEspecificos?categoria=${encodeURIComponent(categoriaSelecionada)}`;
-      console.log("URL da requisição:", url);
+    // Construindo a URL corretamente para passar a categoria como query string
+    const url = `${
+      apiProduto.online
+    }/produtosEspecificos?categoria=${encodeURIComponent(
+      categoriaSelecionada
+    )}`;
+    console.log("URL da requisição:", url);
+    // Fazendo a requisição
+    const response = await fetch(url);
+    let categoria = decodeURIComponent(categoriaSelecionada);
+    // Atualizando a imagem do carrossel
+    elementos.carroselImagem.src = `../img/index_categorias/${categoria}.jpg`;
+    elementos.carroselImagem.alt = categoria;
+    const data = await response.json();
 
-      // Fazendo a requisição
-      let categoria = decodeURIComponent(categoriaSelecionada);
-      // Atualizando a imagem do carrossel
-      elementos.carroselImagem.src = `../img/index_categorias/${categoria}.jpg`;
-      elementos.carroselImagem.alt = categoria;
-      const response = await fetch(url);
-      const data = await response.json();
-
-      if (!Array.isArray(data) || data.length === 0) {
-          renderizarProdutos();
-          return;
-      }
-
-      // Atualizando os produtos na interface
-      estado.produtos = data.map(sanitizarProduto);
+    if (!Array.isArray(data) || data.length === 0) {
       renderizarProdutos();
+      return;
+    }
 
+    // Atualizando os produtos na interface
+    estado.produtos = data.map(sanitizarProduto);
+    renderizarProdutos();
   } catch (erro) {
-      console.error("Erro ao carregar produtos:", erro);
-      mostrarErroCarregamento();
+    console.error("Erro ao carregar produtos:", erro);
+    mostrarErroCarregamento();
   }
 }
 
@@ -211,15 +215,16 @@ function criarCardProduto(produto) {
     ? `<span style="text-decoration: line-through; font-size: 0.9rem;">R$ ${produto.preco.toFixed(
         2
       )}</span>
-       <span class="fs-5 ms-2">R$ ${produto.preco_promocional.toFixed(
-         2
-       )}</span>`
+       <span class="fs-5 ms-2">R$ ${(produto.preco * 0.8).toFixed(2)}</span>`
     : `<span class="fs-5">R$ ${produto.preco.toFixed(2)}</span>`;
   card.innerHTML = `
-    <div class="card h-100 cursor-pointer" onclick="abrirModalProduto(${JSON.stringify(
-      produto
-    ).replace(/"/g, "&quot;")})">
-      <img src="${produto.imagem_1}" 
+    <div class="card h-100 cursor point">
+      <img src="${
+        produto.imagem_1 != null
+          ? produto.imagem_1
+          : "https://github.com/KauaNca/green_line_desktop/tree/main/imagens/produtos/" +
+            produto.imagem_1
+      }" 
            class="card-img-top" 
            alt="${escapeHtml(produto.nome)}"
            loading="lazy"
@@ -228,7 +233,9 @@ function criarCardProduto(produto) {
       <div class="card-body">
         <h6 class="card-title">${escapeHtml(produto.nome)}</h6>
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <span class="text-warning">${gerarEstrelas(Number(produto.avaliacao))}</span>
+          <span class="text-warning">${gerarEstrelas(
+            Number(produto.avaliacao)
+          )}</span>
           <small class="text-muted">${produto.numAvaliacoes} av.</small>
         </div>
         <p class="card-text text-muted small">${escapeHtml(
@@ -236,13 +243,11 @@ function criarCardProduto(produto) {
         )}${produto.descricao_curta.length > 60 ? "..." : ""}</p>
         <p class="fw-bold mb-0 ${produto.promocao ? "text-success" : ""}">
           ${precoFormatado}
-        </p>
-        ${
-          produto.estoque === 0
-            ? '<span class="badge bg-secondary mt-2">Fora de estoque</span>'
-            : ""
-        }
-        <p>
+        </p class="">
+        ${(produto.estoque = 0
+          ? '<span class="badge bg-secondary mt-2">Fora de estoque</span>'
+          : "")}
+        <p class="">
           ${
             produto.categoria
               ? `<span class="badge bg-success mt-2">${produto.categoria}</span>`
@@ -252,6 +257,10 @@ function criarCardProduto(produto) {
       </div>
     </div>
   `;
+  // Ao clicar no card, redireciona para a página de detalhes do produto
+  card.addEventListener("click", () => {
+    window.location.href = `${caminho}/produto.html?id=${produto.id_produto}`;
+  });
   return card;
 }
 
@@ -399,129 +408,152 @@ function abrirModalProduto(dadosProduto) {
 }
 function configurarEventos() {
   // Eventos do modal
-  const produtoModal = document.getElementById('produtoModal');
-  produtoModal.addEventListener('hidden.bs.modal', () => {
-    const inputQuantidade = document.getElementById('quantidadeModal');
+  const produtoModal = document.getElementById("produtoModal");
+  produtoModal.addEventListener("hidden.bs.modal", () => {
+    const inputQuantidade = document.getElementById("quantidadeModal");
     inputQuantidade.value = 1;
     estado.id_produto = null;
   });
 
   // Eventos de quantidade
-  document.querySelectorAll('[data-action="increase"]').forEach(btn =>
-    btn.addEventListener('click', () => adjustQuantity('quantidadeModal', 1))
-  );
+  document
+    .querySelectorAll('[data-action="increase"]')
+    .forEach((btn) =>
+      btn.addEventListener("click", () => adjustQuantity("quantidadeModal", 1))
+    );
 
-  document.querySelectorAll('[data-action="decrease"]').forEach(btn =>
-    btn.addEventListener('click', () => adjustQuantity('quantidadeModal', -1))
-  );
+  document
+    .querySelectorAll('[data-action="decrease"]')
+    .forEach((btn) =>
+      btn.addEventListener("click", () => adjustQuantity("quantidadeModal", -1))
+    );
 
   // Eventos de compra/carrinho
-  document.getElementById('btnComprarAgora').addEventListener('click', async () => {
-    if (!estado.id_pessoa) {
-      mostrarFeedback("Por favor, faça login ou cadastro para prosseguir", "danger");
-      return;
-    }
-// Obter quantidade
-const qtdInput = document.getElementById('quantidadeModal');
-const qtd = parseInt(qtdInput.value, 10);
+  document
+    .getElementById("btnComprarAgora")
+    .addEventListener("click", async () => {
+      if (!estado.id_pessoa) {
+        mostrarFeedback(
+          "Por favor, faça login ou cadastro para prosseguir",
+          "danger"
+        );
+        return;
+      }
+      // Obter quantidade
+      const qtdInput = document.getElementById("quantidadeModal");
+      const qtd = parseInt(qtdInput.value, 10);
 
-// Validar quantidade
-if (isNaN(qtd) || qtd <= 0 || qtd > 100) { 
-  mostrarFeedback("Quantidade inválida! Por favor, insira um valor entre 1 e 1F00.", 'danger');
-  return;
-}
-console.log("Quantidade selecionada:", qtd);
+      // Validar quantidade
+      if (isNaN(qtd) || qtd <= 0 || qtd > 100) {
+        mostrarFeedback(
+          "Quantidade inválida! Por favor, insira um valor entre 1 e 1F00.",
+          "danger"
+        );
+        return;
+      }
+      console.log("Quantidade selecionada:", qtd);
 
-// Obter nome do produto
-const nome_produto = document.getElementById('produtoModalLabel').textContent.trim();
+      // Obter nome do produto
+      const nome_produto = document
+        .getElementById("produtoModalLabel")
+        .textContent.trim();
 
-// Obter elementos de preço
-const originalPriceEl = document.querySelector('#produtoModalPreco .original-price');
-const discountPriceEl = document.querySelector('#produtoModalPreco .discount-price');
+      // Obter elementos de preço
+      const originalPriceEl = document.querySelector(
+        "#produtoModalPreco .original-price"
+      );
+      const discountPriceEl = document.querySelector(
+        "#produtoModalPreco .discount-price"
+      );
 
-if (!originalPriceEl) {
-  mostrarFeedback("Erro ao obter preço do produto.", 'danger');
-  return;
-}
+      if (!originalPriceEl) {
+        mostrarFeedback("Erro ao obter preço do produto.", "danger");
+        return;
+      }
 
-// Extrair preço de forma segura
-function extrairPreco(elemento) {
-  if (!elemento) return null;
-  
-  const precoTexto = elemento.textContent.trim();
-  const precoNumerico = parseFloat(
-    precoTexto
-      .replace(/[^\d,]/g, '')  
-      .replace(',', '.')
-  );
-  
-  return isNaN(precoNumerico) ? null : precoNumerico;
-}
+      // Extrair preço de forma segura
+      function extrairPreco(elemento) {
+        if (!elemento) return null;
 
+        const precoTexto = elemento.textContent.trim();
+        const precoNumerico = parseFloat(
+          precoTexto.replace(/[^\d,]/g, "").replace(",", ".")
+        );
 
-let preco_final;
-const isPromocao = window.getComputedStyle(originalPriceEl).textDecoration.includes('line-through');
+        return isNaN(precoNumerico) ? null : precoNumerico;
+      }
 
-if (isPromocao && discountPriceEl) {
-  preco_final = extrairPreco(discountPriceEl);
-} else {
-  preco_final = extrairPreco(originalPriceEl);
-}
+      let preco_final;
+      const isPromocao = window
+        .getComputedStyle(originalPriceEl)
+        .textDecoration.includes("line-through");
 
-// Validar preço
-if (preco_final === null || preco_final <= 0) {
-  mostrarFeedback("Preço do produto inválido.", 'danger');
-  return;
-}
+      if (isPromocao && discountPriceEl) {
+        preco_final = extrairPreco(discountPriceEl);
+      } else {
+        preco_final = extrairPreco(originalPriceEl);
+      }
 
-console.log("Preço final:", preco_final);
+      // Validar preço
+      if (preco_final === null || preco_final <= 0) {
+        mostrarFeedback("Preço do produto inválido.", "danger");
+        return;
+      }
 
-// Calcular subtotal com arredondamento
-const subtotal = Math.round((preco_final * qtd) * 100) / 100;
-console.log("Subtotal:", subtotal.toFixed(2));
+      console.log("Preço final:", preco_final);
 
+      // Calcular subtotal com arredondamento
+      const subtotal = Math.round(preco_final * qtd * 100) / 100;
+      console.log("Subtotal:", subtotal.toFixed(2));
 
-    const dadosCompra = {
-      nome_produto,
-      preco_final,
-      quantidade: qtd,
-      subtotal,
-      id_pessoa: estado.id_pessoa,
-      data: new Date().toISOString(),
-    };
+      const dadosCompra = {
+        nome_produto,
+        preco_final,
+        quantidade: qtd,
+        subtotal,
+        id_pessoa: estado.id_pessoa,
+        data: new Date().toISOString(),
+      };
 
-    console.log("Dados da compra:", dadosCompra);
-    sessionStorage.setItem("dadosCompra", JSON.stringify(dadosCompra));
-    window.location.href = "vendas.html";
-  });
+      console.log("Dados da compra:", dadosCompra);
+      sessionStorage.setItem("dadosCompra", JSON.stringify(dadosCompra));
+      window.location.href = "vendas.html";
+    });
 
-  document.getElementById('btnAddCarrinho').addEventListener('click', async () => {
-    if (!estado.id_pessoa) {
-      mostrarFeedback("Por favor, faça login ou cadastro para prosseguir", "danger");
-      return;
-    }
+  document
+    .getElementById("btnAddCarrinho")
+    .addEventListener("click", async () => {
+      if (!estado.id_pessoa) {
+        mostrarFeedback(
+          "Por favor, faça login ou cadastro para prosseguir",
+          "danger"
+        );
+        return;
+      }
 
-    const quantidade = parseInt(document.getElementById('quantidadeModal').value, 10);
-    if (isNaN(quantidade) || quantidade <= 0) {
-      mostrarFeedback("Quantidade inválida!", 'danger');
-      return;
-    }
+      const quantidade = parseInt(
+        document.getElementById("quantidadeModal").value,
+        10
+      );
+      if (isNaN(quantidade) || quantidade <= 0) {
+        mostrarFeedback("Quantidade inválida!", "danger");
+        return;
+      }
 
-    try {
-      const requisicao = await fetch(`${apiProduto.online}/carrinho`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id_pessoa: estado.id_pessoa,
-          id_produto: estado.id_produto,
-          quantidade
-        })
-      });
+      try {
+        const requisicao = await fetch(`${apiProduto.online}/carrinho`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id_pessoa: estado.id_pessoa,
+            id_produto: estado.id_produto,
+            quantidade,
+          }),
+        });
 
-      const resposta = await requisicao.json();
-     
+        const resposta = await requisicao.json();
 
-      if (resposta.codigo === 1 || resposta.mensagem === "ITEM_DUPLICADO") {
+        if (resposta.codigo === 1 || resposta.mensagem === "ITEM_DUPLICADO") {
           mostrarFeedback("⚠️ Este item já está no seu carrinho", "warning");
         } else if (resposta.sucesso) {
           let badge = document.getElementById("badge-carrinho");
@@ -538,8 +570,9 @@ console.log("Subtotal:", subtotal.toFixed(2));
         mostrarFeedback(
           "❌ Ocorreu um erro ao adicionar o item ao carrinho",
           "danger"
-        )}
-  });
+        );
+      }
+    });
 }
 
 // == Inicialização ==
