@@ -51,7 +51,7 @@ formularioCadastro.addEventListener("submit", function (e) {
     infoVal = false;
   }
   // Expressão regular para pelo menos 1 letra e 1 número
-  const passRegex = /^(?=.*[a-zA-Z])(?=.*\d).{5,}$/;
+  const passRegex = /^(?=.*[a-zA-Z])(?=.*\d).{8,}$/;
   if (!passRegex.test(senha)) {
     infoVal = false;
   }

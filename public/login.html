@@ -86,6 +86,9 @@
                                         title="Senha" id="senhaErro" aria-hidden="true"></span>
                                     <div class="form-floating">
                                         <input type="password" class="form-control input" id="senha" placeholder=" "
+                                        pattern="(?=.*\d)(?=.*[a-zA-Z]).{8,}"
+                                                title="A senha deve ter pelo menos 8 caracteres, incluindo ao menos 1 número e 1 letra."
+                                                maxlength="8"
                                             required aria-required="true" aria-describedby="senhaHelp">
                                         <label class="form-label" for="senha">Senha</label>
                                     </div>
