@@ -81,7 +81,7 @@
                                         <div class="form-floating">
                                             <input type="text" class="form-control input" id="cpf" placeholder=" "
                                                 pattern="\d{3}\.\d{3}\.\d{3}-\d{2}" maxlength="14"
-                                                title="Digite o CPF no formato 123.456.789-00" onchange="verificarCPF()"
+                                                title="Digite o CPF no formato 123.456.789-00"
                                                 required aria-required="true">
                                             <label class="form-label" for="cpf">CPF</label>
                                         </div>
@@ -94,7 +94,7 @@
                                             id="emailErro" aria-hidden="true"></span>
                                         <div class="form-floating">
                                             <input type="email" class="form-control input" id="email" placeholder=" "
-                                                maxlength="60" onchange="verificarEmail()"
+                                                maxlength="60"
                                                 required aria-required="true">
                                             <label class="form-label" for="email">E-mail</label>
                                         </div>
@@ -153,7 +153,7 @@
         crossorigin="anonymous"></script>
     
     <!-- JavaScript personalizado -->
-    <script src="../js/frontendCadastro.js" defer></script>
+    <script type="module" src="../js/frontendCadastro.js" defer></script>
 </body>
 
 </html>
