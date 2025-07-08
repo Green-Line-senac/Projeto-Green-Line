@@ -132,11 +132,15 @@ app.get("/redefinir-senha", async (req, res) => {
 app.get("/verificarEmail", async (req, res) => {
   const { email } = req.query;
   const sql = "SELECT COUNT(*) AS total FROM pessoa WHERE email = ?";
-
   try {
     const verificacao = await db.query(sql, [email]);
-    const existe = verificacao[0].total > 0;
-    res.json({ existe });
+    if(verificacao[0].total>0){
+      res.json({codigo: 1, mensagem:"Email cadastrado"})
+    }
+    else{
+      res.json({codigo: 2, mensagem:"Email disponível"})
+    }
+
   } catch (erro) {
     res.status(500).json({ erro: "Erro ao verificar o email" });
   }
@@ -148,8 +152,12 @@ app.get("/verificarCPF", async (req, res) => {
 
   try {
     const verificacao = await db.query(sql, [cpf]);
-    const existe = verificacao[0].total > 0;
-    res.json({ existe });
+    if(verificacao[0].total>0){
+      res.json({codigo: 1, mensagem:"CPF cadastrado"})
+    }
+    else{
+      res.json({codigo: 2, mensagem:"CPF disponível"})
+    }
   } catch (erro) {
     res.status(500).json({ erro: "Erro ao verificar o cpf" });
   }

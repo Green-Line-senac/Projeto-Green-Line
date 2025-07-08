@@ -498,7 +498,7 @@ btnEnviar.onclick = async () => {
   }
 }
 
-function showAlert(msg, type = 'danger') {
+export function showAlert(msg, type = 'danger') {
   const alertDiv = document.createElement('div');
   alertDiv.className = `alert alert-dismissible fade show text-white bg-${type} border-0 position-fixed bottom-0 end-0`;
   alertDiv.style.zIndex = 2000;
