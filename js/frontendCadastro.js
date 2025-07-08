@@ -1,46 +1,67 @@
-import { Usuario } from "./teste.js";
-//Variáveis
+import { Usuario } from "./classeUsuario.js";
+
+// Variáveis
 const api = {
   online: "https://green-line-web.onrender.com",
-  cadastro: "http://localhost:3000",
+  cadastro: "http://localhost:3000"
 };
 
 const formularioCadastro = document.getElementById("formularioCadastro");
-formularioCadastro.addEventListener("submit", function (e) {
+formularioCadastro.addEventListener("submit", async function (e) {
   e.preventDefault();
 
-  let btEnviar = document.getElementById("cadastrar-usuario");
+  const btEnviar = document.getElementById("cadastrar-usuario");
+  const originalText = btEnviar.innerHTML;
+  
+  try {
+    // Mostra loading
     btEnviar.disabled = true;
-    btEnviar.innerHTML =
-      '<span class="spinner-border spinner-border-sm" role:"status" aria-hidden:"true"></span>';
+    btEnviar.innerHTML = `
+      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+    `;
 
-  const nome = document.getElementById("username").value;
-  const cpf = document.getElementById("cpf").value;
-  const email = document.getElementById("email").value;
-  const telefone = document.getElementById("telefone").value;
-  const senha = document.getElementById("password").value;
+    // Obtém valores
+    const nome = document.getElementById("username").value.trim();
+    const cpf = document.getElementById("cpf").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const telefone = document.getElementById("telefone").value.trim();
+    const senha = document.getElementById("password").value;
 
-  let usuario = new Usuario(
-    nome,cpf, email, telefone, senha
-  );
-  usuario.salvarUsuario();
-
+    // Cria e salva usuário (note a ordem correta dos parâmetros)
+    const usuario = new Usuario(nome, email, telefone, cpf, senha);
+    await usuario.salvarUsuario();
+    
+  } catch (error) {
+    console.error("Erro no cadastro:", error);
+    alert(error.message || "Erro ao cadastrar usuário");
+  } finally {
+    // Restaura o botão
+    btEnviar.disabled = false;
+    btEnviar.innerHTML = originalText;
+  }
 });
 
-
-//MÁSCARAS
-//CPF
+// Máscaras (melhoradas)
 document.getElementById("cpf").addEventListener("input", function (e) {
   let value = e.target.value.replace(/\D/g, "");
-  value = value.replace(/(\d{3})(\d)/, "$1.$2");
-  value = value.replace(/(\d{3})(\d)/, "$1.$2");
-  value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+  
+  if (value.length > 11) value = value.substring(0, 11);
+  
+  value = value.replace(/(\d{3})(\d)/, "$1.$2")
+              .replace(/(\d{3})(\d)/, "$1.$2")
+              .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+  
   e.target.value = value;
 });
-//TELEFONE
+
 document.getElementById("telefone").addEventListener("input", function (e) {
-  let value = e.target.value.replace(/\D/g, ""); // Remove caracteres não numéricos
-  value = value.replace(/(\d{2})(\d)/, "($1) $2"); // Adiciona parênteses e espaço após DDD
-  value = value.replace(/(\d{5})(\d)/, "$1-$2"); // Adiciona hífen no meio do número
+  let value = e.target.value.replace(/\D/g, "");
+  
+  // Limita a 11 dígitos (DDD + 9 dígitos)
+  if (value.length > 11) value = value.substring(0, 11);
+  
+  value = value.replace(/^(\d{2})(\d)/g, "($1) $2")
+              .replace(/(\d{5})(\d)/, "$1-$2");
+  
   e.target.value = value;
 });

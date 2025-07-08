@@ -1,4 +1,5 @@
 import { showAlert } from "./frontendProdutoDetalhe.js";
+
 const api = {
   online: "https://green-line-web.onrender.com",
   cadastro: "http://localhost:3000",
@@ -6,10 +7,6 @@ const api = {
 
 export class Usuario {
   constructor(nome, email, telefone, cpf, senha) {
-    if (!nome || !email || !telefone || !cpf || !senha) {
-      throw new Error("Todos os campos são obrigatórios.");
-    }
-
     this.nome = nome;
     this.email = email;
     this.telefone = telefone;
@@ -18,52 +15,54 @@ export class Usuario {
   }
 
   validarDados() {
-    const nameRegex = /^[a-zA-Z\s]{1,30}$/;
+    const nameRegex = /^[a-zA-ZÀ-ÿ\s']{1,30}$/;
     if (!nameRegex.test(this.nome)) {
-      throw new Error(
-        "Nome inválido. Use apenas letras e espaços (até 30 caracteres)."
-      );
+      showAlert("Nome inválido. Use apenas letras e espaços (até 30 caracteres).", "danger");
+      return false;
     }
 
-    const emailRegex = /^([a-zA-Z0-9._%+-]+)@([a-zA-Z0-9.-]+)\.([a-zA-Z]{2,})$/;
-    if (!emailRegex.test(this.email)) {
-      throw new Error("E-mail inválido.");
-    }
-
-    const phoneRegex = /^\(\d{2}\)\s9\d{4}-\d{4}$/;
+    const phoneRegex = /^\(\d{2}\)\s?\d{4,5}-?\d{4}$/;
     if (!phoneRegex.test(this.telefone)) {
-      throw new Error("Telefone inválido. Use o formato (XX) 9XXXX-XXXX.");
+      showAlert("Telefone inválido. Use o formato (XX) 9XXXX-XXXX.", "danger");
+      return false;
     }
 
-    const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$|^\d{11}$/;
+    const cpfRegex = /^(\d{3}\.){2}\d{3}-\d{2}$|^\d{11}$/;
     if (!cpfRegex.test(this.cpf)) {
-      throw new Error(
-        "CPF inválido. Use o formato XXX.XXX.XXX-XX ou 11 dígitos."
-      );
+      showAlert("CPF inválido. Use o formato XXX.XXX.XXX-XX ou 11 dígitos.", "danger");
+      return false;
     }
 
-    const passRegex = /^(?=.*[a-zA-Z])(?=.*\d).{8,}$/;
+    const passRegex = /^(?=.*[a-zA-ZÀ-ÿ])(?=.*\d).{8,}$/;
     if (!passRegex.test(this.senha)) {
-      throw new Error(
-        "Senha inválida. Deve ter pelo menos 8 caracteres, 1 letra e 1 número."
-      );
+      showAlert("Senha inválida. Deve ter pelo menos 8 caracteres, 1 letra e 1 número.", "danger");
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.email)) {
+      showAlert("E-mail inválido.", "danger");
+      return false;
     }
 
     return true;
   }
 
   async salvarUsuario() {
-    try {
-      // Valida os dados antes de salvar
-      this.validarDados();
+    // Valida os dados antes de salvar
+    if (!this.validarDados()) {
+      return; // Se a validação falhar, não continua
+    }
 
+    try {
       // Verifica se o CPF já está cadastrado
       const cpfResponse = await this.verificarCPF(this.cpf);
       if (cpfResponse.codigo === 1) {
         showAlert(cpfResponse.mensagem, "danger");
         return;
       }
-      const emailReponse = await this.verificarEmail(this.email);
+
+      // Verifica se o E-mail já está cadastrado
+      const emailResponse = await this.verificarEmail(this.email);
       if (emailResponse.codigo === 1) {
         showAlert(emailResponse.mensagem, "danger");
         return;
@@ -84,37 +83,34 @@ export class Usuario {
 
       const data = await response.json();
 
-      if (data.status === 200) {
+      if (data.codigo === 200) {
         showAlert(data.mensagem, "success");
       } else {
         showAlert(data.mensagem, "danger");
       }
     } catch (error) {
       console.error("Erro ao cadastrar:", error);
-      showAlert(data.mensagem, "danger");
+      showAlert("Erro ao cadastrar. Tente novamente mais tarde.", "danger");
     }
   }
 
   async verificarCPF(cpf) {
     try {
       const response = await fetch(`${api.online}/verificarCPF?cpf=${cpf}`);
-      const data = await response.json();
-      return data;
+      return await response.json();
     } catch (error) {
       console.error("Erro ao verificar CPF:", error);
-      throw new Error("Erro ao verificar CPF. Tente novamente mais tarde.");
+      return { codigo: 1, mensagem: "Erro ao verificar CPF." };
     }
   }
+
   async verificarEmail(email) {
     try {
-      const response = await fetch(
-        `${api.online}/verificarEmail?email=${email}`
-      );
-      const data = await response.json();
-      return data;
+      const response = await fetch(`${api.online}/verificarEmail?email=${email}`);
+      return await response.json();
     } catch (error) {
-      console.error("Erro ao verificar email:", error);
-      throw new Error("Erro ao verificar email. Tente novamente mais tarde.");
+      console.error("Erro ao verificar e-mail:", error);
+      return { codigo: 1, mensagem: "Erro ao verificar e-mail." };
     }
   }
 }

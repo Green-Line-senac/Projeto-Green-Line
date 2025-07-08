@@ -49,6 +49,7 @@ app.post("/cadastrarUsuario", async (req, res) => {
       return res.status(500).json({ erro: "Erro ao enviar o email" });
     }
     res.status(200).json({
+      codigo: 200,
       mensagem:
         "Cadastro realizado com sucesso! Verifique seu e-mail para confirmação.",
     });

@@ -68,7 +68,7 @@
                                             data-bs-toggle="tooltip" title="Nome" id="nomeErro" aria-hidden="true"></span>
                                         <div class="form-floating">
                                             <input type="text" class="form-control input" id="username" placeholder=" "
-                                                pattern="[a-zA-Z\s]+" maxlength="60"
+                                                maxlength="60"
                                                 title="Somente letras e espaços são permitidos." required
                                                 aria-required="true">
                                             <label class="form-label" for="username">Nome</label>
@@ -80,7 +80,7 @@
                                         <span class="alert d-block bi bi-card-list text-bg-success" id="cpfErro" aria-hidden="true"></span>
                                         <div class="form-floating">
                                             <input type="text" class="form-control input" id="cpf" placeholder=" "
-                                                pattern="\d{3}\.\d{3}\.\d{3}-\d{2}" maxlength="14"
+                                                maxlength="14"
                                                 title="Digite o CPF no formato 123.456.789-00"
                                                 required aria-required="true">
                                             <label class="form-label" for="cpf">CPF</label>
@@ -107,8 +107,8 @@
                                             id="telefoneErro" aria-hidden="true"></span>
                                         <div class="form-floating">
                                             <input type="text" class="form-control input" id="telefone" placeholder=" "
-                                                pattern="\(\d{2}\)\s9\d{4}-\d{4}" maxlength="15"
-                                                title="Digite o telefone no formato brasileiro: (11) 9XXXX-XXXX"
+                                                maxlength="17
+                                                title="Digite o telefone no formato brasileiro: (XX) 9XXXX-XXXX"
                                                 required aria-required="true">
                                             <label class="form-label" for="telefone">Telefone</label>
                                         </div>
@@ -120,7 +120,7 @@
                                             id="senhaErro" aria-hidden="true"></span>
                                         <div class="form-floating">
                                             <input type="password" class="form-control input" id="password"
-                                                placeholder=" " pattern="(?=.*\d)(?=.*[a-zA-Z]).{8,}"
+                                                placeholder="
                                                 title="A senha deve ter pelo menos 8 caracteres, incluindo ao menos 1 número e 1 letra."
                                                 maxlength="8" required aria-required="true">
                                             <label class="form-label" for="password">Senha</label>
