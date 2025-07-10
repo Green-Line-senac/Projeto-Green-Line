@@ -33,9 +33,9 @@ export class Usuario {
       return false;
     }
 
-    const passRegex = /^(?=.*[a-zA-ZÀ-ÿ])(?=.*\d).{8,}$/;
+    const passRegex = /^(?=.*[a-zA-ZÀ-ÿ])(?=.*\d).{5,}$/;
     if (!passRegex.test(this.senha)) {
-      showAlert("Senha inválida. Deve ter pelo menos 8 caracteres, 1 letra e 1 número.", "danger");
+      showAlert("Senha inválida. Deve ter pelo menos 5 caracteres, 1 letra e 1 número.", "danger");
       return false;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
