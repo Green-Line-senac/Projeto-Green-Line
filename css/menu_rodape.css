@@ -261,3 +261,6 @@ body {
     padding-bottom: 0;
   }
 }
+.text-justify {
+    text-align: justify;
+}

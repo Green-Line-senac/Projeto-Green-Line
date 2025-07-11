@@ -1,209 +1,471 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Green Line - Finalizar Compra</title>
-        <!--Favicon-->
-      <link rel="icon" type="image/png" href="../img/favicon/favicon-96x96.png" sizes="96x96" />
-<link rel="icon" type="image/svg+xml" href="../img/favicon/favicon/favicon.svg" />
-<link rel="shortcut icon" href="../img/favicon/favicon/favicon.ico" />
-<link rel="apple-touch-icon" sizes="180x180" href="../img/favicon/favicon/apple-touch-icon.png" />
-<link rel="manifest" href="../img/favicon/favicon/site.webmanifest" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="../css/menu_rodape.css">
-    <link rel="stylesheet" href="../css/vendas.css">
+    <!--Favicon-->
+    <link
+      rel="icon"
+      type="image/png"
+      href="../img/favicon/favicon-96x96.png"
+      sizes="96x96"
+    />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="../img/favicon/favicon/favicon.svg"
+    />
+    <link rel="shortcut icon" href="../img/favicon/favicon/favicon.ico" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="../img/favicon/favicon/apple-touch-icon.png"
+    />
+    <link rel="manifest" href="../img/favicon/favicon/site.webmanifest" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <link rel="stylesheet" href="../css/menu_rodape.css" />
+    <link rel="stylesheet" href="../css/vendas.css" />
     <script type="module" src="../js/frontendVendas.js" defer></script>
-</head>
+  </head>
 
-<body>
-<main>
-    <div class="container-fluid d-flex flex-column py-3">
+  <body>
+    <nav class="holo-header menu_green_line" role="banner">
+      <nav
+        class="navbar navbar-expand-lg container bg-dark.bg-gradient"
+        aria-label="Navegação principal"
+      >
+        <img
+          src="../img/logo.png"
+          alt="Logo GreenLine - Folha verde estilizada"
+          width="40"
+          height="40"
+        />
+
+        <!-- Título da marca -->
+        <a class="navbar-brand" href="../index.html" aria-current="page"
+          >GreenLine</a
+        >
+
+        <!-- Botão para dispositivos menores com label melhorado -->
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarContent"
+          aria-controls="navbarContent"
+          aria-expanded="false"
+          aria-label="Alternar navegação"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Conteúdo do menu de navegação -->
+        <div class="collapse navbar-collapse" id="navbarContent">
+          <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a
+                class="nav-link active"
+                href="../index.html"
+                aria-current="page"
+                >Início</a
+              >
+            </li>
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link active"
+                href="produtos.html"
+                aria-current="page"
+                >Produtos</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="manutencao.html">Ofertas</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="sobre.html">Sobre</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="contato.html">Contato</a>
+            </li>
+          </ul>
+
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a
+                class="nav-link icon-btn"
+                href="carrinho.html"
+                aria-label="Carrinho de compras"
+              >
+                <i class="bi bi-cart position-relative" aria-hidden="true">
+                  <span
+                    class="badge text-bg-success position-absolute top-0 start-100 translate-middle rounded-circle border border-light badge-sm"
+                    id="badge-carrinho"
+                    >0</span
+                  >
+                </i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link icon-btn"
+                href="login.html"
+                id="link-usuario"
+                aria-label="Área do usuário"
+                ><i
+                  id="icone-usuario"
+                  class="bi bi-person"
+                  aria-hidden="true"
+                ></i
+              ></a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </nav>
+    <main>
+      <div class="container-fluid d-flex flex-column py-3">
         <div class="container text-start mb-4">
-            <h1 class="h3 fw-bold text-success">Finalizar compra</h1>
-            <p class="lead">Preencha as informações para que a compra seja efetuada</p>
+          <h1 class="h3 fw-bold text-success">Finalizar compra</h1>
+          <p class="lead">
+            Preencha as informações para que a compra seja efetuada
+          </p>
         </div>
 
         <div class="container-fluid">
-            <div class="row justify-content-center g-3"> <!-- Alterado gap para g-3 (gap no row) -->
-                <!-- Formulário principal -->
-                <div class="col-12 col-lg-8 col-xl-7 secao-formulario">
-                    <form id="formulario-venda" novalidate>
-                        <fieldset class="mb-4 border rounded-3 px-3 py-2">
-                            <legend class="h5 fw-bold text-success mb-3">Endereço de entrega</legend>
-                            
-                            <!-- Linha CEP + Bairro -->
-                            <div class="row g-3"> <!-- Adicionado row com gap -->
-                                <div class="col-12 col-md-6"> <!-- CEP ocupa metade em desktop -->
-                                    <div class="form-floating py-2 mb-3">
-                                        <input type="text" name="cep" class="form-control" id="cep"
-                                            placeholder="Digite o CEP" required maxlength="9">
-                                        <label for="cep">CEP*</label>
-                                        <div class="invalid-feedback">Por favor, insira um CEP válido.</div>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-md-6"> <!-- Bairro ocupa outra metade -->
-                                    <div class="form-floating py-2 mb-3">
-                                        <input type="text" name="bairro" class="form-control" id="bairro"
-                                            placeholder="Digite o seu bairro" maxlength="30" readonly>
-                                        <label for="bairro">Bairro</label>
-                                        <div class="invalid-feedback"></div>
-                                    </div>
-                                </div>
-                            </div>
+          <div class="row justify-content-center g-3">
+            <!-- Alterado gap para g-3 (gap no row) -->
+            <!-- Formulário principal -->
+            <div class="col-12 col-lg-8 col-xl-7 secao-formulario">
+              <form id="formulario-venda" novalidate>
+                <fieldset class="mb-4 border rounded-3 px-3 py-2">
+                  <legend class="h5 fw-bold text-success mb-3">
+                    Endereço de entrega
+                  </legend>
 
-                            <!-- Endereço completo -->
-                            <div class="form-floating py-2 mb-3">
-                                <input type="text" name="endereco" class="form-control" id="logradouro"
-                                    placeholder="Digite o seu endereço" required maxlength="60" readonly>
-                                <label for="endereco">Endereço*</label>
-                                <div class="invalid-feedback">Por favor, insira um endereço válido.</div>
-                            </div>
-
-                            <!-- Linha Número + Complemento -->
-                            <div class="row g-3">
-                                <div class="col-12 col-sm-4 col-md-3 py-2">
-                                    <div class="form-floating mb-3 py-2">
-                                        <input type="text" name="numero" class="form-control" id="numeroCasa"
-                                            placeholder="Número" required maxlength="9" readonly>
-                                        <label for="numero">Número*</label>
-                                        <div class="invalid-feedback">Por favor, insira o número.</div>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-sm-8 col-md-9 py-2">
-                                    <div class="form-floating mb-3">
-                                        <input type="text" name="complemento" class="form-control" id="complementoCasa"
-                                            placeholder="Complemento de endereço" maxlength="30" readonly>
-                                        <label for="complemento">Complemento</label>
-                                        <div class="invalid-feedback"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Linha Cidade + Estado -->
-                            <div class="row g-3">
-                                <div class="col-12 col-md-8"> <!-- Cidade maior -->
-                                    <div class="form-floating py-2 mb-3">
-                                        <input type="text" name="cidade" class="form-control" id="cidade"
-                                            placeholder="Cidade" required maxlength="25" readonly>
-                                        <label for="cidade">Cidade*</label>
-                                        <div class="invalid-feedback">Por favor, insira a cidade.</div>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-md-4"> <!-- Estado menor -->
-                                    <div class="form-floating py-2 mb-3">
-                                        <select name="estado" class="form-select" id="uf" required readonly>
-                                            <option value="" selected disabled>Selecione</option>
-                                            <option value="AC">Acre</option>
-                                            <option value="AL">Alagoas</option>
-                                            <option value="AP">Amapá</option>
-                                            <option value="AM">Amazonas</option>
-                                            <option value="BA">Bahia</option>
-                                            <option value="CE">Ceará</option>
-                                            <option value="DF">Distrito Federal</option>
-                                            <option value="ES">Espírito Santo</option>
-                                            <option value="GO">Goiás</option>
-                                            <option value="MA">Maranhão</option>
-                                            <option value="MT">Mato Grosso</option>
-                                            <option value="MS">Mato Grosso do Sul</option>
-                                            <option value="MG">Minas Gerais</option>
-                                            <option value="PA">Pará</option>
-                                            <option value="PB">Paraíba</option>
-                                            <option value="PR">Paraná</option>
-                                            <option value="PE">Pernambuco</option>
-                                            <option value="PI">Piauí</option>
-                                            <option value="RJ">Rio de Janeiro</option>
-                                            <option value="RN">Rio Grande do Norte</option>
-                                            <option value="RS">Rio Grande do Sul</option>
-                                            <option value="RO">Rondônia</option>
-                                            <option value="RR">Roraima</option>
-                                            <option value="SC">Santa Catarina</option>
-                                            <option value="SP">São Paulo</option>
-                                            <option value="SE">Sergipe</option>
-                                            <option value="TO">Tocantins</option>
-                                        </select>
-                                        <label for="estado">Estado*</label>
-                                        <div class="invalid-feedback">Por favor, selecione um estado.</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </fieldset>
-
-                        <!-- Seção Pagamento -->
-                        <fieldset class="mb-4 border rounded-3 px-3 py-2">
-                            <legend class="h5 fw-bold text-success mb-3">Forma de pagamento</legend>
-                            <div class="form-floating py-2 mb-3">
-                                <select name="pagamento" class="form-select" id="pagamento" required>
-                                    <option value="" selected disabled>Selecione</option>
-                                    <option value="CC">Cartão de crédito</option>
-                                    <option value="PIX">PIX</option>
-                                    <option value="BB">Boleto Bancário</option>
-                                </select>
-                                <label for="pagamento">Forma de Pagamento*</label>
-                                <div class="invalid-feedback">Por favor, selecione uma forma de pagamento.</div>
-                            </div>
-                            <div class="px-2" id="container-pagamentos"></div>
-                        </fieldset>
-
-                        <!-- Botões -->
-                        <div class="d-flex flex-column flex-sm-row justify-content-end gap-3 mt-4">
-                            <button type="button" class="btn btn-outline-secondary order-1 order-sm-0" id="Cancelar">Cancelar</button>
-                            <button type="button" class="btn btn-success" id="FinalizarCompra">Finalizar Compra</button>
+                  <!-- Linha CEP + Bairro -->
+                  <div class="row g-3">
+                    <!-- Adicionado row com gap -->
+                    <div class="col-12 col-md-6">
+                      <!-- CEP ocupa metade em desktop -->
+                      <div class="form-floating py-2 mb-3">
+                        <input
+                          type="text"
+                          name="cep"
+                          class="form-control"
+                          id="cep"
+                          placeholder="Digite o CEP"
+                          required
+                          maxlength="9"
+                        />
+                        <label for="cep">CEP*</label>
+                        <div class="invalid-feedback">
+                          Por favor, insira um CEP válido.
                         </div>
-                    </form>
-                </div>
-
-                <!-- Resumo do Pedido -->
-                <div class="col-12 col-lg-4 col-xl-4 d-flex flex-column gap-4">
-                    <div class="border rounded-3 p-3">
-                        <h2 class="h5 mb-3">Resumo do pedido</h2>
-                        <div class="container-produtos-vendas">
-                            <!-- Produtos serão adicionados dinamicamente aqui -->
-                        </div>
-                        
-                        <div class="mt-3">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="text-muted">Subtotal:</span>
-                                <span id="contador-subtotal" class="fw-medium">R$ 0,00</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="text-muted">Frete:</span>
-                                <span id="contador-frete" class="fw-medium">R$ 0,00</span>
-                            </div>
-                            <hr>
-                            <div class="d-flex justify-content-between">
-                                <span class="fw-bold">Total:</span>
-                                <span id="contador-total" class="fw-bold text-success">R$ 0,00</span>
-                            </div>
-                        </div>
+                      </div>
                     </div>
-
-                    <div class="border rounded-3 p-3">
-                        <h2 class="h5 mb-3">Informações importantes</h2>
-                        <ul class="lista-dicas">
-                            <li>Frete calculado no fechamento da compra</li>
-                            <li>Prazos de entrega de 3 a 7 dias úteis</li>
-                            <li>Pagamento via PIX tem 5% de desconto</li>
-                            <li>Entregamos em todo território nacional</li>
-                        </ul>
+                    <div class="col-12 col-md-6">
+                      <!-- Bairro ocupa outra metade -->
+                      <div class="form-floating py-2 mb-3">
+                        <input
+                          type="text"
+                          name="bairro"
+                          class="form-control"
+                          id="bairro"
+                          placeholder="Digite o seu bairro"
+                          maxlength="30"
+                          readonly
+                        />
+                        <label for="bairro">Bairro</label>
+                        <div class="invalid-feedback"></div>
+                      </div>
                     </div>
+                  </div>
+
+                  <!-- Endereço completo -->
+                  <div class="form-floating py-2 mb-3">
+                    <input
+                      type="text"
+                      name="endereco"
+                      class="form-control"
+                      id="logradouro"
+                      placeholder="Digite o seu endereço"
+                      required
+                      maxlength="60"
+                      readonly
+                    />
+                    <label for="endereco">Endereço*</label>
+                    <div class="invalid-feedback">
+                      Por favor, insira um endereço válido.
+                    </div>
+                  </div>
+
+                  <!-- Linha Número + Complemento -->
+                  <div class="row g-3">
+                    <div class="col-12 col-sm-4 col-md-3 py-2">
+                      <div class="form-floating mb-3 py-2">
+                        <input
+                          type="text"
+                          name="numero"
+                          class="form-control"
+                          id="numeroCasa"
+                          placeholder="Número"
+                          required
+                          maxlength="9"
+                          readonly
+                        />
+                        <label for="numero">Número*</label>
+                        <div class="invalid-feedback">
+                          Por favor, insira o número.
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-12 col-sm-8 col-md-9 py-2">
+                      <div class="form-floating mb-3">
+                        <input
+                          type="text"
+                          name="complemento"
+                          class="form-control"
+                          id="complementoCasa"
+                          placeholder="Complemento de endereço"
+                          maxlength="30"
+                          readonly
+                        />
+                        <label for="complemento">Complemento</label>
+                        <div class="invalid-feedback"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Linha Cidade + Estado -->
+                  <div class="row g-3">
+                    <div class="col-12 col-md-8">
+                      <!-- Cidade maior -->
+                      <div class="form-floating py-2 mb-3">
+                        <input
+                          type="text"
+                          name="cidade"
+                          class="form-control"
+                          id="cidade"
+                          placeholder="Cidade"
+                          required
+                          maxlength="25"
+                          readonly
+                        />
+                        <label for="cidade">Cidade*</label>
+                        <div class="invalid-feedback">
+                          Por favor, insira a cidade.
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                      <!-- Estado menor -->
+                      <div class="form-floating py-2 mb-3">
+                        <select
+                          name="estado"
+                          class="form-select"
+                          id="uf"
+                          required
+                          readonly
+                        >
+                          <option value="" selected disabled>Selecione</option>
+                          <option value="AC">Acre</option>
+                          <option value="AL">Alagoas</option>
+                          <option value="AP">Amapá</option>
+                          <option value="AM">Amazonas</option>
+                          <option value="BA">Bahia</option>
+                          <option value="CE">Ceará</option>
+                          <option value="DF">Distrito Federal</option>
+                          <option value="ES">Espírito Santo</option>
+                          <option value="GO">Goiás</option>
+                          <option value="MA">Maranhão</option>
+                          <option value="MT">Mato Grosso</option>
+                          <option value="MS">Mato Grosso do Sul</option>
+                          <option value="MG">Minas Gerais</option>
+                          <option value="PA">Pará</option>
+                          <option value="PB">Paraíba</option>
+                          <option value="PR">Paraná</option>
+                          <option value="PE">Pernambuco</option>
+                          <option value="PI">Piauí</option>
+                          <option value="RJ">Rio de Janeiro</option>
+                          <option value="RN">Rio Grande do Norte</option>
+                          <option value="RS">Rio Grande do Sul</option>
+                          <option value="RO">Rondônia</option>
+                          <option value="RR">Roraima</option>
+                          <option value="SC">Santa Catarina</option>
+                          <option value="SP">São Paulo</option>
+                          <option value="SE">Sergipe</option>
+                          <option value="TO">Tocantins</option>
+                        </select>
+                        <label for="estado">Estado*</label>
+                        <div class="invalid-feedback">
+                          Por favor, selecione um estado.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </fieldset>
+
+                <!-- Seção Pagamento -->
+                <fieldset class="mb-4 border rounded-3 px-3 py-2">
+                  <legend class="h5 fw-bold text-success mb-3">
+                    Forma de pagamento
+                  </legend>
+                  <div class="form-floating py-2 mb-3">
+                    <select
+                      name="pagamento"
+                      class="form-select"
+                      id="pagamento"
+                      required
+                    >
+                      <option value="" selected disabled>Selecione</option>
+                      <option value="CC">Cartão de crédito</option>
+                      <option value="PIX">PIX</option>
+                      <option value="BB">Boleto Bancário</option>
+                    </select>
+                    <label for="pagamento">Forma de Pagamento*</label>
+                    <div class="invalid-feedback">
+                      Por favor, selecione uma forma de pagamento.
+                    </div>
+                  </div>
+                  <div class="px-2" id="container-pagamentos"></div>
+                </fieldset>
+
+                <!-- Botões -->
+                <div
+                  class="d-flex flex-column flex-sm-row justify-content-end gap-3 mt-4"
+                >
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary order-1 order-sm-0"
+                    id="Cancelar"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-success"
+                    id="FinalizarCompra"
+                  >
+                    Finalizar Compra
+                  </button>
                 </div>
+              </form>
             </div>
-        </div>
-    </div>
-</main>
-<script src="../js/freteCep.js"></script>
-<!-- Garantir todos os campos necessários para freteCep.js -->
-<input type="hidden" id="logradouro">
-<input type="hidden" id="bairro">
-<input type="hidden" id="cidade">
-<input type="hidden" id="uf">
-<input type="hidden" id="frete">
-<input type="hidden" id="numeroCasa">
-<input type="hidden" id="complementoCasa">
-</body>
 
+            <!-- Resumo do Pedido -->
+            <div class="col-12 col-lg-4 col-xl-4 d-flex flex-column gap-4">
+              <div class="border rounded-3 p-3">
+                <h2 class="h5 mb-3">Resumo do pedido</h2>
+                <div class="container-produtos-vendas">
+                  <!-- Produtos serão adicionados dinamicamente aqui -->
+                </div>
+
+                <div class="mt-3">
+                  <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Subtotal:</span>
+                    <span id="contador-subtotal" class="fw-medium"
+                      >R$ 0,00</span
+                    >
+                  </div>
+                  <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Frete:</span>
+                    <span id="contador-frete" class="fw-medium">R$ 0,00</span>
+                  </div>
+                  <hr />
+                  <div class="d-flex justify-content-between">
+                    <span class="fw-bold">Total:</span>
+                    <span id="contador-total" class="fw-bold text-success"
+                      >R$ 0,00</span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div class="border rounded-3 p-3">
+                <h2 class="h5 mb-3">Informações importantes</h2>
+                <ul class="lista-dicas">
+                  <li>Frete calculado no fechamento da compra</li>
+                  <li>Prazos de entrega de 3 a 7 dias úteis</li>
+                  <li>Pagamento via PIX tem 5% de desconto</li>
+                  <li>Entregamos em todo território nacional</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script src="../js/freteCep.js"></script>
+    <!-- Garantir todos os campos necessários para freteCep.js -->
+    <input type="hidden" id="logradouro" />
+    <input type="hidden" id="bairro" />
+    <input type="hidden" id="cidade" />
+    <input type="hidden" id="uf" />
+    <input type="hidden" id="frete" />
+    <input type="hidden" id="numeroCasa" />
+    <input type="hidden" id="complementoCasa" />
+  </body>
+  <footer class="footer-global bg-dark text-white pt-4 pb-0" role="contentinfo">
+    <div class="container text-center">
+      <!-- Links de Navegação -->
+      <div class="row justify-content-center mb-3">
+        <div class="col-6 col-sm-4 col-md-2">
+          <a
+            href="public/politica_privacidade.html"
+            class="text-white text-decoration-none hover-green transition-all"
+          >
+            Política de Privacidade
+          </a>
+        </div>
+        <div class="col-6 col-sm-4 col-md-2 ms-2">
+          <a
+            href="public/termos_de_uso.html"
+            class="text-white text-decoration-none hover-green transition-all"
+          >
+            Termos de Uso
+          </a>
+        </div>
+        <div class="col-6 col-sm-4 col-md-2">
+          <a
+            href="public/trocas_devolucoes.html"
+            class="text-white text-decoration-none hover-green transition-all"
+          >
+            Trocas e Devoluções
+          </a>
+        </div>
+      </div>
+
+      <!-- Divisor -->
+      <hr class="border-secondary my-2 mx-auto" style="max-width: 80%" />
+
+      <!-- Informações de Contato -->
+      <div class="row mb-3">
+        <div class="col-12 text-center">
+          <address class="mb-2 fs-7">
+            71080-020 | CNPJ: 74.707.730/0001-63<br />
+            Ceilândia, Brasília-DF
+          </address>
+        </div>
+      </div>
+    </div>
+
+    <!-- Copyright -->
+    <div class="text-white text-center py-3">
+      <small class="text-white">
+        © 2025 GreenLine - Todos os direitos reservados
+      </small>
+    </div>
+  </footer>
 </html>
