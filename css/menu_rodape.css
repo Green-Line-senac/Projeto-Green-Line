@@ -12,10 +12,8 @@ body {
 
 /* Header */
 .holo-header {
-  position: fixed;
-  top: 0;
   width: 100%;
-  z-index: 1030;
+  
 }
 
 @include media-breakpoint-up(sm) {
@@ -48,12 +46,12 @@ body {
 /* GUILHERME */
 
 .menu_green_line.holo-header {
-    position: absolute;
+    /*position: absolute;*/
     width: 100%;
     /*background: linear-gradient(135deg, #064e3b, #059669, #34d399);*/
     background: white;
     color: black;
-    padding: 1rem 0;
+    padding: 1rem 0 0 0 ;
     z-index: 1000;
     top: 0;
     overflow: visible;

@@ -1,41 +1,71 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-br">
+  <head>
+    <title>Pedido Confirmado - GreenLine | Sustentabilidade e Qualidade</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta
+      name="description"
+      content="Seu pedido foi confirmado com sucesso! Acompanhe o status do seu pedido na GreenLine."
+    />
+    <!--Favicon-->
+    <link
+      rel="icon"
+      type="image/png"
+      href="../img/favicon/favicon-96x96.png"
+      sizes="96x96"
+    />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="../img/favicon/favicon/favicon.svg"
+    />
+    <link rel="shortcut icon" href="../img/favicon/favicon/favicon.ico" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="../img/favicon/favicon/apple-touch-icon.png"
+    />
+    <link rel="manifest" href="../img/favicon/favicon/site.webmanifest" />
 
-<head>
-  <title>Pedido Confirmado - GreenLine | Sustentabilidade e Qualidade</title>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-  <meta name="description" content="Seu pedido foi confirmado com sucesso! Acompanhe o status do seu pedido na GreenLine.">
-      <!--Favicon-->
-      <link rel="icon" type="image/png" href="../img/favicon/favicon-96x96.png" sizes="96x96" />
-<link rel="icon" type="image/svg+xml" href="../img/favicon/favicon/favicon.svg" />
-<link rel="shortcut icon" href="../img/favicon/favicon/favicon.ico" />
-<link rel="apple-touch-icon" sizes="180x180" href="../img/favicon/favicon/apple-touch-icon.png" />
-<link rel="manifest" href="../img/favicon/favicon/site.webmanifest" />
-  
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
-  <link rel="stylesheet" href="../css/pedido_confirmado.css">
-  <script type="module" src="../js/frontendPedido.js"></script>
-  <link rel="stylesheet" href="../css/menu_rodape.css">
-</head>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../css/pedido_confirmado.css" />
+    <script type="module" src="../js/frontendPedido.js"></script>
+    <link rel="stylesheet" href="../css/menu_rodape.css" />
+     <script src="../js/frontendPadrao.js" defer></script>
+  </head>
 
-<body>
-   <!-- Navegação principal - Menu do site -->
-   <nav class="holo-header menu_green_line" role="banner">
+  <body>
+    <!-- Navegação principal - Menu do site -->
+  <nav class="holo-header menu_green_line" role="banner">
     <nav class="navbar navbar-expand-lg container bg-dark.bg-gradient" aria-label="Navegação principal">
       <img src="../img/logo.png" alt="Logo GreenLine - Folha verde estilizada" width="40" height="40">
 
       <!-- Título da marca -->
-      <a class="navbar-brand" href="index.html" aria-current="page">GreenLine</a>
+      <a class="navbar-brand" href="../index.html" aria-current="page">GreenLine</a>
 
       <!-- Botão para dispositivos menores com label melhorado -->
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
         aria-controls="navbarContent" aria-expanded="false" aria-label="Alternar navegação">
         <span class="navbar-toggler-icon"></span>
       </button>
+
       <!-- Conteúdo do menu de navegação -->
       <div class="collapse navbar-collapse" id="navbarContent">
         <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
@@ -54,16 +84,6 @@
           <li class="nav-item">
             <a class="nav-link" href="contato.html">Contato</a>
           </li>
-          <li class="nav-item dropdown d-none">
-            <a class="nav-link dropdown-toggle" href="#" id="admDropdown" role="button" data-bs-toggle="dropdown"
-              aria-expanded="false" aria-haspopup="true">Administração</a>
-            <ul class="dropdown-menu bg-white" aria-labelledby="produtosDropdown">
-              <li><a class="dropdown-item" href="cadastroProdutos.html">Cadastrar Produtos</a></li>
-              <li><a class="dropdown-item" href="manutencao.html">Cadastro de Administrador</a></li>
-              <li><a class="dropdown-item" href="manutencao.html">Cadastro de Categorias</a></li>
-              <li><a class="dropdown-item" href="manutencao.html">Dados de venda</a></li>
-            </ul>
-          </li>
         </ul>
 
         <ul class="navbar-nav">
@@ -77,7 +97,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link icon-btn" href="../public/login.html" id="link-usuario" aria-label="Área do usuário"><i
+            <a class="nav-link icon-btn" href="login.html" id="link-usuario" aria-label="Área do usuário"><i
                 id="icone-usuario" class="bi bi-person" aria-hidden="true"></i></a>
           </li>
         </ul>
@@ -85,194 +105,206 @@
     </nav>
   </nav>
 
-  <!-- Conteúdo principal -->
-  <main class="container-fluid px-3" style="margin-top: 6.5rem;" role="main">
-    <div class="row justify-content-center">
-      <div class="col-12 col-lg-10">
-        
-        <!-- Header de confirmação -->
-        <div class="confirmation-header text-center mb-5">
-          <div class="success-icon mb-3">
-            <i class="bi bi-check-circle-fill text-success"></i>
+    <!-- Conteúdo principal -->
+    <main class="container-fluid px-3" role="main">
+      <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+          <!-- Header de confirmação -->
+          <div class="confirmation-header text-center mb-5">
+            <div class="success-icon mb-3">
+              <i class="bi bi-check-circle-fill text-success"></i>
+            </div>
+            <h1 class="confirmation-title">Pedido Confirmado!</h1>
+            <p class="confirmation-subtitle">
+              Obrigado por escolher produtos sustentáveis
+            </p>
+            <div class="order-number">
+              <span class="text-muted">Número do pedido:</span>
+              <strong id="numeroPedido">#GL-2025-001234</strong>
+            </div>
           </div>
-          <h1 class="confirmation-title">Pedido Confirmado!</h1>
-          <p class="confirmation-subtitle">Obrigado por escolher produtos sustentáveis</p>
-          <div class="order-number">
-            <span class="text-muted">Número do pedido:</span>
-            <strong id="numeroPedido">#GL-2025-001234</strong>
-          </div>
-        </div>
 
-        <div class="row">
-          <!-- Informações do pedido -->
-          <div class="col-12 col-lg-8 mb-4">
-            
-            <!-- Status do pedido -->
-            <div class="order-status-card mb-4">
-              <h3 class="card-title">
-                <i class="bi bi-truck me-2"></i>
-                Status do Pedido
-              </h3>
-              <div class="status-timeline">
-                <div class="status-step active">
-                  <div class="step-icon">
-                    <i class="bi bi-check-circle-fill"></i>
+          <div class="row">
+            <!-- Informações do pedido -->
+            <div class="col-12 col-lg-8 mb-4">
+              <!-- Status do pedido -->
+              <div class="order-status-card mb-4">
+                <h3 class="card-title">
+                  <i class="bi bi-truck me-2"></i>
+                  Status do Pedido
+                </h3>
+                <div class="status-timeline">
+                  <div class="status-step active">
+                    <div class="step-icon">
+                      <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div class="step-content">
+                      <h4>Pedido Confirmado</h4>
+                      <p id="dataConfirmacao">Hoje, 15:30</p>
+                    </div>
                   </div>
-                  <div class="step-content">
-                    <h4>Pedido Confirmado</h4>
-                    <p id="dataConfirmacao">Hoje, 15:30</p>
+                  <div class="status-step">
+                    <div class="step-icon">
+                      <i class="bi bi-box-seam"></i>
+                    </div>
+                    <div class="step-content">
+                      <h4>Preparando</h4>
+                      <p>Em breve</p>
+                    </div>
+                  </div>
+                  <div class="status-step">
+                    <div class="step-icon">
+                      <i class="bi bi-truck"></i>
+                    </div>
+                    <div class="step-content">
+                      <h4>Em Transporte</h4>
+                      <p>Em breve</p>
+                    </div>
+                  </div>
+                  <div class="status-step">
+                    <div class="step-icon">
+                      <i class="bi bi-house-door"></i>
+                    </div>
+                    <div class="step-content">
+                      <h4>Entregue</h4>
+                      <p id="previsaoEntrega">Previsão: 3-5 dias úteis</p>
+                    </div>
                   </div>
                 </div>
-                <div class="status-step">
-                  <div class="step-icon">
-                    <i class="bi bi-box-seam"></i>
-                  </div>
-                  <div class="step-content">
-                    <h4>Preparando</h4>
-                    <p>Em breve</p>
-                  </div>
+              </div>
+
+              <!-- Produtos do pedido -->
+              <div class="order-items-card mb-4">
+                <h3 class="card-title">
+                  <i class="bi bi-bag-check me-2"></i>
+                  Produtos do Pedido
+                </h3>
+                <div id="produtosPedido" class="order-items-list">
+                  <!-- Produtos serão carregados via JavaScript -->
                 </div>
-                <div class="status-step">
-                  <div class="step-icon">
-                    <i class="bi bi-truck"></i>
+              </div>
+
+              <!-- Informações de entrega -->
+              <div class="delivery-info-card">
+                <h3 class="card-title">
+                  <i class="bi bi-geo-alt me-2"></i>
+                  Informações de Entrega
+                </h3>
+                <div class="delivery-details">
+                  <div class="delivery-address">
+                    <h4>Endereço de Entrega</h4>
+                    <p id="enderecoEntrega">
+                      João Silva<br />
+                      Rua das Flores, 123 - Apt 45<br />
+                      Jardim Sustentável<br />
+                      Brasília - DF, 70000-000
+                    </p>
                   </div>
-                  <div class="step-content">
-                    <h4>Em Transporte</h4>
-                    <p>Em breve</p>
-                  </div>
-                </div>
-                <div class="status-step">
-                  <div class="step-icon">
-                    <i class="bi bi-house-door"></i>
-                  </div>
-                  <div class="step-content">
-                    <h4>Entregue</h4>
-                    <p id="previsaoEntrega">Previsão: 3-5 dias úteis</p>
+                  <div class="delivery-method">
+                    <h4>Método de Entrega</h4>
+                    <p id="metodoEntrega">
+                      <i class="bi bi-truck me-2"></i>
+                      Entrega Padrão (3-5 dias úteis)
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Produtos do pedido -->
-            <div class="order-items-card mb-4">
-              <h3 class="card-title">
-                <i class="bi bi-bag-check me-2"></i>
-                Produtos do Pedido
-              </h3>
-              <div id="produtosPedido" class="order-items-list">
-                <!-- Produtos serão carregados via JavaScript -->
-              </div>
-            </div>
+            <!-- Resumo do pedido -->
+            <div class="col-12 col-lg-4">
+              <div class="order-summary-card">
+                <h3 class="card-title">
+                  <i class="bi bi-receipt me-2"></i>
+                  Resumo do Pedido
+                </h3>
 
-            <!-- Informações de entrega -->
-            <div class="delivery-info-card">
-              <h3 class="card-title">
-                <i class="bi bi-geo-alt me-2"></i>
-                Informações de Entrega
-              </h3>
-              <div class="delivery-details">
-                <div class="delivery-address">
-                  <h4>Endereço de Entrega</h4>
-                  <p id="enderecoEntrega">
-                    João Silva<br>
-                    Rua das Flores, 123 - Apt 45<br>
-                    Jardim Sustentável<br>
-                    Brasília - DF, 70000-000
+                <div class="summary-details">
+                  <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span id="subtotal">R$ 127,50</span>
+                  </div>
+                  <div class="summary-row">
+                    <span>Frete:</span>
+                    <span id="frete">R$ 12,50</span>
+                  </div>
+                  <div class="summary-row discount">
+                    <span>Desconto Eco:</span>
+                    <span id="desconto">-R$ 10,00</span>
+                  </div>
+                  <hr />
+                  <div class="summary-row total">
+                    <span>Total:</span>
+                    <span id="total">R$ 130,00</span>
+                  </div>
+                </div>
+
+                <div class="payment-info mt-4">
+                  <h4>Forma de Pagamento</h4>
+                  <p id="formaPagamento">
+                    <i class="bi bi-credit-card me-2"></i>
+                    Cartão de Crédito ****1234
                   </p>
                 </div>
-                <div class="delivery-method">
-                  <h4>Método de Entrega</h4>
-                  <p id="metodoEntrega">
-                    <i class="bi bi-truck me-2"></i>
-                    Entrega Padrão (3-5 dias úteis)
+
+                <div class="eco-impact mt-4">
+                  <div class="eco-badge">
+                    <i class="bi bi-leaf me-2"></i>
+                    Impacto Sustentável
+                  </div>
+                  <p class="eco-text">
+                    Com esta compra, você evitou <strong>2.5kg</strong> de CO₂ e
+                    contribuiu para o plantio de <strong>1 árvore</strong>!
                   </p>
                 </div>
               </div>
-            </div>
-          </div>
 
-          <!-- Resumo do pedido -->
-          <div class="col-12 col-lg-4">
-            <div class="order-summary-card">
-              <h3 class="card-title">
-                <i class="bi bi-receipt me-2"></i>
-                Resumo do Pedido
-              </h3>
-              
-              <div class="summary-details">
-                <div class="summary-row">
-                  <span>Subtotal:</span>
-                  <span id="subtotal">R$ 127,50</span>
-                </div>
-                <div class="summary-row">
-                  <span>Frete:</span>
-                  <span id="frete">R$ 12,50</span>
-                </div>
-                <div class="summary-row discount">
-                  <span>Desconto Eco:</span>
-                  <span id="desconto">-R$ 10,00</span>
-                </div>
-                <hr>
-                <div class="summary-row total">
-                  <span>Total:</span>
-                  <span id="total">R$ 130,00</span>
-                </div>
-              </div>
+              <!-- Ações rápidas -->
+              <div class="quick-actions-card mt-4">
+                <h3 class="card-title">
+                  <i class="bi bi-lightning me-2"></i>
+                  Ações Rápidas
+                </h3>
 
-              <div class="payment-info mt-4">
-                <h4>Forma de Pagamento</h4>
-                <p id="formaPagamento">
-                  <i class="bi bi-credit-card me-2"></i>
-                  Cartão de Crédito ****1234
-                </p>
-              </div>
+                <div class="action-buttons">
+                  <button
+                    class="btn btn-success btn-block mb-2"
+                    id="btnContinuarComprando"
+                  >
+                    <i class="bi bi-arrow-left me-2"></i>
+                    Continuar Comprando
+                  </button>
 
-              <div class="eco-impact mt-4">
-                <div class="eco-badge">
-                  <i class="bi bi-leaf me-2"></i>
-                  Impacto Sustentável
+                  <button
+                    class="btn btn-outline-success btn-block mb-2"
+                    id="btnAcompanharPedido"
+                  >
+                    <i class="bi bi-search me-2"></i>
+                    Acompanhar Pedido
+                  </button>
+
+                  <button
+                    class="btn btn-outline-success btn-block mb-2"
+                    id="btnBaixarComprovante"
+                  >
+                    <i class="bi bi-download me-2"></i>
+                    Baixar Comprovante
+                  </button>
+
+                  <button
+                    class="btn btn-outline-success btn-block"
+                    id="btnEntrarContato"
+                  >
+                    <i class="bi bi-headset me-2"></i>
+                    Falar com Suporte
+                  </button>
                 </div>
-                <p class="eco-text">
-                  Com esta compra, você evitou <strong>2.5kg</strong> de CO₂ 
-                  e contribuiu para o plantio de <strong>1 árvore</strong>!
-                </p>
-              </div>
-            </div>
-
-            <!-- Ações rápidas -->
-            <div class="quick-actions-card mt-4">
-              <h3 class="card-title">
-                <i class="bi bi-lightning me-2"></i>
-                Ações Rápidas
-              </h3>
-              
-              <div class="action-buttons">
-                <button class="btn btn-success btn-block mb-2" id="btnContinuarComprando">
-                  <i class="bi bi-arrow-left me-2"></i>
-                  Continuar Comprando
-                </button>
-                
-                <button class="btn btn-outline-success btn-block mb-2" id="btnAcompanharPedido">
-                  <i class="bi bi-search me-2"></i>
-                  Acompanhar Pedido
-                </button>
-                
-                <button class="btn btn-outline-success btn-block mb-2" id="btnBaixarComprovante">
-                  <i class="bi bi-download me-2"></i>
-                  Baixar Comprovante
-                </button>
-                
-                <button class="btn btn-outline-success btn-block" id="btnEntrarContato">
-                  <i class="bi bi-headset me-2"></i>
-                  Falar com Suporte
-                </button>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Produtos relacionados -->
-         <!--
+          <!-- Produtos relacionados -->
+          <!--
         <div class="related-products mt-5">
           <h3 class="section-title">
             <i class="bi bi-heart me-2"></i>
@@ -282,128 +314,175 @@
            Produtos relacionados serão carregados via JavaScript 
           </div>
         </div>-->
-
+        </div>
       </div>
-    </div>
-  </main>
+    </main>
 
-  <!-- Rodapé -->
-  <footer class="container-fluid text-center text-white" style="background-color:black" role="contentinfo">
-    <div class="container">
-      <section aria-label="Links úteis">
-        <div class="row text-center d-flex justify-content-center pt-5">
-          <div class="col-md-2">
-            <h3 class="text-uppercase h6 font-weight-bold">
-              <a href="politica_privacidade.html" class="text-white">Política de privacidade</a>
-            </h3>
+    <!-- Rodapé -->
+
+    <footer
+      class="footer-global bg-dark text-white pt-4 pb-0"
+      role="contentinfo"
+    >
+      <div class="container text-center">
+        <!-- Links de Navegação -->
+        <div class="row justify-content-center mb-3">
+          <div class="col-6 col-sm-4 col-md-2">
+            <a
+              href="politica_privacidade.html"
+              class="text-white text-decoration-none hover-green transition-all"
+            >
+              Política de Privacidade
+            </a>
           </div>
-          <div class="col-md-2">
-            <h3 class="text-uppercase h6 font-weight-bold">
-              <a href="termos_de_uso.html" class="text-white">Termos de uso</a>
-            </h3>
+          <div class="col-6 col-sm-4 col-md-2 ms-2">
+            <a
+              href="termos_de_uso.html"
+              class="text-white text-decoration-none hover-green transition-all"
+            >
+              Termos de Uso
+            </a>
           </div>
-          <div class="col-md-2">
-            <h3 class="text-uppercase h6 font-weight-bold">
-              <a href="trocas_devolucoes.html" class="text-white">Trocas e devoluções</a>
-            </h3>
+          <div class="col-6 col-sm-4 col-md-2">
+            <a
+              href="trocas_devolucoes.html"
+              class="text-white text-decoration-none hover-green transition-all"
+            >
+              Trocas e Devoluções
+            </a>
           </div>
         </div>
-      </section>
 
-      <hr class="my-3" aria-hidden="true" />
+        <!-- Divisor -->
+        <hr class="border-secondary my-2 mx-auto" style="max-width: 80%" />
 
-      <section class="mb-1" aria-label="Informações de contato">
-        <div class="row d-flex justify-content-center">
-          <div class="col-lg-8">
-            <p class="text-center">71080-020 | CNPJ : 74.707.730/0001-63 | Ceilândia, Brasília-DF</p>
+        <!-- Informações de Contato -->
+        <div class="row mb-3">
+          <div class="col-12 text-center">
+            <address class="mb-2 fs-7">
+              71080-020 | CNPJ: 74.707.730/0001-63<br />
+              Ceilândia, Brasília-DF
+            </address>
           </div>
         </div>
-      </section>
-    </div>
+      </div>
 
-    <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2)">
-      <p class="text-center">© 2025 GreenLine</p>
-    </div>
-  </footer>
+      <!-- Copyright -->
+      <div class="text-white text-center py-3">
+        <small class="text-white">
+          © 2025 GreenLine - Todos os direitos reservados
+        </small>
+      </div>
+    </footer>
 
-  <!-- Modal de Acompanhamento -->
-  <div class="modal fade" id="modalAcompanhamento" tabindex="-1" aria-labelledby="modalAcompanhamentoLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header bg-success">
-          <h5 class="modal-title" id="modalAcompanhamentoLabel">
-            <i class="bi bi-truck me-2"></i>
-            Acompanhamento do Pedido
-          </h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
-        </div>
-        <div class="modal-body p-4">
-          <div class="tracking-details">
-            <!-- Informações do Pedido -->
-            <div class="order-info">
-              <div class="row align-items-center">
-                <div class="col-md-6">
-                  <h6 class="mb-2">
-                    <i class="bi bi-box-seam me-2"></i>
-                    Número do Pedido: 
-                    <span id="modalNumeroPedido" class="text-success"></span>
-                  </h6>
+    <!-- Modal de Acompanhamento -->
+    <div
+      class="modal fade"
+      id="modalAcompanhamento"
+      tabindex="-1"
+      aria-labelledby="modalAcompanhamentoLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-success">
+            <h5 class="modal-title" id="modalAcompanhamentoLabel">
+              <i class="bi bi-truck me-2"></i>
+              Acompanhamento do Pedido
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Fechar"
+            ></button>
+          </div>
+          <div class="modal-body p-4">
+            <div class="tracking-details">
+              <!-- Informações do Pedido -->
+              <div class="order-info">
+                <div class="row align-items-center">
+                  <div class="col-md-6">
+                    <h6 class="mb-2">
+                      <i class="bi bi-box-seam me-2"></i>
+                      Número do Pedido:
+                      <span id="modalNumeroPedido" class="text-success"></span>
+                    </h6>
+                  </div>
+                  <div class="col-md-6 text-md-end">
+                    <p class="text-muted mb-0">
+                      <i class="bi bi-calendar-event me-2"></i>
+                      Data do Pedido:
+                      <span id="modalDataPedido"></span>
+                    </p>
+                  </div>
                 </div>
-                <div class="col-md-6 text-md-end">
-                  <p class="text-muted mb-0">
-                    <i class="bi bi-calendar-event me-2"></i>
-                    Data do Pedido: 
-                    <span id="modalDataPedido"></span>
-                  </p>
+              </div>
+
+              <!-- Timeline de Status -->
+              <div class="timeline-tracking">
+                <!-- Status serão preenchidos via JavaScript -->
+              </div>
+
+              <!-- Informações Adicionais -->
+              <div class="tracking-info mt-4">
+                <div class="alert alert-success" role="alert">
+                  <i class="bi bi-info-circle-fill me-2"></i>
+                  Acompanhe as atualizações do seu pedido em tempo real.
                 </div>
               </div>
             </div>
-            
-            <!-- Timeline de Status -->
-            <div class="timeline-tracking">
-              <!-- Status serão preenchidos via JavaScript -->
-            </div>
-
-            <!-- Informações Adicionais -->
-            <div class="tracking-info mt-4">
-              <div class="alert alert-success" role="alert">
-                <i class="bi bi-info-circle-fill me-2"></i>
-                Acompanhe as atualizações do seu pedido em tempo real.
-              </div>
-            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              data-bs-dismiss="modal"
+            >
+              <i class="bi bi-x-lg me-2"></i>
+              Fechar
+            </button>
+            <button
+              type="button"
+              class="btn btn-success"
+              id="btnEnviarAtualizacoes"
+            >
+              <i class="bi bi-envelope me-2"></i>
+              Receber Atualizações por Email
+            </button>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-            <i class="bi bi-x-lg me-2"></i>
-            Fechar
-          </button>
-          <button type="button" class="btn btn-success" id="btnEnviarAtualizacoes">
-            <i class="bi bi-envelope me-2"></i>
-            Receber Atualizações por Email
-          </button>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Container para os Toasts -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div
+        id="liveToast"
+        class="toast"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div class="toast-header">
+          <i class="bi me-2"></i>
+          <strong class="me-auto" id="toastTitle"></strong>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="toast"
+            aria-label="Fechar"
+          ></button>
         </div>
+        <div class="toast-body" id="toastMessage"></div>
       </div>
     </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-    crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  
-  <!-- Container para os Toasts -->
-  <div class="toast-container position-fixed bottom-0 end-0 p-3">
-    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="toast-header">
-        <i class="bi me-2"></i>
-        <strong class="me-auto" id="toastTitle"></strong>
-        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Fechar"></button>
-      </div>
-      <div class="toast-body" id="toastMessage"></div>
-    </div>
-  </div>
-  
-</body>
-
+  </body>
 </html>
