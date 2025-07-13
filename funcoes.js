@@ -47,23 +47,23 @@ class FuncaoUteis {
             `;
       }
       if (tipo === "compra-concluida") {
+        if (tipo === "compra-concluida" && !pedido?.numeroPedido) {
+          throw new Error(
+            "Dados do pedido são necessários para este tipo de e-mail."
+          );
+        }
         mensagem = `
-          Olá!
-          
-          Seu pedido ${pedido.numeroPedido} foi confirmado com sucesso!
-          
-          Detalhes do pedido:
-          - Data: ${pedido.dataConfirmacao}
-          - Valor total: R$ ${pedido.total.toFixed(2)}
-          - Previsão de entrega: ${pedido.previsaoEntrega}
-          
-          Você pode acompanhar seu pedido em nosso site.
-          
-          Obrigado por escolher produtos sustentáveis!
-          
-          Atenciosamente,
-          Equipe GreenLine
-        `;
+    <h1>Pedido Confirmado!</h1>
+    <p>Olá, seu pedido <strong>${
+      pedido.numeroPedido
+    }</strong> foi confirmado!</p>
+    <ul>
+      <li>Data: ${pedido.dataConfirmacao}</li>
+      <li>Total: R$ ${pedido.total.toFixed(2)}</li>
+      <li>Previsão de entrega: ${pedido.previsaoEntrega}</li>
+    </ul>
+    <p>Acompanhe seu pedido em nosso site.</p>
+  `;
       }
       await transportador.sendMail({
         from: "Green Line <greenline.ecologic@gmail.com>",

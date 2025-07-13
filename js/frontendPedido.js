@@ -143,7 +143,7 @@ async function enviarEmailConfirmacao(pedido) {
           pedido: {
             numeroPedido: pedido.numeroPedido,
             dataConfirmacao: pedido.dataConfirmacao,
-            total: pedido.total.toFixed(2),
+            total: pedido.total,
             previsaoEntrega: pedido.previsaoEntrega,
           },
         }),
