@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Perfil</title>
-        <!--Favicon-->
-      <link rel="icon" type="image/png" href="../img/favicon/favicon-96x96.png" sizes="96x96" />
+        <link rel="icon" type="image/png" href="../img/favicon/favicon-96x96.png" sizes="96x96" />
 <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon/favicon.svg" />
 <link rel="shortcut icon" href="../img/favicon/favicon/favicon.ico" />
 <link rel="apple-touch-icon" sizes="180x180" href="../img/favicon/favicon/apple-touch-icon.png" />
@@ -16,8 +15,10 @@
     <script src="../js/frontendPerfil.js" defer></script>
 </head>
 <body>
+    <button class="back-button" onclick="window.location.href='../index.html'">
+        <i class="fas fa-arrow-left"></i>
+    </button>
     <div class="container">
-        <!-- Sidebar -->
         <div class="sidebar">
             <div class="profile-header">
                 <div class="profile-avatar">
@@ -35,11 +36,11 @@
                 <div class="nav-item active" data-section="personal">
                     <i class="fas fa-user"></i> Informações Pessoais
                 </div>
-                <div class="nav-item" data-section="orders">
-                    <i class="fas fa-shopping-bag"></i> Meus Pedidos
+                <div class="nav-item" onclick="window.location.href='/public/carrinho.html'">
+                    <i class="fas fa-shopping-cart"></i> Meu Carrinho
                 </div>
-                <div class="nav-item" data-section="saved">
-                    <i class="fas fa-heart"></i> Produtos Salvos
+                <div class="nav-item" data-section="purchase-history">
+                    <i class="fas fa-history"></i> Histórico de Compras
                 </div>
                 <div class="nav-item" data-section="gears">
                     <i class="fa-solid fa-gear"></i> Configurações
@@ -50,9 +51,7 @@
             </div>
         </div>
         
-        <!-- Main Content -->
         <div class="main-content">
-            <!-- Seção de Informações Pessoais -->
             <div id="personal-section">
                 <h2 class="section-title">Informações Pessoais</h2>
                 <div class="info-grid">
@@ -80,28 +79,24 @@
                 <button class="btn btn-primary" id="savePersonalBtn" style="margin-top: 20px;">Salvar Alterações</button>
             </div>
             
-            <!-- Seção de Pedidos -->
             <div id="orders-section" class="hidden">
-                <h2 class="section-title">Meus Pedidos</h2>
+                <h2 class="section-title">Meu Carrinho</h2>
                 <div id="ordersContent">
-                    <p>Seus pedidos aparecerão aqui</p>
+                    <p>Clique em "Meu Carrinho" na barra lateral para acessar seu carrinho de compras.</p>
                 </div>
             </div>
             
-            <!-- Seção de Produtos Salvos -->
             <div id="saved-section" class="hidden">
-                <h2 class="section-title">Produtos Salvos</h2>
+                <h2 class="section-title">Histórico de Compras</h2>
                 <div id="savedProductsContent">
-                    <p>Seus produtos salvos aparecerão aqui</p>
+                    <p>Seu histórico de compras aparecerá aqui.</p>
                 </div>
             </div>
             
-            <!-- Seção de Configurações -->
             <div id="gears-section" class="hidden">
                 <h2 class="section-title">Configurações</h2>
                 
                 <div class="settings-grid">
-                    <!-- Modo Noturno -->
                     <div class="setting-item">
                         <div class="setting-label">Modo Noturno</div>
                         <label class="switch">
@@ -110,7 +105,6 @@
                         </label>
                     </div>
                     
-                    <!-- Endereço -->
                     <div class="setting-item">
                         <div class="setting-label">Meu Endereço</div>
                         <div class="address-card" id="addressContent">
@@ -119,16 +113,6 @@
                         <button class="btn btn-primary" id="updateAddressBtn">Atualizar Endereço</button>
                     </div>
                     
-                    <!-- Método de Pagamento -->
-                    <div class="setting-item">
-                        <div class="setting-label">Método de Pagamento</div>
-                        <div class="payment-methods" id="paymentMethods">
-                            <p>Carregando métodos...</p>
-                        </div>
-                        <button class="btn btn-primary" id="addPaymentMethodBtn">Adicionar Método</button>
-                    </div>
-                    
-                    <!-- Deletar Conta -->
                     <div class="setting-item danger-zone">
                         <div class="setting-label">Zona de Perigo</div>
                         <button class="btn btn-danger" id="deleteAccountBtn">
@@ -140,7 +124,6 @@
         </div>
     </div>
 
-    <!-- Modal para deletar conta -->
     <div id="deleteModal" class="modal hidden">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
@@ -153,7 +136,6 @@
         </div>
     </div>
 
-    <!-- Modal para atualizar endereço -->
     <div id="addressModal" class="modal hidden">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
@@ -186,33 +168,6 @@
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" id="cancelAddressBtn">Cancelar</button>
                     <button type="submit" class="btn btn-primary">Salvar Endereço</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal para adicionar método de pagamento -->
-    <div id="paymentModal" class="modal hidden">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h3>Adicionar Método de Pagamento</h3>
-            <form id="paymentForm">
-                <div class="form-group">
-                    <label for="paymentType">Tipo</label>
-                    <select id="paymentType" name="paymentType" required>
-                        <option value="VISA">Visa</option>
-                        <option value="MASTERCARD">Mastercard</option>
-                        <option value="AMEX">American Express</option>
-                        <option value="ELO">Elo</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="cardNumber">Número do Cartão</label>
-                    <input type="text" id="cardNumber" name="cardNumber" required>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" id="cancelPaymentBtn">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Adicionar Cartão</button>
                 </div>
             </form>
         </div>

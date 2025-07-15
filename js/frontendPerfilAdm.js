@@ -55,7 +55,8 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('profileStatus').textContent = userData.status;
         document.getElementById('profileEmailContent').textContent = userData.email;
     }
-    
+
+
     // Carregar lista de usuários (para a seção ADM)
     function loadUsersList() {
         //  requisição AJAX
@@ -118,6 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Abrir modal de edição de usuário
+
     function openUserEditModal(userId) {
         // Simulando requisição AJAX para obter dados do usuário
          const token = sessionStorage.getItem('userToken');
@@ -128,12 +130,12 @@ document.addEventListener('DOMContentLoaded', function() {
         })
             .then(response => response.json())
             .then(user => {
-                document.getElementById('userId').value = user.id_pessoa;
-                document.getElementById('userName').value = user.nome;
-                document.getElementById('userEmail').value = user.email;
-                document.getElementById('userPhone').value = user.telefone;
-                document.getElementById('userStatus').value = user.situacao;
-                document.getElementById('userType').value = user.id_tipo_usuario;
+                document.getElementById('userId').value = user[0].id_pessoa;
+                document.getElementById('userName').value = user[0].nome;
+                document.getElementById('userEmail').value = user[0].email;
+                document.getElementById('userPhone').value = user[0].telefone;
+                document.getElementById('userStatus').value = user[0].situacao;
+                document.getElementById('userType').value = user[0].id_tipo_usuario;
                 
                 document.getElementById('userModalTitle').textContent = `Editar Usuário: ${user.nome}`;
                 document.getElementById('userManagementModal').classList.remove('hidden');
@@ -142,6 +144,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Erro ao carregar dados do usuário:', error);
             });
     }
+
+    //pesquisar usuários
     
     // Carregar imagens do carrossel
     function loadCarouselImages() {
@@ -312,6 +316,18 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Erro ao atualizar usuário');
         });
     });
+
+    // Lógica para o modo noturno
+  const darkModeToggle = document.getElementById('darkModeToggle');
+  darkModeToggle.addEventListener('change', () => {
+      if (darkModeToggle.checked) {
+          document.body.classList.add('dark-mode');
+          localStorage.setItem('darkMode', 'true');
+      } else {
+          document.body.classList.remove('dark-mode');
+          localStorage.setItem('darkMode', 'false');
+      }
+  });
     
     // Deletar usuário
     document.getElementById('deleteUserBtn').addEventListener('click', function() {
@@ -355,10 +371,28 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Logout
-    window.logout = function() {
-        sessionStorage.removeItem('userToken');
-        sessionStorage.removeItem('userEmail');
-        window.location.href = '../index.html';
-    };
+  
 });
+
+function logout() {
+  try {
+    // Limpar apenas os itens específicos do sessionStorage
+    const itemsToRemove = [
+      "userToken",
+      "id_pessoa",
+      "userEmail",
+      "userType",
+      "usuario",
+      "loginTime",
+    ];
+
+    itemsToRemove.forEach((item) => sessionStorage.removeItem(item));
+    // REMOVIDA A LINHA ABAIXO: sessionStorage.clear();
+    window.location.href = "/public/login.html"; 
+
+    console.log("SessionStorage limpo com sucesso.");
+  } catch (error) {
+    console.error("Erro ao fazer logout:", error);
+    alert("Erro ao fazer logout.");
+  }
+}

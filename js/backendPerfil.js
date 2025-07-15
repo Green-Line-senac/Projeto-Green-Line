@@ -419,9 +419,9 @@ app.put('/pessoa/:id_pessoa/imagem', async (req, res) => {
 });
 
 // [9] ROTAS PARA ENDEREÇO
-app.get('/pessoa/:id_pessoa/endereco', async (req, res) => {
+app.get('/pessoa/view_pessoa_endereco', async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT * FROM enderecos WHERE id_pessoa = ?', [req.params.id_pessoa]);
+        const [rows] = await db.query('SELECT * FROM view_pessoa_endereco WHERE id_pessoa = ?', [req.params.id_pessoa]);
         if (rows.length === 0) {
             return res.status(404).json({ error: 'Endereço não encontrado' });
         }
