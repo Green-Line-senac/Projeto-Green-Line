@@ -41,6 +41,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   preencherCamposProduto(produto);
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+  const btnVoltar = document.getElementById('btn-voltar-produtos');
+  if (btnVoltar) {
+    btnVoltar.addEventListener('click', function() {
+      window.history.back();
+    });
+  }
+});
+
 function preencherCamposProduto(produto) {
   // Imagem principal
   const imgEl = document.getElementById('produto-img-principal');
