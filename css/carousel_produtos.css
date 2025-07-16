@@ -1,3 +1,38 @@
+html, body {
+  overflow-x: hidden;
+}
+
+header[aria-label="Destaques de produtos"] {
+  width: 100vw;
+  max-width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  padding: 0;
+}
+
+.carousel-image {
+  width: 100vw !important;
+  max-width: 100vw;
+  min-width: 100vw;
+  object-fit: cover;
+  margin: 0;
+  display: block;
+  object-position: right center;
+}
+
+/* Mantém o carrossel colado nas laterais */
+header > .container-fluid,
+header > .container-fluid > .row,
+header > .container-fluid > .row > .col-12 {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
 /* Melhorias específicas para o carrossel */
 .carousel-slide-wrapper {
   position: relative;
@@ -5,10 +40,8 @@
   overflow: hidden;
 }
 
-.carousel-image {
-  height: 400px !important;
-  object-fit: cover;
-  filter: brightness(0.9);
+.carousel .carousel-inner {
+  max-height: 350px;   /* igual ao valor acima */
 }
 
 .carousel-overlay {
@@ -20,14 +53,38 @@
   background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.3) 100%);
 }
 
+/* Remove alinhamento vertical centralizado do Bootstrap */
+.carousel-caption.d-flex {
+  display: block !important;
+  align-items: initial !important;
+  height: auto !important;
+}
+
+/* Garante que o texto fique mais para cima e visível */
 .carousel-caption {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: 5vh;
+  bottom: auto;
+  left: 5vw;
+  right: auto;
   text-align: left;
-  padding: 0;
+  width: auto;
+  max-width: 40vw;
+  padding-left: 0;
+  padding-right: 0;
+  transform: none;
+  background: none;
+}
+
+@media (max-width: 900px) {
+  .carousel-caption {
+    top: 22vw;
+    left: 2vw;
+    max-width: 80vw;
+    font-size: 0.95em;
+  }
+  .carousel-title {
+    font-size: 1.2em;
+  }
 }
 
 .carousel-content {
@@ -176,7 +233,7 @@
   }
 
   .carousel-image {
-    height: 300px !important;
+    max-height: 200px; /* menor em telas pequenas */
   }
 
   .carousel-title {
@@ -217,3 +274,23 @@
     font-size: 0.9rem;
     margin-bottom: 1.5rem;
   }
+
+@media (max-width: 600px) {
+  .carousel-image {
+    max-height: 260px;
+    min-height: 180px;
+  }
+  .carousel-caption {
+    top: 22vw;
+    left: 4vw;
+    max-width: 90vw;
+    font-size: 0.85em;
+    padding: 0.5em 0.5em 0 0;
+  }
+  .carousel-title {
+    font-size: 1em;
+  }
+  .carousel-description {
+    font-size: 0.9em;
+  }
+}
