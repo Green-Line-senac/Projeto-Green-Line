@@ -17,7 +17,7 @@ async function carregarDadosUsuario() {
 
     if (!token || !idPessoa) {
       console.error("Usuário não autenticado - redirecionando para login");
-      window.location.href = "../index.html";
+      window.location.href = "login.html";
       return;
     }
 
