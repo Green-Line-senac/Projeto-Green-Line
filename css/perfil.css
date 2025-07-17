@@ -346,6 +346,9 @@ input:checked + .slider:before {
     margin-top: 20px;
 }
 
+/* endereco */
+
+
 /* Estilos para histórico de pedidos */
 .order-history {
     margin-top: 20px;
