@@ -226,69 +226,82 @@ if (maxTextEl) {
   // Botões de ação
   const btnComprar = document.getElementById('btnComprarAgora');
   const btnCarrinho = document.getElementById('btnAddCarrinho');
-  if (btnComprar && qtdEl && produto) {
-    btnComprar.onclick = () => {
+
+  // Desabilitar botões se fora de estoque
+  if (produto.estoque <= 0) {
+    if (btnComprar) {
+      btnComprar.disabled = true;
+      btnComprar.classList.add('disabled');
+      btnComprar.textContent = 'Indisponível';
+    }
+    if (btnCarrinho) {
+      btnCarrinho.disabled = true;
+      btnCarrinho.classList.add('disabled');
+      btnCarrinho.textContent = 'Indisponível';
+    }
+    if (qtdEl) qtdEl.disabled = true;
+  } else {
+    if (btnComprar && qtdEl && produto) {
+      btnComprar.onclick = () => {
+        const id_pessoa = sessionStorage.getItem('id_pessoa');
+        if (!id_pessoa) {
+          showAlert('Por favor, faça login ou cadastro para continuar sua compra.',"danger");
+          return;
+        }
+    
+        const quantidade = Math.max(1, Math.min(Number(qtdEl.value) || 1, maxEstoque));
+        const preco_final = emPromocao ? produto.preco_promocional : produto.preco;
+        const subtotal = Number((preco_final * quantidade).toFixed(2));
+    
+        const dadosCompra = {
+          nome_produto: produto.nome || produto.produto || 'Produto',
+          preco_final,
+          quantidade,
+          subtotal,
+          id_produto: produto.id_produto || null,
+          data: new Date().toISOString(),
+        };
+    
+        sessionStorage.setItem('dadosCompra', JSON.stringify(dadosCompra));
+        window.location.href = 'vendas.html';
+      };
+    }
+    if (btnCarrinho && qtdEl) btnCarrinho.onclick = () => {
+      const quantidade = Math.max(1, Math.min(Number(qtdEl.value) || 1, maxEstoque));
       const id_pessoa = sessionStorage.getItem('id_pessoa');
       if (!id_pessoa) {
-        showAlert('Por favor, faça login ou cadastro para continuar sua compra.',"danger");
+        showAlert('Por favor, faça login ou cadastro para adicionar ao carrinho.',"danger");
         return;
       }
-  
-      const quantidade = Math.max(1, Math.min(Number(qtdEl.value) || 1, maxEstoque));
-      const preco_final = emPromocao ? produto.preco_promocional : produto.preco;
-      const subtotal = Number((preco_final * quantidade).toFixed(2));
-  
-      const dadosCompra = {
-        nome_produto: produto.nome || produto.produto || 'Produto',
-        preco_final,
-        quantidade,
-        subtotal,
-        id_produto: produto.id_produto || null,
-        data: new Date().toISOString(),
-      };
-  
-      sessionStorage.setItem('dadosCompra', JSON.stringify(dadosCompra));
-      window.location.href = 'vendas.html';
+
+      fetch('https://green-line-web.onrender.com/carrinho', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id_pessoa: Number(id_pessoa),
+          id_produto: produto.id_produto,
+          quantidade
+        })
+      })
+        .then(res => res.json())
+        .then(resposta => {
+          if (resposta.codigo === 1 || resposta.mensagem === 'ITEM_DUPLICADO') {
+            showAlert('Este item já está no seu carrinho',"warning");
+          } else if (resposta.sucesso) {
+            sessionStorage.setItem('carrinho', (Number(sessionStorage.getItem('carrinho') || 0) + 1));
+            const badgeCarrinho = document.getElementById('badge-carrinho');
+            if (badgeCarrinho) {
+              badgeCarrinho.textContent = (Number(badgeCarrinho.textContent) || 0) + quantidade;}
+            showAlert('Item adicionado ao carrinho com sucesso!',"success");
+          } else {
+            showAlert('❌ Falha ao adicionar item ao carrinho');
+          }
+        })
+        .catch(() => {
+          showAlert('❌ Ocorreu um erro ao adicionar o item ao carrinho');
+        });
     };
   }
-  
-  if (btnCarrinho && qtdEl) btnCarrinho.onclick = () => {
-    const quantidade = Math.max(1, Math.min(Number(qtdEl.value) || 1, maxEstoque));
-    const id_pessoa = sessionStorage.getItem('id_pessoa');
-    if (!id_pessoa) {
-      showAlert('Por favor, faça login ou cadastro para adicionar ao carrinho.',"danger");
-      return;
-    }
-
-
-    
-    fetch('https://green-line-web.onrender.com/carrinho', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id_pessoa: Number(id_pessoa),
-        id_produto: produto.id_produto,
-        quantidade
-      })
-    })
-      .then(res => res.json())
-      .then(resposta => {
-        if (resposta.codigo === 1 || resposta.mensagem === 'ITEM_DUPLICADO') {
-          showAlert('Este item já está no seu carrinho',"warning");
-        } else if (resposta.sucesso) {
-          sessionStorage.setItem('carrinho', (Number(sessionStorage.getItem('carrinho') || 0) + 1));
-          const badgeCarrinho = document.getElementById('badge-carrinho');
-          if (badgeCarrinho) {
-            badgeCarrinho.textContent = (Number(badgeCarrinho.textContent) || 0) + quantidade;}
-          showAlert('Item adicionado ao carrinho com sucesso!',"success");
-        } else {
-          showAlert('❌ Falha ao adicionar item ao carrinho');
-        }
-      })
-      .catch(() => {
-        showAlert('❌ Ocorreu um erro ao adicionar o item ao carrinho');
-      });
-  };
 }
 
 function gerarEstrelas(nota) {
