@@ -1,7 +1,8 @@
 // frontendPerfilAdm.js
 
 document.addEventListener('DOMContentLoaded', async function () {
-  const isAdmin = sessionStorage.getItem('isAdmin') === 'true';
+  const isAdmin = sessionStorage.getItem('isAdmin') === 'true';;
+
   if (!isAdmin) {
     window.location.href = 'perfil.html';
     return;
