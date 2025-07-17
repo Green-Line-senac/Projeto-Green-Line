@@ -377,16 +377,12 @@ async function preencherPaginaConfirmacao(pedido) {
               <div>
                 <h5 class="item-name mb-1">${produto.nome}</h5>
                 <p class="item-details text-muted mb-0">
-                  Quantidade: ${produto.quantidade} × R$ ${produto.preco
-          .toFixed(2)
-          .replace(".", ",")}
+                  Quantidade: ${produto.quantidade} × ${formatarPrecoBR(produto.preco)}
                 </p>
               </div>
             </div>
             <div class="item-total">
-              <strong>R$ ${produto.subtotal
-                .toFixed(2)
-                .replace(".", ",")}</strong>
+              <strong>${formatarPrecoBR(produto.subtotal)}</strong>
             </div>
           </div>
         `;
@@ -397,21 +393,17 @@ async function preencherPaginaConfirmacao(pedido) {
     // Resumo financeiro
     const subtotalEl = document.getElementById("subtotal");
     if (subtotalEl) {
-      subtotalEl.textContent = `R$ ${pedido.subtotal
-        .toFixed(2)
-        .replace(".", ",")}`;
+      subtotalEl.textContent = `${formatarPrecoBR(pedido.subtotal)}`;
     }
 
     const freteEl = document.getElementById("frete");
     if (freteEl) {
-      freteEl.textContent = `R$ ${pedido.frete.toFixed(2).replace(".", ",")}`;
+      freteEl.textContent = `${formatarPrecoBR(pedido.frete)}`;
     }
 
     const descontoEl = document.getElementById("desconto");
     if (descontoEl) {
-      descontoEl.textContent = `-R$ ${pedido.desconto
-        .toFixed(2)
-        .replace(".", ",")}`;
+      descontoEl.textContent = `-${formatarPrecoBR(pedido.desconto)}`;
       // Oculta linha de desconto se for zero
       if (pedido.desconto === 0) {
         const descontoRow = descontoEl.closest(".summary-row");
@@ -421,7 +413,7 @@ async function preencherPaginaConfirmacao(pedido) {
 
     const totalEl = document.getElementById("total");
     if (totalEl) {
-      totalEl.textContent = `R$ ${pedido.total.toFixed(2).replace(".", ",")}`;
+      totalEl.textContent = `${formatarPrecoBR(pedido.total)}`;
     }
 
     // Forma de pagamento
@@ -758,6 +750,11 @@ async function enviarAtualizacoes() {
 //     console.error('Erro ao carregar produtos relacionados:', erro);
 //   }
 // }
+
+// Função para formatar preço no padrão brasileiro
+function formatarPrecoBR(valor) {
+  return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
 
 // Inicialização do módulo
 document.addEventListener("DOMContentLoaded", () => {
