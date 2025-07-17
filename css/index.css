@@ -123,3 +123,36 @@ footer {
   }
 }
 
+/* Ajuste das setas do carrossel de categorias */
+#productCarousel .carousel-control-prev,
+#productCarousel .carousel-control-next {
+  width: 40px;
+  height: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.8;
+  z-index: 2;
+}
+
+#productCarousel .carousel-control-prev {
+  left: -30px; /* Afasta a seta da esquerda dos cards */
+}
+
+#productCarousel .carousel-control-next {
+  right: -30px; /* Afasta a seta da direita dos cards */
+}
+
+#productCarousel .carousel-control-prev-icon,
+#productCarousel .carousel-control-next-icon {
+  width: 32px;
+  height: 32px;
+  filter: invert(41%) sepia(94%) saturate(355%) hue-rotate(83deg) brightness(90%) contrast(90%);
+  background-color: transparent !important;
+}
+
+/* Ajuste do espaçamento dos cards dentro do carrossel */
+#productCarousel .carousel-item .categoria {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
