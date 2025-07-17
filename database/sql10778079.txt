@@ -21,9 +21,9 @@ CREATE TABLE pessoa (
 
 CREATE TABLE enderecos (
     id_endereco INT PRIMARY KEY AUTO_INCREMENT,
-    uf CHAR(2) NOT NULL,
-    cep VARCHAR(12) NOT NULL,
-    cidade VARCHAR(20) NOT NULL,
+    uf CHAR(2) NULL,
+    cep VARCHAR(12) NULL,
+    cidade VARCHAR(20) NULL,
     bairro VARCHAR(50) NULL,
     endereco TEXT NULL,
     complemento TEXT NULL,

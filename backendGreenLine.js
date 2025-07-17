@@ -23,14 +23,24 @@ const segredo = process.env.SEGREDO_JWT;
 app.post("/cadastrarUsuario", async (req, res) => {
   const { nome, email, cpf, telefone, senha } = req.body;
 
-  const inserirPessoa = `INSERT INTO pessoa(nome, email, cpf, telefone,id_tipo_usuario, senha, situacao, imagem_perfil) 
+  // Verifica se todos os campos obrigatórios foram fornecidos
+  if (!nome || !email || !cpf || !telefone || !senha) {
+    return res.status(400).json({ erro: "Todos os campos são obrigatórios." });
+  }
+
+  const inserirPessoa = `INSERT INTO pessoa(nome, email, cpf, telefone, id_tipo_usuario, senha, situacao, imagem_perfil) 
     VALUES (?, ?, ?, ?, 2, ?, 'P', 'perfil.png')`;
+
   const selecionarId = `SELECT id_pessoa FROM pessoa WHERE email = ? ORDER BY id_pessoa DESC LIMIT 1`;
-  const inserirEndereco = `INSERT INTO enderecos(uf,cep,cidade,bairro,endereco,complemento,situacao,id_pessoa) 
-  VALUES('DF',NULL,NULL,NULL,NULL,NULL,'A',?)`;
+
+  const inserirEndereco = `INSERT INTO enderecos(uf, cep, cidade, bairro, endereco, complemento, situacao, id_pessoa) 
+    VALUES('DF', NULL, NULL, NULL, NULL, NULL, 'A', ?)`;
 
   try {
+    // Criptografa a senha
     const senhaCriptografada = await bcrypt.hash(senha, 10);
+
+    // Insere a pessoa no banco de dados
     await db.query(inserirPessoa, [
       nome,
       email,
@@ -39,17 +49,21 @@ app.post("/cadastrarUsuario", async (req, res) => {
       senhaCriptografada,
     ]);
 
-    const resultadoId = await db.query(selecionarId, [email]);
-    if (resultadoId.length === 0) {
+    // Obtém o ID da pessoa recém-criada
+    const [resultadoId] = await db.query(selecionarId, [email]);
+
+    if (!resultadoId || resultadoId.length === 0) {
       return res
         .status(400)
         .json({ erro: "Erro ao recuperar o ID da pessoa." });
     }
-    try {
-      await db.query(inserirEndereco, [resultadoId]);
-    } catch (erro) {
-      return res.status(400).json({ erro: "Erro ao inserir o endereço" });
-    }
+
+    const idPessoa = resultadoId[0].id_pessoa;
+
+    // Insere o endereço padrão para a pessoa
+    await db.query(inserirEndereco, [idPessoa]);
+
+    // Tenta enviar o e-mail de confirmação
     try {
       await funcoesUteis.enviarEmail(
         email,
@@ -58,14 +72,31 @@ app.post("/cadastrarUsuario", async (req, res) => {
         null
       );
     } catch (erro) {
-      return res.status(500).json({ erro: "Erro ao enviar o email" });
+      console.error("Erro ao enviar email:", erro);
+      // Não retornamos erro aqui pois o cadastro foi realizado com sucesso
+      // Apenas o e-mail não foi enviado
     }
+
     res.status(200).json({
       codigo: 200,
       mensagem:
         "Cadastro realizado com sucesso! Verifique seu e-mail para confirmação.",
     });
   } catch (err) {
+    console.error("Erro no cadastro:", err);
+
+    // Verifica se o erro é de duplicação (e-mail ou CPF já cadastrado)
+    if (err.code === "ER_DUP_ENTRY") {
+      if (err.message.includes("email")) {
+        return res
+          .status(400)
+          .json({ erro: "Este e-mail já está cadastrado." });
+      }
+      if (err.message.includes("cpf")) {
+        return res.status(400).json({ erro: "Este CPF já está cadastrado." });
+      }
+    }
+
     res.status(500).json({ erro: "Erro durante o processo de cadastro." });
   }
 });
