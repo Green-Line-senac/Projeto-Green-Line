@@ -26,6 +26,8 @@ app.post("/cadastrarUsuario", async (req, res) => {
   const inserirPessoa = `INSERT INTO pessoa(nome, email, cpf, telefone,id_tipo_usuario, senha, situacao, imagem_perfil) 
     VALUES (?, ?, ?, ?, 2, ?, 'P', 'perfil.png')`;
   const selecionarId = `SELECT id_pessoa FROM pessoa WHERE email = ? ORDER BY id_pessoa DESC LIMIT 1`;
+  const inserirEndereco = `INSERT INTO enderecos(uf,cep,cidade,bairro,endereco,complemento,situacao,id_pessoa) 
+  VALUES('DF',NULL,NULL,NULL,NULL,NULL,'A',?)`;
 
   try {
     const senhaCriptografada = await bcrypt.hash(senha, 10);
@@ -44,7 +46,17 @@ app.post("/cadastrarUsuario", async (req, res) => {
         .json({ erro: "Erro ao recuperar o ID da pessoa." });
     }
     try {
-       await funcoesUteis.enviarEmail(email,"Confirmação de email", "confirmacao",null);
+      await db.query(inserirEndereco, [resultadoId]);
+    } catch (erro) {
+      return res.status(400).json({ erro: "Erro ao inserir o endereço" });
+    }
+    try {
+      await funcoesUteis.enviarEmail(
+        email,
+        "Confirmação de email",
+        "confirmacao",
+        null
+      );
     } catch (erro) {
       return res.status(500).json({ erro: "Erro ao enviar o email" });
     }
@@ -96,8 +108,7 @@ app.get("/validar", async (req, res) => {
 app.get("/redefinir-senha", async (req, res) => {
   const { token } = req.query;
   const senhaCriptografada = await bcrypt.hash(senha, 10);
-  const atualizarSituacao =
-    "UPDATE pessoa SET senha = ? WHERE id_pessoa = ?";
+  const atualizarSituacao = "UPDATE pessoa SET senha = ? WHERE id_pessoa = ?";
   const sql =
     "SELECT id_pessoa FROM pessoa WHERE situacao = 'A' AND email = ?;";
 
@@ -135,13 +146,11 @@ app.get("/verificarEmail", async (req, res) => {
   const sql = "SELECT COUNT(*) AS total FROM pessoa WHERE email = ?";
   try {
     const verificacao = await db.query(sql, [email]);
-    if(verificacao[0].total>0){
-      res.json({codigo: 1, mensagem:"Email cadastrado"})
+    if (verificacao[0].total > 0) {
+      res.json({ codigo: 1, mensagem: "Email cadastrado" });
+    } else {
+      res.json({ codigo: 2, mensagem: "Email disponível" });
     }
-    else{
-      res.json({codigo: 2, mensagem:"Email disponível"})
-    }
-
   } catch (erro) {
     res.status(500).json({ erro: "Erro ao verificar o email" });
   }
@@ -153,11 +162,10 @@ app.get("/verificarCPF", async (req, res) => {
 
   try {
     const verificacao = await db.query(sql, [cpf]);
-    if(verificacao[0].total>0){
-      res.json({codigo: 1, mensagem:"CPF cadastrado"})
-    }
-    else{
-      res.json({codigo: 2, mensagem:"CPF disponível"})
+    if (verificacao[0].total > 0) {
+      res.json({ codigo: 1, mensagem: "CPF cadastrado" });
+    } else {
+      res.json({ codigo: 2, mensagem: "CPF disponível" });
     }
   } catch (erro) {
     res.status(500).json({ erro: "Erro ao verificar o cpf" });
@@ -299,49 +307,52 @@ app.get("/produtosEspecificos", async (req, res) => {
 // ==================== BACKEND PADRÃO ====================
 app.post("/enviar-email", async (req, res) => {
   // 1. Extrai e valida campos obrigatórios
-  const { assunto, tipo, email: rawEmail,pedido} = req.body;
-  
+  const { assunto, tipo, email: rawEmail, pedido } = req.body;
+
   if (!assunto || !tipo) {
-    return res.status(400).json({ 
-      conclusao: 1, 
-      mensagem: "Assunto e tipo são obrigatórios" 
+    return res.status(400).json({
+      conclusao: 1,
+      mensagem: "Assunto e tipo são obrigatórios",
     });
   }
 
   // 2. Limpeza e validação do email
   const email = rawEmail?.trim().toLowerCase();
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  
+
   if (!email || !emailRegex.test(email)) {
-    return res.status(400).json({ 
-      conclusao: 1, 
-      mensagem: "Email inválido ou não fornecido" 
+    return res.status(400).json({
+      conclusao: 1,
+      mensagem: "Email inválido ou não fornecido",
     });
   }
 
   try {
-    console.log(`Preparando para enviar email para ${email}`, { tipo, assunto });
-    
+    console.log(`Preparando para enviar email para ${email}`, {
+      tipo,
+      assunto,
+    });
+
     await funcoesUteis.enviarEmail(email, assunto, tipo, pedido);
-    
+
     console.log(`Email enviado com sucesso para ${email}`);
-    
-    return res.json({ 
-      conclusao: 2, 
+
+    return res.json({
+      conclusao: 2,
       mensagem: "Email enviado com sucesso",
-      detalhes: { email, tipo } 
+      detalhes: { email, tipo },
     });
   } catch (erro) {
     console.error("Falha no envio de email:", {
       erro: erro.message,
       email,
-      tipo
+      tipo,
     });
-    
-    return res.status(500).json({ 
-      conclusao: 3, 
+
+    return res.status(500).json({
+      conclusao: 3,
       mensagem: "Falha ao enviar email",
-      erro: process.env.NODE_ENV === 'development' ? erro.message : undefined
+      erro: process.env.NODE_ENV === "development" ? erro.message : undefined,
     });
   }
 });
@@ -389,7 +400,7 @@ app.post("/verificarConta", async (req, res) => {
       : `SELECT * FROM pessoa WHERE nome = ?`;
 
     const pesquisa = await db.query(sql, [usuario]);
-    
+
     if (pesquisa.length === 0) {
       return res.status(404).json({
         dadosValidos: 0,
@@ -434,10 +445,10 @@ app.post("/verificarConta", async (req, res) => {
       "SELECT SUM(quantidade_pendente) AS numero_carrinho FROM vw_quantidade_pendente WHERE id_pessoa = ?",
       [id_pessoa]
     );
-     let carrinho = respostaCarrinho.length > 0
+    let carrinho =
+      respostaCarrinho.length > 0
         ? Number(respostaCarrinho[0].numero_carrinho || 0)
         : 0;
-
 
     // Geração do token JWT
     const token = jwt.sign(
@@ -462,7 +473,7 @@ app.post("/verificarConta", async (req, res) => {
         email,
         isAdmin,
         carrinho,
-        id_tipo_usuario
+        id_tipo_usuario,
       },
     });
   } catch (error) {
@@ -770,7 +781,7 @@ app.post("/salvar-pedido", async (req, res) => {
     // Restante do código permanece igual...
     const ultimoPedido = await db.query(
       "SELECT id_pedido FROM pedidos WHERE numero_pedido = ? ORDER BY id_pedido DESC LIMIT 1",
-      [pedido.numeroPedido],
+      [pedido.numeroPedido]
     );
     const idPedido = ultimoPedido[0].id_pedido;
     console.log("ID do pedido inserido:", idPedido);
@@ -822,7 +833,9 @@ app.post("/avaliacoes", async (req, res) => {
   // Validação básica dos dados
   if (!id_produto || !id_pessoa || !nota) {
     console.warn("⚠️ Dados incompletos:", { id_produto, id_pessoa, nota });
-    return res.status(400).json({ sucesso: false, mensagem: "Dados incompletos" });
+    return res
+      .status(400)
+      .json({ sucesso: false, mensagem: "Dados incompletos" });
   }
 
   try {
@@ -839,21 +852,39 @@ app.post("/avaliacoes", async (req, res) => {
         "UPDATE avaliacoes SET nota = ?, comentario = ?, data = NOW() WHERE id_avaliacao = ?",
         [nota, comentario || null, existe[0].id_avaliacao]
       );
-      console.log("📝 Avaliação atualizada:", { id_produto, id_pessoa, nota, comentario });
-      return res.json({ sucesso: true, mensagem: "Avaliação atualizada com sucesso" });
+      console.log("📝 Avaliação atualizada:", {
+        id_produto,
+        id_pessoa,
+        nota,
+        comentario,
+      });
+      return res.json({
+        sucesso: true,
+        mensagem: "Avaliação atualizada com sucesso",
+      });
     } else {
       // Insere nova avaliação
       await db.query(
         "INSERT INTO avaliacoes (id_produto, id_pessoa, nota, comentario, data) VALUES (?, ?, ?, ?, NOW())",
         [id_produto, id_pessoa, nota, comentario || null]
       );
-      console.log("✅ Nova avaliação registrada:", { id_produto, id_pessoa, nota, comentario });
-      return res.json({ sucesso: true, mensagem: "Avaliação registrada com sucesso" });
+      console.log("✅ Nova avaliação registrada:", {
+        id_produto,
+        id_pessoa,
+        nota,
+        comentario,
+      });
+      return res.json({
+        sucesso: true,
+        mensagem: "Avaliação registrada com sucesso",
+      });
     }
   } catch (err) {
     // Debug de erro
     console.error("💥 Erro ao processar avaliação:", err);
-    res.status(500).json({ sucesso: false, mensagem: "Erro ao registrar avaliação" });
+    res
+      .status(500)
+      .json({ sucesso: false, mensagem: "Erro ao registrar avaliação" });
   }
 });
 
@@ -861,7 +892,9 @@ app.post("/avaliacoes", async (req, res) => {
 app.get("/avaliacoes", async (req, res) => {
   const { id_produto } = req.query;
   if (!id_produto) {
-    return res.status(400).json({ sucesso: false, mensagem: "ID do produto não informado" });
+    return res
+      .status(400)
+      .json({ sucesso: false, mensagem: "ID do produto não informado" });
   }
   try {
     const avaliacoes = await db.query(
@@ -870,10 +903,15 @@ app.get("/avaliacoes", async (req, res) => {
     );
     // Calcular média e total
     const total = avaliacoes.length;
-    const media = total > 0 ? (avaliacoes.reduce((soma, a) => soma + a.nota, 0) / total).toFixed(2) : 0;
+    const media =
+      total > 0
+        ? (avaliacoes.reduce((soma, a) => soma + a.nota, 0) / total).toFixed(2)
+        : 0;
     res.json({ sucesso: true, media, total, avaliacoes });
   } catch (err) {
-    res.status(500).json({ sucesso: false, mensagem: "Erro ao buscar avaliações" });
+    res
+      .status(500)
+      .json({ sucesso: false, mensagem: "Erro ao buscar avaliações" });
   }
 });
 
@@ -886,6 +924,3 @@ app.get("/teste", (req, res) => {
 app.listen(3010, () => {
   console.log("🚀 SERVIDOR RODANDO NO ONLINE");
 });
-
-
-

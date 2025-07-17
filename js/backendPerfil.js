@@ -417,6 +417,7 @@ app.put('/pessoa/:id_pessoa/imagem', async (req, res) => {
 app.get('/pessoa/:id_pessoa/enderecos', async (req, res) => {
     try {
         const idPessoa = req.params.id_pessoa;
+        console.log(idPessoa);
 
         // Execute a consulta e capture o resultado completo
         const queryResult = await db.query(
