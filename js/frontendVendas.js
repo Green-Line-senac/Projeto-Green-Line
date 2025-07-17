@@ -384,33 +384,66 @@ document.getElementById("FinalizarCompra").addEventListener("click", async (even
         mostrarErros(["Não foi possível encontrar os dados da sua compra. Por favor, tente novamente."]);
         return;
     }
-    
+
+    // Validação dos campos obrigatórios
+    const erros = [];
+    // Endereço
+    const cep = document.getElementById('cep').value;
+    const logradouro = document.getElementById('logradouro').value;
+    const numeroCasa = document.getElementById('numeroCasa').value;
+    const bairro = document.getElementById('bairro').value;
+    const cidade = document.getElementById('cidade').value;
+    const uf = document.getElementById('uf').value;
+    if (!cep || !/^\d{5}-?\d{3}$/.test(cep)) erros.push('CEP inválido ou não preenchido');
+    if (!logradouro || logradouro.length < 3) erros.push('Endereço inválido ou não preenchido');
+    if (!numeroCasa || !/^\d+$/.test(numeroCasa)) erros.push('Número da casa inválido ou não preenchido');
+    if (!bairro || bairro.length < 3) erros.push('Bairro inválido ou não preenchido');
+    if (!cidade || cidade.length < 3) erros.push('Cidade inválida ou não preenchida');
+    if (!uf || !/^[A-Z]{2}$/.test(uf)) erros.push('Estado inválido ou não preenchido');
+
+    // Pagamento
+    const metodoPagamento = document.getElementById('pagamento').value;
+    if (!metodoPagamento) {
+      erros.push('Selecione a forma de pagamento.');
+    }
+    let dadosPagamento = { metodoPagamento };
+    if (metodoPagamento === 'CC') {
+      const numeroCartao = document.getElementById('numero-cartao').value;
+      const nomeCartao = document.getElementById('nome-cartao').value;
+      const validadeCartao = document.getElementById('validade-cartao').value;
+      const cvv = document.getElementById('cvv').value;
+      const parcelas = document.getElementById('parcelas').value;
+      if (!numeroCartao || numeroCartao.replace(/\s/g, '').length < 16) erros.push('Número do cartão inválido ou não preenchido');
+      if (!nomeCartao || nomeCartao.length < 3) erros.push('Nome no cartão inválido ou não preenchido');
+      if (!validadeCartao || !/^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(validadeCartao)) erros.push('Validade do cartão inválida ou não preenchida');
+      if (!cvv || !/^[0-9]{3,4}$/.test(cvv)) erros.push('CVV inválido ou não preenchido');
+      if (!parcelas) erros.push('Selecione o número de parcelas');
+      dadosPagamento = {
+        ...dadosPagamento,
+        numeroCartao,
+        nomeCartao,
+        validadeCartao,
+        cvv,
+        parcelas
+      };
+    }
+
+    if (erros.length > 0) {
+      mostrarErros(erros);
+      return;
+    }
+
     try {
         // Coleta dados do endereço
         const dadosEndereco = {
-            cep: document.getElementById('cep').value,
-            logradouro: document.getElementById('logradouro').value,
-            numeroCasa: document.getElementById('numeroCasa').value,
+            cep,
+            logradouro,
+            numeroCasa,
             complementoCasa: document.getElementById('complementoCasa').value,
-            bairro: document.getElementById('bairro').value,
-            cidade: document.getElementById('cidade').value,
-            uf: document.getElementById('uf').value
+            bairro,
+            cidade,
+            uf
         };
-
-        // Coleta dados do pagamento
-        const metodoPagamento = document.getElementById('pagamento').value;
-        let dadosPagamento = { metodoPagamento };
-
-        if (metodoPagamento === 'CC') {
-            dadosPagamento = {
-                ...dadosPagamento,
-                numeroCartao: document.getElementById('numero-cartao').value,
-                nomeCartao: document.getElementById('nome-cartao').value,
-                validadeCartao: document.getElementById('validade-cartao').value,
-                cvv: document.getElementById('cvv').value,
-                parcelas: document.getElementById('parcelas').value
-            };
-        }
 
         // Combina todos os dados do formulário
         const dadosFormulario = {
@@ -469,4 +502,9 @@ document.addEventListener('DOMContentLoaded', function() {
     atualizarResumoFrete();
   }
 });
+
+// Função para formatar preço no padrão brasileiro
+function formatarPrecoBR(valor) {
+  return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
 
