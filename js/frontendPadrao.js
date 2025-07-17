@@ -54,6 +54,7 @@ async function verificarEstadoLogin() {
     if (dadosUsuario.id_pessoa) {
       dadosUsuario.logado = true;
     }
+    console.log(dadosUsuario);
 
     if (dadosUsuario?.logado === true) {
       elementosHTML.iconeUsuario.className = "bi bi-person-check text-success";
