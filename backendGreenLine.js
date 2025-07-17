@@ -461,7 +461,8 @@ app.post("/verificarConta", async (req, res) => {
         id_pessoa,
         email,
         isAdmin,
-        carrinho
+        carrinho,
+        id_tipo_usuario
       },
     });
   } catch (error) {

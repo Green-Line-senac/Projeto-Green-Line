@@ -41,6 +41,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   preencherCamposProduto(produto);
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+  const btnVoltar = document.getElementById('btn-voltar-produtos');
+  if (btnVoltar) {
+    btnVoltar.addEventListener('click', function() {
+      window.history.back();
+    });
+  }
+});
+
+function formatarPrecoBR(valor) {
+  return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
 function preencherCamposProduto(produto) {
   // Imagem principal
   const imgEl = document.getElementById('produto-img-principal');
@@ -91,18 +104,18 @@ function preencherCamposProduto(produto) {
   const precoPromocionalEl = document.getElementById('produto-preco-promocional');
   const emPromocao = produto.promocao && produto.preco_promocional > 0 && produto.preco_promocional < produto.preco;
   if (emPromocao) {
-    if (precoOriginalEl) precoOriginalEl.textContent = 'R$ ' + Number(produto.preco).toFixed(2);
-    if (precoPromocionalEl) precoPromocionalEl.textContent = 'R$ ' + Number(produto.preco_promocional).toFixed(2);
+    if (precoOriginalEl) precoOriginalEl.textContent = formatarPrecoBR(Number(produto.preco));
+    if (precoPromocionalEl) precoPromocionalEl.textContent = formatarPrecoBR(Number(produto.preco_promocional));
   } else {
     if (precoOriginalEl) precoOriginalEl.textContent = '';
-    if (precoPromocionalEl) precoPromocionalEl.textContent = 'R$ ' + Number(produto.preco).toFixed(2);
+    if (precoPromocionalEl) precoPromocionalEl.textContent = formatarPrecoBR(Number(produto.preco));
   }
 
   // Parcelamento (exemplo simples)
   const parcEl = document.getElementById('produto-parcelamento');
   if (parcEl) {
     const valor = emPromocao ? produto.preco_promocional : produto.preco;
-    parcEl.textContent = `ou 12x de R$ ${(valor/12).toFixed(2)} sem juros`;
+    parcEl.textContent = `ou 12x de ${formatarPrecoBR(valor/12)} sem juros`;
   }
 
   // Descrição
@@ -185,7 +198,7 @@ if (maxTextEl) {
     if (qtd < 1) qtd = 1;
     if (qtd > maxEstoque) qtd = maxEstoque;
     qtdEl.value = qtd;
-    totalEl.textContent = 'R$ ' + (valor * qtd).toFixed(2);
+    totalEl.textContent = formatarPrecoBR(valor * qtd);
     // Desabilita botões se atingir limites
     if (btnMenos) btnMenos.disabled = qtd <= 1;
     if (btnMais) btnMais.disabled = qtd >= maxEstoque;
