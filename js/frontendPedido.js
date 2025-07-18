@@ -128,6 +128,11 @@ function calcularImpactoSustentavel(produtos) {
 
 // Função para enviar email de confirmação
 async function enviarEmailConfirmacao(pedido) {
+  if (!pedido.email || !pedido.email.includes('@')) {
+    console.error('E-mail do pedido está vazio ou inválido:', pedido.email);
+    mostrarErro('E-mail do usuário não encontrado ou inválido. Faça login novamente.');
+    return;
+  }
   try {
     const response = await fetch(
       "https://green-line-web.onrender.com/enviar-email",
@@ -151,6 +156,8 @@ async function enviarEmailConfirmacao(pedido) {
     );
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Resposta do backend ao tentar enviar email:', errorText);
       throw new Error("Falha ao enviar email");
     }
 
@@ -257,6 +264,9 @@ async function carregarDadosPedido() {
         quantidade: parseInt(item.quantidade) || 1,
         preco: parseFloat(item.preco_final) || 0,
         subtotal: (parseFloat(item.preco_final) || 0) * (parseInt(item.quantidade) || 1),
+        imagem_principal: item.imagem_principal,
+        imagem_1: item.imagem_1,
+        imagem: item.imagem
       })).filter(p => p.nome && p.quantidade > 0),
       subtotal,
       frete,
@@ -278,6 +288,7 @@ async function carregarDadosPedido() {
             },
       impactoCO2: impacto.co2,
       arvores: impacto.arvores,
+      dataConfirmacao // <-- garantir que a data está presente
     };
     console.log('Pedido enviado para backend:', pedido);
     await salvarPedido(pedido);
@@ -536,9 +547,21 @@ function continuarComprando() {
 
 async function acompanharPedido() {
   const numeroPedido = document.getElementById("numeroPedido").textContent;
-  const dataConfirmacao =
-    document.getElementById("dataConfirmacao").textContent;
-
+  let dataConfirmacao = document.getElementById("dataConfirmacao").textContent;
+  // Se a data estiver vazia, tenta buscar do sessionStorage ou mostra mensagem padrão
+  if (!dataConfirmacao || dataConfirmacao.trim() === "") {
+    const ultimoPedido = sessionStorage.getItem("ultimoPedido");
+    if (ultimoPedido) {
+      try {
+        const pedido = JSON.parse(ultimoPedido);
+        dataConfirmacao = pedido.dataConfirmacao || "Data não disponível";
+      } catch (e) {
+        dataConfirmacao = "Data não disponível";
+      }
+    } else {
+      dataConfirmacao = "Data não disponível";
+    }
+  }
   // Atualiza informações básicas no modal
   document.getElementById("modalNumeroPedido").textContent = numeroPedido;
   document.getElementById("modalDataPedido").textContent = dataConfirmacao;

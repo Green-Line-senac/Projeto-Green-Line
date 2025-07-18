@@ -178,6 +178,7 @@ function armazenarDadosUsuario(dados) {
     sessionStorage.setItem("userToken", dados.token);
     sessionStorage.setItem("id_pessoa", dados.user.id_pessoa);
     sessionStorage.setItem("userEmail", dados.user.email);
+    sessionStorage.setItem("email", dados.user.email); // Garantir compatibilidade com o restante do sistema
     sessionStorage.setItem("userType", dados.user.tipo_usuario);
     sessionStorage.setItem("isAdmin", dados.user.isAdmin);
     sessionStorage.setItem("carrinho", dados.user.carrinho || 0);
