@@ -8,6 +8,7 @@ const path = require("path");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const multer = require('multer');
 
 const app = express();
 app.use(express.json({ limit: "100mb" }));
