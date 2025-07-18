@@ -17,7 +17,10 @@ export class Usuario {
   validarDados() {
     const nameRegex = /^[a-zA-ZÀ-ÿ\s']{1,30}$/;
     if (!nameRegex.test(this.nome)) {
-      showAlert("Nome inválido. Use apenas letras e espaços (até 30 caracteres).", "danger");
+      showAlert(
+        "Nome inválido. Use apenas letras e espaços (até 30 caracteres).",
+        "danger"
+      );
       return false;
     }
 
@@ -29,13 +32,19 @@ export class Usuario {
 
     const cpfRegex = /^(\d{3}\.){2}\d{3}-\d{2}$|^\d{11}$/;
     if (!cpfRegex.test(this.cpf)) {
-      showAlert("CPF inválido. Use o formato XXX.XXX.XXX-XX ou 11 dígitos.", "danger");
+      showAlert(
+        "CPF inválido. Use o formato XXX.XXX.XXX-XX ou 11 dígitos.",
+        "danger"
+      );
       return false;
     }
 
     const passRegex = /^(?=.*[a-zA-ZÀ-ÿ])(?=.*\d).{5,}$/;
     if (!passRegex.test(this.senha)) {
-      showAlert("Senha inválida. Deve ter pelo menos 5 caracteres, 1 letra e 1 número.", "danger");
+      showAlert(
+        "Senha inválida. Deve ter pelo menos 5 caracteres, 1 letra e 1 número.",
+        "danger"
+      );
       return false;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -69,7 +78,7 @@ export class Usuario {
       }
 
       // Envia os dados para a API
-      const response = await fetch(`${api.online}/cadastrarUsuario`, {
+      const response = await fetch(`${api.cadastro}/cadastrarUsuario`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -83,10 +92,10 @@ export class Usuario {
 
       const data = await response.json();
 
-      if (data.codigo === 200) {
-        showAlert(data.mensagem, "success");
+      if (data.success) {
+        showAlert(data.message, "success"); 
       } else {
-        showAlert(data.mensagem, "danger");
+        showAlert(data.message || "Erro desconhecido", "danger");
       }
     } catch (error) {
       console.error("Erro ao cadastrar:", error);
@@ -106,7 +115,9 @@ export class Usuario {
 
   async verificarEmail(email) {
     try {
-      const response = await fetch(`${api.online}/verificarEmail?email=${email}`);
+      const response = await fetch(
+        `${api.online}/verificarEmail?email=${email}`
+      );
       return await response.json();
     } catch (error) {
       console.error("Erro ao verificar e-mail:", error);

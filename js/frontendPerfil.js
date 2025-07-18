@@ -22,7 +22,7 @@ async function carregarDadosUsuario() {
     }
 
     // 2. Fazer a requisição com o token de autenticação
-    const response = await fetch(`${api.perfil}/pessoa/${idPessoa}`, {
+    const response = await fetch(`${api.online}/pessoa/${idPessoa}`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -233,7 +233,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const token = sessionStorage.getItem("userToken");
       const idPessoa = sessionStorage.getItem("id_pessoa");
 
-      const response = await fetch(`${api.perfil}/pessoa/${idPessoa}`, {
+      const response = await fetch(`${api.online}/pessoa/${idPessoa}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -354,7 +354,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const token = sessionStorage.getItem("userToken");
       const idPessoa = sessionStorage.getItem("id_pessoa");
 
-      const response = await fetch(`${api.perfil}/pessoa/${idPessoa}`, {
+      const response = await fetch(`${api.online}/pessoa/${idPessoa}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -402,7 +402,7 @@ document.addEventListener("DOMContentLoaded", () => {
 async function atualizarImagemPerfil(imageData) {
   try {
     const idPessoa = sessionStorage.getItem("id_pessoa");
-    const response = await fetch(`${api.perfil}/pessoa/${idPessoa}/imagem`, {
+    const response = await fetch(`${api.online}/pessoa/${idPessoa}/imagem`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

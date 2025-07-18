@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-     "start": "npm install && concurrently \"node js/backendPerfil.js\""
+     "start": "npm install && concurrently \"node js/backendPerfil.js\" \"node js/backendCadastro.js\""
   },
   "keywords": [],
   "author": "",

@@ -27,26 +27,6 @@ const verificarToken = (req, res, next) => {
     }
 };
 
-/*
-// Configuração do MySQL
-let db;
-mysql.createConnection({
-  database: process.env.DB_NAME,
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT
-})
-.then(connection => {
-  db = connection;
-  console.log('✅ Conectado ao MySQL');
-})
-.catch(err => {
-  console.error('❌ Erro no MySQL:', err.message);
-});*/
-
-
-
 // Configuração do multer para upload de imagens
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {

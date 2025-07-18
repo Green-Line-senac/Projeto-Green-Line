@@ -82,11 +82,32 @@ INSERT INTO tipo_usuario (tipo) VALUES
 
 -- Inserindo usuários
 INSERT INTO pessoa (nome, email, telefone, cpf, id_tipo_usuario, senha, situacao, imagem_perfil) VALUES
-('Kauã', 'kaua@email.com', '61999990001', '111.222.333-44', 1, 'senhaKaua', 'A', NULL),
-('Gabriel', 'gabriel@email.com', '61999990002', '222.333.444-55', 1, 'senhaGabriel', 'A', NULL),
-('Edenilson', 'edenilson@email.com', '61999990003', '333.444.555-66', 1, 'senhaEdenilson', 'A', NULL),
-('Guilherme', 'guilherme@email.com', '61999990004', '444.555.666-77', 2, 'senhaGuilherme', 'A', NULL),
-('Fabrício', 'fabricio@email.com', '61999990005', '555.666.777-88', 2, 'senhaFabricio', 'A', NULL);
+("Administrador","adm@gmail.com","(61) 99999-9999","000.000.000-01",1,"123","A","administrador.jpg"),
+('Kauã', 'kaua@email.com', '61999990001', '111.222.333-44', 1, '123', 'A', "kaua.jpeg"),
+('Gabriel', 'gabriel@email.com', '61999990002', '222.333.444-55', 1, '123', 'A', "gabriel.jpeg"),
+('Edenilson', 'edenilson@email.com', '61999990003', '333.444.555-66', 1, '123', 'A', "edenilson.jpg"),
+('Guilherme', 'guilherme@email.com', '61999990004', '444.555.666-77', 2, '123', 'A', "guilherme.jpg"),
+('Fabrício', 'fabricio@email.com', '61999990005', '555.666.777-88', 2, '123', 'A', "fabricio.jpg"); 
+
+-- Inserindo endereços para os usuários
+INSERT INTO enderecos (uf, cep, cidade, bairro, endereco, complemento, situacao, id_pessoa) VALUES
+-- Endereço do Administrador (id_pessoa 1)
+('DF', '70000-000', 'Brasília', 'Asa Sul', 'SQN 102 Bloco A', 'Sala 101', 'A', 1),
+
+-- Endereço do Kauã (id_pessoa 2)
+('DF', '72100-000', 'Brasília', 'Taguatinga', 'QNA 34 Conjunto A', 'Casa 2', 'A', 2),
+
+-- Endereço do Gabriel (id_pessoa 3)
+('DF', '72220-000', 'Brasília', 'Águas Claras', 'Rua 15 Sul', 'Apto 502 Bloco C', 'A', 3),
+
+-- Endereço do Edenilson (id_pessoa 4)
+('GO', '74000-000', 'Goiânia', 'Setor Marista', 'Rua 9', 'Casa 15', 'A', 4),
+
+-- Endereço do Guilherme (id_pessoa 5)
+('SP', '01000-000', 'São Paulo', 'Moema', 'Av. Ibirapuera', 'Apto 1001', 'A', 5),
+
+-- Endereço do Fabrício (id_pessoa 6)
+('RJ', '22000-000', 'Rio de Janeiro', 'Ipanema', 'Av. Vieira Souto', 'Apto 200', 'A', 6);
 
 INSERT INTO produto (
     produto, 

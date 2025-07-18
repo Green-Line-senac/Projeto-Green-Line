@@ -45,7 +45,7 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
         return;
       }
 
-      const response = await fetch(`${api.perfil}/pessoa/${idPessoa}`, {
+      const response = await fetch(`${api.online}/pessoa/${idPessoa}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -96,7 +96,7 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
     if (!idPessoa || !token) return;
 
     try {
-      const resp = await fetch(`${api.perfil}/pessoa/${idPessoa}/enderecos`, {
+      const resp = await fetch(`${api.online}/pessoa/${idPessoa}/enderecos`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
 
@@ -161,7 +161,7 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
       const token = sessionStorage.getItem("userToken");
       const idPessoa = sessionStorage.getItem("id_pessoa");
 
-      await fetch(`${api.perfil}/pessoa/${idPessoa}`, {
+      await fetch(`${api.online}/pessoa/${idPessoa}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -202,7 +202,7 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
       bairro: e.target.bairro.value,
     };
 
-    await fetch(`${api.perfil}/pessoa/${idPessoa}/enderecos`, {
+    await fetch(`${api.online}/pessoa/${idPessoa}/enderecos`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -224,7 +224,7 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
     reader.onload = async (event) => {
       const base64 = event.target.result;
       const idPessoa = sessionStorage.getItem("id_pessoa");
-      await fetch(`${api.perfil}/pessoa/${idPessoa}/imagem`, {
+      await fetch(`${api.online}/pessoa/${idPessoa}/imagem`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ imagem_perfil: base64 })
@@ -241,7 +241,7 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
   document.getElementById("confirmDeleteBtn").addEventListener("click", async () => {
     const idPessoa = sessionStorage.getItem("id_pessoa");
     const token = sessionStorage.getItem("userToken");
-    await fetch(`${api.perfil}/pessoa/${idPessoa}`, {
+    await fetch(`${api.online}/pessoa/${idPessoa}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` }
     });
