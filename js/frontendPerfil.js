@@ -6,6 +6,9 @@ const api = {
   perfil: "http://localhost:3008",
   index: "http://localhost:3002",
 };
+const basePath = window.location.pathname.includes("green_line_web")
+          ? "/green_line_web/public"
+          : "/public";
 
 // Função para carregar dados do usuário
 // Função para carregar dados do usuário - VERSÃO CORRIGIDA
@@ -17,7 +20,7 @@ async function carregarDadosUsuario() {
 
     if (!token || !idPessoa) {
       console.error("Usuário não autenticado - redirecionando para login");
-      window.location.href = "login.html";
+      window.location.href = `${basePath}/login.html`;
       return;
     }
 
@@ -434,7 +437,7 @@ function logout() {
 
     itemsToRemove.forEach((item) => sessionStorage.removeItem(item));
     // REMOVIDA A LINHA ABAIXO: sessionStorage.clear();
-    window.location.href = "/public/login.html"; 
+    window.location.href = `${basePath}/login.html`; 
 
     console.log("SessionStorage limpo com sucesso.");
   } catch (error) {

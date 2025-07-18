@@ -3,7 +3,7 @@ let estado = {
     produtos: []
 };
 
-const api = {
+const apiCarrinho = {
     online: "https://green-line-web.onrender.com",
     index: "http://localhost:3002",
     carrinho: "http://localhost:3006"
@@ -25,7 +25,7 @@ async function buscarProdutos() {
     try {
         console.log("Buscando produtos para ID:", estado.id_pessoa);
 
-        const resposta = await fetch(`${api.online}/buscar-produtos`, {
+        const resposta = await fetch(`${apiCarrinho.online}/buscar-produtos`, {
             method: 'POST',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id_pessoa: estado.id_pessoa })
@@ -119,7 +119,7 @@ function subtotal() {
 // Função para remover produto
 async function excluirProduto(id_produto, id_carrinho, elemento) {
     try {
-        let requisicao = await fetch(`${api.online}/excluir-produtos`, {
+        let requisicao = await fetch(`${apiCarrinho.online}/excluir-produtos`, {
             method: 'POST',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id_pessoa: estado.id_pessoa, id_produto, id_carrinho })
