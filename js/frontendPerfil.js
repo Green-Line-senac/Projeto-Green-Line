@@ -105,6 +105,8 @@ function preencherDadosPerfil(usuario) {
 function preencherEndereco(endereco) {
 
    if (Array.isArray(endereco)) endereco = endereco[0];
+   // Salva o endereço no sessionStorage para uso em outras páginas
+   sessionStorage.setItem("enderecoUsuario", JSON.stringify(endereco));
   const addressContent = document.getElementById("addressContent");
   addressContent.innerHTML = `
         <p>${endereco.endereco},${endereco.complemento ? ' - ' + endereco.complemento : ''}</p>
@@ -318,6 +320,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     alert("Endereço salvo com sucesso!");
+    // Salva o endereço no sessionStorage para uso em outras páginas
+    sessionStorage.setItem("enderecoUsuario", JSON.stringify(body));
     document.getElementById("addressModal").classList.add("hidden");
     loadAddress(); // recarrega os dados na interface
   } catch (err) {
@@ -325,6 +329,41 @@ document.addEventListener("DOMContentLoaded", () => {
     alert("Erro ao atualizar endereço: " + err.message);
   }
 });
+
+  // Integração com ViaCEP para preenchimento automático de endereço
+  function buscarEnderecoPorCep(cep) {
+    // Remove caracteres não numéricos
+    cep = cep.replace(/\D/g, "");
+    if (cep.length !== 8) return;
+    fetch(`https://viacep.com.br/ws/${cep}/json/`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.erro) {
+          alert("CEP não encontrado!");
+          return;
+        }
+        document.getElementById("endereco").value = data.logradouro || "";
+        document.getElementById("bairro").value = data.bairro || "";
+        document.getElementById("cidade").value = data.localidade || "";
+        document.getElementById("uf").value = data.uf || "";
+      })
+      .catch(() => {
+        alert("Erro ao buscar o CEP. Tente novamente.");
+      });
+  }
+
+  // Adiciona evento ao campo de CEP do modal de endereço
+  const cepInput = document.getElementById("cep");
+  if (cepInput) {
+    cepInput.addEventListener("blur", function () {
+      buscarEnderecoPorCep(this.value);
+    });
+    cepInput.addEventListener("keyup", function () {
+      if (this.value.replace(/\D/g, "").length === 8) {
+        buscarEnderecoPorCep(this.value);
+      }
+    });
+  }
 
 
   // Lógica para o modal de exclusão de conta
@@ -398,6 +437,44 @@ document.addEventListener("DOMContentLoaded", () => {
       reader.readAsDataURL(file);
     }
   });
+
+  // Função para buscar e exibir pedidos feitos na seção de histórico de compras
+  async function carregarPedidosUsuario() {
+    const idPessoa = sessionStorage.getItem("id_pessoa");
+    if (!idPessoa) return;
+    const container = document.getElementById("savedProductsContent");
+    container.innerHTML = '<p>Carregando pedidos...</p>';
+    try {
+      const resp = await fetch(`https://green-line-web.onrender.com/pessoa/${idPessoa}/pedidos`);
+      if (!resp.ok) {
+        container.innerHTML = '<p>Nenhum pedido encontrado.</p>';
+        return;
+      }
+      const pedidos = await resp.json();
+      if (!Array.isArray(pedidos) || pedidos.length === 0) {
+        container.innerHTML = '<p>Nenhum pedido encontrado.</p>';
+        return;
+      }
+      let html = '';
+      pedidos.forEach(pedido => {
+        html += `<div class="pedido-card">
+          <h4>Pedido: <span class="text-success">${pedido.numero_pedido || pedido.numeroPedido || pedido.id_pedido}</span></h4>
+          <p><strong>Data:</strong> ${pedido.data_hora ? new Date(pedido.data_hora).toLocaleString('pt-BR') : (pedido.dataConfirmacao || '')}</p>
+          <p><strong>Status:</strong> ${pedido.situacao || 'Confirmado'}</p>
+          <p><strong>Total:</strong> R$ ${(pedido.valor_total || pedido.total || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+        </div>`;
+      });
+      container.innerHTML = html;
+    } catch (err) {
+      container.innerHTML = '<p>Erro ao carregar pedidos.</p>';
+    }
+  }
+
+  // Carregar pedidos ao abrir a seção de histórico de compras
+  const navPurchaseHistory = document.querySelector('.nav-item[data-section="purchase-history"]');
+  if (navPurchaseHistory) {
+    navPurchaseHistory.addEventListener('click', carregarPedidosUsuario);
+  }
 
 });
 

@@ -204,6 +204,24 @@ async function mascaraCEP() {
 
 // Exibe informações do produto selecionado
 document.addEventListener("DOMContentLoaded", () => {
+    // Preencher endereço automaticamente se houver no sessionStorage
+    const enderecoSalvo = sessionStorage.getItem("enderecoUsuario");
+    if (enderecoSalvo) {
+        try {
+            const endereco = JSON.parse(enderecoSalvo);
+            if (endereco) {
+                if (document.getElementById('cep')) document.getElementById('cep').value = endereco.cep || '';
+                if (document.getElementById('endereco')) document.getElementById('endereco').value = endereco.endereco || '';
+                if (document.getElementById('complemento')) document.getElementById('complemento').value = endereco.complemento || '';
+                if (document.getElementById('bairro')) document.getElementById('bairro').value = endereco.bairro || '';
+                if (document.getElementById('cidade')) document.getElementById('cidade').value = endereco.cidade || '';
+                if (document.getElementById('estado')) document.getElementById('estado').value = endereco.uf || endereco.estado || '';
+            }
+        } catch (e) {
+            console.warn('Endereço salvo no perfil está corrompido ou inválido.');
+        }
+    }
+
     let dadosCompra = sessionStorage.getItem("dadosCompra");
 
     if (dadosCompra) {
@@ -225,14 +243,14 @@ document.addEventListener("DOMContentLoaded", () => {
         let valorTotal = 0;
 
         dadosCompra.forEach(element => {
-            const precoFormatado = parseFloat(element.preco_final).toFixed(2).replace(".", ",");
-            const subtotalFormatado = parseFloat(element.subtotal).toFixed(2).replace(".", ",");
+            const precoFormatado = formatarPrecoBR(element.preco_final);
+            const subtotalFormatado = formatarPrecoBR(element.subtotal);
             valorTotal += parseFloat(element.subtotal);
 
             htmlContent += `
             <hr>
                 <p><strong>Produto:</strong> ${element.nome_produto || element.nome || 'Produto'}</p>
-                <p><strong>Preço unitário:</strong> R$ ${precoFormatado}</p>
+                <p><strong>Preço unitário:</strong> ${precoFormatado}</p>
                 <p><strong>Quantidade:</strong> ${element.quantidade}</p>
             `;
         });
@@ -240,9 +258,9 @@ document.addEventListener("DOMContentLoaded", () => {
         containerProdutos.innerHTML = htmlContent;
         
         // Atualiza os totais
-        const valorTotalFormatado = valorTotal.toFixed(2).replace(".", ",");
-        document.getElementById("contador-subtotal").textContent = `R$ ${valorTotalFormatado}`;
-        document.getElementById("contador-total").textContent = `R$ ${valorTotalFormatado}`;
+        const valorTotalFormatado = formatarPrecoBR(valorTotal);
+        document.getElementById("contador-subtotal").textContent = valorTotalFormatado;
+        document.getElementById("contador-total").textContent = valorTotalFormatado;
     } else {
         containerProdutos.innerHTML = "<p>Nenhum produto selecionado.</p>";
     }
@@ -506,5 +524,17 @@ document.addEventListener('DOMContentLoaded', function() {
 // Função para formatar preço no padrão brasileiro
 function formatarPrecoBR(valor) {
   return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+// Máscara de CEP em tempo real
+const cepInput = document.getElementById('cep');
+if (cepInput) {
+    cepInput.addEventListener('input', function() {
+        let cep = this.value.replace(/\D/g, '');
+        if (cep.length > 5) {
+            cep = cep.substring(0, 5) + '-' + cep.substring(5, 8);
+        }
+        this.value = cep;
+    });
 }
 

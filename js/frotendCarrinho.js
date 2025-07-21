@@ -82,8 +82,8 @@ async function renderizarProdutos() {
                         <span class="text-muted">Quantidade: ${item.quantidade}</span>
                     </div>
                     <div class="text-end">
-                        ${!item.promocao ? `<div class="">R$ ${item.preco_unitario}</div>` : `<div class="preco-original">R$ ${item.preco_unitario}</div>`}
-                        ${item.promocao ? `<div class="preco-promocao">R$ ${item.preco_promocional}</div>` : ''}
+                        ${!item.promocao ? `<div class="">${formatarPrecoBR(item.preco_unitario)}</div>` : `<div class="preco-original">${formatarPrecoBR(item.preco_unitario)}</div>`}
+                        ${item.promocao ? `<div class="preco-promocao">${formatarPrecoBR(item.preco_promocional)}</div>` : ''}
                     </div>
                 </div>
             </div>
@@ -100,6 +100,11 @@ async function renderizarProdutos() {
     subtotal(); // Atualiza o total após renderizar
 }
 
+// Função utilitária para formatar valores em reais
+function formatarPrecoBR(valor) {
+    return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
 // Calcula subtotal
 function subtotal() {
     let total = document.getElementById('total');
@@ -113,7 +118,7 @@ function subtotal() {
     });
 
     quantidade.innerHTML = quant || 0;
-    total.innerHTML = valor.toFixed(2) || "0.00";
+    total.innerHTML = formatarPrecoBR(valor) || formatarPrecoBR(0);
 }
 
 // Função para remover produto
