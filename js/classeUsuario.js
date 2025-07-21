@@ -78,7 +78,7 @@ export class Usuario {
       }
 
       // Envia os dados para a API
-      const response = await fetch(`${api.cadastro}/cadastrarUsuario`, {
+      const response = await fetch(`${api.online}/cadastrarUsuario`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

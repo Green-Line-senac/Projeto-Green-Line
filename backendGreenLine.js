@@ -376,6 +376,26 @@ app.post("/enviar-email", async (req, res) => {
   }
 });
 
+// ==================== ROTA DE SOLICITAÇÃO DE ATUALIZAÇÕES DE PEDIDO ====================
+app.post("/solicitar-atualizacoes", async (req, res) => {
+  const { email, numeroPedido } = req.body;
+  if (!email || !numeroPedido) {
+    return res.status(400).json({ mensagem: "Email e número do pedido são obrigatórios." });
+  }
+  try {
+    await funcoesUteis.enviarEmail(
+      email,
+      `Atualizações do Pedido ${numeroPedido}`,
+      "atualizacao-pedido",
+      { numeroPedido }
+    );
+    res.status(200).json({ mensagem: "Solicitação de atualizações enviada!" });
+  } catch (erro) {
+    console.error("Erro ao enviar atualizações por e-mail:", erro);
+    res.status(500).json({ mensagem: "Erro ao enviar atualizações por e-mail." });
+  }
+});
+
 // ==================== BACKEND LOGIN ====================
 
 // Rota de verificação de conta
