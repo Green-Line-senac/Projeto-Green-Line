@@ -24,16 +24,20 @@ export class Usuario {
       return false;
     }
 
-    const phoneRegex = /^\(\d{2}\)\s?\d{4,5}-?\d{4}$/;
+    const phoneRegex = /^\(?(\d{2})\)?\s?(\d{4,5})-?(\d{4})$/;
     if (!phoneRegex.test(this.telefone)) {
-      showAlert("Telefone inválido. Use o formato (XX) 9XXXX-XXXX.", "danger");
+      showAlert(
+        "Telefone inválido. Use o formato (XX) 9XXXX-XXXX ou XX9XXXXXXXX.",
+        "danger"
+      );
       return false;
     }
 
-    const cpfRegex = /^(\d{3}\.){2}\d{3}-\d{2}$|^\d{11}$/;
+    // CPF regex: XXX.XXX.XXX-XX or XXXXXXXXXXX (11 digits)
+    const cpfRegex = /^(\d{3}\.?\d{3}\.?\d{3}-?\d{2}|\d{11})$/;
     if (!cpfRegex.test(this.cpf)) {
       showAlert(
-        "CPF inválido. Use o formato XXX.XXX.XXX-XX ou 11 dígitos.",
+        "CPF inválido. Use o formato XXX.XXX.XXX-XX ou XXXXXXXXXXX.",
         "danger"
       );
       return false;
@@ -93,7 +97,7 @@ export class Usuario {
       const data = await response.json();
 
       if (data.success) {
-        showAlert(data.message, "success"); 
+        showAlert(data.message, "success");
       } else {
         showAlert(data.message || "Erro desconhecido", "danger");
       }

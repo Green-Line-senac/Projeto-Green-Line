@@ -26,7 +26,7 @@ class FuncaoUteis {
         <div style="background-color: #f0f8ff; padding: 15px; border-radius: 5px; text-align: center; font-size: 18px; margin: 20px 0;">
             <strong>123GL</strong>
         </div>
-        <p>Por segurança, recomendamos que você acesse sua conta e altere esta senha temporária o quanto antes.</p>
+        <p>Clicando no botão a seguir, sua senha será reiniciada.</p>
         <a href="https://green-line-web.onrender.com/redefinir-senha?token=${this.criarToken(
           email
         )}" style="display: inline-block; padding: 12px 24px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 15px 0;">

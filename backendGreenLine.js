@@ -126,6 +126,7 @@ app.get("/validar", async (req, res) => {
 });
 app.get("/redefinir-senha", async (req, res) => {
   const { token } = req.query;
+  let senha = "123GL";
   const senhaCriptografada = await bcrypt.hash(senha, 10);
   const atualizarSituacao = "UPDATE pessoa SET senha = ? WHERE id_pessoa = ?";
   const sql =
