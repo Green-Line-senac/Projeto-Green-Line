@@ -30,7 +30,7 @@ class FuncaoUteis {
         <a href="https://green-line-web.onrender.com/redefinir-senha?token=${this.criarToken(
           email
         )}" style="display: inline-block; padding: 12px 24px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 15px 0;">
-            Acessar minha conta
+            Redefinir sua senha
         </a>
         <p>Atenciosamente,<br>Equipe Green Line</p>
       `;
