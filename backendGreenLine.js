@@ -460,13 +460,13 @@ app.post("/verificarConta", async (req, res) => {
       });
     }
 
-    // Verificação adicional para admin
-    if (id_tipo_usuario === 1) {
-      return res.status(403).json({
-        dadosValidos: 1,
-        mensagem: "Conta admin requer verificação adicional.",
-      });
-    }
+    // Verificação adicional para admin (comentada para permitir login de admins)
+    // if (id_tipo_usuario === 1) {
+    //   return res.status(403).json({
+    //     dadosValidos: 1,
+    //     mensagem: "Conta admin requer verificação adicional.",
+    //   });
+    // }
     let respostaCarrinho = await db.query(
       "SELECT SUM(quantidade_pendente) AS numero_carrinho FROM vw_quantidade_pendente WHERE id_pessoa = ?",
       [id_pessoa]
