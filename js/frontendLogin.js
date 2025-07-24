@@ -43,6 +43,10 @@ async function handleLogin(e) {
   }
 
   try {
+    // Mostrar loading
+    showLoading(LoadingPresets.login);
+    showButtonLoading(botaoEntrar, 'Entrar');
+
     const resposta = await fazerRequisicaoLogin(usuario, senha);
 
     if (!resposta.ok) {
@@ -58,6 +62,9 @@ async function handleLogin(e) {
     console.error("Erro no processo de login:", erro);
     mostrarMensagem("Falha na conexão. Tente novamente.", "danger");
   } finally {
+    // Esconder loading
+    hideLoading();
+    hideButtonLoading(botaoEntrar);
     reativarBotao();
   }
 }

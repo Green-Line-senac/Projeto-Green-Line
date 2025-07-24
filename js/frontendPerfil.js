@@ -7,12 +7,14 @@ const api = {
   index: "http://localhost:3002",
 };
 const basePath = window.location.pathname.includes("green_line_web")
-          ? "/green_line_web/public"
-          : "/public";
+  ? "/green_line_web/public"
+  : "/public";
 
 // Função para carregar dados do usuário
 // Função para carregar dados do usuário - VERSÃO CORRIGIDA
 async function carregarDadosUsuario() {
+  const loadingId = showLoading('Carregando perfil...', 'Buscando suas informações');
+
   try {
     // 1. Verificar se o usuário está autenticado
     const token = sessionStorage.getItem("userToken");
@@ -20,7 +22,11 @@ async function carregarDadosUsuario() {
 
     if (!token || !idPessoa) {
       console.error("Usuário não autenticado - redirecionando para login");
-      window.location.href = `${basePath}/login.html`;
+      hideLoading();
+      showError('Acesso negado', 'Você precisa fazer login para acessar esta página');
+      setTimeout(() => {
+        window.location.href = `${basePath}/login.html`;
+      }, 2000);
       return;
     }
 
@@ -36,7 +42,11 @@ async function carregarDadosUsuario() {
     if (!response.ok) {
       if (response.status === 401 || response.status === 403) {
         // Token inválido ou expirado - forçar logout
-        logout();
+        hideLoading();
+        showError('Sessão expirada', 'Sua sessão expirou. Faça login novamente');
+        setTimeout(() => {
+          logout();
+        }, 2000);
         return;
       }
       throw new Error(`Erro HTTP: ${response.status} ${response.statusText}`);
@@ -53,10 +63,13 @@ async function carregarDadosUsuario() {
     document.body.classList.toggle('dark-mode', darkModeEnabled);
     document.getElementById('darkModeToggle').checked = darkModeEnabled;
 
+    hideLoading();
+    showSuccess('Perfil carregado!', 'Suas informações foram carregadas com sucesso', { duration: 3000 });
+
   } catch (error) {
     console.error("Erro ao carregar dados do usuário:", error);
-    alert("Erro ao carregar dados do usuário. Por favor, tente novamente.");
-    logout(); // Considerar deslogar em caso de erro grave na carga de dados
+    hideLoading();
+    showError('Erro ao carregar perfil', 'Não foi possível carregar suas informações. Tente novamente.');
   }
 }
 
@@ -82,6 +95,7 @@ async function loadAddress() {
     console.error("Erro ao buscar endereço:", err);
     document.getElementById("addressContent").innerHTML =
       "<p>Erro ao carregar endereço.</p>";
+    showWarning('Endereço não encontrado', 'Não foi possível carregar seu endereço', { duration: 3000 });
   }
 }
 
@@ -104,9 +118,9 @@ function preencherDadosPerfil(usuario) {
 // Função para preencher os dados de endereço
 function preencherEndereco(endereco) {
 
-   if (Array.isArray(endereco)) endereco = endereco[0];
-   // Salva o endereço no sessionStorage para uso em outras páginas
-   sessionStorage.setItem("enderecoUsuario", JSON.stringify(endereco));
+  if (Array.isArray(endereco)) endereco = endereco[0];
+  // Salva o endereço no sessionStorage para uso em outras páginas
+  sessionStorage.setItem("enderecoUsuario", JSON.stringify(endereco));
   const addressContent = document.getElementById("addressContent");
   addressContent.innerHTML = `
         <p>${endereco.endereco},${endereco.complemento ? ' - ' + endereco.complemento : ''}</p>
@@ -165,15 +179,15 @@ document.addEventListener("DOMContentLoaded", () => {
       // Map data-section to actual div IDs
       let targetSectionId;
       if (section === 'personal') {
-          targetSectionId = 'personal-section';
+        targetSectionId = 'personal-section';
       } else if (section === 'purchase-history') { // Updated from 'saved'
-          targetSectionId = 'saved-section'; // HTML ID for purchase history
+        targetSectionId = 'saved-section'; // HTML ID for purchase history
       } else if (section === 'gears') {
-          targetSectionId = 'gears-section';
+        targetSectionId = 'gears-section';
       }
 
       if (targetSectionId) {
-          showSection(targetSectionId);
+        showSection(targetSectionId);
       }
     });
   });
@@ -184,13 +198,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // Lógica para o modo noturno
   const darkModeToggle = document.getElementById('darkModeToggle');
   darkModeToggle.addEventListener('change', () => {
-      if (darkModeToggle.checked) {
-          document.body.classList.add('dark-mode');
-          localStorage.setItem('darkMode', 'true');
-      } else {
-          document.body.classList.remove('dark-mode');
-          localStorage.setItem('darkMode', 'false');
-      }
+    if (darkModeToggle.checked) {
+      document.body.classList.add('dark-mode');
+      localStorage.setItem('darkMode', 'true');
+    } else {
+      document.body.classList.remove('dark-mode');
+      localStorage.setItem('darkMode', 'false');
+    }
   });
 
   // Lógica para editar campos de texto (Nome Completo e Telefone)
@@ -224,7 +238,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      input.addEventListener("keypress", function(e) {
+      input.addEventListener("keypress", function (e) {
         if (e.key === 'Enter') {
           input.blur(); // Simula o blur para salvar
         }
@@ -234,6 +248,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Botão Salvar Alterações para Informações Pessoais
   document.getElementById("savePersonalBtn").addEventListener("click", async () => {
+    const loadingId = showLoading('Salvando alterações...', 'Atualizando suas informações');
+
     try {
       const token = sessionStorage.getItem("userToken");
       const idPessoa = sessionStorage.getItem("id_pessoa");
@@ -254,11 +270,13 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error("Erro ao salvar informações pessoais");
       }
 
-      alert("Informações pessoais salvas com sucesso!");
+      hideLoading();
+      showSuccess('Informações salvas!', 'Suas informações pessoais foram atualizadas com sucesso');
       carregarDadosUsuario(); // Recarrega para garantir que os dados exibidos estão atualizados
     } catch (error) {
       console.error("Erro ao salvar informações pessoais:", error);
-      alert("Erro ao salvar informações pessoais. Por favor, tente novamente.");
+      hideLoading();
+      showError('Erro ao salvar', 'Não foi possível salvar suas informações. Tente novamente.');
     }
   });
 
@@ -290,65 +308,76 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("addressForm").addEventListener("submit", async function (e) {
-  e.preventDefault();
+    e.preventDefault();
 
-  const idPessoa = sessionStorage.getItem("id_pessoa");
-  const token = sessionStorage.getItem("userToken");
+    const loadingId = showLoading('Salvando endereço...', 'Atualizando suas informações de entrega');
 
-  const body = {
-    uf: this.uf.value,
-    cep: this.cep.value,
-    cidade: this.cidade.value,
-    bairro: this.bairro.value,
-    endereco: this.endereco.value,
-    complemento: this.complemento.value,
-    }; 
+    const idPessoa = sessionStorage.getItem("id_pessoa");
+    const token = sessionStorage.getItem("userToken");
 
-  try {
-    const response = await fetch(`http://localhost:3008/pessoa/${idPessoa}/enderecos`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify(body),
-    });
+    const body = {
+      uf: this.uf.value,
+      cep: this.cep.value,
+      cidade: this.cidade.value,
+      bairro: this.bairro.value,
+      endereco: this.endereco.value,
+      complemento: this.complemento.value,
+    };
 
-    if (!response.ok) {
-      const erro = await response.json();
-      throw new Error(erro.error || "Erro ao atualizar endereço");
+    try {
+      const response = await fetch(`http://localhost:3008/pessoa/${idPessoa}/enderecos`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        const erro = await response.json();
+        throw new Error(erro.error || "Erro ao atualizar endereço");
+      }
+
+      hideLoading();
+      showSuccess('Endereço salvo!', 'Seu endereço foi atualizado com sucesso');
+
+      // Salva o endereço no sessionStorage para uso em outras páginas
+      sessionStorage.setItem("enderecoUsuario", JSON.stringify(body));
+      document.getElementById("addressModal").classList.add("hidden");
+      loadAddress(); // recarrega os dados na interface
+    } catch (err) {
+      console.error("Erro ao atualizar endereço:", err);
+      hideLoading();
+      showError('Erro ao salvar endereço', err.message || 'Não foi possível atualizar seu endereço');
     }
-
-    alert("Endereço salvo com sucesso!");
-    // Salva o endereço no sessionStorage para uso em outras páginas
-    sessionStorage.setItem("enderecoUsuario", JSON.stringify(body));
-    document.getElementById("addressModal").classList.add("hidden");
-    loadAddress(); // recarrega os dados na interface
-  } catch (err) {
-    console.error("Erro ao atualizar endereço:", err);
-    alert("Erro ao atualizar endereço: " + err.message);
-  }
-});
+  });
 
   // Integração com ViaCEP para preenchimento automático de endereço
   function buscarEnderecoPorCep(cep) {
     // Remove caracteres não numéricos
     cep = cep.replace(/\D/g, "");
     if (cep.length !== 8) return;
+
+    const loadingId = showLoading('Buscando CEP...', 'Consultando dados do endereço');
+
     fetch(`https://viacep.com.br/ws/${cep}/json/`)
       .then((res) => res.json())
       .then((data) => {
+        hideLoading();
         if (data.erro) {
-          alert("CEP não encontrado!");
+          showError('CEP não encontrado', 'Verifique se o CEP digitado está correto');
           return;
         }
         document.getElementById("endereco").value = data.logradouro || "";
         document.getElementById("bairro").value = data.bairro || "";
         document.getElementById("cidade").value = data.localidade || "";
         document.getElementById("uf").value = data.uf || "";
+        showSuccess('CEP encontrado!', 'Endereço preenchido automaticamente', { duration: 3000 });
       })
       .catch(() => {
-        alert("Erro ao buscar o CEP. Tente novamente.");
+        hideLoading();
+        showError('Erro ao buscar CEP', 'Não foi possível consultar o CEP. Tente novamente.');
       });
   }
 
@@ -392,6 +421,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   confirmDeleteBtn.addEventListener("click", async () => {
+    const loadingId = showLoading('Excluindo conta...', 'Processando exclusão da sua conta');
+
     try {
       const token = sessionStorage.getItem("userToken");
       const idPessoa = sessionStorage.getItem("id_pessoa");
@@ -407,11 +438,16 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error("Erro ao deletar conta");
       }
 
-      alert("Conta deletada com sucesso!");
-      logout(); // Desloga o usuário após a exclusão da conta
+      hideLoading();
+      showSuccess('Conta excluída!', 'Sua conta foi excluída com sucesso. Você será redirecionado.');
+
+      setTimeout(() => {
+        logout(); // Desloga o usuário após a exclusão da conta
+      }, 2000);
     } catch (error) {
       console.error("Erro ao deletar conta:", error);
-      alert("Erro ao deletar conta. Por favor, tente novamente.");
+      hideLoading();
+      showError('Erro ao excluir conta', 'Não foi possível excluir sua conta. Tente novamente.');
     }
   });
 
@@ -421,6 +457,20 @@ document.addEventListener("DOMContentLoaded", () => {
   avatarInput.addEventListener('change', async (event) => {
     const file = event.target.files[0];
     if (file) {
+      // Validar tamanho do arquivo (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        showError('Arquivo muito grande', 'A imagem deve ter no máximo 5MB');
+        return;
+      }
+
+      // Validar tipo do arquivo
+      if (!file.type.startsWith('image/')) {
+        showError('Formato inválido', 'Por favor, selecione apenas arquivos de imagem');
+        return;
+      }
+
+      const loadingId = showLoading('Atualizando foto...', 'Fazendo upload da sua nova imagem de perfil');
+
       const reader = new FileReader();
       reader.onload = async (e) => {
         try {
@@ -428,10 +478,12 @@ document.addEventListener("DOMContentLoaded", () => {
           // Em um ambiente de produção, é melhor fazer upload para um serviço de armazenamento de arquivos.
           await atualizarImagemPerfil(e.target.result);
           document.getElementById('profileAvatar').src = e.target.result;
-          alert('Imagem de perfil atualizada com sucesso!');
+          hideLoading();
+          showSuccess('Foto atualizada!', 'Sua imagem de perfil foi atualizada com sucesso');
         } catch (error) {
           console.error("Erro ao atualizar imagem de perfil:", error);
-          alert("Erro ao atualizar imagem de perfil.");
+          hideLoading();
+          showError('Erro ao atualizar foto', 'Não foi possível atualizar sua imagem de perfil');
         }
       };
       reader.readAsDataURL(file);
@@ -442,19 +494,31 @@ document.addEventListener("DOMContentLoaded", () => {
   async function carregarPedidosUsuario() {
     const idPessoa = sessionStorage.getItem("id_pessoa");
     if (!idPessoa) return;
+
     const container = document.getElementById("savedProductsContent");
-    container.innerHTML = '<p>Carregando pedidos...</p>';
+    const loadingId = showLoading('Carregando histórico...', 'Buscando seus pedidos anteriores');
+
+    container.innerHTML = '<div class="text-center"><p>Carregando pedidos...</p></div>';
+
     try {
       const resp = await fetch(`https://green-line-web.onrender.com/pessoa/${idPessoa}/pedidos`);
+
+      hideLoading();
+
       if (!resp.ok) {
         container.innerHTML = '<p>Nenhum pedido encontrado.</p>';
+        showInfo('Histórico vazio', 'Você ainda não fez nenhum pedido', { duration: 3000 });
         return;
       }
+
       const pedidos = await resp.json();
+
       if (!Array.isArray(pedidos) || pedidos.length === 0) {
         container.innerHTML = '<p>Nenhum pedido encontrado.</p>';
+        showInfo('Histórico vazio', 'Você ainda não fez nenhum pedido', { duration: 3000 });
         return;
       }
+
       let html = '';
       pedidos.forEach(pedido => {
         html += `<div class="pedido-card">
@@ -464,9 +528,15 @@ document.addEventListener("DOMContentLoaded", () => {
           <p><strong>Total:</strong> R$ ${(pedido.valor_total || pedido.total || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
         </div>`;
       });
+
       container.innerHTML = html;
+      showSuccess('Histórico carregado!', `${pedidos.length} pedido(s) encontrado(s)`, { duration: 3000 });
+
     } catch (err) {
+      console.error('Erro ao carregar pedidos:', err);
+      hideLoading();
       container.innerHTML = '<p>Erro ao carregar pedidos.</p>';
+      showError('Erro ao carregar histórico', 'Não foi possível carregar seus pedidos. Tente novamente.');
     }
   }
 
@@ -514,7 +584,7 @@ function logout() {
 
     itemsToRemove.forEach((item) => sessionStorage.removeItem(item));
     // REMOVIDA A LINHA ABAIXO: sessionStorage.clear();
-    window.location.href = `${basePath}/login.html`; 
+    window.location.href = `${basePath}/login.html`;
 
     console.log("SessionStorage limpo com sucesso.");
   } catch (error) {

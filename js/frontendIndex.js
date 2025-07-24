@@ -48,6 +48,8 @@ async function inicializarApp() {
 // ==================== FUNÇÕES DE CARREGAMENTO ====================
 async function carregarProdutosPromocao() {
   try {
+    // Mostrar loading enquanto carrega produtos
+    showLoading(LoadingPresets.carregandoProdutos);
     mostrarLoader();
 
     const response = await fetch(`${config.online}/produtos`);
@@ -62,6 +64,9 @@ async function carregarProdutosPromocao() {
   } catch (erro) {
     console.error("Erro:", erro);
     mostrarErroCarregamento();
+  } finally {
+    // Esconder loading após carregar produtos
+    hideLoading();
   }
 }
 

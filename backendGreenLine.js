@@ -463,7 +463,7 @@ app.post("/verificarConta", async (req, res) => {
     // Verificação do tipo de usuário
     let tipoUsuario = '';
     let isAdmin = false;
-    
+
     if (id_tipo_usuario === 1) {
       tipoUsuario = 'Administrador';
       isAdmin = true;
@@ -599,9 +599,9 @@ app.post("/cadastro-produto", async (req, res) => {
       outrosDados.dimensoes || "0x0x0",
       outrosDados.ativo ? 1 : 0,
       imagem_1 ||
-        "https://www.malhariapradense.com.br/wp-content/uploads/2017/08/produto-sem-imagem.png",
+      "https://www.malhariapradense.com.br/wp-content/uploads/2017/08/produto-sem-imagem.png",
       imagem_2 ||
-        "https://www.malhariapradense.com.br/wp-content/uploads/2017/08/produto-sem-imagem.png",
+      "https://www.malhariapradense.com.br/wp-content/uploads/2017/08/produto-sem-imagem.png",
       outrosDados.categoria,
     ]);
 
@@ -951,17 +951,17 @@ app.get("/avaliacoes", async (req, res) => {
 
 /*BACKEND PERFIL */
 const verificarToken = (req, res, next) => {
-    const token = req.headers['authorization'];
-    if (!token) return res.status(401).json({ error: 'Token não fornecido.' });
+  const token = req.headers['authorization'];
+  if (!token) return res.status(401).json({ error: 'Token não fornecido.' });
 
-    try {
-        const tokenFormatado = token.replace('Bearer ', '');
-        const decoded = jwt.verify(tokenFormatado, process.env.SEGREDO_JWT);
-        req.usuario = decoded;
-        next();
-    } catch (error) {
-        return res.status(403).json({ error: 'Token inválido ou expirado.' });
-    }
+  try {
+    const tokenFormatado = token.replace('Bearer ', '');
+    const decoded = jwt.verify(tokenFormatado, process.env.SEGREDO_JWT);
+    req.usuario = decoded;
+    next();
+  } catch (error) {
+    return res.status(403).json({ error: 'Token inválido ou expirado.' });
+  }
 };
 
 // Configuração do multer para upload de imagens
@@ -976,7 +976,7 @@ const storage = multer.diskStorage({
   }
 })
 
-const upload = multer({ 
+const upload = multer({
   storage: storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // Limite de 5MB
   fileFilter: (req, file, cb) => {
@@ -1076,58 +1076,58 @@ app.post('/pessoa', async (req, res) => {
 app.post('/login', async (req, res) => {
   try {
     const { email, senha } = req.body;
-    
+
     // Buscar usuário
     const [users] = await db.query(
-      'SELECT id_pessoa, nome, email, senha, id_tipo_usuario FROM pessoa WHERE email = ?', 
+      'SELECT id_pessoa, nome, email, senha, id_tipo_usuario FROM pessoa WHERE email = ?',
       [email]
     );
-    
+
     if (users.length === 0) {
       return res.status(401).json({ error: 'Credenciais inválidas' });
     }
-    
+
     const user = users[0];
-    
+
     // Buscar informações de login
     const [logins] = await db.query('SELECT * FROM login WHERE id_pessoa = ?', [user.id_pessoa]);
     if (logins.length === 0) {
       return res.status(401).json({ error: 'Credenciais inválidas' });
     }
-    
+
     const login = logins[0];
-    
+
     // Verificar senha
     const senhaValida = await bcrypt.compare(senha, login.senha_hash);
     if (!senhaValida) {
       return res.status(401).json({ error: 'Credenciais inválidas' });
     }
-    
-    
+
+
     const token = jwt.sign(
-  { 
-    userId: user.id_pessoa, // Certifique-se que está usando id_pessoa
-    email: user.email,
-    tipo_usuario: user.id_tipo_usuario 
-  },
-  process.env.SEGREDO_JWT,
-  { expiresIn: '1h' }
-);
+      {
+        userId: user.id_pessoa, // Certifique-se que está usando id_pessoa
+        email: user.email,
+        tipo_usuario: user.id_tipo_usuario
+      },
+      process.env.SEGREDO_JWT,
+      { expiresIn: '1h' }
+    );
 
     console.log('Token JWT gerado:', token);
-    
+
     const isAdmin = user.email === "greenl.adm@gmail.com" || user.id_tipo_usuario === 1;
 
-      // Retornar token e user com isAdmin
-      res.json({ 
-        token, 
-        user: { 
-          id_pessoa: user.id_pessoa,
-          email: user.email,
-          tipo_usuario: user.id_tipo_usuario,
-          isAdmin 
-        } 
-      });
+    // Retornar token e user com isAdmin
+    res.json({
+      token,
+      user: {
+        id_pessoa: user.id_pessoa,
+        email: user.email,
+        tipo_usuario: user.id_tipo_usuario,
+        isAdmin
+      }
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Erro no servidor' });
@@ -1145,21 +1145,21 @@ app.get('/profile', async (req, res) => {
     if (!token) {
       return res.status(401).json({ error: 'Token não fornecido' });
     }
-    
+
     const decoded = jwt.verify(token, SEGREDO_JWT);
-    
+
     // Buscar usuário
     const [users] = await db.query('SELECT * FROM pessoa WHERE id_pessoa = ?', [decoded.id_pessoa]);
     console.log('Usuários encontrados:', users);
     if (users.length === 0) {
       return res.status(404).json({ error: 'Usuário não encontrado' });
     }
-    
+
     const user = users[0];
-    
+
     // Remover dados sensíveis antes de enviar
     delete user.cpf;
-    
+
     res.json(user);
   } catch (error) {
     console.error(error);
@@ -1201,20 +1201,20 @@ app.get('/pessoa/:id_pessoa', verificarToken, async (req, res) => {
     );
     console.log('Resposta da consulta:', resposta);
     rows = resposta;
-    
+
     if (rows.length === 0) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         error: 'Usuário não encontrado',
         details: `Nenhum usuário encontrado com o ID ${id}`
       });
     }
-    
+
     res.json(rows);
   } catch (err) {
     console.error('Erro detalhado:', err);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Erro ao buscar usuário',
-      details: err.message 
+      details: err.message
     });
   }
 });
@@ -1247,7 +1247,7 @@ app.delete('/pessoa/:id_pessoa', async (req, res) => {
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Usuário não encontrado' });
     }
-    
+
     res.status(204).end();
   } catch (err) {
     res.status(500).json({ error: 'Erro ao deletar usuário' });
@@ -1284,153 +1284,153 @@ app.get('/pessoa/me', async (req, res) => {
 
     // Em produção, decodifique o token JWT para obter o ID
     const userId = req.body.userId || req.query.userId;
-    
+
     const [rows] = await db.query(
       'SELECT id_pessoa, nome, email, telefone, cpf, situacao, imagem_perfil FROM pessoa WHERE id_pessoa = ?',
       [userId]
     );
-    
+
     if (rows.length === 0) {
       return res.status(404).json({ error: 'Usuário não encontrado' });
     }
-    
+
     res.json(rows[0]);
   } catch (err) {
     console.error('Erro ao buscar usuário:', err);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Erro ao buscar usuário',
-      details: err.message 
+      details: err.message
     });
   }
 });
 
 // [8] ATUALIZAR IMAGEM DE PERFIL (PUT)
 app.put('/pessoa/:id_pessoa/imagem', async (req, res) => {
-    try {
-        const { imagem_perfil } = req.body;
-        const id = parseInt(req.params.id_pessoa);
-        
-        if (isNaN(id) || id <= 0) {
-            return res.status(400).json({ error: 'ID inválido' });
-        }
+  try {
+    const { imagem_perfil } = req.body;
+    const id = parseInt(req.params.id_pessoa);
 
-        const [result] = await db.query(
-            'UPDATE pessoa SET imagem_perfil = ? WHERE id_pessoa = ?',
-            [imagem_perfil, id]
-        );
-        
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Usuário não encontrado' });
-        }
-        
-        res.json({ message: 'Imagem de perfil atualizada com sucesso' });
-    } catch (err) {
-        console.error('Erro ao atualizar imagem:', err);
-        res.status(500).json({ error: 'Erro ao atualizar imagem de perfil' });
+    if (isNaN(id) || id <= 0) {
+      return res.status(400).json({ error: 'ID inválido' });
     }
+
+    const [result] = await db.query(
+      'UPDATE pessoa SET imagem_perfil = ? WHERE id_pessoa = ?',
+      [imagem_perfil, id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+
+    res.json({ message: 'Imagem de perfil atualizada com sucesso' });
+  } catch (err) {
+    console.error('Erro ao atualizar imagem:', err);
+    res.status(500).json({ error: 'Erro ao atualizar imagem de perfil' });
+  }
 });
 
 // [9] ROTAS PARA ENDEREÇO
 app.get('/pessoa/:id_pessoa/enderecos', async (req, res) => {
-    try {
-        const idPessoa = req.params.id_pessoa;
-        console.log(idPessoa);
+  try {
+    const idPessoa = req.params.id_pessoa;
+    console.log(idPessoa);
 
-        // Execute a consulta e capture o resultado completo
-        const queryResult = await db.query(
-            'SELECT id_endereco, uf, cep, cidade, bairro, endereco, complemento FROM enderecos WHERE id_pessoa = ?',
-            [idPessoa]
-        );
-        console.log("Resultado bruto da consulta GET de endereço:", queryResult);
+    // Execute a consulta e capture o resultado completo
+    const queryResult = await db.query(
+      'SELECT id_endereco, uf, cep, cidade, bairro, endereco, complemento FROM enderecos WHERE id_pessoa = ?',
+      [idPessoa]
+    );
+    console.log("Resultado bruto da consulta GET de endereço:", queryResult);
 
-        let rows;
-        // Adapte esta parte dependendo do que seu db.query realmente retorna
-        // Se db.query retorna [rows, fields], então:
-        if (Array.isArray(queryResult) && Array.isArray(queryResult[0])) {
-            rows = queryResult[0];
-        } else { // Se db.query retorna apenas as rows diretamente:
-            rows = queryResult;
-        }
-
-        // Verifique se 'rows' é um array e se tem elementos antes de acessar .length
-        if (Array.isArray(rows) && rows.length > 0) {
-            res.json(rows[0]); // Retorna o primeiro endereço encontrado
-        } else {
-            // Se nenhum endereço for encontrado, retorna 404
-            return res.status(404).json({ error: 'Endereço não encontrado' });
-        }
-    } catch (err) {
-        console.error('Erro detalhado ao buscar endereço:', err); // Log mais detalhado
-        res.status(500).json({ error: 'Erro ao buscar endereço', details: err.message }); // Inclua detalhes do erro
+    let rows;
+    // Adapte esta parte dependendo do que seu db.query realmente retorna
+    // Se db.query retorna [rows, fields], então:
+    if (Array.isArray(queryResult) && Array.isArray(queryResult[0])) {
+      rows = queryResult[0];
+    } else { // Se db.query retorna apenas as rows diretamente:
+      rows = queryResult;
     }
+
+    // Verifique se 'rows' é um array e se tem elementos antes de acessar .length
+    if (Array.isArray(rows) && rows.length > 0) {
+      res.json(rows[0]); // Retorna o primeiro endereço encontrado
+    } else {
+      // Se nenhum endereço for encontrado, retorna 404
+      return res.status(404).json({ error: 'Endereço não encontrado' });
+    }
+  } catch (err) {
+    console.error('Erro detalhado ao buscar endereço:', err); // Log mais detalhado
+    res.status(500).json({ error: 'Erro ao buscar endereço', details: err.message }); // Inclua detalhes do erro
+  }
 });
 app.put('/pessoa/:id_pessoa/enderecos', async (req, res) => {
-    try {
-        const { uf, cep, cidade, bairro, endereco, complemento } = req.body;
-        const idPessoa = req.params.id_pessoa;
+  try {
+    const { uf, cep, cidade, bairro, endereco, complemento } = req.body;
+    const idPessoa = req.params.id_pessoa;
 
-        // Execute a consulta e capture o resultado completo
-        const queryResult = await db.query('SELECT id_endereco FROM enderecos WHERE id_pessoa = ?', [idPessoa]);
-        console.log("Resultado bruto da consulta de existência de endereço:", queryResult);
+    // Execute a consulta e capture o resultado completo
+    const queryResult = await db.query('SELECT id_endereco FROM enderecos WHERE id_pessoa = ?', [idPessoa]);
+    console.log("Resultado bruto da consulta de existência de endereço:", queryResult);
 
-        let existingRows;
-        // Adapte esta parte dependendo do que seu db.query realmente retorna
-        // Se db.query retorna [rows, fields], então:
-        if (Array.isArray(queryResult) && Array.isArray(queryResult[0])) {
-            existingRows = queryResult[0];
-        } else { // Se db.query retorna apenas as rows diretamente:
-            existingRows = queryResult;
-        }
-
-        // Verifique se existingRows é um array e se tem elementos antes de acessar .length
-        if (Array.isArray(existingRows) && existingRows.length > 0) {
-            // Atualiza existente
-            await db.query(
-                'UPDATE enderecos SET uf = ?, cep = ?, cidade = ?, bairro = ?, endereco = ?, complemento = ? WHERE id_pessoa = ?',
-                [uf, cep, cidade, bairro, endereco, complemento, idPessoa]
-            );
-        } else {
-            // Cria novo
-            await db.query(
-                'INSERT INTO enderecos (id_pessoa, uf, cep, cidade, bairro, endereco, complemento) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                [idPessoa, uf, cep, cidade, bairro || null, endereco || null, complemento || null]
-            );
-        }
-
-        res.json({ message: 'Endereço atualizado com sucesso' });
-    } catch (err) {
-        console.error('Erro detalhado ao tentar atualizar/inserir endereço:', err); // Log mais detalhado
-        res.status(500).json({ error: 'Erro ao atualizar endereço', details: err.message }); // Inclua detalhes do erro
+    let existingRows;
+    // Adapte esta parte dependendo do que seu db.query realmente retorna
+    // Se db.query retorna [rows, fields], então:
+    if (Array.isArray(queryResult) && Array.isArray(queryResult[0])) {
+      existingRows = queryResult[0];
+    } else { // Se db.query retorna apenas as rows diretamente:
+      existingRows = queryResult;
     }
+
+    // Verifique se existingRows é um array e se tem elementos antes de acessar .length
+    if (Array.isArray(existingRows) && existingRows.length > 0) {
+      // Atualiza existente
+      await db.query(
+        'UPDATE enderecos SET uf = ?, cep = ?, cidade = ?, bairro = ?, endereco = ?, complemento = ? WHERE id_pessoa = ?',
+        [uf, cep, cidade, bairro, endereco, complemento, idPessoa]
+      );
+    } else {
+      // Cria novo
+      await db.query(
+        'INSERT INTO enderecos (id_pessoa, uf, cep, cidade, bairro, endereco, complemento) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [idPessoa, uf, cep, cidade, bairro || null, endereco || null, complemento || null]
+      );
+    }
+
+    res.json({ message: 'Endereço atualizado com sucesso' });
+  } catch (err) {
+    console.error('Erro detalhado ao tentar atualizar/inserir endereço:', err); // Log mais detalhado
+    res.status(500).json({ error: 'Erro ao atualizar endereço', details: err.message }); // Inclua detalhes do erro
+  }
 });
 // Rota para listar todos os usuários (apenas para ADMs)
 app.get('/pessoa', async (req, res) => {
-    try {
-        // Verificar se o usuário é ADM
-        const token = req.headers.authorization?.split(' ')[1];
-        if (!token) {
-            return res.status(401).json({ error: 'Token não fornecido' });
-        }else{ console.log('Token do ADM recebido:', token);}
-        
-        const decoded = jwt.verify(token, SEGREDO_JWT);
-       
-        
-        // Verificar se o usuário é administrador
-        const [isAdmin] = await db.query('SELECT email FROM pessoa WHERE id_pessoa = ?', [decoded.id_pessoa]);
-        if (isAdmin.length === 0 || isAdmin[0].email !== "greenl.adm@gmail.com") {
-          console.log('Usuário não é administrador:', decoded.id_pessoa)
-          return res.status(403).json({ error: 'Acesso negado - apenas administradores' });
-        }
-        
-        // Buscar todos os usuários (exceto senhas)
-        const [rows] = await db.query(`SELECT id_pessoa, nome, email, telefone, cpf, id_tipo_usuario, situacao, imagem_perfil 
-            FROM pessoa`);
-        
-        res.json(rows);
-    } catch (err) {
-        console.error('Erro ao listar usuários:', err);
-        res.status(500).json({ error: 'Erro ao listar usuários' });
+  try {
+    // Verificar se o usuário é ADM
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ error: 'Token não fornecido' });
+    } else { console.log('Token do ADM recebido:', token); }
+
+    const decoded = jwt.verify(token, SEGREDO_JWT);
+
+
+    // Verificar se o usuário é administrador
+    const [isAdmin] = await db.query('SELECT email FROM pessoa WHERE id_pessoa = ?', [decoded.id_pessoa]);
+    if (isAdmin.length === 0 || isAdmin[0].email !== "greenl.adm@gmail.com") {
+      console.log('Usuário não é administrador:', decoded.id_pessoa)
+      return res.status(403).json({ error: 'Acesso negado - apenas administradores' });
     }
+
+    // Buscar todos os usuários (exceto senhas)
+    const [rows] = await db.query(`SELECT id_pessoa, nome, email, telefone, cpf, id_tipo_usuario, situacao, imagem_perfil 
+            FROM pessoa`);
+
+    res.json(rows);
+  } catch (err) {
+    console.error('Erro ao listar usuários:', err);
+    res.status(500).json({ error: 'Erro ao listar usuários' });
+  }
 });
 
 // GET /pedidos/todos
@@ -1454,7 +1454,7 @@ app.get('/pedidos/todos', async (req, res) => {
       JOIN pedido_produto pp ON pp.id_pedido = p.id_pedido
       ORDER BY p.data_hora DESC
     `);
-    
+
     res.json(pedidos);
   } catch (err) {
     console.error("Erro ao buscar pedidos:", err);
@@ -1465,94 +1465,94 @@ app.get('/pedidos/todos', async (req, res) => {
 
 //Rota atualizar tipo de usuário
 app.put('/pessoa/:id_pessoa/tipo', async (req, res) => {
-    try {
-        const { id_tipo_usuario } = req.body;
-        const idPessoa = parseInt(req.params.id_pessoa);
-        
-        if (isNaN(idPessoa) || idPessoa <= 0) {
-            return res.status(400).json({ error: 'ID inválido' });
-        }
+  try {
+    const { id_tipo_usuario } = req.body;
+    const idPessoa = parseInt(req.params.id_pessoa);
 
-        // Verifica se o tipo de usuário é válido
-        if (![1, 2].includes(id_tipo_usuario)) {
-            return res.status(400).json({ error: 'Tipo de usuário inválido' });
-        }
-
-        const [result] = await db.query(
-            'UPDATE pessoa SET id_tipo_usuario = ? WHERE id_pessoa = ?',
-            [id_tipo_usuario, idPessoa]
-        );
-        
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Usuário não encontrado' });
-        }
-        
-        res.json({ message: 'Tipo de usuário atualizado com sucesso' });
-    } catch (err) {
-        console.error('Erro ao atualizar tipo de usuário:', err);
-        res.status(500).json({ error: 'Erro ao atualizar tipo de usuário' });
+    if (isNaN(idPessoa) || idPessoa <= 0) {
+      return res.status(400).json({ error: 'ID inválido' });
     }
+
+    // Verifica se o tipo de usuário é válido
+    if (![1, 2].includes(id_tipo_usuario)) {
+      return res.status(400).json({ error: 'Tipo de usuário inválido' });
+    }
+
+    const [result] = await db.query(
+      'UPDATE pessoa SET id_tipo_usuario = ? WHERE id_pessoa = ?',
+      [id_tipo_usuario, idPessoa]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+
+    res.json({ message: 'Tipo de usuário atualizado com sucesso' });
+  } catch (err) {
+    console.error('Erro ao atualizar tipo de usuário:', err);
+    res.status(500).json({ error: 'Erro ao atualizar tipo de usuário' });
+  }
 });
 
 // Rota para obter imagens do carrossel
 app.get('/carousel-images', (req, res) => {
-    try {
-        // Simulando leitura do arquivo JSON
-        const carouselData = require('./carousel-index.json');
-        res.json(carouselData);
-    } catch (err) {
-        console.error('Erro ao carregar imagens do carrossel:', err);
-        res.status(500).json({ error: 'Erro ao carregar imagens do carrossel' });
-    }
+  try {
+    // Simulando leitura do arquivo JSON
+    const carouselData = require('./carousel-index.json');
+    res.json(carouselData);
+  } catch (err) {
+    console.error('Erro ao carregar imagens do carrossel:', err);
+    res.status(500).json({ error: 'Erro ao carregar imagens do carrossel' });
+  }
 });
 
 // Rota para deletar imagem do carrossel
 app.post('/delete-carousel-image', (req, res) => {
-    try {
-        const { imageName } = req.body;
-        
-        // Simulando atualização do arquivo JSON
-        const carouselData = require('./carousel-index.json');
-        const updatedData = carouselData.filter(img => img.nomeImagem !== imageName);
-        
-        // Aqui você salvaria o updatedData de volta no arquivo JSON
-        // fs.writeFileSync('./carousel-index.json', JSON.stringify(updatedData, null, 2));
-        
-        res.json({ success: true, message: 'Imagem removida com sucesso' });
-    } catch (err) {
-        console.error('Erro ao remover imagem do carrossel:', err);
-        res.status(500).json({ success: false, message: 'Erro ao remover imagem' });
-    }
+  try {
+    const { imageName } = req.body;
+
+    // Simulando atualização do arquivo JSON
+    const carouselData = require('./carousel-index.json');
+    const updatedData = carouselData.filter(img => img.nomeImagem !== imageName);
+
+    // Aqui você salvaria o updatedData de volta no arquivo JSON
+    // fs.writeFileSync('./carousel-index.json', JSON.stringify(updatedData, null, 2));
+
+    res.json({ success: true, message: 'Imagem removida com sucesso' });
+  } catch (err) {
+    console.error('Erro ao remover imagem do carrossel:', err);
+    res.status(500).json({ success: false, message: 'Erro ao remover imagem' });
+  }
 });
 
 // Rota para upload de novas imagens do carrossel
 app.post('/upload-carousel-images', upload.array('carouselImages'), (req, res) => {
-    try {
-        const files = req.files;
-        if (!files || files.length === 0) {
-            return res.status(400).json({ success: false, message: 'Nenhuma imagem enviada' });
-        }
-        
-        // Simulando atualização do carrossel
-        const carouselData = require('./carousel-index.json');
-        
-        files.forEach(file => {
-            // Aqui você moveria o arquivo para o diretório de imagens
-            // e adicionaria ao carrossel-index.json
-            const newImage = {
-                nomeImagem: file.originalname
-            };
-            carouselData.push(newImage);
-        });
-        
-        // Aqui você salvaria o carouselData de volta no arquivo JSON
-        // fs.writeFileSync('./carousel-index.json', JSON.stringify(carouselData, null, 2));
-        
-        res.json({ success: true, message: 'Imagens adicionadas com sucesso' });
-    } catch (err) {
-        console.error('Erro ao adicionar imagens ao carrossel:', err);
-        res.status(500).json({ success: false, message: 'Erro ao adicionar imagens' });
+  try {
+    const files = req.files;
+    if (!files || files.length === 0) {
+      return res.status(400).json({ success: false, message: 'Nenhuma imagem enviada' });
     }
+
+    // Simulando atualização do carrossel
+    const carouselData = require('./carousel-index.json');
+
+    files.forEach(file => {
+      // Aqui você moveria o arquivo para o diretório de imagens
+      // e adicionaria ao carrossel-index.json
+      const newImage = {
+        nomeImagem: file.originalname
+      };
+      carouselData.push(newImage);
+    });
+
+    // Aqui você salvaria o carouselData de volta no arquivo JSON
+    // fs.writeFileSync('./carousel-index.json', JSON.stringify(carouselData, null, 2));
+
+    res.json({ success: true, message: 'Imagens adicionadas com sucesso' });
+  } catch (err) {
+    console.error('Erro ao adicionar imagens ao carrossel:', err);
+    res.status(500).json({ success: false, message: 'Erro ao adicionar imagens' });
+  }
 });
 
 // ==================== ROTA DE TESTE ====================

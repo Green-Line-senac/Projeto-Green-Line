@@ -184,11 +184,18 @@ async function mascaraCEP() {
     
     try {
         console.log('Iniciando requisição...');
+        
+        // Mostrar loading enquanto busca CEP
+        const loadingId = showLoading('Buscando CEP...', 'Consultando dados do endereço');
+        
         const response = await fetch(`${api.online}/checar-cep?cep=${cep}`);
         console.log('Resposta recebida:', response);
         
         const data = await response.json();
         console.log('Dados JSON:', data); 
+        
+        // Esconder loading
+        hideNotification(loadingId);
         
         if(!response.ok) throw new Error(data.message || 'Erro ao buscar CEP');
         
@@ -197,8 +204,12 @@ async function mascaraCEP() {
         cidadeInput.value = data.localidade;
         estadoInput.value = data.uf || 'Estado não informado';
         
+        // Mostrar sucesso
+        showSuccess('CEP encontrado!', 'Endereço preenchido automaticamente', { duration: 3000 });
+        
     } catch (error) {
         console.error('Erro completo:', error);
+        showError('Erro ao buscar CEP', 'Não foi possível encontrar o endereço. Verifique o CEP digitado.');
     }
 }
 
@@ -374,20 +385,24 @@ function validarEndereco(endereco) {
     return erros;
 }
 
-// Função para mostrar erros
+// Função para mostrar erros usando o novo sistema de notificações
 function mostrarErros(erros) {
-    const alertaErro = document.createElement('div');
-    alertaErro.className = 'alert alert-danger alert-dismissible fade show';
-    alertaErro.innerHTML = `
-        <h4 class="alert-heading">Por favor, corrija os seguintes erros:</h4>
-        <ul class="mb-0">
-            ${erros.map(erro => `<li>${erro}</li>`).join('')}
-        </ul>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-    `;
-    
-    const container = document.querySelector('.container');
-    container.insertBefore(alertaErro, container.firstChild);
+    showValidationError(erros, {
+        actions: [
+            {
+                text: 'Entendi',
+                type: 'primary',
+                handler: () => {
+                    // Focar no primeiro campo com erro
+                    const firstErrorField = document.querySelector('.is-invalid, .campo-invalido');
+                    if (firstErrorField) {
+                        firstErrorField.focus();
+                        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+            }
+        ]
+    });
 }
 
 // Event listener para finalizar compra
@@ -452,6 +467,9 @@ document.getElementById("FinalizarCompra").addEventListener("click", async (even
     }
 
     try {
+        // Mostrar loading durante o processamento
+        const loadingId = showLoading('Processando pedido...', 'Finalizando sua compra');
+
         // Coleta dados do endereço
         const dadosEndereco = {
             cep,
@@ -472,8 +490,20 @@ document.getElementById("FinalizarCompra").addEventListener("click", async (even
         // Salva os dados no sessionStorage
         sessionStorage.setItem('dadosFormulario', JSON.stringify(dadosFormulario));
         
-        // Redireciona para a página de confirmação
-        window.location.href = '../public/pedido_confirmado.html'
+        // Simular um pequeno delay para mostrar o loading
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Esconder loading
+        hideNotification(loadingId);
+        
+        // Mostrar sucesso antes de redirecionar
+        showSuccess('Pedido processado!', 'Redirecionando para confirmação...', { duration: 2000 });
+        
+        // Redirecionar após um pequeno delay
+        setTimeout(() => {
+            window.location.href = '../public/pedido_confirmado.html';
+        }, 2000);
+        
     } catch (error) {
         console.error('Erro detalhado ao processar pedido:', error);
         mostrarErros(["Ocorreu um erro ao processar seu pedido. Por favor, tente novamente."]);
@@ -536,5 +566,26 @@ if (cepInput) {
         }
         this.value = cep;
     });
+    
+    // Validar CEP quando o usuário sair do campo
+    cepInput.addEventListener('blur', function() {
+        const cep = this.value.replace(/\D/g, '');
+        if (cep.length === 8) {
+            mascaraCEP();
+        } else if (cep.length > 0) {
+            showWarning('CEP incompleto', 'Digite um CEP válido com 8 dígitos', { duration: 3000 });
+        }
+    });
 }
+
+// Adicionar notificação de boas-vindas quando a página carregar
+document.addEventListener('DOMContentLoaded', function() {
+    // Mostrar notificação informativa sobre o processo
+    setTimeout(() => {
+        showInfo('Finalize sua compra', 'Preencha os dados de entrega e pagamento para concluir seu pedido', { 
+            duration: 4000,
+            compact: true 
+        });
+    }, 1000);
+});
 
