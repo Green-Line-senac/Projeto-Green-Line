@@ -460,13 +460,22 @@ app.post("/verificarConta", async (req, res) => {
       });
     }
 
-    // Verificação adicional para admin (comentada para permitir login de admins)
-    // if (id_tipo_usuario === 1) {
-    //   return res.status(403).json({
-    //     dadosValidos: 1,
-    //     mensagem: "Conta admin requer verificação adicional.",
-    //   });
-    // }
+    // Verificação do tipo de usuário
+    let tipoUsuario = '';
+    let isAdmin = false;
+    
+    if (id_tipo_usuario === 1) {
+      tipoUsuario = 'Administrador';
+      isAdmin = true;
+    } else if (id_tipo_usuario === 2) {
+      tipoUsuario = 'Cliente';
+      isAdmin = false;
+    } else {
+      return res.status(403).json({
+        dadosValidos: 1,
+        mensagem: "Tipo de usuário inválido.",
+      });
+    }
     let respostaCarrinho = await db.query(
       "SELECT SUM(quantidade_pendente) AS numero_carrinho FROM vw_quantidade_pendente WHERE id_pessoa = ?",
       [id_pessoa]
@@ -487,9 +496,6 @@ app.post("/verificarConta", async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    // Resposta de sucesso
-    const isAdmin = id_tipo_usuario === "1";
-
     // Envia isso para o frontend
     return res.status(200).json({
       dadosValidos: 2,
@@ -497,7 +503,9 @@ app.post("/verificarConta", async (req, res) => {
       user: {
         id_pessoa,
         email,
+        nome,
         isAdmin,
+        tipoUsuario,
         carrinho,
         id_tipo_usuario,
       },
