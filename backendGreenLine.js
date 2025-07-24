@@ -488,7 +488,7 @@ app.post("/verificarConta", async (req, res) => {
     );
 
     // Resposta de sucesso
-    const isAdmin = email === "greenl.adm@gmail.com";
+    const isAdmin = id_tipo_usuario === "1";
 
     // Envia isso para o frontend
     return res.status(200).json({
