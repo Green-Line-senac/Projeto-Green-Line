@@ -10,42 +10,7 @@ const basePath = window.location.pathname.includes("green_line_web")
   ? "/green_line_web/public"
   : "/public";
 
-// Função para verificar conectividade do servidor
-async function verificarConectividade() {
-  try {
-    const response = await fetch('http://localhost:3008/health', {
-      method: 'GET',
-      timeout: 3000
-    });
-    return response.ok;
-  } catch (error) {
-    return false;
-  }
-}
 
-// Função para mostrar status de conectividade
-async function mostrarStatusConectividade() {
-  const isLocalAvailable = await verificarConectividade();
-
-  if (!isLocalAvailable) {
-    showWarning('Servidor local indisponível',
-      'O servidor backend local não está rodando. Usando servidor online como alternativa.', {
-      duration: 8000,
-      actions: [
-        {
-          text: 'Como iniciar servidor',
-          type: 'primary',
-          handler: () => {
-            showInfo('Instruções do servidor',
-              'Execute "npm run backend" ou "node js/backendPerfil.js" no terminal para iniciar o servidor local.',
-              { duration: 10000 }
-            );
-          }
-        }
-      ]
-    });
-  }
-}
 
 // Função para carregar dados do usuário
 // Função para carregar dados do usuário - VERSÃO CORRIGIDA
@@ -142,16 +107,6 @@ async function loadAddress() {
     console.error("Erro ao buscar endereço:", err);
     document.getElementById("addressContent").innerHTML =
       "<p>Erro ao carregar endereço.</p>";
-    showWarning('Servidor indisponível', 'Não foi possível conectar ao servidor. Verifique se o backend está rodando.', {
-      duration: 5000,
-      actions: [
-        {
-          text: 'Tentar novamente',
-          type: 'primary',
-          handler: () => loadAddress()
-        }
-      ]
-    });
   }
 }
 

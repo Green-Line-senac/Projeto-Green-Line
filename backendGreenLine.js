@@ -707,6 +707,7 @@ app.get("/checar-cep", async (req, res) => {
     }
     return res.status(200).json(resposta);
   } catch (error) {
+    console.error("Erro detalhado ao consultar CEP:", error);
     return res.status(500).json({ error: "Erro ao consultar CEP", codigo: -2 });
   }
 });

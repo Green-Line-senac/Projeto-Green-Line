@@ -163,54 +163,12 @@ function formatarCEP(input) {
     input.value = cep;
 }
 
-async function validarCEP(input) {
-    // Consulta o servidor quando o campo perde o foco
+function aplicarMascaraCEP(input) {
     let cep = input.value.replace(/\D/g, '');
-    if (cep.length === 8) {
-        await mascaraCEP(); // Sua função original
+    if (cep.length > 5) {
+        cep = cep.substring(0, 5) + '-' + cep.substring(5, 8);
     }
-}
-
-async function mascaraCEP() {
-    console.log('Função mascaraCEP iniciada'); 
-    
-    const cepInput = document.getElementById('cep');
-    const bairroInput = document.getElementById('bairro');
-    const enderecoInput = document.getElementById('endereco');
-    const cidadeInput = document.getElementById('cidade');
-    const estadoInput = document.getElementById('estado');
-    let cep = cepInput.value.replace(/\D/g, '');
-    console.log('CEP formatado:', cep);
-    
-    try {
-        console.log('Iniciando requisição...');
-        
-        // Mostrar loading enquanto busca CEP
-        const loadingId = showLoading('Buscando CEP...', 'Consultando dados do endereço');
-        
-        const response = await fetch(`${api.online}/checar-cep?cep=${cep}`);
-        console.log('Resposta recebida:', response);
-        
-        const data = await response.json();
-        console.log('Dados JSON:', data); 
-        
-        // Esconder loading
-        hideNotification(loadingId);
-        
-        if(!response.ok) throw new Error(data.message || 'Erro ao buscar CEP');
-        
-        bairroInput.value = data.bairro || 'Bairro não informado';
-        enderecoInput.value = data.logradouro || 'Endereço não informado';
-        cidadeInput.value = data.localidade;
-        estadoInput.value = data.uf || 'Estado não informado';
-        
-        // Mostrar sucesso
-        showSuccess('CEP encontrado!', 'Endereço preenchido automaticamente', { duration: 3000 });
-        
-    } catch (error) {
-        console.error('Erro completo:', error);
-        showError('Erro ao buscar CEP', 'Não foi possível encontrar o endereço. Verifique o CEP digitado.');
-    }
+    input.value = cep;
 }
 
 // Exibe informações do produto selecionado
@@ -570,9 +528,7 @@ if (cepInput) {
     // Validar CEP quando o usuário sair do campo
     cepInput.addEventListener('blur', function() {
         const cep = this.value.replace(/\D/g, '');
-        if (cep.length === 8) {
-            mascaraCEP();
-        } else if (cep.length > 0) {
+        if (cep.length > 0 && cep.length < 8) {
             showWarning('CEP incompleto', 'Digite um CEP válido com 8 dígitos', { duration: 3000 });
         }
     });

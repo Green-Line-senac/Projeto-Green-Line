@@ -152,6 +152,7 @@ async function enviarEmailConfirmacao(pedido) {
             dataConfirmacao: pedido.dataConfirmacao,
             total: pedido.total,
             previsaoEntrega: pedido.previsaoEntrega,
+            produtos: pedido.produtos || []
           },
         }),
       }
@@ -337,6 +338,9 @@ async function salvarPedido(pedido) {
   const loadingId = showLoading('Salvando pedido...', 'Registrando seu pedido no sistema');
 
   try {
+    console.log('Tentando salvar pedido:', pedido);
+    console.log('URL da API:', `${apiPedido.online}/salvar-pedido`);
+
     const response = await fetch(`${apiPedido.online}/salvar-pedido`, {
       method: "POST",
       headers: {
@@ -345,13 +349,31 @@ async function salvarPedido(pedido) {
       body: JSON.stringify(pedido),
     });
 
+    console.log('Resposta do servidor:', response.status, response.statusText);
     hideNotification(loadingId);
 
     if (!response.ok) {
-      const errorData = await response.json();
+      let errorData;
+      let errorText = '';
+
+      try {
+        const responseText = await response.text();
+        console.log('Texto da resposta de erro:', responseText);
+
+        if (responseText) {
+          try {
+            errorData = JSON.parse(responseText);
+          } catch (jsonError) {
+            console.error('Resposta não é JSON válido:', jsonError);
+            errorText = responseText;
+          }
+        }
+      } catch (parseError) {
+        console.error('Erro ao ler resposta de erro:', parseError);
+      }
 
       // Tratamento específico para erro de estoque
-      if (errorData.codigo === -4) {
+      if (errorData && errorData.codigo === -4) {
         showError('Estoque insuficiente!',
           `${errorData.produto}: apenas ${errorData.estoqueDisponivel} unidade(s) disponível(is)`, {
           duration: 8000,
@@ -368,7 +390,21 @@ async function salvarPedido(pedido) {
         return;
       }
 
-      throw new Error(errorData.error || "Erro ao salvar pedido");
+      // Tratamento para diferentes tipos de erro
+      let errorMessage = 'Erro desconhecido';
+      if (errorData && errorData.error) {
+        errorMessage = errorData.error;
+      } else if (errorText) {
+        errorMessage = errorText;
+      } else if (response.status === 404) {
+        errorMessage = 'Servidor não encontrado. Verifique se o backend está rodando.';
+      } else if (response.status === 500) {
+        errorMessage = 'Erro interno do servidor. Verifique os logs do backend.';
+      } else {
+        errorMessage = `Erro do servidor (${response.status}): ${response.statusText}`;
+      }
+
+      throw new Error(errorMessage);
     }
 
     const resultado = await response.json();
@@ -377,8 +413,23 @@ async function salvarPedido(pedido) {
 
   } catch (error) {
     hideNotification(loadingId);
-    console.error("Erro ao salvar pedido:", error);
-    showError('Erro ao salvar pedido', error.message || 'Houve um problema ao processar seu pedido');
+    console.error("Erro detalhado ao salvar pedido:", error);
+
+    // Tratamento específico para erro de rede
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      showError('Erro de conexão', 'Não foi possível conectar ao servidor. Verifique se o backend está rodando e tente novamente.', {
+        duration: 10000,
+        actions: [
+          {
+            text: 'Tentar novamente',
+            type: 'primary',
+            handler: () => salvarPedido(pedido)
+          }
+        ]
+      });
+    } else {
+      showError('Erro ao salvar pedido', error.message || 'Houve um problema ao processar seu pedido');
+    }
   }
 }
 
@@ -432,13 +483,38 @@ async function preencherPaginaConfirmacao(pedido) {
       produtosContainer.innerHTML = ""; // Limpa conteúdo anterior
 
       pedido.produtos.forEach((produto, index) => {
-        // Tenta pegar a imagem do produto (nome pode variar conforme origem dos dados)
-        const imagem = produto.imagem_principal || produto.imagem_1 || produto.imagem || '../img/imagem-nao-disponivel.png';
+        // Tenta pegar a imagem do produto com múltiplos fallbacks
+        let imagem = '../img/imagem-nao-disponivel.png'; // Fallback padrão
+
+        // Verifica diferentes possíveis nomes de propriedades de imagem
+        if (produto.imagem_principal && produto.imagem_principal !== '') {
+          imagem = produto.imagem_principal;
+        } else if (produto.imagem_1 && produto.imagem_1 !== '') {
+          imagem = produto.imagem_1;
+        } else if (produto.imagem && produto.imagem !== '') {
+          imagem = produto.imagem;
+        } else if (produto.imagem_2 && produto.imagem_2 !== '') {
+          imagem = produto.imagem_2;
+        } else if (produto.foto && produto.foto !== '') {
+          imagem = produto.foto;
+        }
+
+        // Garante que a imagem tenha o caminho correto
+        if (imagem && !imagem.startsWith('http') && !imagem.startsWith('../') && !imagem.startsWith('/')) {
+          imagem = '../img/produtos/' + imagem;
+        }
+
+        console.log('Produto:', produto.nome, 'Imagem:', imagem); // Debug
+
         const produtoHTML = `
           <div class="order-item d-flex justify-content-between align-items-center py-3 ${index < pedido.produtos.length - 1 ? "border-bottom" : ""
           }">
             <div class="item-info d-flex align-items-center">
-              <img src="${imagem}" alt="${produto.nome}" class="rounded me-3" style="width: 56px; height: 56px; object-fit: cover; background: #f8f9fa; border: 1px solid #eee;">
+              <img src="${imagem}" 
+                   alt="${produto.nome}" 
+                   class="rounded me-3 product-image" 
+                   style="width: 56px; height: 56px; object-fit: cover; background: #f8f9fa; border: 1px solid #eee;"
+                   onerror="this.src='../img/imagem-nao-disponivel.png'; this.onerror=null;">
               <div>
                 <h5 class="item-name mb-1">${produto.nome}</h5>
                 <p class="item-details text-muted mb-0">

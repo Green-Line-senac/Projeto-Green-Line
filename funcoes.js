@@ -52,6 +52,33 @@ class FuncaoUteis {
             "Dados do pedido são necessários para este tipo de e-mail."
           );
         }
+
+        // Função para formatar valor monetário
+        const formatarValor = (valor) => {
+          return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+          }).format(valor);
+        };
+
+        // Gerar HTML dos produtos
+        let produtosHtml = '';
+        if (pedido.produtos && Array.isArray(pedido.produtos)) {
+          produtosHtml = pedido.produtos.map(produto => {
+            const imagemUrl = produto.imagem_principal || produto.imagem_1 || produto.imagem || 'https://green-line-web.onrender.com/img/imagem-nao-disponivel.png';
+            return `
+              <div style="display: flex; align-items: center; background: white; padding: 15px; margin: 10px 0; border-radius: 8px; border: 1px solid #e9ecef;">
+                <img src="${imagemUrl}" alt="${produto.nome}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin-right: 15px;">
+                <div style="flex: 1;">
+                  <h4 style="margin: 0 0 5px 0; color: #28a745;">${produto.nome}</h4>
+                  <p style="margin: 0; color: #6c757d;">Quantidade: ${produto.quantidade}</p>
+                  <p style="margin: 5px 0 0 0; font-weight: bold; color: #333;">Subtotal: ${formatarValor(produto.subtotal)}</p>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+
         mensagem = `
     <!DOCTYPE html>
     <html lang="pt-BR">
@@ -64,6 +91,7 @@ class FuncaoUteis {
             .header { background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
             .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
             .order-info { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #28a745; }
+            .products-section { margin: 20px 0; }
             .eco-badge { background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; text-align: center; margin: 20px 0; }
             .footer { text-align: center; margin-top: 30px; color: #6c757d; font-size: 14px; }
             .btn { display: inline-block; background: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 10px 0; }
@@ -82,8 +110,13 @@ class FuncaoUteis {
                 <h3>📦 Detalhes do Pedido</h3>
                 <p><strong>Número:</strong> ${pedido.numeroPedido}</p>
                 <p><strong>Data:</strong> ${pedido.dataConfirmacao}</p>
-                <p><strong>Total:</strong> R$ ${pedido.total.toFixed(2).replace('.', ',')}</p>
+                <p><strong>Total:</strong> ${formatarValor(pedido.total)}</p>
                 <p><strong>Previsão de entrega:</strong> ${pedido.previsaoEntrega}</p>
+            </div>
+
+            <div class="products-section">
+                <h3>🛍️ Produtos Comprados</h3>
+                ${produtosHtml}
             </div>
             
             <div class="eco-badge">
