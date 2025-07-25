@@ -611,7 +611,7 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
     try {
       const resp = await fetch(`https://green-line-web.onrender.com/pessoa/${idPessoa}/pedidos`);
 
-      hideNotification(loadingId);
+      hideLoading();
 
       if (!resp.ok) {
         container.innerHTML = '<p>Nenhum pedido encontrado.</p>';
@@ -642,7 +642,7 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
 
     } catch (err) {
       console.error('Erro ao carregar pedidos:', err);
-      hideNotification(loadingId);
+      hideLoading();
       container.innerHTML = '<p>Erro ao carregar pedidos.</p>';
       showError('Erro ao carregar histórico', 'Não foi possível carregar seus pedidos. Tente novamente.');
     }
