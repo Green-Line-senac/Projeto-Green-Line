@@ -10,6 +10,43 @@ const basePath = window.location.pathname.includes("green_line_web")
   ? "/green_line_web/public"
   : "/public";
 
+// Função para verificar conectividade do servidor
+async function verificarConectividade() {
+  try {
+    const response = await fetch('http://localhost:3008/health', {
+      method: 'GET',
+      timeout: 3000
+    });
+    return response.ok;
+  } catch (error) {
+    return false;
+  }
+}
+
+// Função para mostrar status de conectividade
+async function mostrarStatusConectividade() {
+  const isLocalAvailable = await verificarConectividade();
+
+  if (!isLocalAvailable) {
+    showWarning('Servidor local indisponível',
+      'O servidor backend local não está rodando. Usando servidor online como alternativa.', {
+      duration: 8000,
+      actions: [
+        {
+          text: 'Como iniciar servidor',
+          type: 'primary',
+          handler: () => {
+            showInfo('Instruções do servidor',
+              'Execute "npm run backend" ou "node js/backendPerfil.js" no terminal para iniciar o servidor local.',
+              { duration: 10000 }
+            );
+          }
+        }
+      ]
+    });
+  }
+}
+
 // Função para carregar dados do usuário
 // Função para carregar dados do usuário - VERSÃO CORRIGIDA
 async function carregarDadosUsuario() {
@@ -80,9 +117,19 @@ async function loadAddress() {
   if (!idPessoa || !token) return;
 
   try {
-    const resp = await fetch(`http://localhost:3008/pessoa/${idPessoa}/enderecos`, {
-      headers: { "Authorization": `Bearer ${token}` }
-    });
+    // Tenta primeiro o servidor local, depois o online
+    let resp;
+    try {
+      resp = await fetch(`http://localhost:3008/pessoa/${idPessoa}/enderecos`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+    } catch (localError) {
+      console.log('Servidor local não disponível, tentando servidor online...');
+      resp = await fetch(`${api.online}/pessoa/${idPessoa}/enderecos`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+    }
+
     if (!resp.ok) throw new Error("Falha no GET de endereço");
     const endereco = await resp.json();     // backend devolve objeto
     if (endereco) {
@@ -95,7 +142,16 @@ async function loadAddress() {
     console.error("Erro ao buscar endereço:", err);
     document.getElementById("addressContent").innerHTML =
       "<p>Erro ao carregar endereço.</p>";
-    showWarning('Endereço não encontrado', 'Não foi possível carregar seu endereço', { duration: 3000 });
+    showWarning('Servidor indisponível', 'Não foi possível conectar ao servidor. Verifique se o backend está rodando.', {
+      duration: 5000,
+      actions: [
+        {
+          text: 'Tentar novamente',
+          type: 'primary',
+          handler: () => loadAddress()
+        }
+      ]
+    });
   }
 }
 
@@ -325,14 +381,28 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     try {
-      const response = await fetch(`http://localhost:3008/pessoa/${idPessoa}/enderecos`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify(body),
-      });
+      // Tenta primeiro o servidor local, depois o online
+      let response;
+      try {
+        response = await fetch(`http://localhost:3008/pessoa/${idPessoa}/enderecos`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(body),
+        });
+      } catch (localError) {
+        console.log('Servidor local não disponível, tentando servidor online...');
+        response = await fetch(`${api.online}/pessoa/${idPessoa}/enderecos`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(body),
+        });
+      }
 
       if (!response.ok) {
         const erro = await response.json();

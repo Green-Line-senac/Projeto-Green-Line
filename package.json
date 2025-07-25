@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-     "start": "npm install && concurrently \"node js/backendPerfil.js\" \"node js/backendCadastro.js\""
+     "start": "npm install && concurrently \"node backendGreenLine.js\" \"node js/backendPerfil.js\" \"node js/backendCadastro.js\"",
+     "dev": "concurrently \"node js/backendPerfil.js\" \"node js/backendCadastro.js\" \"node backendGreenLine.js\"",
+     "backend": "node backendGreenLine.js",
+     "all-servers": "concurrently \"node backendGreenLine.js\" \"node js/backendPerfil.js\" \"node js/backendCadastro.js\" \"node js/backendIndex.js\" \"node js/backendprodutos.js\"",
+     "email-server": "node backendGreenLine.js"
   },
   "keywords": [],
   "author": "",

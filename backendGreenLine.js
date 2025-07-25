@@ -820,10 +820,10 @@ app.post("/salvar-pedido", async (req, res) => {
     const idPedido = ultimoPedido[0].id_pedido;
     console.log("ID do pedido inserido:", idPedido);
 
-    // Inserir produtos do pedido
+    // Inserir produtos do pedido e atualizar estoque
     for (const produto of pedido.produtos) {
       const produtoExistente = await db.query(
-        "SELECT id_produto FROM produto WHERE produto = ? LIMIT 1",
+        "SELECT id_produto, estoque FROM produto WHERE nome_produto = ? LIMIT 1",
         [produto.nome]
       );
 
@@ -832,18 +832,44 @@ app.post("/salvar-pedido", async (req, res) => {
         continue;
       }
 
+      const produtoInfo = produtoExistente[0];
+      const estoqueAtual = produtoInfo.estoque;
+      const quantidadeComprada = produto.quantidade;
+
+      // Verificar se há estoque suficiente
+      if (estoqueAtual < quantidadeComprada) {
+        console.error(`Estoque insuficiente para ${produto.nome}. Disponível: ${estoqueAtual}, Solicitado: ${quantidadeComprada}`);
+        return res.status(400).json({
+          error: `Estoque insuficiente para o produto ${produto.nome}. Disponível: ${estoqueAtual}`,
+          codigo: -4,
+          produto: produto.nome,
+          estoqueDisponivel: estoqueAtual,
+          quantidadeSolicitada: quantidadeComprada
+        });
+      }
+
+      // Inserir produto no pedido
       await db.query(
         `INSERT INTO pedido_produto(
           id_pedido, id_produto, quantidade, preco_unitario, nome_produto
         ) VALUES(?, ?, ?, ?, ?)`,
         [
           idPedido,
-          produtoExistente[0].id_produto,
-          produto.quantidade,
+          produtoInfo.id_produto,
+          quantidadeComprada,
           produto.preco,
           produto.nome,
         ]
       );
+
+      // Atualizar estoque do produto
+      const novoEstoque = estoqueAtual - quantidadeComprada;
+      await db.query(
+        "UPDATE produto SET estoque = ? WHERE id_produto = ?",
+        [novoEstoque, produtoInfo.id_produto]
+      );
+
+      console.log(`Estoque atualizado para ${produto.nome}: ${estoqueAtual} -> ${novoEstoque}`);
     }
 
     return res.status(200).json({

@@ -30,8 +30,23 @@ class NotificationManager {
       actions = [],
       closable = true,
       progress = true,
-      compact = false
+      compact = false,
+      preventDuplicates = true
     } = options;
+
+    // Prevenir notificações duplicadas
+    if (preventDuplicates) {
+      const duplicateKey = `${type}-${title}-${message}`;
+      const existingNotification = Array.from(this.notifications.values()).find(
+        notification => notification.dataset.duplicateKey === duplicateKey
+      );
+      
+      if (existingNotification) {
+        // Se já existe uma notificação igual, apenas faz shake para chamar atenção
+        this.shake(existingNotification.dataset.id);
+        return existingNotification.dataset.id;
+      }
+    }
 
     // Limitar número de notificações
     if (this.notifications.size >= this.maxNotifications) {
@@ -49,7 +64,8 @@ class NotificationManager {
       closable,
       progress,
       compact,
-      duration
+      duration,
+      preventDuplicates
     });
 
     this.container.appendChild(notification);
@@ -96,12 +112,17 @@ class NotificationManager {
     return id;
   }
 
-  createNotification({ id, type, title, message, actions, closable, progress, compact, duration }) {
+  createNotification({ id, type, title, message, actions, closable, progress, compact, duration, preventDuplicates }) {
     const notification = document.createElement('div');
     notification.className = `notification ${type} ${compact ? 'compact' : ''}`;
     notification.dataset.id = id;
     notification.dataset.startTime = Date.now();
     notification.dataset.duration = duration;
+    
+    // Adicionar chave para prevenção de duplicatas
+    if (preventDuplicates) {
+      notification.dataset.duplicateKey = `${type}-${title}-${message}`;
+    }
 
     const icon = this.getIcon(type);
     
@@ -224,7 +245,8 @@ class NotificationManager {
       message,
       duration: 0,
       closable: false,
-      progress: false
+      progress: false,
+      preventDuplicates: true // Especialmente importante para loading
     });
   }
 
@@ -305,44 +327,73 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// Instância global
-const notifications = new NotificationManager();
+// Instância global - inicializada após a definição da classe
+let notifications;
+let isInitialized = false;
+
+// Função para inicializar o sistema de notificações
+function initNotifications() {
+  if (!notifications || !isInitialized) {
+    // Remove container anterior se existir
+    const existingContainer = document.getElementById('notifications-container');
+    if (existingContainer) {
+      existingContainer.remove();
+    }
+    
+    notifications = new NotificationManager();
+    isInitialized = true;
+  }
+  return notifications;
+}
 
 // Funções de conveniência globais
 function showNotification(options) {
-  return notifications.show(options);
+  return initNotifications().show(options);
 }
 
 function showSuccess(title, message, options = {}) {
-  return notifications.success(title, message, options);
+  return initNotifications().success(title, message, options);
 }
 
 function showError(title, message, options = {}) {
-  return notifications.error(title, message, options);
+  return initNotifications().error(title, message, options);
 }
 
 function showWarning(title, message, options = {}) {
-  return notifications.warning(title, message, options);
+  return initNotifications().warning(title, message, options);
 }
 
 function showInfo(title, message, options = {}) {
-  return notifications.info(title, message, options);
+  return initNotifications().info(title, message, options);
 }
 
 function showValidationError(errors, options = {}) {
-  return notifications.validationError(errors, options);
+  return initNotifications().validationError(errors, options);
 }
 
 function showLoading(title, message) {
-  return notifications.loading(title, message);
+  return initNotifications().loading(title, message);
 }
 
 function hideNotification(id) {
-  notifications.hide(id);
+  initNotifications().hide(id);
 }
 
 function clearAllNotifications() {
-  notifications.clear();
+  initNotifications().clear();
+}
+
+// Inicializar automaticamente quando o DOM estiver pronto (apenas uma vez)
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!isInitialized) {
+      initNotifications();
+    }
+  });
+} else {
+  if (!isInitialized) {
+    initNotifications();
+  }
 }
 
 // Exportar para módulos se necessário

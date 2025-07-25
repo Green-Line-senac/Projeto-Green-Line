@@ -11,16 +11,16 @@ class LoadingManager {
       text = 'Carregando...',
       subtext = 'Por favor, aguarde',
       type = 'spinner',
-      theme = 'success' 
+      theme = 'success'
     } = options;
 
     const loadingHTML = `
       <div class="loading-overlay loading-${theme}" id="loadingOverlay">
         <div class="loading-container">
-          ${type === 'spinner' ? 
-            '<div class="loading-spinner"></div>' : 
-            '<div class="loading-dots"><div></div><div></div><div></div><div></div></div>'
-          }
+          ${type === 'spinner' ?
+        '<div class="loading-spinner"></div>' :
+        '<div class="loading-dots"><div></div><div></div><div></div><div></div></div>'
+      }
           <div class="loading-text">${text}</div>
           <div class="loading-subtext">${subtext}</div>
         </div>
@@ -41,9 +41,9 @@ class LoadingManager {
   // Mostrar loading
   show(options = {}) {
     if (this.isVisible) return;
-    
+
     this.createLoadingElement(options);
-    
+
     // Adiciona animação de entrada
     requestAnimationFrame(() => {
       if (this.loadingElement) {
@@ -63,7 +63,7 @@ class LoadingManager {
     if (!this.isVisible || !this.loadingElement) return;
 
     this.loadingElement.style.opacity = '0';
-    
+
     setTimeout(() => {
       if (this.loadingElement && this.loadingElement.parentNode) {
         this.loadingElement.parentNode.removeChild(this.loadingElement);
@@ -96,7 +96,7 @@ class LoadingManager {
       buttonElement.textContent = originalText;
       buttonElement.removeAttribute('data-original-text');
     }
-    
+
     buttonElement.classList.remove('btn-loading');
     buttonElement.disabled = false;
   }
@@ -168,28 +168,28 @@ const LoadingPresets = {
     type: 'spinner',
     theme: 'primary'
   },
-  
+
   cadastro: {
     text: 'Criando conta...',
     subtext: 'Processando seus dados',
     type: 'dots',
     theme: 'success'
   },
-  
+
   carregandoProdutos: {
     text: 'Carregando produtos...',
     subtext: 'Buscando os melhores produtos para você',
     type: 'spinner',
     theme: 'success'
   },
-  
+
   processandoPagamento: {
     text: 'Processando pagamento...',
     subtext: 'Não feche esta página',
     type: 'dots',
     theme: 'warning'
   },
-  
+
   salvandoDados: {
     text: 'Salvando...',
     subtext: 'Seus dados estão sendo salvos',

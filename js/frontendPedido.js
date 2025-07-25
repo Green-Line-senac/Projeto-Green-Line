@@ -32,9 +32,8 @@ function formatarEndereco(dadosCliente) {
   }
 
   return `${dadosCliente.nome || "Cliente"}<br>
-          ${dadosCliente.endereco}, ${dadosCliente.numeroCasa}${
-    dadosCliente.complementoCasa ? " - " + dadosCliente.complementoCasa : ""
-  }<br>
+          ${dadosCliente.endereco}, ${dadosCliente.numeroCasa}${dadosCliente.complementoCasa ? " - " + dadosCliente.complementoCasa : ""
+    }<br>
           ${dadosCliente.bairro}<br>
           ${dadosCliente.cidade} - ${dadosCliente.estado}, ${dadosCliente.cep}`;
 }
@@ -130,9 +129,12 @@ function calcularImpactoSustentavel(produtos) {
 async function enviarEmailConfirmacao(pedido) {
   if (!pedido.email || !pedido.email.includes('@')) {
     console.error('E-mail do pedido está vazio ou inválido:', pedido.email);
-    mostrarErro('E-mail do usuário não encontrado ou inválido. Faça login novamente.');
+    showError('Email inválido', 'E-mail do usuário não encontrado ou inválido. Faça login novamente.');
     return;
   }
+
+  const loadingId = showLoading('Enviando confirmação...', 'Enviando email de confirmação do pedido');
+
   try {
     const response = await fetch(
       "https://green-line-web.onrender.com/enviar-email",
@@ -155,6 +157,8 @@ async function enviarEmailConfirmacao(pedido) {
       }
     );
 
+    hideNotification(loadingId);
+
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Resposta do backend ao tentar enviar email:', errorText);
@@ -162,13 +166,28 @@ async function enviarEmailConfirmacao(pedido) {
     }
 
     console.log("Email de confirmação enviado com sucesso");
+    showSuccess('Email enviado!', 'Confirmação do pedido enviada para seu email', { duration: 4000 });
+
   } catch (erro) {
+    hideNotification(loadingId);
     console.error("Erro ao enviar email:", erro);
+    showWarning('Email não enviado', 'Não foi possível enviar o email de confirmação, mas seu pedido foi processado com sucesso', {
+      duration: 6000,
+      actions: [
+        {
+          text: 'Tentar novamente',
+          type: 'primary',
+          handler: () => enviarEmailConfirmacao(pedido)
+        }
+      ]
+    });
   }
 }
 
 // Função principal para carregar dados do pedido
 async function carregarDadosPedido() {
+  const loadingId = showLoading('Processando pedido...', 'Carregando informações da sua compra');
+
   try {
     console.log("Iniciando carregamento dos dados do pedido...");
 
@@ -178,9 +197,8 @@ async function carregarDadosPedido() {
 
     if (!dadosCompraStr) {
       console.error("Dados da compra não encontrados no sessionStorage");
-      mostrarErro(
-        "Dados da compra não encontrados. Redirecionando para a página de vendas..."
-      );
+      hideNotification(loadingId);
+      showError('Dados não encontrados', 'Dados da compra não encontrados. Redirecionando para a página de vendas...');
       setTimeout(() => {
         window.location.href = "vendas.html";
       }, 3000);
@@ -197,7 +215,8 @@ async function carregarDadosPedido() {
       console.log("Dados da compra carregados:", dadosCompra);
     } catch (error) {
       console.error("Erro ao fazer parse dos dados da compra:", error);
-      mostrarErro("Erro nos dados da compra");
+      hideNotification(loadingId);
+      showError('Erro nos dados', 'Erro ao processar dados da compra');
       return;
     }
 
@@ -244,7 +263,8 @@ async function carregarDadosPedido() {
     const idPessoa = sessionStorage.getItem("id_pessoa");
     const email = sessionStorage.getItem("email");
     if (!idPessoa) {
-      mostrarErro("Você precisa estar logado para finalizar a compra. Redirecionando para o login...");
+      hideNotification(loadingId);
+      showError('Login necessário', 'Você precisa estar logado para finalizar a compra. Redirecionando para o login...');
       setTimeout(() => {
         window.location.href = "/public/login.html";
       }, 2000);
@@ -275,17 +295,17 @@ async function carregarDadosPedido() {
       formaPagamento: formatarFormaPagamento(dadosFormulario),
       formaPagamentoVendas:
         dadosFormulario.metodoPagamento === "PIX" ||
-        dadosFormulario.metodoPagamento === "DEB" ||
-        dadosFormulario.metodoPagamento === "BB"
+          dadosFormulario.metodoPagamento === "DEB" ||
+          dadosFormulario.metodoPagamento === "BB"
           ? dadosFormulario.metodoPagamento
           : {
-              metodoPagamento: dadosFormulario.metodoPagamento,
-              numeroCartao: dadosFormulario.numeroCartao,
-              nomeCartao: dadosFormulario.nomeCartao,
-              validadeCartao: dadosFormulario.validadeCartao,
-              cvv: dadosFormulario.cvv,
-              parcelas: dadosFormulario.parcelas ? `${dadosFormulario.parcelas}x` : "1x",
-            },
+            metodoPagamento: dadosFormulario.metodoPagamento,
+            numeroCartao: dadosFormulario.numeroCartao,
+            nomeCartao: dadosFormulario.nomeCartao,
+            validadeCartao: dadosFormulario.validadeCartao,
+            cvv: dadosFormulario.cvv,
+            parcelas: dadosFormulario.parcelas ? `${dadosFormulario.parcelas}x` : "1x",
+          },
       impactoCO2: impacto.co2,
       arvores: impacto.arvores,
       dataConfirmacao // <-- garantir que a data está presente
@@ -299,14 +319,23 @@ async function carregarDadosPedido() {
     // Salva dados do pedido para uso futuro
     sessionStorage.setItem("ultimoPedido", JSON.stringify(pedido));
 
+    // Esconder loading principal
+    hideNotification(loadingId);
+
+    // Mostrar sucesso do processamento
+    showSuccess('Pedido processado!', 'Seu pedido foi confirmado com sucesso', { duration: 3000 });
+
     // Envia email de confirmação
     await enviarEmailConfirmacao(pedido);
   } catch (error) {
     console.error("Erro geral ao carregar dados do pedido:", error);
-    mostrarErro("Erro inesperado ao carregar dados do pedido");
+    hideNotification(loadingId);
+    showError('Erro no processamento', 'Erro inesperado ao carregar dados do pedido');
   }
 }
 async function salvarPedido(pedido) {
+  const loadingId = showLoading('Salvando pedido...', 'Registrando seu pedido no sistema');
+
   try {
     const response = await fetch(`${apiPedido.online}/salvar-pedido`, {
       method: "POST",
@@ -316,14 +345,40 @@ async function salvarPedido(pedido) {
       body: JSON.stringify(pedido),
     });
 
+    hideNotification(loadingId);
+
     if (!response.ok) {
-      throw new Error("Erro ao salvar pedido");
+      const errorData = await response.json();
+
+      // Tratamento específico para erro de estoque
+      if (errorData.codigo === -4) {
+        showError('Estoque insuficiente!',
+          `${errorData.produto}: apenas ${errorData.estoqueDisponivel} unidade(s) disponível(is)`, {
+          duration: 8000,
+          actions: [
+            {
+              text: 'Ajustar quantidade',
+              type: 'primary',
+              handler: () => {
+                window.location.href = '/public/carrinho.html';
+              }
+            }
+          ]
+        });
+        return;
+      }
+
+      throw new Error(errorData.error || "Erro ao salvar pedido");
     }
 
     const resultado = await response.json();
     console.log("Pedido salvo com sucesso:", resultado);
+    showSuccess('Pedido salvo!', 'Seu pedido foi registrado com sucesso no sistema', { duration: 3000 });
+
   } catch (error) {
+    hideNotification(loadingId);
     console.error("Erro ao salvar pedido:", error);
+    showError('Erro ao salvar pedido', error.message || 'Houve um problema ao processar seu pedido');
   }
 }
 
@@ -380,8 +435,7 @@ async function preencherPaginaConfirmacao(pedido) {
         // Tenta pegar a imagem do produto (nome pode variar conforme origem dos dados)
         const imagem = produto.imagem_principal || produto.imagem_1 || produto.imagem || '../img/imagem-nao-disponivel.png';
         const produtoHTML = `
-          <div class="order-item d-flex justify-content-between align-items-center py-3 ${
-            index < pedido.produtos.length - 1 ? "border-bottom" : ""
+          <div class="order-item d-flex justify-content-between align-items-center py-3 ${index < pedido.produtos.length - 1 ? "border-bottom" : ""
           }">
             <div class="item-info d-flex align-items-center">
               <img src="${imagem}" alt="${produto.nome}" class="rounded me-3" style="width: 56px; height: 56px; object-fit: cover; background: #f8f9fa; border: 1px solid #eee;">
@@ -436,12 +490,10 @@ async function preencherPaginaConfirmacao(pedido) {
     // Impacto sustentável
     const ecoTextEl = document.querySelector(".eco-text");
     if (ecoTextEl) {
-      const ecoText = `Com esta compra, você evitou <strong>${
-        pedido.impactoCO2
-      }</strong> de CO₂ 
-                       e contribuiu para o plantio de <strong>${
-                         pedido.arvores
-                       } árvore${pedido.arvores > 1 ? "s" : ""}</strong>!`;
+      const ecoText = `Com esta compra, você evitou <strong>${pedido.impactoCO2
+        }</strong> de CO₂ 
+                       e contribuiu para o plantio de <strong>${pedido.arvores
+        } árvore${pedido.arvores > 1 ? "s" : ""}</strong>!`;
       ecoTextEl.innerHTML = ecoText;
     }
 
@@ -539,10 +591,22 @@ function mostrarInfo(mensagem) {
 
 // Funções para os botões de ação
 function continuarComprando() {
-  mostrarInfo("Redirecionando para a página de produtos...");
+  showSuccess('Obrigado pela compra!', 'Redirecionando para mais produtos sustentáveis...', {
+    duration: 2000,
+    actions: [
+      {
+        text: 'Ver ofertas',
+        type: 'primary',
+        handler: () => {
+          window.location.href = "/public/produtos.html?categoria=ofertas";
+        }
+      }
+    ]
+  });
+
   setTimeout(() => {
     window.location.href = "/public/produtos.html";
-  }, 1000);
+  }, 2000);
 }
 
 async function acompanharPedido() {
@@ -694,9 +758,11 @@ async function enviarAtualizacoes() {
   const numeroPedido = document.getElementById("modalNumeroPedido").textContent;
 
   if (!email) {
-    mostrarErro("Por favor, faça login para receber atualizações por email.");
+    showError('Login necessário', 'Por favor, faça login para receber atualizações por email.');
     return;
   }
+
+  const loadingId = showLoading('Configurando atualizações...', 'Registrando seu email para receber notificações');
 
   try {
     const response = await fetch(
@@ -713,8 +779,10 @@ async function enviarAtualizacoes() {
       }
     );
 
+    hideNotification(loadingId);
+
     if (response.ok) {
-      mostrarSucesso("Você receberá atualizações sobre seu pedido por email!");
+      showSuccess('Atualizações configuradas!', 'Você receberá atualizações sobre seu pedido por email!');
       // Fecha o modal após sucesso
       const modal = bootstrap.Modal.getInstance(
         document.getElementById("modalAcompanhamento")
@@ -725,9 +793,8 @@ async function enviarAtualizacoes() {
     }
   } catch (erro) {
     console.error("Erro ao solicitar atualizações:", erro);
-    mostrarErro(
-      "Não foi possível configurar as atualizações por email. Tente novamente mais tarde."
-    );
+    hideNotification(loadingId);
+    showError('Erro nas atualizações', 'Não foi possível configurar as atualizações por email. Tente novamente mais tarde.');
   }
 }
 
