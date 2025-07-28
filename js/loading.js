@@ -73,8 +73,8 @@ class LoadingManager {
     }, 500);
   }
 
-  // Loading para botões
-  showButtonLoading(buttonElement, originalText = null) {
+  // Loading para botões com opções de estilo
+  showButtonLoading(buttonElement, originalText = null, style = 'spinner-only') {
     if (!buttonElement) return;
 
     if (!originalText) {
@@ -82,9 +82,30 @@ class LoadingManager {
     }
 
     buttonElement.setAttribute('data-original-text', originalText);
-    buttonElement.textContent = 'Carregando...';
     buttonElement.classList.add('btn-loading');
     buttonElement.disabled = true;
+
+    // Diferentes estilos de loading
+    switch (style) {
+      case 'spinner-only':
+        buttonElement.innerHTML = `
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        `;
+        break;
+      case 'text-only':
+        buttonElement.textContent = 'Processando...';
+        break;
+      case 'spinner-text':
+        buttonElement.innerHTML = `
+          <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          Processando...
+        `;
+        break;
+      default:
+        buttonElement.innerHTML = `
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        `;
+    }
   }
 
   // Remover loading do botão
@@ -150,9 +171,9 @@ function hideLoading() {
   loading.hide();
 }
 
-function showButtonLoading(buttonId, originalText = null) {
+function showButtonLoading(buttonId, originalText = null, style = 'spinner-only') {
   const button = typeof buttonId === 'string' ? document.getElementById(buttonId) : buttonId;
-  loading.showButtonLoading(button, originalText);
+  loading.showButtonLoading(button, originalText, style);
 }
 
 function hideButtonLoading(buttonId) {
