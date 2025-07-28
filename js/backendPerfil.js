@@ -95,13 +95,8 @@ app.get('/', (req, res) => {
       atualizar: 'PUT /pessoa/:id_pessoa',
       deletar: 'DELETE /pessoa/:id_pessoa',
       endereco: {
-        buscar: 'GET /pessoa/:id_pessoa/endereco',
-        atualizar: 'PUT /pessoa/:id_pessoa/endereco'
-      },
-      pagamentos: {
-        listar: 'GET /pessoa/:id_pessoa/pagamentos',
-        adicionar: 'POST /pessoa/:id_pessoa/pagamentos',
-        remover: 'DELETE /pessoa/:id_pessoa/pagamentos/:id'
+        buscar: 'GET /pessoa/:id_pessoa/enderecos',
+        atualizar: 'PUT /pessoa/:id_pessoa/enderecos'
       },
       imagem: 'PUT /pessoa/:id_pessoa/imagem'
     }
@@ -419,80 +414,77 @@ app.put('/pessoa/:id_pessoa/imagem', async (req, res) => {
 });
 
 // [9] ROTAS PARA ENDEREÇO
-app.get('/pessoa/view_pessoa_endereco', async (req, res) => {
+app.get('/pessoa/:id_pessoa/enderecos', async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT * FROM view_pessoa_endereco WHERE id_pessoa = ?', [req.params.id_pessoa]);
-        if (rows.length === 0) {
-            return res.status(404).json({ error: 'Endereço não encontrado' });
-        }
-        res.json(rows[0]);
-    } catch (err) {
-        res.status(500).json({ error: 'Erro ao buscar endereço' });
-    }
-});
-
-app.put('/pessoa/:id_pessoa/endereco', async (req, res) => {
-    try {
-        const { cep, logradouro, numero, complemento, cidade, estado } = req.body;
         const idPessoa = req.params.id_pessoa;
 
-        // Verifica se já existe endereço
-        const [existing] = await db.query('SELECT id FROM enderecos WHERE id_pessoa = ?', [idPessoa]);
-        
-        if (existing.length > 0) {
+        // Execute a consulta e capture o resultado completo
+        const queryResult = await db.query(
+            'SELECT id_endereco, uf, cep, cidade, bairro, endereco, complemento FROM enderecos WHERE id_pessoa = ?',
+            [idPessoa]
+        );
+        console.log("Resultado bruto da consulta GET de endereço:", queryResult);
+
+        let rows;
+        // Adapte esta parte dependendo do que seu db.query realmente retorna
+        // Se db.query retorna [rows, fields], então:
+        if (Array.isArray(queryResult) && Array.isArray(queryResult[0])) {
+            rows = queryResult[0];
+        } else { // Se db.query retorna apenas as rows diretamente:
+            rows = queryResult;
+        }
+
+        // Verifique se 'rows' é um array e se tem elementos antes de acessar .length
+        if (Array.isArray(rows) && rows.length > 0) {
+            res.json(rows[0]); // Retorna o primeiro endereço encontrado
+        } else {
+            // Se nenhum endereço for encontrado, retorna 404
+            return res.status(404).json({ error: 'Endereço não encontrado' });
+        }
+    } catch (err) {
+        console.error('Erro detalhado ao buscar endereço:', err); // Log mais detalhado
+        res.status(500).json({ error: 'Erro ao buscar endereço', details: err.message }); // Inclua detalhes do erro
+    }
+});
+app.put('/pessoa/:id_pessoa/enderecos', async (req, res) => {
+    try {
+        const { uf, cep, cidade, bairro, endereco, complemento } = req.body;
+        const idPessoa = req.params.id_pessoa;
+
+        // Execute a consulta e capture o resultado completo
+        const queryResult = await db.query('SELECT id_endereco FROM enderecos WHERE id_pessoa = ?', [idPessoa]);
+        console.log("Resultado bruto da consulta de existência de endereço:", queryResult);
+
+        let existingRows;
+        // Adapte esta parte dependendo do que seu db.query realmente retorna
+        // Se db.query retorna [rows, fields], então:
+        if (Array.isArray(queryResult) && Array.isArray(queryResult[0])) {
+            existingRows = queryResult[0];
+        } else { // Se db.query retorna apenas as rows diretamente:
+            existingRows = queryResult;
+        }
+
+        // Verifique se existingRows é um array e se tem elementos antes de acessar .length
+        if (Array.isArray(existingRows) && existingRows.length > 0) {
             // Atualiza existente
             await db.query(
-                'UPDATE enderecos SET cep = ?, logradouro = ?, numero = ?, complemento = ?, cidade = ?, estado = ? WHERE id_pessoa = ?',
-                [cep, logradouro, numero, complemento, cidade, estado, idPessoa]
+                'UPDATE enderecos SET uf = ?, cep = ?, cidade = ?, bairro = ?, endereco = ?, complemento = ? WHERE id_pessoa = ?',
+                [uf, cep, cidade, bairro, endereco, complemento, idPessoa]
             );
         } else {
             // Cria novo
             await db.query(
-                'INSERT INTO enderecos (id_pessoa, cep, logradouro, numero, complemento, cidade, estado) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                [idPessoa, cep, logradouro, numero, complemento, cidade, estado]
+                'INSERT INTO enderecos (id_pessoa, uf, cep, cidade, bairro, endereco, complemento) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                [idPessoa, uf, cep, cidade, bairro || null, endereco || null, complemento || null]
             );
         }
-        
+
         res.json({ message: 'Endereço atualizado com sucesso' });
     } catch (err) {
-        res.status(500).json({ error: 'Erro ao atualizar endereço' });
+        console.error('Erro detalhado ao tentar atualizar/inserir endereço:', err); // Log mais detalhado
+        res.status(500).json({ error: 'Erro ao atualizar endereço', details: err.message }); // Inclua detalhes do erro
     }
 });
-
-// [10] ROTAS PARA MÉTODOS DE PAGAMENTO
-// app.get('/pessoa/:id_pessoa/pagamentos', async (req, res) => {
-//     try {
-//         const [rows] = await db.query('SELECT id, tipo, numero FROM metodos_pagamento WHERE id_pessoa = ?', [req.params.id_pessoa]);
-//         res.json(rows);
-//     } catch (err) {
-//         res.status(500).json({ error: 'Erro ao buscar métodos de pagamento' });
-//     }
-// });
-
-// app.post('/pessoa/:id_pessoa/pagamentos', async (req, res) => {
-//     try {
-//         const { tipo, numero } = req.body;
-//         await db.query(
-//             'INSERT INTO metodos_pagamento (id_pessoa, tipo, numero) VALUES (?, ?, ?)',
-//             [req.params.id_pessoa, tipo, numero]
-//         );
-//         res.status(201).json({ message: 'Método de pagamento adicionado' });
-//     } catch (err) {
-//         res.status(500).json({ error: 'Erro ao adicionar método de pagamento' });
-//     }
-// });
-
-// app.delete('/pessoa/:id_pessoa/pagamentos/:id', async (req, res) => {
-//     try {
-//         await db.query('DELETE FROM metodos_pagamento WHERE id = ? AND id_pessoa = ?', [req.params.id, req.params.id_pessoa]);
-//         res.status(204).end();
-//     } catch (err) {
-//         res.status(500).json({ error: 'Erro ao remover método de pagamento' });
-//     }
-// });
-
-
-
 // Rota para listar todos os usuários (apenas para ADMs)
 app.get('/pessoa', async (req, res) => {
     try {
@@ -522,6 +514,36 @@ app.get('/pessoa', async (req, res) => {
         res.status(500).json({ error: 'Erro ao listar usuários' });
     }
 });
+
+// GET /pedidos/todos
+app.get('/pedidos/todos', async (req, res) => {
+  try {
+    const [pedidos] = await conexao.execute(`
+      SELECT 
+        p.id_pedido,
+        p.numero_pedido,
+        p.data_hora,
+        p.situacao,
+        p.valor_total,
+        pe.nome AS nome_usuario,
+        pe.email,
+        pe.telefone,
+        pp.nome_produto,
+        pp.quantidade,
+        pp.preco_unitario
+      FROM pedidos p
+      JOIN pessoa pe ON pe.id_pessoa = p.id_pessoa
+      JOIN pedido_produto pp ON pp.id_pedido = p.id_pedido
+      ORDER BY p.data_hora DESC
+    `);
+    
+    res.json(pedidos);
+  } catch (err) {
+    console.error("Erro ao buscar pedidos:", err);
+    res.status(500).json({ erro: 'Erro ao buscar pedidos' });
+  }
+});
+
 
 //Rota atualizar tipo de usuário
 app.put('/pessoa/:id_pessoa/tipo', async (req, res) => {

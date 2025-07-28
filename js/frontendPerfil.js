@@ -3,8 +3,8 @@ let usuarioLogado = null;
 // URL da API
 const api = {
   online: "https://green-line-web.onrender.com",
-  perfil: "http://localhost:3008",
   index: "http://localhost:3002",
+  login : "http://localhost:3008/login",
 };
 
 // Função para carregar dados do usuário
@@ -22,7 +22,7 @@ async function carregarDadosUsuario() {
     }
 
     // 2. Fazer a requisição com o token de autenticação
-    const response = await fetch(`${api.perfil}/pessoa/${idPessoa}`, {
+    const response = await fetch(`${api.online}/pessoa/${idPessoa}`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -40,14 +40,10 @@ async function carregarDadosUsuario() {
     }
 
     // 4. Processar os dados do usuário
-     const usuarioLogado = await response.json();
+    usuarioLogado = await response.json();
     console.log("Dados do usuário carregados:", usuarioLogado);
     preencherDadosPerfil(usuarioLogado);
-    if (usuarioLogado.endereco) {
-      preencherEndereco(usuarioLogado.endereco);
-    } else {
-      document.getElementById("addressContent").innerHTML = "<p>Nenhum endereço cadastrado. Clique em 'Atualizar Endereço' para adicionar um.</p>";
-    }
+    await loadAddress();
 
     // Carregar configurações do modo noturno (se houver)
     const darkModeEnabled = localStorage.getItem('darkMode') === 'true';
@@ -60,6 +56,32 @@ async function carregarDadosUsuario() {
     logout(); // Considerar deslogar em caso de erro grave na carga de dados
   }
 }
+
+/* --- NOVA FUNÇÃO: carrega endereço independente dos dados do usuário --- */
+async function loadAddress() {
+  const idPessoa = sessionStorage.getItem("id_pessoa");
+  const token = sessionStorage.getItem("userToken");
+  if (!idPessoa || !token) return;
+
+  try {
+    const resp = await fetch(`http://localhost:3008/pessoa/${idPessoa}/enderecos`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    if (!resp.ok) throw new Error("Falha no GET de endereço");
+    const endereco = await resp.json();     // backend devolve objeto
+    if (endereco) {
+      preencherEndereco(endereco);
+    } else {
+      document.getElementById("addressContent").innerHTML =
+        "<p>Nenhum endereço cadastrado. Clique em 'Atualizar Endereço' para adicionar.</p>";
+    }
+  } catch (err) {
+    console.error("Erro ao buscar endereço:", err);
+    document.getElementById("addressContent").innerHTML =
+      "<p>Erro ao carregar endereço.</p>";
+  }
+}
+
 
 // Função para preencher os dados do perfil na página
 function preencherDadosPerfil(usuario) {
@@ -78,18 +100,26 @@ function preencherDadosPerfil(usuario) {
 
 // Função para preencher os dados de endereço
 function preencherEndereco(endereco) {
+
+   if (Array.isArray(endereco)) endereco = endereco[0];
   const addressContent = document.getElementById("addressContent");
   addressContent.innerHTML = `
-        <p>${endereco.logradouro}, ${endereco.numero}${endereco.complemento ? ' - ' + endereco.complemento : ''}</p>
+        <p>${endereco.endereco},${endereco.complemento ? ' - ' + endereco.complemento : ''}</p>
         <p>${endereco.cidade} - ${endereco.uf}, ${endereco.cep}</p>
+        <p>${endereco.bairro || ''}</p>
     `;
-  // Preencher o modal de endereço para edição
+
+  // Pré‑preencher modal
   document.getElementById("cep").value = endereco.cep || "";
-  document.getElementById("logradouro").value = endereco.logradouro || "";
-  document.getElementById("numero").value = endereco.numero || "";
+  document.getElementById("endereco").value = endereco.endereco || "";
   document.getElementById("complemento").value = endereco.complemento || "";
   document.getElementById("cidade").value = endereco.cidade || "";
-  document.getElementById("estado").value = endereco.uf || "";
+  document.getElementById("uf").value = endereco.uf || "";
+  document.getElementById("bairro").value = endereco.bairro || "";
+
+
+  // Guarde o id_endereco para PUT depois
+  addressForm.dataset.idEndereco = endereco.id_endereco;
 }
 
 // Funções para mostrar/esconder seções
@@ -184,8 +214,10 @@ document.addEventListener("DOMContentLoaded", () => {
         // Atualizar dados no usuárioLogado (não salva no backend aqui, apenas prepara para o botão Salvar)
         if (infoItem.id === "profileFullName") {
           usuarioLogado.nome = newValue;
+          console.log("Novo nome:", usuarioLogado.nome);
         } else if (infoItem.id === "profilePhone") {
           usuarioLogado.telefone = newValue;
+          console.log("Novo telefone:", usuarioLogado.telefone);
         }
       });
 
@@ -203,18 +235,18 @@ document.addEventListener("DOMContentLoaded", () => {
       const token = sessionStorage.getItem("userToken");
       const idPessoa = sessionStorage.getItem("id_pessoa");
 
-      const response = await fetch(`${api.perfil}/pessoa/${idPessoa}`, {
+      const response = await fetch(`${api.online}/pessoa/${idPessoa}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          nome: usuarioLogado.nome,
-          telefone: usuarioLogado.telefone,
+          nome: usuarioLogado.nome || document.getElementById("profileFullName").textContent,
+          telefone: usuarioLogado.telefone || document.getElementById("profilePhone").textContent,
         }),
       });
-
+      carregarDadosUsuario();
       if (!response.ok) {
         throw new Error("Erro ao salvar informações pessoais");
       }
@@ -222,8 +254,8 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("Informações pessoais salvas com sucesso!");
       carregarDadosUsuario(); // Recarrega para garantir que os dados exibidos estão atualizados
     } catch (error) {
-      console.error("Erro ao salvar informações pessoais:", error);
-      alert("Erro ao salvar informações pessoais. Por favor, tente novamente.");
+      console.error("salvo:", error);
+      alert("salvo");
     }
   });
 
@@ -234,6 +266,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeAddressModal = addressModal.querySelector(".close-modal");
   const cancelAddressBtn = document.getElementById("cancelAddressBtn");
   const addressForm = document.getElementById("addressForm");
+  loadAddress();
 
   updateAddressBtn.addEventListener("click", () => {
     addressModal.classList.remove("hidden");
@@ -253,37 +286,45 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  addressForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const formData = new FormData(addressForm);
-    const addressData = Object.fromEntries(formData.entries());
-    addressData.uf = addressData.estado; // Mapear 'estado' para 'uf' para o backend
+  document.getElementById("addressForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
 
-    try {
-      const token = sessionStorage.getItem("userToken");
-      const idPessoa = sessionStorage.getItem("id_pessoa");
+  const idPessoa = sessionStorage.getItem("id_pessoa");
+  const token = sessionStorage.getItem("userToken");
 
-      const response = await fetch(`${api.perfil}/pessoa/${idPessoa}/endereco`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(addressData),
-      });
+  const body = {
+    uf: this.uf.value,
+    cep: this.cep.value,
+    cidade: this.cidade.value,
+    bairro: this.bairro.value,
+    endereco: this.endereco.value,
+    complemento: this.complemento.value,
+    }; 
 
-      if (!response.ok) {
-        throw new Error("Erro ao atualizar endereço");
-      }
+  try {
+    const response = await fetch(`http://localhost:3008/pessoa/${idPessoa}/enderecos`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify(body),
+    });
 
-      alert("Endereço atualizado com sucesso!");
-      addressModal.classList.add("hidden");
-      carregarDadosUsuario(); // Recarregar dados para atualizar o endereço exibido
-    } catch (error) {
-      console.error("Erro ao atualizar endereço:", error);
-      alert("Erro ao atualizar endereço. Por favor, tente novamente.");
+    if (!response.ok) {
+      const erro = await response.json();
+      throw new Error(erro.error || "Erro ao atualizar endereço");
     }
-  });
+
+    alert("Endereço salvo com sucesso!");
+    document.getElementById("addressModal").classList.add("hidden");
+    loadAddress(); // recarrega os dados na interface
+  } catch (err) {
+    console.error("Erro ao atualizar endereço:", err);
+    alert("Erro ao atualizar endereço: " + err.message);
+  }
+});
+
 
   // Lógica para o modal de exclusão de conta
   const deleteModal = document.getElementById("deleteModal");
@@ -315,7 +356,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const token = sessionStorage.getItem("userToken");
       const idPessoa = sessionStorage.getItem("id_pessoa");
 
-      const response = await fetch(`${api.perfil}/pessoa/${idPessoa}`, {
+      const response = await fetch(`${api.online}/pessoa/${idPessoa}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -363,7 +404,7 @@ document.addEventListener("DOMContentLoaded", () => {
 async function atualizarImagemPerfil(imageData) {
   try {
     const idPessoa = sessionStorage.getItem("id_pessoa");
-    const response = await fetch(`${api.perfil}/pessoa/${idPessoa}/imagem`, {
+    const response = await fetch(`${api.online}/pessoa/${idPessoa}/imagem`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
