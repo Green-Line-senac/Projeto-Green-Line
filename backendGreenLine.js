@@ -35,7 +35,7 @@ app.post("/cadastrarUsuario", async (req, res) => {
     // 2. Insere pessoa
     await db.query(
       `INSERT INTO pessoa(nome, email, cpf, telefone, id_tipo_usuario, senha, situacao, imagem_perfil) 
-       VALUES (?, ?, ?, ?, 2, ?, 'P', 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png')`,
+       VALUES (?, ?, ?, ?, 2, ?, 'P', 'https://cdn-icons-png.flaticon.com/512/6460/6460121.png')`,
       [nome, email, cpf, telefone, senhaCriptografada]
     );
 
