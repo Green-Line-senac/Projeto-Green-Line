@@ -10,12 +10,13 @@ const basePath = window.location.pathname.includes("green_line_web")
   ? "/green_line_web/public"
   : "/public";
 
-
-
 // Função para carregar dados do usuário
 // Função para carregar dados do usuário - VERSÃO CORRIGIDA
 async function carregarDadosUsuario() {
-  const loadingId = showLoading('Carregando perfil...', 'Buscando suas informações');
+  const loadingId = showLoading(
+    "Carregando perfil...",
+    "Buscando suas informações"
+  );
 
   try {
     // 1. Verificar se o usuário está autenticado
@@ -25,7 +26,10 @@ async function carregarDadosUsuario() {
     if (!token || !idPessoa) {
       console.error("Usuário não autenticado - redirecionando para login");
       hideNotification(loadingId);
-      showError('Acesso negado', 'Você precisa fazer login para acessar esta página');
+      showError(
+        "Acesso negado",
+        "Você precisa fazer login para acessar esta página"
+      );
       setTimeout(() => {
         window.location.href = `${basePath}/login.html`;
       }, 2000);
@@ -45,7 +49,10 @@ async function carregarDadosUsuario() {
       if (response.status === 401 || response.status === 403) {
         // Token inválido ou expirado - forçar logout
         hideNotification(loadingId);
-        showError('Sessão expirada', 'Sua sessão expirou. Faça login novamente');
+        showError(
+          "Sessão expirada",
+          "Sua sessão expirou. Faça login novamente"
+        );
         setTimeout(() => {
           logout();
         }, 2000);
@@ -61,17 +68,23 @@ async function carregarDadosUsuario() {
     await loadAddress();
 
     // Carregar configurações do modo noturno (se houver)
-    const darkModeEnabled = localStorage.getItem('darkMode') === 'true';
-    document.body.classList.toggle('dark-mode', darkModeEnabled);
-    document.getElementById('darkModeToggle').checked = darkModeEnabled;
+    const darkModeEnabled = localStorage.getItem("darkMode") === "true";
+    document.body.classList.toggle("dark-mode", darkModeEnabled);
+    document.getElementById("darkModeToggle").checked = darkModeEnabled;
 
     hideNotification(loadingId);
-    showSuccess('Perfil carregado!', 'Suas informações foram carregadas com sucesso', { duration: 3000 });
-
+    showSuccess(
+      "Perfil carregado!",
+      "Suas informações foram carregadas com sucesso",
+      { duration: 3000 }
+    );
   } catch (error) {
     console.error("Erro ao carregar dados do usuário:", error);
     hideNotification(loadingId);
-    showError('Erro ao carregar perfil', 'Não foi possível carregar suas informações. Tente novamente.');
+    showError(
+      "Erro ao carregar perfil",
+      "Não foi possível carregar suas informações. Tente novamente."
+    );
   }
 }
 
@@ -85,18 +98,18 @@ async function loadAddress() {
     // Tenta primeiro o servidor local, depois o online
     let resp;
     try {
-      resp = await fetch(`http://localhost:3008/pessoa/${idPessoa}/enderecos`, {
-        headers: { "Authorization": `Bearer ${token}` }
+      resp = await fetch(`${api.online}/pessoa/${idPessoa}/enderecos`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
     } catch (localError) {
-      console.log('Servidor local não disponível, tentando servidor online...');
+      console.log("Servidor local não disponível, tentando servidor online...");
       resp = await fetch(`${api.online}/pessoa/${idPessoa}/enderecos`, {
-        headers: { "Authorization": `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
     }
 
     if (!resp.ok) throw new Error("Falha no GET de endereço");
-    const endereco = await resp.json();     // backend devolve objeto
+    const endereco = await resp.json(); // backend devolve objeto
     if (endereco) {
       preencherEndereco(endereco);
     } else {
@@ -110,16 +123,22 @@ async function loadAddress() {
   }
 }
 
-
 // Função para preencher os dados do perfil na página
 function preencherDadosPerfil(usuario) {
-  document.getElementById("profileName").textContent = usuario[0].nome || "Nome do Usuário";
-  document.getElementById("profileEmail").textContent = usuario[0].email || "email@exemplo.com";
-  document.getElementById("profileEmailContent").textContent = usuario[0].email || "email@exemplo.com"; // Email na seção de informações pessoais
-  document.getElementById("profileFullName").textContent = usuario[0].nome || "Nome Completo";
-  document.getElementById("profilePhone").textContent = usuario[0].telefone || "Não informado";
-  document.getElementById("profileCpf").textContent = usuario[0].cpf || "Não informado";
-  document.getElementById("profileStatus").textContent = usuario[0].situacao === 'A' ? 'Ativo' : 'Pendente/Inativo';
+  document.getElementById("profileName").textContent =
+    usuario[0].nome || "Nome do Usuário";
+  document.getElementById("profileEmail").textContent =
+    usuario[0].email || "email@exemplo.com";
+  document.getElementById("profileEmailContent").textContent =
+    usuario[0].email || "email@exemplo.com"; // Email na seção de informações pessoais
+  document.getElementById("profileFullName").textContent =
+    usuario[0].nome || "Nome Completo";
+  document.getElementById("profilePhone").textContent =
+    usuario[0].telefone || "Não informado";
+  document.getElementById("profileCpf").textContent =
+    usuario[0].cpf || "Não informado";
+  document.getElementById("profileStatus").textContent =
+    usuario[0].situacao === "A" ? "Ativo" : "Pendente/Inativo";
 
   if (usuario.imagem_perfil) {
     document.getElementById("profileAvatar").src = usuario[0].imagem_perfil;
@@ -128,15 +147,16 @@ function preencherDadosPerfil(usuario) {
 
 // Função para preencher os dados de endereço
 function preencherEndereco(endereco) {
-
   if (Array.isArray(endereco)) endereco = endereco[0];
   // Salva o endereço no sessionStorage para uso em outras páginas
   sessionStorage.setItem("enderecoUsuario", JSON.stringify(endereco));
   const addressContent = document.getElementById("addressContent");
   addressContent.innerHTML = `
-        <p>${endereco.endereco},${endereco.complemento ? ' - ' + endereco.complemento : ''}</p>
+        <p>${endereco.endereco},${
+    endereco.complemento ? " - " + endereco.complemento : ""
+  }</p>
         <p>${endereco.cidade} - ${endereco.uf}, ${endereco.cep}</p>
-        <p>${endereco.bairro || ''}</p>
+        <p>${endereco.bairro || ""}</p>
     `;
 
   // Pré‑preencher modal
@@ -146,7 +166,6 @@ function preencherEndereco(endereco) {
   document.getElementById("cidade").value = endereco.cidade || "";
   document.getElementById("uf").value = endereco.uf || "";
   document.getElementById("bairro").value = endereco.bairro || "";
-
 
   // Guarde o id_endereco para PUT depois
   addressForm.dataset.idEndereco = endereco.id_endereco;
@@ -168,7 +187,9 @@ function showSection(sectionId) {
   if (targetSection) {
     targetSection.classList.remove("hidden");
     // Adicionar a classe 'active' ao item de navegação correspondente
-    const navItem = document.querySelector(`.nav-item[data-section="${sectionId.replace('-section', '')}"]`);
+    const navItem = document.querySelector(
+      `.nav-item[data-section="${sectionId.replace("-section", "")}"]`
+    );
     if (navItem) {
       navItem.classList.add("active");
     }
@@ -183,18 +204,19 @@ document.addEventListener("DOMContentLoaded", () => {
     item.addEventListener("click", function () {
       const section = this.dataset.section;
       // Handle direct link for 'Meu Carrinho' separately
-      if (section === 'carrinho') {
+      if (section === "carrinho") {
         // The HTML already handles the redirect, no need for JS showSection
         return;
       }
       // Map data-section to actual div IDs
       let targetSectionId;
-      if (section === 'personal') {
-        targetSectionId = 'personal-section';
-      } else if (section === 'purchase-history') { // Updated from 'saved'
-        targetSectionId = 'saved-section'; // HTML ID for purchase history
-      } else if (section === 'gears') {
-        targetSectionId = 'gears-section';
+      if (section === "personal") {
+        targetSectionId = "personal-section";
+      } else if (section === "purchase-history") {
+        // Updated from 'saved'
+        targetSectionId = "saved-section"; // HTML ID for purchase history
+      } else if (section === "gears") {
+        targetSectionId = "gears-section";
       }
 
       if (targetSectionId) {
@@ -207,14 +229,14 @@ document.addEventListener("DOMContentLoaded", () => {
   showSection("personal-section");
 
   // Lógica para o modo noturno
-  const darkModeToggle = document.getElementById('darkModeToggle');
-  darkModeToggle.addEventListener('change', () => {
+  const darkModeToggle = document.getElementById("darkModeToggle");
+  darkModeToggle.addEventListener("change", () => {
     if (darkModeToggle.checked) {
-      document.body.classList.add('dark-mode');
-      localStorage.setItem('darkMode', 'true');
+      document.body.classList.add("dark-mode");
+      localStorage.setItem("darkMode", "true");
     } else {
-      document.body.classList.remove('dark-mode');
-      localStorage.setItem('darkMode', 'false');
+      document.body.classList.remove("dark-mode");
+      localStorage.setItem("darkMode", "false");
     }
   });
 
@@ -250,7 +272,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       input.addEventListener("keypress", function (e) {
-        if (e.key === 'Enter') {
+        if (e.key === "Enter") {
           input.blur(); // Simula o blur para salvar
         }
       });
@@ -258,39 +280,49 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Botão Salvar Alterações para Informações Pessoais
-  document.getElementById("savePersonalBtn").addEventListener("click", async () => {
-    const loadingId = showLoading('Salvando alterações...', 'Atualizando suas informações');
+  document
+    .getElementById("savePersonalBtn")
+    .addEventListener("click", async () => {
+      const loadingId = showLoading(
+        "Salvando alterações...",
+        "Atualizando suas informações"
+      );
 
-    try {
-      const token = sessionStorage.getItem("userToken");
-      const idPessoa = sessionStorage.getItem("id_pessoa");
+      try {
+        const token = sessionStorage.getItem("userToken");
+        const idPessoa = sessionStorage.getItem("id_pessoa");
 
-      const response = await fetch(`${api.online}/pessoa/${idPessoa}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          nome: usuarioLogado.nome,
-          telefone: usuarioLogado.telefone,
-        }),
-      });
+        const response = await fetch(`${api.online}/pessoa/${idPessoa}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            nome: usuarioLogado.nome,
+            telefone: usuarioLogado.telefone,
+          }),
+        });
 
-      if (!response.ok) {
-        throw new Error("Erro ao salvar informações pessoais");
+        if (!response.ok) {
+          throw new Error("Erro ao salvar informações pessoais");
+        }
+
+        hideNotification(loadingId);
+        showSuccess(
+          "Informações salvas!",
+          "Suas informações pessoais foram atualizadas com sucesso"
+        );
+        carregarDadosUsuario(); // Recarrega para garantir que os dados exibidos estão atualizados
+      } catch (error) {
+        console.error("Erro ao salvar informações pessoais:", error);
+        hideNotification(loadingId);
+        showError(
+          "Erro ao salvar",
+          "Não foi possível salvar suas informações. Tente novamente."
+        );
       }
-
-      hideNotification(loadingId);
-      showSuccess('Informações salvas!', 'Suas informações pessoais foram atualizadas com sucesso');
-      carregarDadosUsuario(); // Recarrega para garantir que os dados exibidos estão atualizados
-    } catch (error) {
-      console.error("Erro ao salvar informações pessoais:", error);
-      hideNotification(loadingId);
-      showError('Erro ao salvar', 'Não foi possível salvar suas informações. Tente novamente.');
-    }
-  });
-
+    });
 
   // Lógica para o modal de endereço
   const addressModal = document.getElementById("addressModal");
@@ -318,65 +350,78 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  document.getElementById("addressForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
+  document
+    .getElementById("addressForm")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
 
-    const loadingId = showLoading('Salvando endereço...', 'Atualizando suas informações de entrega');
+      const loadingId = showLoading(
+        "Salvando endereço...",
+        "Atualizando suas informações de entrega"
+      );
 
-    const idPessoa = sessionStorage.getItem("id_pessoa");
-    const token = sessionStorage.getItem("userToken");
+      const idPessoa = sessionStorage.getItem("id_pessoa");
+      const token = sessionStorage.getItem("userToken");
 
-    const body = {
-      uf: this.uf.value,
-      cep: this.cep.value,
-      cidade: this.cidade.value,
-      bairro: this.bairro.value,
-      endereco: this.endereco.value,
-      complemento: this.complemento.value,
-    };
+      const body = {
+        uf: this.uf.value,
+        cep: this.cep.value,
+        cidade: this.cidade.value,
+        bairro: this.bairro.value,
+        endereco: this.endereco.value,
+        complemento: this.complemento.value,
+      };
 
-    try {
-      // Tenta primeiro o servidor local, depois o online
-      let response;
       try {
-        response = await fetch(`http://localhost:3008/pessoa/${idPessoa}/enderecos`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          },
-          body: JSON.stringify(body),
-        });
-      } catch (localError) {
-        console.log('Servidor local não disponível, tentando servidor online...');
-        response = await fetch(`${api.online}/pessoa/${idPessoa}/enderecos`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          },
-          body: JSON.stringify(body),
-        });
+        // Tenta primeiro o servidor local, depois o online
+        let response;
+        try {
+          response = await fetch(`${api.online}/pessoa/${idPessoa}/enderecos`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(body),
+          });
+        } catch (localError) {
+          console.log(
+            "Servidor local não disponível, tentando servidor online..."
+          );
+          response = await fetch(`${api.online}/pessoa/${idPessoa}/enderecos`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(body),
+          });
+        }
+
+        if (!response.ok) {
+          const erro = await response.json();
+          throw new Error(erro.error || "Erro ao atualizar endereço");
+        }
+
+        hideNotification(loadingId);
+        showSuccess(
+          "Endereço salvo!",
+          "Seu endereço foi atualizado com sucesso"
+        );
+
+        // Salva o endereço no sessionStorage para uso em outras páginas
+        sessionStorage.setItem("enderecoUsuario", JSON.stringify(body));
+        document.getElementById("addressModal").classList.add("hidden");
+        loadAddress(); // recarrega os dados na interface
+      } catch (err) {
+        console.error("Erro ao atualizar endereço:", err);
+        hideNotification(loadingId);
+        showError(
+          "Erro ao salvar endereço",
+          err.message || "Não foi possível atualizar seu endereço"
+        );
       }
-
-      if (!response.ok) {
-        const erro = await response.json();
-        throw new Error(erro.error || "Erro ao atualizar endereço");
-      }
-
-      hideNotification(loadingId);
-      showSuccess('Endereço salvo!', 'Seu endereço foi atualizado com sucesso');
-
-      // Salva o endereço no sessionStorage para uso em outras páginas
-      sessionStorage.setItem("enderecoUsuario", JSON.stringify(body));
-      document.getElementById("addressModal").classList.add("hidden");
-      loadAddress(); // recarrega os dados na interface
-    } catch (err) {
-      console.error("Erro ao atualizar endereço:", err);
-      hideNotification(loadingId);
-      showError('Erro ao salvar endereço', err.message || 'Não foi possível atualizar seu endereço');
-    }
-  });
+    });
 
   // Integração com ViaCEP para preenchimento automático de endereço
   function buscarEnderecoPorCep(cep) {
@@ -384,25 +429,36 @@ document.addEventListener("DOMContentLoaded", () => {
     cep = cep.replace(/\D/g, "");
     if (cep.length !== 8) return;
 
-    const loadingId = showLoading('Buscando CEP...', 'Consultando dados do endereço');
+    const loadingId = showLoading(
+      "Buscando CEP...",
+      "Consultando dados do endereço"
+    );
 
     fetch(`https://viacep.com.br/ws/${cep}/json/`)
       .then((res) => res.json())
       .then((data) => {
         hideNotification(loadingId);
         if (data.erro) {
-          showError('CEP não encontrado', 'Verifique se o CEP digitado está correto');
+          showError(
+            "CEP não encontrado",
+            "Verifique se o CEP digitado está correto"
+          );
           return;
         }
         document.getElementById("endereco").value = data.logradouro || "";
         document.getElementById("bairro").value = data.bairro || "";
         document.getElementById("cidade").value = data.localidade || "";
         document.getElementById("uf").value = data.uf || "";
-        showSuccess('CEP encontrado!', 'Endereço preenchido automaticamente', { duration: 3000 });
+        showSuccess("CEP encontrado!", "Endereço preenchido automaticamente", {
+          duration: 3000,
+        });
       })
       .catch(() => {
         hideNotification(loadingId);
-        showError('Erro ao buscar CEP', 'Não foi possível consultar o CEP. Tente novamente.');
+        showError(
+          "Erro ao buscar CEP",
+          "Não foi possível consultar o CEP. Tente novamente."
+        );
       });
   }
 
@@ -418,7 +474,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-
 
   // Lógica para o modal de exclusão de conta
   const deleteModal = document.getElementById("deleteModal");
@@ -446,7 +501,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   confirmDeleteBtn.addEventListener("click", async () => {
-    const loadingId = showLoading('Excluindo conta...', 'Processando exclusão da sua conta');
+    const loadingId = showLoading(
+      "Excluindo conta...",
+      "Processando exclusão da sua conta"
+    );
 
     try {
       const token = sessionStorage.getItem("userToken");
@@ -464,7 +522,10 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       hideNotification(loadingId);
-      showSuccess('Conta excluída!', 'Sua conta foi excluída com sucesso. Você será redirecionado.');
+      showSuccess(
+        "Conta excluída!",
+        "Sua conta foi excluída com sucesso. Você será redirecionado."
+      );
 
       setTimeout(() => {
         logout(); // Desloga o usuário após a exclusão da conta
@@ -472,29 +533,37 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (error) {
       console.error("Erro ao deletar conta:", error);
       hideNotification(loadingId);
-      showError('Erro ao excluir conta', 'Não foi possível excluir sua conta. Tente novamente.');
+      showError(
+        "Erro ao excluir conta",
+        "Não foi possível excluir sua conta. Tente novamente."
+      );
     }
   });
 
-
   // Lógica para upload de imagem de perfil
-  const avatarInput = document.getElementById('avatarInput');
-  avatarInput.addEventListener('change', async (event) => {
+  const avatarInput = document.getElementById("avatarInput");
+  avatarInput.addEventListener("change", async (event) => {
     const file = event.target.files[0];
     if (file) {
       // Validar tamanho do arquivo (máximo 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        showError('Arquivo muito grande', 'A imagem deve ter no máximo 5MB');
+        showError("Arquivo muito grande", "A imagem deve ter no máximo 5MB");
         return;
       }
 
       // Validar tipo do arquivo
-      if (!file.type.startsWith('image/')) {
-        showError('Formato inválido', 'Por favor, selecione apenas arquivos de imagem');
+      if (!file.type.startsWith("image/")) {
+        showError(
+          "Formato inválido",
+          "Por favor, selecione apenas arquivos de imagem"
+        );
         return;
       }
 
-      const loadingId = showLoading('Atualizando foto...', 'Fazendo upload da sua nova imagem de perfil');
+      const loadingId = showLoading(
+        "Atualizando foto...",
+        "Fazendo upload da sua nova imagem de perfil"
+      );
 
       const reader = new FileReader();
       reader.onload = async (e) => {
@@ -502,13 +571,19 @@ document.addEventListener("DOMContentLoaded", () => {
           // A imagem será salva como base64 no banco de dados.
           // Em um ambiente de produção, é melhor fazer upload para um serviço de armazenamento de arquivos.
           await atualizarImagemPerfil(e.target.result);
-          document.getElementById('profileAvatar').src = e.target.result;
+          document.getElementById("profileAvatar").src = e.target.result;
           hideNotification(loadingId);
-          showSuccess('Foto atualizada!', 'Sua imagem de perfil foi atualizada com sucesso');
+          showSuccess(
+            "Foto atualizada!",
+            "Sua imagem de perfil foi atualizada com sucesso"
+          );
         } catch (error) {
           console.error("Erro ao atualizar imagem de perfil:", error);
           hideNotification(loadingId);
-          showError('Erro ao atualizar foto', 'Não foi possível atualizar sua imagem de perfil');
+          showError(
+            "Erro ao atualizar foto",
+            "Não foi possível atualizar sua imagem de perfil"
+          );
         }
       };
       reader.readAsDataURL(file);
@@ -521,56 +596,83 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!idPessoa) return;
 
     const container = document.getElementById("savedProductsContent");
-    const loadingId = showLoading('Carregando histórico...', 'Buscando seus pedidos anteriores');
+    const loadingId = showLoading(
+      "Carregando histórico...",
+      "Buscando seus pedidos anteriores"
+    );
 
-    container.innerHTML = '<div class="text-center"><p>Carregando pedidos...</p></div>';
+    container.innerHTML =
+      '<div class="text-center"><p>Carregando pedidos...</p></div>';
 
     try {
-      const resp = await fetch(`https://green-line-web.onrender.com/pessoa/${idPessoa}/pedidos`);
+      const resp = await fetch(
+        `https://green-line-web.onrender.com/pessoa/${idPessoa}/pedidos`
+      );
 
       hideNotification(loadingId);
 
       if (!resp.ok) {
-        container.innerHTML = '<p>Nenhum pedido encontrado.</p>';
-        showInfo('Histórico vazio', 'Você ainda não fez nenhum pedido', { duration: 3000 });
+        container.innerHTML = "<p>Nenhum pedido encontrado.</p>";
+        showInfo("Histórico vazio", "Você ainda não fez nenhum pedido", {
+          duration: 3000,
+        });
         return;
       }
 
       const pedidos = await resp.json();
 
       if (!Array.isArray(pedidos) || pedidos.length === 0) {
-        container.innerHTML = '<p>Nenhum pedido encontrado.</p>';
-        showInfo('Histórico vazio', 'Você ainda não fez nenhum pedido', { duration: 3000 });
+        container.innerHTML = "<p>Nenhum pedido encontrado.</p>";
+        showInfo("Histórico vazio", "Você ainda não fez nenhum pedido", {
+          duration: 3000,
+        });
         return;
       }
 
-      let html = '';
-      pedidos.forEach(pedido => {
+      let html = "";
+      pedidos.forEach((pedido) => {
         html += `<div class="pedido-card">
-          <h4>Pedido: <span class="text-success">${pedido.numero_pedido || pedido.numeroPedido || pedido.id_pedido}</span></h4>
-          <p><strong>Data:</strong> ${pedido.data_hora ? new Date(pedido.data_hora).toLocaleString('pt-BR') : (pedido.dataConfirmacao || '')}</p>
-          <p><strong>Status:</strong> ${pedido.situacao || 'Confirmado'}</p>
-          <p><strong>Total:</strong> R$ ${(pedido.valor_total || pedido.total || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+          <h4>Pedido: <span class="text-success">${
+            pedido.numero_pedido || pedido.numeroPedido || pedido.id_pedido
+          }</span></h4>
+          <p><strong>Data:</strong> ${
+            pedido.data_hora
+              ? new Date(pedido.data_hora).toLocaleString("pt-BR")
+              : pedido.dataConfirmacao || ""
+          }</p>
+          <p><strong>Status:</strong> ${pedido.situacao || "Confirmado"}</p>
+          <p><strong>Total:</strong> R$ ${(
+            pedido.valor_total ||
+            pedido.total ||
+            0
+          ).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</p>
         </div>`;
       });
 
       container.innerHTML = html;
-      showSuccess('Histórico carregado!', `${pedidos.length} pedido(s) encontrado(s)`, { duration: 3000 });
-
+      showSuccess(
+        "Histórico carregado!",
+        `${pedidos.length} pedido(s) encontrado(s)`,
+        { duration: 3000 }
+      );
     } catch (err) {
-      console.error('Erro ao carregar pedidos:', err);
+      console.error("Erro ao carregar pedidos:", err);
       hideNotification(loadingId);
-      container.innerHTML = '<p>Erro ao carregar pedidos.</p>';
-      showError('Erro ao carregar histórico', 'Não foi possível carregar seus pedidos. Tente novamente.');
+      container.innerHTML = "<p>Erro ao carregar pedidos.</p>";
+      showError(
+        "Erro ao carregar histórico",
+        "Não foi possível carregar seus pedidos. Tente novamente."
+      );
     }
   }
 
   // Carregar pedidos ao abrir a seção de histórico de compras
-  const navPurchaseHistory = document.querySelector('.nav-item[data-section="purchase-history"]');
+  const navPurchaseHistory = document.querySelector(
+    '.nav-item[data-section="purchase-history"]'
+  );
   if (navPurchaseHistory) {
-    navPurchaseHistory.addEventListener('click', carregarPedidosUsuario);
+    navPurchaseHistory.addEventListener("click", carregarPedidosUsuario);
   }
-
 });
 
 // Função para atualizar imagem de perfil

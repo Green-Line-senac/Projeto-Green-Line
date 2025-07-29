@@ -145,7 +145,7 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
       // Tenta primeiro o servidor local, depois o online
       let resp;
       try {
-        resp = await fetch(`http://localhost:3008/pessoa/${idPessoa}/enderecos`, {
+        resp = await fetch(`${api.online}/pessoa/${idPessoa}/enderecos`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
       } catch (localError) {
@@ -344,7 +344,7 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
       // Tenta primeiro o servidor local, depois o online
       let response;
       try {
-        response = await fetch(`http://localhost:3008/pessoa/${idPessoa}/enderecos`, {
+        response = await fetch(`${api.online}/pessoa/${idPessoa}/enderecos`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -521,7 +521,7 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
   // --- Funções ADM ---
   function loadUsersList() {
     const token = sessionStorage.getItem("userToken");
-    fetch("http://localhost:3008/pessoa", {
+    fetch(`${api.online}/pessoa`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -549,7 +549,7 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
 
   function openUserEditModal(id) {
     const token = sessionStorage.getItem("userToken");
-    fetch(`http://localhost:3008/pessoa/${id}`, {
+    fetch(`${api.online}/pessoa/${id}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -577,7 +577,7 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
       id_tipo_usuario: document.getElementById("userType").value,
     };
 
-    await fetch(`http://localhost:3008/pessoa/${id}`, {
+    await fetch(`${api.online}/pessoa/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -633,7 +633,7 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
     try {
       // Usar função utilitária com fallback automático
       const resp = await fetchWithFallback(
-        `http://localhost:3008/pessoa/${idPessoa}/pedidos`,
+        `${api.online}/pessoa/${idPessoa}/pedidos`,
         `${api.online}/pessoa/${idPessoa}/pedidos`
       );
 
@@ -717,7 +717,7 @@ async function loadTodosPedidos() {
   try {
     // Usar função utilitária com fallback automático
     const response = await fetchWithFallback(
-      'http://localhost:3008/pedidos/todos',
+      `${api.online}/pedidos/todos`,
       `${api.online}/pedidos/todos`
     );
 

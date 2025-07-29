@@ -55,28 +55,42 @@ class FuncaoUteis {
 
         // Função para formatar valor monetário
         const formatarValor = (valor) => {
-          return new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
+          return new Intl.NumberFormat("pt-BR", {
+            style: "currency",
+            currency: "BRL",
           }).format(valor);
         };
 
         // Gerar HTML dos produtos
-        let produtosHtml = '';
+        let produtosHtml = "";
         if (pedido.produtos && Array.isArray(pedido.produtos)) {
-          produtosHtml = pedido.produtos.map(produto => {
-            const imagemUrl = produto.imagem_principal || produto.imagem_1 || produto.imagem || 'https://green-line-web.onrender.com/img/imagem-nao-disponivel.png';
-            return `
+          produtosHtml = pedido.produtos
+            .map((produto) => {
+              const imagemUrl =
+                produto.imagem_principal ||
+                produto.imagem_1 ||
+                produto.imagem ||
+                "https://green-line-web.onrender.com/img/imagem-nao-disponivel.png";
+              return `
               <div style="display: flex; align-items: center; background: white; padding: 15px; margin: 10px 0; border-radius: 8px; border: 1px solid #e9ecef;">
-                <img src="${imagemUrl}" alt="${produto.nome}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin-right: 15px;">
+                <img src="${imagemUrl}" alt="${
+                produto.nome
+              }" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin-right: 15px;">
                 <div style="flex: 1;">
-                  <h4 style="margin: 0 0 5px 0; color: #28a745;">${produto.nome}</h4>
-                  <p style="margin: 0; color: #6c757d;">Quantidade: ${produto.quantidade}</p>
-                  <p style="margin: 5px 0 0 0; font-weight: bold; color: #333;">Subtotal: ${formatarValor(produto.subtotal)}</p>
+                  <h4 style="margin: 0 0 5px 0; color: #28a745;">${
+                    produto.nome
+                  }</h4>
+                  <p style="margin: 0; color: #6c757d;">Quantidade: ${
+                    produto.quantidade
+                  }</p>
+                  <p style="margin: 5px 0 0 0; font-weight: bold; color: #333;">Subtotal: ${formatarValor(
+                    produto.subtotal
+                  )}</p>
                 </div>
               </div>
             `;
-          }).join('');
+            })
+            .join("");
         }
 
         mensagem = `
@@ -111,7 +125,9 @@ class FuncaoUteis {
                 <p><strong>Número:</strong> ${pedido.numeroPedido}</p>
                 <p><strong>Data:</strong> ${pedido.dataConfirmacao}</p>
                 <p><strong>Total:</strong> ${formatarValor(pedido.total)}</p>
-                <p><strong>Previsão de entrega:</strong> ${pedido.previsaoEntrega}</p>
+                <p><strong>Previsão de entrega:</strong> ${
+                  pedido.previsaoEntrega
+                }</p>
             </div>
 
             <div class="products-section">
