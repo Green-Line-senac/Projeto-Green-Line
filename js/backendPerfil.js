@@ -397,7 +397,6 @@ app.put('/pessoa/:id_pessoa/imagem', async (req, res) => {
 app.get('/pessoa/:id_pessoa/enderecos', async (req, res) => {
     try {
         const idPessoa = req.params.id_pessoa;
-        console.log(idPessoa);
 
         // Execute a consulta e capture o resultado completo
         const queryResult = await db.query(
@@ -425,45 +424,49 @@ app.get('/pessoa/:id_pessoa/enderecos', async (req, res) => {
     } catch (err) {
         console.error('Erro detalhado ao buscar endereço:', err); // Log mais detalhado
         res.status(500).json({ error: 'Erro ao buscar endereço', details: err.message }); // Inclua detalhes do erro
+        console.error('Erro detalhado ao buscar endereço:', err); // Log mais detalhado
+        res.status(500).json({ error: 'Erro ao buscar endereço', details: err.message }); // Inclua detalhes do erro
     }
 });
 app.put('/pessoa/:id_pessoa/enderecos', async (req, res) => {
     try {
         const { uf, cep, cidade, bairro, endereco, complemento } = req.body;
-        const idPessoa = req.params.id_pessoa;
+        const idPessoa = parseInt(req.params.id_pessoa);
+        if (isNaN(idPessoa) || idPessoa <= 0) {
+            console.error('Erro de validação: ID de pessoa inválido para atualização/inserção de endereço:', req.params.id_pessoa);
+            return res.status(400).json({ error: 'ID inválido' });
+        }
 
-        // Execute a consulta e capture o resultado completo
+        // Verifica se já existe um endereço para esta pessoa
         const queryResult = await db.query('SELECT id_endereco FROM enderecos WHERE id_pessoa = ?', [idPessoa]);
-        console.log("Resultado bruto da consulta de existência de endereço:", queryResult);
-
+        
         let existingRows;
-        // Adapte esta parte dependendo do que seu db.query realmente retorna
-        // Se db.query retorna [rows, fields], então:
         if (Array.isArray(queryResult) && Array.isArray(queryResult[0])) {
             existingRows = queryResult[0];
-        } else { // Se db.query retorna apenas as rows diretamente:
+        } else {
             existingRows = queryResult;
         }
 
-        // Verifique se existingRows é um array e se tem elementos antes de acessar .length
         if (Array.isArray(existingRows) && existingRows.length > 0) {
-            // Atualiza existente
+            // Se o endereço existe, atualiza
             await db.query(
                 'UPDATE enderecos SET uf = ?, cep = ?, cidade = ?, bairro = ?, endereco = ?, complemento = ? WHERE id_pessoa = ?',
                 [uf, cep, cidade, bairro, endereco, complemento, idPessoa]
             );
+            console.log(`Endereço atualizado para pessoa ID: ${idPessoa}`);
         } else {
-            // Cria novo
+            // Se o endereço não existe, insere um novo
             await db.query(
                 'INSERT INTO enderecos (id_pessoa, uf, cep, cidade, bairro, endereco, complemento) VALUES (?, ?, ?, ?, ?, ?, ?)',
                 [idPessoa, uf, cep, cidade, bairro || null, endereco || null, complemento || null]
             );
+            console.log(`Novo endereço inserido para pessoa ID: ${idPessoa}`);
         }
 
         res.json({ message: 'Endereço atualizado com sucesso' });
     } catch (err) {
         console.error('Erro detalhado ao tentar atualizar/inserir endereço:', err); // Log mais detalhado
-        res.status(500).json({ error: 'Erro ao atualizar endereço', details: err.message }); // Inclua detalhes do erro
+        res.status(500).json({ error: 'Erro ao atualizar endereço', details: err.message });
     }
 });
 // Rota para listar todos os usuários (apenas para ADMs)
@@ -495,6 +498,36 @@ app.get('/pessoa', async (req, res) => {
         res.status(500).json({ error: 'Erro ao listar usuários' });
     }
 });
+
+// GET /pedidos/todos
+app.get('/pedidos/todos', async (req, res) => {
+  try {
+    const [pedidos] = await conexao.execute(`
+      SELECT 
+        p.id_pedido,
+        p.numero_pedido,
+        p.data_hora,
+        p.situacao,
+        p.valor_total,
+        pe.nome AS nome_usuario,
+        pe.email,
+        pe.telefone,
+        pp.nome_produto,
+        pp.quantidade,
+        pp.preco_unitario
+      FROM pedidos p
+      JOIN pessoa pe ON pe.id_pessoa = p.id_pessoa
+      JOIN pedido_produto pp ON pp.id_pedido = p.id_pedido
+      ORDER BY p.data_hora DESC
+    `);
+    
+    res.json(pedidos);
+  } catch (err) {
+    console.error("Erro ao buscar pedidos:", err);
+    res.status(500).json({ erro: 'Erro ao buscar pedidos' });
+  }
+});
+
 
 // GET /pedidos/todos
 app.get('/pedidos/todos', async (req, res) => {
