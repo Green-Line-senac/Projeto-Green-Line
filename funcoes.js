@@ -26,11 +26,11 @@ class FuncaoUteis {
         <div style="background-color: #f0f8ff; padding: 15px; border-radius: 5px; text-align: center; font-size: 18px; margin: 20px 0;">
             <strong>123GL</strong>
         </div>
-        <p>Por segurança, recomendamos que você acesse sua conta e altere esta senha temporária o quanto antes.</p>
+        <p>Clicando no botão a seguir, sua senha será reiniciada.</p>
         <a href="https://green-line-web.onrender.com/redefinir-senha?token=${this.criarToken(
           email
         )}" style="display: inline-block; padding: 12px 24px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 15px 0;">
-            Acessar minha conta
+            Redefinir sua senha
         </a>
         <p>Atenciosamente,<br>Equipe Green Line</p>
       `;
@@ -47,22 +47,98 @@ class FuncaoUteis {
             `;
       }
       if (tipo === "compra-concluida") {
-        if (tipo === "compra-concluida" && !pedido?.numeroPedido) {
+        if (!pedido?.numeroPedido) {
           throw new Error(
             "Dados do pedido são necessários para este tipo de e-mail."
           );
         }
+
+        // Função para formatar valor monetário
+        const formatarValor = (valor) => {
+          return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+          }).format(valor);
+        };
+
+        // Gerar HTML dos produtos
+        let produtosHtml = '';
+        if (pedido.produtos && Array.isArray(pedido.produtos)) {
+          produtosHtml = pedido.produtos.map(produto => {
+            const imagemUrl = produto.imagem_principal || produto.imagem_1 || produto.imagem || 'https://green-line-web.onrender.com/img/imagem-nao-disponivel.png';
+            return `
+              <div style="display: flex; align-items: center; background: white; padding: 15px; margin: 10px 0; border-radius: 8px; border: 1px solid #e9ecef;">
+                <img src="${imagemUrl}" alt="${produto.nome}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin-right: 15px;">
+                <div style="flex: 1;">
+                  <h4 style="margin: 0 0 5px 0; color: #28a745;">${produto.nome}</h4>
+                  <p style="margin: 0; color: #6c757d;">Quantidade: ${produto.quantidade}</p>
+                  <p style="margin: 5px 0 0 0; font-weight: bold; color: #333;">Subtotal: ${formatarValor(produto.subtotal)}</p>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+
         mensagem = `
-    <h1>Pedido Confirmado!</h1>
-    <p>Olá, seu pedido <strong>${
-      pedido.numeroPedido
-    }</strong> foi confirmado!</p>
-    <ul>
-      <li>Data: ${pedido.dataConfirmacao}</li>
-      <li>Total: R$ ${pedido.total.toFixed(2)}</li>
-      <li>Previsão de entrega: ${pedido.previsaoEntrega}</li>
-    </ul>
-    <p>Acompanhe seu pedido em nosso site.</p>
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Pedido Confirmado - GreenLine</title>
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+            .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+            .order-info { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #28a745; }
+            .products-section { margin: 20px 0; }
+            .eco-badge { background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; text-align: center; margin: 20px 0; }
+            .footer { text-align: center; margin-top: 30px; color: #6c757d; font-size: 14px; }
+            .btn { display: inline-block; background: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>🌱 Pedido Confirmado!</h1>
+            <p>Obrigado por escolher produtos sustentáveis</p>
+        </div>
+        
+        <div class="content">
+            <p>Olá! Seu pedido foi confirmado com sucesso e já está sendo processado.</p>
+            
+            <div class="order-info">
+                <h3>📦 Detalhes do Pedido</h3>
+                <p><strong>Número:</strong> ${pedido.numeroPedido}</p>
+                <p><strong>Data:</strong> ${pedido.dataConfirmacao}</p>
+                <p><strong>Total:</strong> ${formatarValor(pedido.total)}</p>
+                <p><strong>Previsão de entrega:</strong> ${pedido.previsaoEntrega}</p>
+            </div>
+
+            <div class="products-section">
+                <h3>🛍️ Produtos Comprados</h3>
+                ${produtosHtml}
+            </div>
+            
+            <div class="eco-badge">
+                🌍 <strong>Impacto Sustentável:</strong> Com esta compra, você contribuiu para um planeta mais verde!
+            </div>
+            
+            <p>Você pode acompanhar o status do seu pedido a qualquer momento em nosso site.</p>
+            
+            <div style="text-align: center;">
+                <a href="https://green-line-web.onrender.com/public/pedido_confirmado.html" class="btn">
+                    Acompanhar Pedido
+                </a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Este é um e-mail automático, não responda.</p>
+            <p><strong>GreenLine</strong> - Faça do meio ambiente o seu meio de vida</p>
+            <p>Ceilândia, Brasília-DF | greenline.ecologic@gmail.com</p>
+        </div>
+    </body>
+    </html>
   `;
       }
       await transportador.sendMail({

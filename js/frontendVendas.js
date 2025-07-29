@@ -163,47 +163,34 @@ function formatarCEP(input) {
     input.value = cep;
 }
 
-async function validarCEP(input) {
-    // Consulta o servidor quando o campo perde o foco
+function aplicarMascaraCEP(input) {
     let cep = input.value.replace(/\D/g, '');
-    if (cep.length === 8) {
-        await mascaraCEP(); // Sua função original
+    if (cep.length > 5) {
+        cep = cep.substring(0, 5) + '-' + cep.substring(5, 8);
     }
-}
-
-async function mascaraCEP() {
-    console.log('Função mascaraCEP iniciada'); 
-    
-    const cepInput = document.getElementById('cep');
-    const bairroInput = document.getElementById('bairro');
-    const enderecoInput = document.getElementById('endereco');
-    const cidadeInput = document.getElementById('cidade');
-    const estadoInput = document.getElementById('estado');
-    let cep = cepInput.value.replace(/\D/g, '');
-    console.log('CEP formatado:', cep);
-    
-    try {
-        console.log('Iniciando requisição...');
-        const response = await fetch(`${api.online}/checar-cep?cep=${cep}`);
-        console.log('Resposta recebida:', response);
-        
-        const data = await response.json();
-        console.log('Dados JSON:', data); 
-        
-        if(!response.ok) throw new Error(data.message || 'Erro ao buscar CEP');
-        
-        bairroInput.value = data.bairro || 'Bairro não informado';
-        enderecoInput.value = data.logradouro || 'Endereço não informado';
-        cidadeInput.value = data.localidade;
-        estadoInput.value = data.uf || 'Estado não informado';
-        
-    } catch (error) {
-        console.error('Erro completo:', error);
-    }
+    input.value = cep;
 }
 
 // Exibe informações do produto selecionado
 document.addEventListener("DOMContentLoaded", () => {
+    // Preencher endereço automaticamente se houver no sessionStorage
+    const enderecoSalvo = sessionStorage.getItem("enderecoUsuario");
+    if (enderecoSalvo) {
+        try {
+            const endereco = JSON.parse(enderecoSalvo);
+            if (endereco) {
+                if (document.getElementById('cep')) document.getElementById('cep').value = endereco.cep || '';
+                if (document.getElementById('endereco')) document.getElementById('endereco').value = endereco.endereco || '';
+                if (document.getElementById('complemento')) document.getElementById('complemento').value = endereco.complemento || '';
+                if (document.getElementById('bairro')) document.getElementById('bairro').value = endereco.bairro || '';
+                if (document.getElementById('cidade')) document.getElementById('cidade').value = endereco.cidade || '';
+                if (document.getElementById('estado')) document.getElementById('estado').value = endereco.uf || endereco.estado || '';
+            }
+        } catch (e) {
+            console.warn('Endereço salvo no perfil está corrompido ou inválido.');
+        }
+    }
+
     let dadosCompra = sessionStorage.getItem("dadosCompra");
 
     if (dadosCompra) {
@@ -225,14 +212,14 @@ document.addEventListener("DOMContentLoaded", () => {
         let valorTotal = 0;
 
         dadosCompra.forEach(element => {
-            const precoFormatado = parseFloat(element.preco_final).toFixed(2).replace(".", ",");
-            const subtotalFormatado = parseFloat(element.subtotal).toFixed(2).replace(".", ",");
+            const precoFormatado = formatarPrecoBR(element.preco_final);
+            const subtotalFormatado = formatarPrecoBR(element.subtotal);
             valorTotal += parseFloat(element.subtotal);
 
             htmlContent += `
             <hr>
                 <p><strong>Produto:</strong> ${element.nome_produto || element.nome || 'Produto'}</p>
-                <p><strong>Preço unitário:</strong> R$ ${precoFormatado}</p>
+                <p><strong>Preço unitário:</strong> ${precoFormatado}</p>
                 <p><strong>Quantidade:</strong> ${element.quantidade}</p>
             `;
         });
@@ -240,9 +227,9 @@ document.addEventListener("DOMContentLoaded", () => {
         containerProdutos.innerHTML = htmlContent;
         
         // Atualiza os totais
-        const valorTotalFormatado = valorTotal.toFixed(2).replace(".", ",");
-        document.getElementById("contador-subtotal").textContent = `R$ ${valorTotalFormatado}`;
-        document.getElementById("contador-total").textContent = `R$ ${valorTotalFormatado}`;
+        const valorTotalFormatado = formatarPrecoBR(valorTotal);
+        document.getElementById("contador-subtotal").textContent = valorTotalFormatado;
+        document.getElementById("contador-total").textContent = valorTotalFormatado;
     } else {
         containerProdutos.innerHTML = "<p>Nenhum produto selecionado.</p>";
     }
@@ -356,20 +343,24 @@ function validarEndereco(endereco) {
     return erros;
 }
 
-// Função para mostrar erros
+// Função para mostrar erros usando o novo sistema de notificações
 function mostrarErros(erros) {
-    const alertaErro = document.createElement('div');
-    alertaErro.className = 'alert alert-danger alert-dismissible fade show';
-    alertaErro.innerHTML = `
-        <h4 class="alert-heading">Por favor, corrija os seguintes erros:</h4>
-        <ul class="mb-0">
-            ${erros.map(erro => `<li>${erro}</li>`).join('')}
-        </ul>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-    `;
-    
-    const container = document.querySelector('.container');
-    container.insertBefore(alertaErro, container.firstChild);
+    showValidationError(erros, {
+        actions: [
+            {
+                text: 'Entendi',
+                type: 'primary',
+                handler: () => {
+                    // Focar no primeiro campo com erro
+                    const firstErrorField = document.querySelector('.is-invalid, .campo-invalido');
+                    if (firstErrorField) {
+                        firstErrorField.focus();
+                        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+            }
+        ]
+    });
 }
 
 // Event listener para finalizar compra
@@ -384,33 +375,69 @@ document.getElementById("FinalizarCompra").addEventListener("click", async (even
         mostrarErros(["Não foi possível encontrar os dados da sua compra. Por favor, tente novamente."]);
         return;
     }
-    
+
+    // Validação dos campos obrigatórios
+    const erros = [];
+    // Endereço
+    const cep = document.getElementById('cep').value;
+    const logradouro = document.getElementById('logradouro').value;
+    const numeroCasa = document.getElementById('numeroCasa').value;
+    const bairro = document.getElementById('bairro').value;
+    const cidade = document.getElementById('cidade').value;
+    const uf = document.getElementById('uf').value;
+    if (!cep || !/^\d{5}-?\d{3}$/.test(cep)) erros.push('CEP inválido ou não preenchido');
+    if (!logradouro || logradouro.length < 3) erros.push('Endereço inválido ou não preenchido');
+    if (!numeroCasa || !/^\d+$/.test(numeroCasa)) erros.push('Número da casa inválido ou não preenchido');
+    if (!bairro || bairro.length < 3) erros.push('Bairro inválido ou não preenchido');
+    if (!cidade || cidade.length < 3) erros.push('Cidade inválida ou não preenchida');
+    if (!uf || !/^[A-Z]{2}$/.test(uf)) erros.push('Estado inválido ou não preenchido');
+
+    // Pagamento
+    const metodoPagamento = document.getElementById('pagamento').value;
+    if (!metodoPagamento) {
+      erros.push('Selecione a forma de pagamento.');
+    }
+    let dadosPagamento = { metodoPagamento };
+    if (metodoPagamento === 'CC') {
+      const numeroCartao = document.getElementById('numero-cartao').value;
+      const nomeCartao = document.getElementById('nome-cartao').value;
+      const validadeCartao = document.getElementById('validade-cartao').value;
+      const cvv = document.getElementById('cvv').value;
+      const parcelas = document.getElementById('parcelas').value;
+      if (!numeroCartao || numeroCartao.replace(/\s/g, '').length < 16) erros.push('Número do cartão inválido ou não preenchido');
+      if (!nomeCartao || nomeCartao.length < 3) erros.push('Nome no cartão inválido ou não preenchido');
+      if (!validadeCartao || !/^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(validadeCartao)) erros.push('Validade do cartão inválida ou não preenchida');
+      if (!cvv || !/^[0-9]{3,4}$/.test(cvv)) erros.push('CVV inválido ou não preenchido');
+      if (!parcelas) erros.push('Selecione o número de parcelas');
+      dadosPagamento = {
+        ...dadosPagamento,
+        numeroCartao,
+        nomeCartao,
+        validadeCartao,
+        cvv,
+        parcelas
+      };
+    }
+
+    if (erros.length > 0) {
+      mostrarErros(erros);
+      return;
+    }
+
     try {
+        // Mostrar loading durante o processamento
+        const loadingId = showLoading('Processando pedido...', 'Finalizando sua compra');
+
         // Coleta dados do endereço
         const dadosEndereco = {
-            cep: document.getElementById('cep').value,
-            logradouro: document.getElementById('logradouro').value,
-            numeroCasa: document.getElementById('numeroCasa').value,
+            cep,
+            logradouro,
+            numeroCasa,
             complementoCasa: document.getElementById('complementoCasa').value,
-            bairro: document.getElementById('bairro').value,
-            cidade: document.getElementById('cidade').value,
-            uf: document.getElementById('uf').value
+            bairro,
+            cidade,
+            uf
         };
-
-        // Coleta dados do pagamento
-        const metodoPagamento = document.getElementById('pagamento').value;
-        let dadosPagamento = { metodoPagamento };
-
-        if (metodoPagamento === 'CC') {
-            dadosPagamento = {
-                ...dadosPagamento,
-                numeroCartao: document.getElementById('numero-cartao').value,
-                nomeCartao: document.getElementById('nome-cartao').value,
-                validadeCartao: document.getElementById('validade-cartao').value,
-                cvv: document.getElementById('cvv').value,
-                parcelas: document.getElementById('parcelas').value
-            };
-        }
 
         // Combina todos os dados do formulário
         const dadosFormulario = {
@@ -421,8 +448,20 @@ document.getElementById("FinalizarCompra").addEventListener("click", async (even
         // Salva os dados no sessionStorage
         sessionStorage.setItem('dadosFormulario', JSON.stringify(dadosFormulario));
         
-        // Redireciona para a página de confirmação
-        window.location.href = '../public/pedido_confirmado.html'
+        // Simular um pequeno delay para mostrar o loading
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Esconder loading
+        hideNotification(loadingId);
+        
+        // Mostrar sucesso antes de redirecionar
+        showSuccess('Pedido processado!', 'Redirecionando para confirmação...', { duration: 2000 });
+        
+        // Redirecionar após um pequeno delay
+        setTimeout(() => {
+            window.location.href = '../public/pedido_confirmado.html';
+        }, 2000);
+        
     } catch (error) {
         console.error('Erro detalhado ao processar pedido:', error);
         mostrarErros(["Ocorreu um erro ao processar seu pedido. Por favor, tente novamente."]);
@@ -468,5 +507,41 @@ document.addEventListener('DOMContentLoaded', function() {
     // Atualiza também ao carregar a página
     atualizarResumoFrete();
   }
+});
+
+// Função para formatar preço no padrão brasileiro
+function formatarPrecoBR(valor) {
+  return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+// Máscara de CEP em tempo real
+const cepInput = document.getElementById('cep');
+if (cepInput) {
+    cepInput.addEventListener('input', function() {
+        let cep = this.value.replace(/\D/g, '');
+        if (cep.length > 5) {
+            cep = cep.substring(0, 5) + '-' + cep.substring(5, 8);
+        }
+        this.value = cep;
+    });
+    
+    // Validar CEP quando o usuário sair do campo
+    cepInput.addEventListener('blur', function() {
+        const cep = this.value.replace(/\D/g, '');
+        if (cep.length > 0 && cep.length < 8) {
+            showWarning('CEP incompleto', 'Digite um CEP válido com 8 dígitos', { duration: 3000 });
+        }
+    });
+}
+
+// Adicionar notificação de boas-vindas quando a página carregar
+document.addEventListener('DOMContentLoaded', function() {
+    // Mostrar notificação informativa sobre o processo
+    setTimeout(() => {
+        showInfo('Finalize sua compra', 'Preencha os dados de entrega e pagamento para concluir seu pedido', { 
+            duration: 4000,
+            compact: true 
+        });
+    }, 1000);
 });
 

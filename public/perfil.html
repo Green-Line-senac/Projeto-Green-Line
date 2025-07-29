@@ -11,6 +11,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/reset.css">
     <link rel="stylesheet" href="../css/perfil.css">
+    <link rel="stylesheet" href="../css/loading.css">
+    <link rel="stylesheet" href="../css/notifications.css">
+    <script src="../js/loading.js"></script>
+    <script src="../js/notifications.js"></script>
     <script src="../js/frontendPerfil.js" defer></script>
 </head>
 <body>
@@ -35,7 +39,7 @@
                 <div class="nav-item active" data-section="personal">
                     <i class="fas fa-user"></i> Informações Pessoais
                 </div>
-                <div class="nav-item" onclick="window.location.href='/public/carrinho.html'">
+                <div class="nav-item" onclick="window.location.href='carrinho.html'">
                     <i class="fas fa-shopping-cart"></i> Meu Carrinho
                 </div>
                 <div class="nav-item" data-section="purchase-history">
@@ -87,8 +91,64 @@
             
             <div id="saved-section" class="hidden">
                 <h2 class="section-title">Histórico de Compras</h2>
-                <div id="savedProductsContent">
-                    <p>Seu histórico de compras aparecerá aqui.</p>
+                
+                <!-- Filtros e Controles -->
+                <div class="purchase-controls">
+                    <div class="search-filter">
+                        <input type="text" id="searchPurchases" placeholder="Buscar por produto ou número do pedido..." class="search-input">
+                        <select id="statusFilter" class="filter-select">
+                            <option value="">Todos os status</option>
+                            <option value="Confirmado">Confirmado</option>
+                            <option value="Processando">Processando</option>
+                            <option value="Enviado">Enviado</option>
+                            <option value="Entregue">Entregue</option>
+                            <option value="Cancelado">Cancelado</option>
+                        </select>
+                        <select id="periodFilter" class="filter-select">
+                            <option value="">Todos os períodos</option>
+                            <option value="30">Últimos 30 dias</option>
+                            <option value="90">Últimos 3 meses</option>
+                            <option value="180">Últimos 6 meses</option>
+                            <option value="365">Último ano</option>
+                        </select>
+                        <button id="refreshPurchases" class="btn-refresh" title="Atualizar">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Estatísticas Rápidas -->
+                <div class="purchase-stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalPurchases">0</div>
+                        <div class="stat-label">Total de Compras</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalSpent">R$ 0,00</div>
+                        <div class="stat-label">Total Gasto</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="averageOrder">R$ 0,00</div>
+                        <div class="stat-label">Ticket Médio</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="lastPurchase">-</div>
+                        <div class="stat-label">Última Compra</div>
+                    </div>
+                </div>
+
+                <!-- Lista de Compras -->
+                <div id="savedProductsContent" class="purchases-container">
+                    <div class="loading-placeholder">
+                        <p>Carregando histórico de compras...</p>
+                    </div>
+                </div>
+
+                <!-- Paginação -->
+                <div class="pagination-container" id="purchasesPagination" style="display: none;">
+                    <button id="prevPage" class="btn-pagination">Anterior</button>
+                    <span id="pageInfo">Página 1 de 1</span>
+                    <button id="nextPage" class="btn-pagination">Próxima</button>
                 </div>
             </div>
             
@@ -135,7 +195,7 @@
         </div>
     </div>
 
-    <div id="addressModal" class="modal hidden">
+        <div id="addressModal" class="modal hidden">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
             <h3>Atualizar Endereço</h3>

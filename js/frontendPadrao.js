@@ -46,7 +46,7 @@ async function verificarEstadoLogin() {
     let dadosUsuario = {
       id_pessoa: sessionStorage.getItem("id_pessoa") || null,
       email: sessionStorage.getItem("userEmail") || null,
-      adm: sessionStorage.getItem("isAdmin") || false,
+      adm: sessionStorage.getItem("isAdmin") === "true",
       usuario: sessionStorage.getItem("usuario") || null,
       quantidade_produtos: sessionStorage.getItem("carrinho") || 0,
       logado: false,
@@ -54,6 +54,7 @@ async function verificarEstadoLogin() {
     if (dadosUsuario.id_pessoa) {
       dadosUsuario.logado = true;
     }
+    console.log(dadosUsuario);
 
     if (dadosUsuario?.logado === true) {
       elementosHTML.iconeUsuario.className = "bi bi-person-check text-success";

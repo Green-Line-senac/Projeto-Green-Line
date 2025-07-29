@@ -1,14 +1,49 @@
-/* Melhorias específicas para o carrossel */
-.carousel-slide-wrapper {
+html, body {
+  overflow-x: hidden;
+}
+
+header[aria-label="Destaques de produtos"] {
+  width: 100vw;
+  max-width: 100vw;
   position: relative;
-  height: 400px;
-  overflow: hidden;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  padding: 0;
 }
 
 .carousel-image {
-  height: 400px !important;
+  width: 100vw !important;
+  max-width: 100vw;
+  min-width: 100vw;
+  height: 450px;
   object-fit: cover;
-  filter: brightness(0.9);
+  margin: 0;
+  display: block;
+  object-position: center center;
+}
+
+/* Mantém o carrossel colado nas laterais */
+header > .container-fluid,
+header > .container-fluid > .row,
+header > .container-fluid > .row > .col-12 {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Melhorias específicas para o carrossel */
+.carousel-slide-wrapper {
+  position: relative;
+  height: 450px;
+  overflow: hidden;
+}
+
+.carousel .carousel-inner {
+  height: 100%;
+  overflow: hidden;
 }
 
 .carousel-overlay {
@@ -20,15 +55,29 @@
   background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.3) 100%);
 }
 
-.carousel-caption {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  text-align: left;
-  padding: 0;
+/* Remove alinhamento vertical centralizado do Bootstrap */
+.carousel-caption.d-flex {
+  display: block !important;
+  align-items: initial !important;
+  height: auto !important;
 }
+
+/* Garante que o texto fique mais para cima e visível */
+.carousel-caption {
+  top: 5vh;
+  bottom: auto;
+  left: 5vw;
+  right: auto;
+  text-align: left;
+  width: auto;
+  max-width: 40vw;
+  padding-left: 0;
+  padding-right: 0;
+  transform: none;
+  background: none;
+}
+
+/* Removido - substituído pela responsividade melhorada abaixo */
 
 .carousel-content {
   animation: slideInLeft 0.8s ease-out;
@@ -169,27 +218,141 @@
   }
 }
 
-/* Responsividade */
-@media (max-width: 768px) {
+/* Responsividade Melhorada */
+@media (min-width: 1400px) {
   .carousel-slide-wrapper {
-    height: 300px;
+    height: 500px;
   }
-
+  
   .carousel-image {
-    height: 300px !important;
+    height: 500px !important;
   }
+  
+  .carousel-caption {
+    max-width: 35vw;
+    top: 10vh;
+  }
+  
+  .carousel-title {
+    font-size: 2.8rem;
+  }
+  
+  .carousel-description {
+    font-size: 1.2rem;
+  }
+}
 
+@media (min-width: 1201px) and (max-width: 1399px) {
+  .carousel-slide-wrapper {
+    height: 450px;
+  }
+  
+  .carousel-image {
+    height: 450px !important;
+  }
+  
+  .carousel-caption {
+    max-width: 40vw;
+    top: 8vh;
+  }
+  
+  .carousel-title {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 1200px) {
+  .carousel-slide-wrapper {
+    height: 380px;
+  }
+  
+  .carousel-image {
+    height: 380px !important;
+  }
+  
+  .carousel-caption {
+    max-width: 50vw;
+    top: 6vh;
+  }
+  
+  .carousel-title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .carousel-slide-wrapper {
+    height: 320px;
+  }
+  
+  .carousel-caption {
+    top: 3vh;
+    left: 3vw;
+    max-width: 60vw;
+  }
+  
   .carousel-title {
     font-size: 1.8rem;
   }
-
+  
   .carousel-description {
     font-size: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .carousel-slide-wrapper {
+    height: 280px;
+  }
+
+  .carousel-image {
+    height: 280px !important;
+    max-height: 280px;
+    min-height: 280px;
+    object-fit: cover;
+    object-position: center center;
+  }
+
+  .carousel-caption {
+    top: 2vh;
+    left: 3vw;
+    right: 3vw;
+    max-width: 94vw;
+    width: auto;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 10px;
+    backdrop-filter: blur(5px);
+  }
+
+  .carousel-title {
+    font-size: 1.5rem;
+    line-height: 1.3;
+    margin-bottom: 0.5rem;
+  }
+
+  .carousel-description {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+  }
+
+  .carousel-badge {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.8rem;
+    margin-bottom: 0.5rem;
   }
 
   .carousel-buttons {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  
+  .carousel-buttons .btn {
+    padding: 0.6rem 1.5rem;
+    font-size: 0.9rem;
+    text-align: center;
   }
 
   .search-enhanced {
@@ -197,23 +360,90 @@
   }
 }
 
-@media (max-width: 1920px) {
+@media (max-width: 576px) {
   .carousel-slide-wrapper {
-    height: auto;
+    height: 250px;
   }
 
   .carousel-image {
-    width: 100%;
-    height: auto !important;
-    object-fit: contain !important; /* mostra a imagem inteira */
+    height: 250px !important;
+    max-height: 250px;
+    min-height: 250px;
+    width: 100vw !important;
+    object-fit: cover;
+    object-position: center center;
+  }
+  
+  .carousel-caption {
+    top: 1vh;
+    left: 2vw;
+    right: 2vw;
+    max-width: 96vw;
+    padding: 0.8rem;
+    font-size: 0.85em;
+  }
+  
+  .carousel-title {
+    font-size: 1.2rem;
+    line-height: 1.2;
+    margin-bottom: 0.4rem;
+  }
+  
+  .carousel-description {
+    font-size: 0.8rem;
+    line-height: 1.3;
+    margin-bottom: 0.8rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .carousel-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .carousel-buttons .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
   }
 }
 
-  .carousel-title {
-    font-size: 1.5rem;
+@media (max-width: 400px) {
+  .carousel-slide-wrapper {
+    height: 220px;
   }
 
-  .carousel-description {
-    font-size: 0.9rem;
-    margin-bottom: 1.5rem;
+  .carousel-image {
+    height: 220px !important;
+    max-height: 220px;
+    min-height: 220px;
   }
+  
+  .carousel-caption {
+    top: 0.5vh;
+    left: 1vw;
+    right: 1vw;
+    max-width: 98vw;
+    padding: 0.6rem;
+  }
+  
+  .carousel-title {
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  .carousel-description {
+    font-size: 0.75rem;
+    margin-bottom: 0.6rem;
+    -webkit-line-clamp: 1;
+  }
+  
+  .carousel-badge {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+    margin-bottom: 0.3rem;
+  }
+}

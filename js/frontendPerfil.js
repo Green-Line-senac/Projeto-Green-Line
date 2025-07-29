@@ -6,10 +6,17 @@ const api = {
   index: "http://localhost:3002",
   login : "http://localhost:3008/login",
 };
+const basePath = window.location.pathname.includes("green_line_web")
+  ? "/green_line_web/public"
+  : "/public";
+
+
 
 // Função para carregar dados do usuário
 // Função para carregar dados do usuário - VERSÃO CORRIGIDA
 async function carregarDadosUsuario() {
+  const loadingId = showLoading('Carregando perfil...', 'Buscando suas informações');
+
   try {
     // 1. Verificar se o usuário está autenticado
     const token = sessionStorage.getItem("userToken");
@@ -17,12 +24,17 @@ async function carregarDadosUsuario() {
 
     if (!token || !idPessoa) {
       console.error("Usuário não autenticado - redirecionando para login");
-      window.location.href = "../index.html";
+      hideLoading();
+      showError('Acesso negado', 'Você precisa fazer login para acessar esta página');
+      setTimeout(() => {
+        window.location.href = `${basePath}/login.html`;
+      }, 2000);
       return;
     }
 
     // 2. Fazer a requisição com o token de autenticação
     const response = await fetch(`${api.online}/pessoa/${idPessoa}`, {
+   
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -33,7 +45,11 @@ async function carregarDadosUsuario() {
     if (!response.ok) {
       if (response.status === 401 || response.status === 403) {
         // Token inválido ou expirado - forçar logout
-        logout();
+        hideLoading();
+        showError('Sessão expirada', 'Sua sessão expirou. Faça login novamente');
+        setTimeout(() => {
+          logout();
+        }, 2000);
         return;
       }
       throw new Error(`Erro HTTP: ${response.status} ${response.statusText}`);
@@ -44,16 +60,55 @@ async function carregarDadosUsuario() {
     console.log("Dados do usuário carregados:", usuarioLogado);
     preencherDadosPerfil(usuarioLogado);
     await loadAddress();
+   
 
     // Carregar configurações do modo noturno (se houver)
     const darkModeEnabled = localStorage.getItem('darkMode') === 'true';
     document.body.classList.toggle('dark-mode', darkModeEnabled);
     document.getElementById('darkModeToggle').checked = darkModeEnabled;
 
+    hideLoading();
+    showSuccess('Perfil carregado!', 'Suas informações foram carregadas com sucesso', { duration: 3000 });
+
   } catch (error) {
     console.error("Erro ao carregar dados do usuário:", error);
-    alert("Erro ao carregar dados do usuário. Por favor, tente novamente.");
-    logout(); // Considerar deslogar em caso de erro grave na carga de dados
+    hideLoading();
+    showError('Erro ao carregar perfil', 'Não foi possível carregar suas informações. Tente novamente.');
+  }
+}
+
+/* --- NOVA FUNÇÃO: carrega endereço independente dos dados do usuário --- */
+async function loadAddress() {
+  const idPessoa = sessionStorage.getItem("id_pessoa");
+  const token = sessionStorage.getItem("userToken");
+  if (!idPessoa || !token) return;
+
+  try {
+    // Tenta primeiro o servidor local, depois o online
+    let resp;
+    try {
+      resp = await fetch(`http://localhost:3008/pessoa/${idPessoa}/enderecos`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+    } catch (localError) {
+      console.log('Servidor local não disponível, tentando servidor online...');
+      resp = await fetch(`${api.online}/pessoa/${idPessoa}/enderecos`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+    }
+
+    if (!resp.ok) throw new Error("Falha no GET de endereço");
+    const endereco = await resp.json();     // backend devolve objeto
+    if (endereco) {
+      preencherEndereco(endereco);
+    } else {
+      document.getElementById("addressContent").innerHTML =
+        "<p>Nenhum endereço cadastrado. Clique em 'Atualizar Endereço' para adicionar.</p>";
+    }
+  } catch (err) {
+    console.error("Erro ao buscar endereço:", err);
+    document.getElementById("addressContent").innerHTML =
+      "<p>Erro ao carregar endereço.</p>";
   }
 }
 
@@ -110,10 +165,18 @@ function preencherEndereco(endereco) {
     `;
 
   // Pré‑preencher modal
+
+  // Pré‑preencher modal
   document.getElementById("cep").value = endereco.cep || "";
   document.getElementById("endereco").value = endereco.endereco || "";
   document.getElementById("complemento").value = endereco.complemento || "";
   document.getElementById("cidade").value = endereco.cidade || "";
+  document.getElementById("uf").value = endereco.uf || "";
+  document.getElementById("bairro").value = endereco.bairro || "";
+
+
+  // Guarde o id_endereco para PUT depois
+  addressForm.dataset.idEndereco = endereco.id_endereco;
   document.getElementById("uf").value = endereco.uf || "";
   document.getElementById("bairro").value = endereco.bairro || "";
 
@@ -160,15 +223,15 @@ document.addEventListener("DOMContentLoaded", () => {
       // Map data-section to actual div IDs
       let targetSectionId;
       if (section === 'personal') {
-          targetSectionId = 'personal-section';
+        targetSectionId = 'personal-section';
       } else if (section === 'purchase-history') { // Updated from 'saved'
-          targetSectionId = 'saved-section'; // HTML ID for purchase history
+        targetSectionId = 'saved-section'; // HTML ID for purchase history
       } else if (section === 'gears') {
-          targetSectionId = 'gears-section';
+        targetSectionId = 'gears-section';
       }
 
       if (targetSectionId) {
-          showSection(targetSectionId);
+        showSection(targetSectionId);
       }
     });
   });
@@ -179,13 +242,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // Lógica para o modo noturno
   const darkModeToggle = document.getElementById('darkModeToggle');
   darkModeToggle.addEventListener('change', () => {
-      if (darkModeToggle.checked) {
-          document.body.classList.add('dark-mode');
-          localStorage.setItem('darkMode', 'true');
-      } else {
-          document.body.classList.remove('dark-mode');
-          localStorage.setItem('darkMode', 'false');
-      }
+    if (darkModeToggle.checked) {
+      document.body.classList.add('dark-mode');
+      localStorage.setItem('darkMode', 'true');
+    } else {
+      document.body.classList.remove('dark-mode');
+      localStorage.setItem('darkMode', 'false');
+    }
   });
 
   // Lógica para editar campos de texto (Nome Completo e Telefone)
@@ -221,7 +284,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      input.addEventListener("keypress", function(e) {
+      input.addEventListener("keypress", function (e) {
         if (e.key === 'Enter') {
           input.blur(); // Simula o blur para salvar
         }
@@ -231,6 +294,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Botão Salvar Alterações para Informações Pessoais
   document.getElementById("savePersonalBtn").addEventListener("click", async () => {
+    const loadingId = showLoading('Salvando alterações...', 'Atualizando suas informações');
+
     try {
       const token = sessionStorage.getItem("userToken");
       const idPessoa = sessionStorage.getItem("id_pessoa");
@@ -251,7 +316,8 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error("Erro ao salvar informações pessoais");
       }
 
-      alert("Informações pessoais salvas com sucesso!");
+      hideLoading();
+      showSuccess('Informações salvas!', 'Suas informações pessoais foram atualizadas com sucesso');
       carregarDadosUsuario(); // Recarrega para garantir que os dados exibidos estão atualizados
     } catch (error) {
       console.error("salvo:", error);
@@ -266,6 +332,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeAddressModal = addressModal.querySelector(".close-modal");
   const cancelAddressBtn = document.getElementById("cancelAddressBtn");
   const addressForm = document.getElementById("addressForm");
+  loadAddress();
   loadAddress();
 
   updateAddressBtn.addEventListener("click", () => {
@@ -352,6 +419,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   confirmDeleteBtn.addEventListener("click", async () => {
+    const loadingId = showLoading('Excluindo conta...', 'Processando exclusão da sua conta');
+
     try {
       const token = sessionStorage.getItem("userToken");
       const idPessoa = sessionStorage.getItem("id_pessoa");
@@ -367,11 +436,16 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error("Erro ao deletar conta");
       }
 
-      alert("Conta deletada com sucesso!");
-      logout(); // Desloga o usuário após a exclusão da conta
+      hideLoading();
+      showSuccess('Conta excluída!', 'Sua conta foi excluída com sucesso. Você será redirecionado.');
+
+      setTimeout(() => {
+        logout(); // Desloga o usuário após a exclusão da conta
+      }, 2000);
     } catch (error) {
       console.error("Erro ao deletar conta:", error);
-      alert("Erro ao deletar conta. Por favor, tente novamente.");
+      hideLoading();
+      showError('Erro ao excluir conta', 'Não foi possível excluir sua conta. Tente novamente.');
     }
   });
 
@@ -381,6 +455,20 @@ document.addEventListener("DOMContentLoaded", () => {
   avatarInput.addEventListener('change', async (event) => {
     const file = event.target.files[0];
     if (file) {
+      // Validar tamanho do arquivo (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        showError('Arquivo muito grande', 'A imagem deve ter no máximo 5MB');
+        return;
+      }
+
+      // Validar tipo do arquivo
+      if (!file.type.startsWith('image/')) {
+        showError('Formato inválido', 'Por favor, selecione apenas arquivos de imagem');
+        return;
+      }
+
+      const loadingId = showLoading('Atualizando foto...', 'Fazendo upload da sua nova imagem de perfil');
+
       const reader = new FileReader();
       reader.onload = async (e) => {
         try {
@@ -388,15 +476,73 @@ document.addEventListener("DOMContentLoaded", () => {
           // Em um ambiente de produção, é melhor fazer upload para um serviço de armazenamento de arquivos.
           await atualizarImagemPerfil(e.target.result);
           document.getElementById('profileAvatar').src = e.target.result;
-          alert('Imagem de perfil atualizada com sucesso!');
+          hideLoading();
+          showSuccess('Foto atualizada!', 'Sua imagem de perfil foi atualizada com sucesso');
         } catch (error) {
           console.error("Erro ao atualizar imagem de perfil:", error);
-          alert("Erro ao atualizar imagem de perfil.");
+          hideLoading();
+          showError('Erro ao atualizar foto', 'Não foi possível atualizar sua imagem de perfil');
         }
       };
       reader.readAsDataURL(file);
     }
   });
+
+  // Função para buscar e exibir pedidos feitos na seção de histórico de compras
+  async function carregarPedidosUsuario() {
+    const idPessoa = sessionStorage.getItem("id_pessoa");
+    if (!idPessoa) return;
+
+    const container = document.getElementById("savedProductsContent");
+    const loadingId = showLoading('Carregando histórico...', 'Buscando seus pedidos anteriores');
+
+    container.innerHTML = '<div class="text-center"><p>Carregando pedidos...</p></div>';
+
+    try {
+      const resp = await fetch(`https://green-line-web.onrender.com/pessoa/${idPessoa}/pedidos`);
+
+      hideLoading();
+
+      if (!resp.ok) {
+        container.innerHTML = '<p>Nenhum pedido encontrado.</p>';
+        showInfo('Histórico vazio', 'Você ainda não fez nenhum pedido', { duration: 3000 });
+        return;
+      }
+
+      const pedidos = await resp.json();
+
+      if (!Array.isArray(pedidos) || pedidos.length === 0) {
+        container.innerHTML = '<p>Nenhum pedido encontrado.</p>';
+        showInfo('Histórico vazio', 'Você ainda não fez nenhum pedido', { duration: 3000 });
+        return;
+      }
+
+      let html = '';
+      pedidos.forEach(pedido => {
+        html += `<div class="pedido-card">
+          <h4>Pedido: <span class="text-success">${pedido.numero_pedido || pedido.numeroPedido || pedido.id_pedido}</span></h4>
+          <p><strong>Data:</strong> ${pedido.data_hora ? new Date(pedido.data_hora).toLocaleString('pt-BR') : (pedido.dataConfirmacao || '')}</p>
+          <p><strong>Status:</strong> ${pedido.situacao || 'Confirmado'}</p>
+          <p><strong>Total:</strong> R$ ${(pedido.valor_total || pedido.total || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+        </div>`;
+      });
+
+      container.innerHTML = html;
+      showSuccess('Histórico carregado!', `${pedidos.length} pedido(s) encontrado(s)`, { duration: 3000 });
+
+    } catch (err) {
+      console.error('Erro ao carregar pedidos:', err);
+      hideLoading();
+      container.innerHTML = '<p>Erro ao carregar pedidos.</p>';
+      showError('Erro ao carregar histórico', 'Não foi possível carregar seus pedidos. Tente novamente.');
+    }
+  }
+
+  // Carregar pedidos ao abrir a seção de histórico de compras
+  const navPurchaseHistory = document.querySelector('.nav-item[data-section="purchase-history"]');
+  if (navPurchaseHistory) {
+    navPurchaseHistory.addEventListener('click', carregarPedidosUsuario);
+  }
 
 });
 
@@ -436,7 +582,7 @@ function logout() {
 
     itemsToRemove.forEach((item) => sessionStorage.removeItem(item));
     // REMOVIDA A LINHA ABAIXO: sessionStorage.clear();
-    window.location.href = "/public/login.html"; 
+    window.location.href = `${basePath}/login.html`;
 
     console.log("SessionStorage limpo com sucesso.");
   } catch (error) {

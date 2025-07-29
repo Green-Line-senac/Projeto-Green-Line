@@ -34,6 +34,7 @@ const verificarToken = (req, res, next) => {
 // Rota de verificação de conta
 app.post('/verificarConta', async (req, res) => {
     try {
+        console.log('Requisição recebida:', req.body);
         const { usuario, senha } = req.body;
 
         // Validação dos campos
@@ -48,7 +49,7 @@ app.post('/verificarConta', async (req, res) => {
         if (typeof usuario !== 'string' || typeof senha !== 'string') {
             return res.status(400).json({ 
                 dadosValidos: -1, 
-                mensagem: "Dados inválidos." 
+                mensagem: "Senha ou Usuario Invalidos." 
             });
         }
 
@@ -58,15 +59,17 @@ app.post('/verificarConta', async (req, res) => {
             : `SELECT * FROM pessoa WHERE nome = ?`;
 
         const pesquisa = await db.query(sql, [usuario]);
-
-        if (pesquisa.length === 0) {
+        console.log('Resultado da pesquisa:', pesquisa);
+        // Corrige para array de arrays (ex: [ [ { ... } ], ... ])
+        const user = Array.isArray(pesquisa[0]) ? pesquisa[0][0] : pesquisa[0];
+        console.log('DEBUG LOGIN:', { user, situacao: user?.situacao, usuario, email: user?.email, id_tipo_usuario: user?.id_tipo_usuario });
+        if (!pesquisa || (Array.isArray(pesquisa) && pesquisa.length === 0) || (Array.isArray(pesquisa[0]) && pesquisa[0].length === 0)) {
             return res.status(404).json({ 
                 dadosValidos: 0, 
                 mensagem: "Conta não encontrada." 
             });
         }
-
-        const { id_pessoa, situacao, senha: senhaHash, id_tipo_usuario, email, nome } = pesquisa[0];
+        const { id_pessoa, situacao, senha: senhaHash, id_tipo_usuario, email, nome } = user;
 
         // Verificação da situação da conta
         if (situacao !== 'A') {
@@ -86,12 +89,12 @@ app.post('/verificarConta', async (req, res) => {
         }
 
         // Verificação adicional para admin
-        if (id_tipo_usuario === 1 && !email.endsWith('.adm@')) {
-            return res.status(403).json({ 
-                dadosValidos: 1, 
-                mensagem: "Conta admin requer verificação adicional." 
-            });
-        }
+        // if (id_tipo_usuario === 1 && !email.endsWith('.adm@')) {
+        //     return res.status(403).json({ 
+        //         dadosValidos: 1, 
+        //         mensagem: "Conta admin requer verificação adicional." 
+        //     });
+        // }
 
         // Geração do token JWT
         const token = jwt.sign(

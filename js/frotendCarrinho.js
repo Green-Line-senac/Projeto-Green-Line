@@ -3,7 +3,7 @@ let estado = {
     produtos: []
 };
 
-const api = {
+const apiCarrinho = {
     online: "https://green-line-web.onrender.com",
     index: "http://localhost:3002",
     carrinho: "http://localhost:3006"
@@ -25,7 +25,7 @@ async function buscarProdutos() {
     try {
         console.log("Buscando produtos para ID:", estado.id_pessoa);
 
-        const resposta = await fetch(`${api.online}/buscar-produtos`, {
+        const resposta = await fetch(`${apiCarrinho.online}/buscar-produtos`, {
             method: 'POST',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id_pessoa: estado.id_pessoa })
@@ -82,8 +82,8 @@ async function renderizarProdutos() {
                         <span class="text-muted">Quantidade: ${item.quantidade}</span>
                     </div>
                     <div class="text-end">
-                        ${!item.promocao ? `<div class="">R$ ${item.preco_unitario}</div>` : `<div class="preco-original">R$ ${item.preco_unitario}</div>`}
-                        ${item.promocao ? `<div class="preco-promocao">R$ ${item.preco_promocional}</div>` : ''}
+                        ${!item.promocao ? `<div class="">${formatarPrecoBR(item.preco_unitario)}</div>` : `<div class="preco-original">${formatarPrecoBR(item.preco_unitario)}</div>`}
+                        ${item.promocao ? `<div class="preco-promocao">${formatarPrecoBR(item.preco_promocional)}</div>` : ''}
                     </div>
                 </div>
             </div>
@@ -100,6 +100,11 @@ async function renderizarProdutos() {
     subtotal(); // Atualiza o total após renderizar
 }
 
+// Função utilitária para formatar valores em reais
+function formatarPrecoBR(valor) {
+    return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
 // Calcula subtotal
 function subtotal() {
     let total = document.getElementById('total');
@@ -113,13 +118,13 @@ function subtotal() {
     });
 
     quantidade.innerHTML = quant || 0;
-    total.innerHTML = valor.toFixed(2) || "0.00";
+    total.innerHTML = formatarPrecoBR(valor) || formatarPrecoBR(0);
 }
 
 // Função para remover produto
 async function excluirProduto(id_produto, id_carrinho, elemento) {
     try {
-        let requisicao = await fetch(`${api.online}/excluir-produtos`, {
+        let requisicao = await fetch(`${apiCarrinho.online}/excluir-produtos`, {
             method: 'POST',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id_pessoa: estado.id_pessoa, id_produto, id_carrinho })

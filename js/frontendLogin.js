@@ -43,6 +43,10 @@ async function handleLogin(e) {
   }
 
   try {
+    // Mostrar loading
+    showLoading(LoadingPresets.login);
+    showButtonLoading(botaoEntrar, 'Entrar');
+
     const resposta = await fazerRequisicaoLogin(usuario, senha);
 
     if (!resposta.ok) {
@@ -58,6 +62,9 @@ async function handleLogin(e) {
     console.error("Erro no processo de login:", erro);
     mostrarMensagem("Falha na conexão. Tente novamente.", "danger");
   } finally {
+    // Esconder loading
+    hideLoading();
+    hideButtonLoading(botaoEntrar);
     reativarBotao();
   }
 }
@@ -178,6 +185,7 @@ function armazenarDadosUsuario(dados) {
     sessionStorage.setItem("userToken", dados.token);
     sessionStorage.setItem("id_pessoa", dados.user.id_pessoa);
     sessionStorage.setItem("userEmail", dados.user.email);
+    sessionStorage.setItem("email", dados.user.email); // Garantir compatibilidade com o restante do sistema
     sessionStorage.setItem("userType", dados.user.tipo_usuario);
     sessionStorage.setItem("isAdmin", dados.user.isAdmin);
     sessionStorage.setItem("carrinho", dados.user.carrinho || 0);

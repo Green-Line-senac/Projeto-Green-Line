@@ -48,6 +48,8 @@ async function inicializarApp() {
 // ==================== FUNÇÕES DE CARREGAMENTO ====================
 async function carregarProdutosPromocao() {
   try {
+    // Mostrar loading enquanto carrega produtos
+    showLoading(LoadingPresets.carregandoProdutos);
     mostrarLoader();
 
     const response = await fetch(`${config.online}/produtos`);
@@ -62,6 +64,9 @@ async function carregarProdutosPromocao() {
   } catch (erro) {
     console.error("Erro:", erro);
     mostrarErroCarregamento();
+  } finally {
+    // Esconder loading após carregar produtos
+    hideLoading();
   }
 }
 
@@ -91,13 +96,17 @@ function renderizarProdutos() {
   elementos.produtosContainer.appendChild(fragment);
 }
 
+function formatarPrecoBR(valor) {
+  return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
 function criarCardProduto(produto) {
   const card = document.createElement("div");
   card.className = "col-12 col-sm-6 col-md-4 col-lg-3 mb-4";
   const precoFormatado = produto.promocao
-    ? `<span style="text-decoration: line-through; font-size: 0.9rem;">R$ ${produto.preco.toFixed(2)}</span>
-       <span class="fs-5 ms-2">R$ ${(produto.preco * 0.8).toFixed(2)}</span>`
-    : `<span class="fs-5">R$ ${produto.preco.toFixed(2)}</span>`;
+    ? `<span style="text-decoration: line-through; font-size: 0.9rem;">${formatarPrecoBR(produto.preco)}</span>
+       <span class="fs-5 ms-2">${formatarPrecoBR(produto.preco * 0.8)}</span>`
+    : `<span class="fs-5">${formatarPrecoBR(produto.preco)}</span>`;
   card.innerHTML = `
     <div class="card h-100 cursor point">
       <img src="${

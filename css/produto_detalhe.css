@@ -9,6 +9,7 @@
   margin-left: auto;
   margin-right: auto;
   padding-top: 110px;
+  position: relative;
 }
 .produto-detalhe-row {
   display: flex;
@@ -305,4 +306,30 @@
   font-size: 1.13rem;
   font-weight: 600;
   padding: 0.7em 0;
+}
+
+#btn-voltar-produtos {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #222;
+}
+
+@media (max-width: 576px) {
+  #btn-voltar-produtos {
+    top: 70px; /* Aumenta a distância do topo para não sobrepor o logo */
+    left: 10px;
+    font-size: 1.7rem;
+  }
+}
+
+@media (max-width: 400px) {
+  #btn-voltar-produtos {
+    display: none;
+  }
 } 
