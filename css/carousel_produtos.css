@@ -5,28 +5,73 @@ body {
 
 /* Classe para margens personalizadas */
 .margem {
-  margin-top: 100px !important;
-  /* Adiciona uma margem superior de 100px, com prioridade devido ao uso de !important */
+  margin-top: 130px !important;
+  /* Adiciona uma margem superior de 130px para dar mais respiro da barra de pesquisa */
 }
 
-/* Estilo para imagens dentro do carrossel - igual à página de produtos */
+/* Margem específica para página de categoria */
+.margem-categoria {
+  margin-top: 110px !important;
+  /* Margem aumentada para página de categoria para dar mais espaço */
+}
+
+/* Estilo para imagens dentro do carrossel - página de produtos */
 #carouselExampleSlidesOnly .carousel-inner img {
-  height: 200px;
-  /* Define uma altura fixa para as imagens */
+  height: 400px;
+  /* Altura maior para telas grandes */
+  width: 100%;
   object-fit: cover;
-  /* Faz com que as imagens ocupem todo o espaço, mantendo suas proporções */
+  object-position: center;
+  transition: none;
+  /* Remove transições da imagem para evitar conflitos */
+  backface-visibility: hidden;
+  /* Melhora performance da animação */
+  transform: translateZ(0);
+  /* Força aceleração de hardware */
+  background-color: #f8f9fa;
+  /* Cor de fundo enquanto carrega */
 }
 
 /* Melhorias específicas para o carrossel */
 .carousel-slide-wrapper {
   position: relative;
-  height: 200px;
+  height: 400px;
+  /* Altura maior para telas grandes */
   overflow: hidden;
 }
 
-.carousel .carousel-inner {
-  height: 100%;
+#carouselExampleSlidesOnly .carousel-inner {
+  height: 400px;
+  /* Altura fixa para o container */
   overflow: hidden;
+  background-color: #f8f9fa;
+  /* Cor de fundo para evitar branco */
+  position: relative;
+}
+
+#carouselExampleSlidesOnly .carousel-item {
+  height: 400px;
+  /* Altura fixa para cada item */
+  position: relative;
+  width: 100%;
+  background-color: #f8f9fa;
+  /* Cor de fundo para evitar branco */
+  overflow: hidden;
+}
+
+/* Corrigir transições do Bootstrap para evitar flash branco */
+#carouselExampleSlidesOnly .carousel-item-next,
+#carouselExampleSlidesOnly .carousel-item-prev,
+#carouselExampleSlidesOnly .carousel-item.active {
+  background-color: #f8f9fa;
+}
+
+/* Garantir que as imagens estejam sempre visíveis durante a transição */
+#carouselExampleSlidesOnly .carousel-item img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
 }
 
 .carousel-overlay {
@@ -35,29 +80,46 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.3) 100%);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.2) 100%);
+  z-index: 1;
+  pointer-events: none;
+  /* Permite cliques através do overlay */
+}
+
+#carouselExampleSlidesOnly .carousel-caption {
+  z-index: 2;
+  pointer-events: auto;
+  /* Permite interação com o caption */
 }
 
 /* Remove alinhamento vertical centralizado do Bootstrap */
-.carousel-caption.d-flex {
-  display: block !important;
-  align-items: initial !important;
-  height: auto !important;
+#carouselExampleSlidesOnly .carousel-caption.d-flex {
+  display: flex !important;
+  align-items: center !important;
+  height: 100% !important;
+  justify-content: flex-start !important;
 }
 
-/* Garante que o texto fique mais para cima e visível */
-.carousel-caption {
-  top: 5vh;
-  bottom: auto;
-  left: 5vw;
-  right: auto;
+/* Garante que o texto fique bem posicionado em telas grandes */
+#carouselExampleSlidesOnly .carousel-caption {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 2rem;
   text-align: left;
-  width: auto;
-  max-width: 40vw;
-  padding-left: 0;
-  padding-right: 0;
-  transform: none;
   background: none;
+  transform: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+#carouselExampleSlidesOnly .carousel-caption .container {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .carousel-content {
@@ -127,16 +189,61 @@ body {
 }
 
 /* Controles melhorados */
-.carousel-control-prev,
-.carousel-control-next {
+#carouselExampleSlidesOnly .carousel-control-prev,
+#carouselExampleSlidesOnly .carousel-control-next {
   width: 5%;
   opacity: 0.8;
   transition: opacity 0.3s ease;
+  z-index: 3;
 }
 
-.carousel-control-prev:hover,
-.carousel-control-next:hover {
+#carouselExampleSlidesOnly .carousel-control-prev:hover,
+#carouselExampleSlidesOnly .carousel-control-next:hover {
   opacity: 1;
+}
+
+/* Garantir que o carrossel não tenha conflitos com outros estilos */
+#carouselExampleSlidesOnly {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background-color: #f8f9fa;
+  /* Cor de fundo base */
+}
+
+/* Corrigir problema de flash branco durante transições slide */
+#carouselExampleSlidesOnly .carousel-item {
+  position: relative;
+  display: none;
+  float: left;
+  width: 100%;
+  margin-right: -100%;
+  backface-visibility: hidden;
+  transition: transform 0.6s ease-in-out;
+  background-color: #f8f9fa;
+}
+
+#carouselExampleSlidesOnly .carousel-item.active,
+#carouselExampleSlidesOnly .carousel-item-next,
+#carouselExampleSlidesOnly .carousel-item-prev {
+  display: block;
+}
+
+#carouselExampleSlidesOnly .carousel-item-next:not(.carousel-item-start),
+#carouselExampleSlidesOnly .active.carousel-item-end {
+  transform: translateX(100%);
+}
+
+#carouselExampleSlidesOnly .carousel-item-prev:not(.carousel-item-end),
+#carouselExampleSlidesOnly .active.carousel-item-start {
+  transform: translateX(-100%);
+}
+
+/* Garantir que as imagens não causem flash */
+#carouselExampleSlidesOnly .carousel-item img {
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 /* Animações */
@@ -152,12 +259,84 @@ body {
   }
 }
 
+/* Estilos específicos para página de categoria - altura menor */
+.margem-categoria #carouselExampleSlidesOnly .carousel-inner img,
+.margem-categoria .carousel-slide-wrapper,
+.margem-categoria #carouselExampleSlidesOnly .carousel-inner,
+.margem-categoria #carouselExampleSlidesOnly .carousel-item {
+  height: 300px !important;
+  /* Altura menor para página de categoria */
+}
+
+/* Estilos para telas muito grandes */
+@media (min-width: 1400px) {
+
+  #carouselExampleSlidesOnly .carousel-inner img,
+  .carousel-slide-wrapper,
+  #carouselExampleSlidesOnly .carousel-inner,
+  #carouselExampleSlidesOnly .carousel-item {
+    height: 500px;
+  }
+
+  /* Altura menor para página de categoria em telas grandes */
+  .margem-categoria #carouselExampleSlidesOnly .carousel-inner img,
+  .margem-categoria .carousel-slide-wrapper,
+  .margem-categoria #carouselExampleSlidesOnly .carousel-inner,
+  .margem-categoria #carouselExampleSlidesOnly .carousel-item {
+    height: 350px !important;
+  }
+
+  .carousel-title {
+    font-size: 3rem;
+  }
+
+  .carousel-description {
+    font-size: 1.2rem;
+  }
+
+  #carouselExampleSlidesOnly .carousel-caption {
+    padding: 3rem;
+  }
+}
+
 /* Responsividade */
+@media (max-width: 1200px) {
+
+  #carouselExampleSlidesOnly .carousel-inner img,
+  .carousel-slide-wrapper,
+  #carouselExampleSlidesOnly .carousel-inner,
+  #carouselExampleSlidesOnly .carousel-item {
+    height: 350px;
+  }
+
+  /* Altura menor para página de categoria */
+  .margem-categoria #carouselExampleSlidesOnly .carousel-inner img,
+  .margem-categoria .carousel-slide-wrapper,
+  .margem-categoria #carouselExampleSlidesOnly .carousel-inner,
+  .margem-categoria #carouselExampleSlidesOnly .carousel-item {
+    height: 280px !important;
+  }
+}
+
 @media (max-width: 992px) {
-  .carousel-caption {
-    top: 3vh;
-    left: 3vw;
-    max-width: 60vw;
+
+  #carouselExampleSlidesOnly .carousel-inner img,
+  .carousel-slide-wrapper,
+  #carouselExampleSlidesOnly .carousel-inner,
+  #carouselExampleSlidesOnly .carousel-item {
+    height: 300px;
+  }
+
+  /* Altura menor para página de categoria */
+  .margem-categoria #carouselExampleSlidesOnly .carousel-inner img,
+  .margem-categoria .carousel-slide-wrapper,
+  .margem-categoria #carouselExampleSlidesOnly .carousel-inner,
+  .margem-categoria #carouselExampleSlidesOnly .carousel-item {
+    height: 250px !important;
+  }
+
+  #carouselExampleSlidesOnly .carousel-caption {
+    padding: 1.5rem;
   }
 
   .carousel-title {
@@ -170,16 +349,40 @@ body {
 }
 
 @media (max-width: 768px) {
-  .carousel-caption {
-    top: 2vh;
-    left: 3vw;
-    right: 3vw;
-    max-width: 94vw;
-    width: auto;
+
+  #carouselExampleSlidesOnly .carousel-inner img,
+  .carousel-slide-wrapper,
+  #carouselExampleSlidesOnly .carousel-inner,
+  #carouselExampleSlidesOnly .carousel-item {
+    height: 250px;
+  }
+
+  /* Altura menor para página de categoria */
+  .margem-categoria #carouselExampleSlidesOnly .carousel-inner img,
+  .margem-categoria .carousel-slide-wrapper,
+  .margem-categoria #carouselExampleSlidesOnly .carousel-inner,
+  .margem-categoria #carouselExampleSlidesOnly .carousel-item {
+    height: 200px !important;
+  }
+
+  #carouselExampleSlidesOnly .carousel-caption {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
     padding: 1rem;
     background: rgba(0, 0, 0, 0.6);
-    border-radius: 10px;
+    border-radius: 0;
     backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  #carouselExampleSlidesOnly .carousel-caption .container {
+    padding: 0;
   }
 
   .carousel-title {
@@ -214,11 +417,15 @@ body {
 }
 
 @media (max-width: 576px) {
-  .carousel-caption {
-    top: 1vh;
-    left: 2vw;
-    right: 2vw;
-    max-width: 96vw;
+
+  #carouselExampleSlidesOnly .carousel-inner img,
+  .carousel-slide-wrapper,
+  #carouselExampleSlidesOnly .carousel-inner,
+  #carouselExampleSlidesOnly .carousel-item {
+    height: 200px;
+  }
+
+  #carouselExampleSlidesOnly .carousel-caption {
     padding: 0.8rem;
     font-size: 0.85em;
   }

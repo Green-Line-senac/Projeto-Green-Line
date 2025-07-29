@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redefinir Senha - Green Line</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #FF9800, #FFB74D);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .header-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px 30px;
+        }
+        
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .message {
+            font-size: 16px;
+            margin-bottom: 30px;
+            line-height: 1.8;
+            color: #555;
+        }
+        
+        .alert-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-left: 4px solid #FF9800;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        
+        .alert-box p {
+            margin: 0;
+            color: #856404;
+            font-size: 14px;
+        }
+        
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .reset-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #FF9800, #FFB74D);
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 16px;
+            transition: transform 0.2s ease;
+        }
+        
+        .reset-button:hover {
+            transform: translateY(-2px);
+            text-decoration: none;
+            color: white;
+        }
+        
+        .alternative-link {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #FF9800;
+        }
+        
+        .alternative-link p {
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .link-text {
+            word-break: break-all;
+            font-family: monospace;
+            background-color: #e9ecef;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .security-tips {
+            background-color: #e8f5e8;
+            border: 1px solid #c3e6cb;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        
+        .security-tips h4 {
+            color: #155724;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .security-tips ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #155724;
+        }
+        
+        .security-tips li {
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px 30px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .footer-text {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .company-info {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .divider {
+            height: 1px;
+            background-color: #e9ecef;
+            margin: 20px 0;
+        }
+        
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                margin: 10px;
+                border-radius: 0;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+            
+            .header {
+                padding: 25px 20px;
+            }
+            
+            .logo {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">🔐 Green Line</div>
+            <div class="header-subtitle">Redefinição de Senha</div>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <div class="greeting">Olá, {{NOME_USUARIO}}!</div>
+            
+            <div class="message">
+                Recebemos uma solicitação para redefinir a senha da sua conta na <strong>Green Line</strong>.
+            </div>
+            
+            <div class="alert-box">
+                <p><strong>⚠️ Importante:</strong> Se você não solicitou esta alteração, ignore este email. Sua senha permanecerá inalterada.</p>
+            </div>
+            
+            <div class="message">
+                Para criar uma nova senha, clique no botão abaixo:
+            </div>
+            
+            <div class="button-container">
+                <a href="{{LINK_RESET}}" class="reset-button">
+                    🔑 Redefinir Senha
+                </a>
+            </div>
+            
+            <div class="alternative-link">
+                <p><strong>Não consegue clicar no botão?</strong></p>
+                <p>Copie e cole o link abaixo no seu navegador:</p>
+                <div class="link-text">{{LINK_RESET}}</div>
+            </div>
+            
+            <div class="security-tips">
+                <h4>🛡️ Dicas de Segurança:</h4>
+                <ul>
+                    <li>Use uma senha forte com pelo menos 8 caracteres</li>
+                    <li>Combine letras maiúsculas, minúsculas, números e símbolos</li>
+                    <li>Não reutilize senhas de outras contas</li>
+                    <li>Considere usar um gerenciador de senhas</li>
+                    <li>Nunca compartilhe sua senha com terceiros</li>
+                </ul>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="message">
+                <strong>Informações da solicitação:</strong><br>
+                • Data: {{DATA_SOLICITACAO}}<br>
+                • IP: {{IP_USUARIO}}<br>
+                • Navegador: {{USER_AGENT}}
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-text">
+                Este link de redefinição expira em <strong>1 hora</strong> por motivos de segurança.
+            </div>
+            <div class="footer-text">
+                Se você não solicitou esta alteração, entre em contato conosco imediatamente.
+            </div>
+            <div class="company-info">
+                © 2025 Green Line - Produtos Ecológicos<br>
+                Ceilândia, Brasília-DF | CNPJ: 74.707.730/0001-63<br>
+                Email: greenline.ecologic@gmail.com
+            </div>
+        </div>
+    </div>
+</body>
+</html>
