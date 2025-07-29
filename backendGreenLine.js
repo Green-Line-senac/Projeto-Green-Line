@@ -547,29 +547,40 @@ app.post("/enviarEmail", async (req, res) => {
 
 //===================BACKEND RECUPERAR SENHA ==================
 app.post("/recuperar-senha", async (req, res) => {
-  const { email: rawEmail } = req.body;
-
-  // Validação básica do email
-  const email = rawEmail?.trim().toLowerCase();
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return res.status(400).json({
-      conclusao: 1,
-      mensagem: "Email inválido",
-    });
-  }
-
   try {
+    const { email: rawEmail } = req.body;
+
+    // Validação básica do email
+    if (!rawEmail) {
+      return res.status(400).json({
+        conclusao: 1,
+        mensagem: "Email não informado.",
+      });
+    }
+
+    const email = rawEmail.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({
+        conclusao: 1,
+        mensagem: "Email inválido.",
+      });
+    }
+
     // Verificar se o email existe no banco de dados
-    const usuario = await Usuario.findOne({ where: { email } });
+    const [usuario] = await db.query(
+      `SELECT id, email FROM usuarios WHERE email = ? LIMIT 1`,
+      [email]
+    );
 
     // Sempre retornar sucesso, mesmo se o email não existir (para evitar vazamento)
-    if (!usuario) {
+    if (!usuario || usuario.length === 0) {
       console.log(
         `Tentativa de recuperação para email não cadastrado: ${email}`
       );
-      return res.json({
+      return res.status(200).json({
         conclusao: 2,
-        mensagem: "Se o email estiver cadastrado, você receberá instruções",
+        mensagem:
+          "Se o email estiver cadastrado, você receberá instruções em breve.",
       });
     }
 
@@ -580,15 +591,16 @@ app.post("/recuperar-senha", async (req, res) => {
       "recuperacao"
     );
 
-    return res.json({
+    return res.status(200).json({
       conclusao: 2,
-      mensagem: "Se o email estiver cadastrado, você receberá instruções",
+      mensagem:
+        "Se o email estiver cadastrado, você receberá instruções em breve.",
     });
   } catch (erro) {
     console.error("Erro no processo de recuperação:", erro);
     return res.status(500).json({
       conclusao: 3,
-      mensagem: "Erro no servidor",
+      mensagem: "Erro interno no servidor ao processar recuperação de senha.",
     });
   }
 });
