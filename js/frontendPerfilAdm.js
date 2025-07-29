@@ -122,16 +122,16 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
   }
 
   function preencherDadosPerfil(user) {
-    document.getElementById("profileName").textContent = user[0].nome || "Nome";
-    document.getElementById("profileEmail").textContent = user[0].email || "email@exemplo.com";
-    document.getElementById("profileEmailContent").textContent = user[0].email || "email@exemplo.com";
-    document.getElementById("profileFullName").textContent = user[0].nome || "Nome Completo";
-    document.getElementById("profilePhone").textContent = user[0].telefone || "Não informado";
-    document.getElementById("profileCpf").textContent = user[0].cpf || "Não informado";
-    document.getElementById("profileStatus").textContent = user[0].situacao === 'A' ? 'Ativo' : 'Pendente/Inativo';
+    document.getElementById("profileName").textContent = user.nome || "Nome";
+    document.getElementById("profileEmail").textContent = user.email || "email@exemplo.com";
+    document.getElementById("profileEmailContent").textContent = user.email || "email@exemplo.com";
+    document.getElementById("profileFullName").textContent = user.nome || "Nome Completo";
+    document.getElementById("profilePhone").textContent = user.telefone || "Não informado";
+    document.getElementById("profileCpf").textContent = user.cpf || "Não informado";
+    document.getElementById("profileStatus").textContent = user.situacao === 'A' ? 'Ativo' : 'Pendente/Inativo';
 
-    if (user[0].imagem_perfil) {
-      document.getElementById("profileAvatar").src = user[0].imagem_perfil;
+    if (user.imagem_perfil) {
+      document.getElementById("profileAvatar").src = user.imagem_perfil;
     }
   }
 

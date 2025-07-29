@@ -3,8 +3,8 @@ let usuarioLogado = null;
 // URL da API
 const api = {
   online: "https://green-line-web.onrender.com",
+  perfil: "http://localhost:3008",
   index: "http://localhost:3002",
-  login : "http://localhost:3008/login",
 };
 const basePath = window.location.pathname.includes("green_line_web")
   ? "/green_line_web/public"
@@ -34,7 +34,6 @@ async function carregarDadosUsuario() {
 
     // 2. Fazer a requisição com o token de autenticação
     const response = await fetch(`${api.online}/pessoa/${idPessoa}`, {
-   
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -56,11 +55,10 @@ async function carregarDadosUsuario() {
     }
 
     // 4. Processar os dados do usuário
-    usuarioLogado = await response.json();
+    const usuarioLogado = await response.json();
     console.log("Dados do usuário carregados:", usuarioLogado);
     preencherDadosPerfil(usuarioLogado);
     await loadAddress();
-   
 
     // Carregar configurações do modo noturno (se houver)
     const darkModeEnabled = localStorage.getItem('darkMode') === 'true';
@@ -112,31 +110,6 @@ async function loadAddress() {
   }
 }
 
-/* --- NOVA FUNÇÃO: carrega endereço independente dos dados do usuário --- */
-async function loadAddress() {
-  const idPessoa = sessionStorage.getItem("id_pessoa");
-  const token = sessionStorage.getItem("userToken");
-  if (!idPessoa || !token) return;
-
-  try {
-    const resp = await fetch(`http://localhost:3008/pessoa/${idPessoa}/enderecos`, {
-      headers: { "Authorization": `Bearer ${token}` }
-    });
-    if (!resp.ok) throw new Error("Falha no GET de endereço");
-    const endereco = await resp.json();     // backend devolve objeto
-    if (endereco) {
-      preencherEndereco(endereco);
-    } else {
-      document.getElementById("addressContent").innerHTML =
-        "<p>Nenhum endereço cadastrado. Clique em 'Atualizar Endereço' para adicionar.</p>";
-    }
-  } catch (err) {
-    console.error("Erro ao buscar endereço:", err);
-    document.getElementById("addressContent").innerHTML =
-      "<p>Erro ao carregar endereço.</p>";
-  }
-}
-
 
 // Função para preencher os dados do perfil na página
 function preencherDadosPerfil(usuario) {
@@ -156,7 +129,9 @@ function preencherDadosPerfil(usuario) {
 // Função para preencher os dados de endereço
 function preencherEndereco(endereco) {
 
-   if (Array.isArray(endereco)) endereco = endereco[0];
+  if (Array.isArray(endereco)) endereco = endereco[0];
+  // Salva o endereço no sessionStorage para uso em outras páginas
+  sessionStorage.setItem("enderecoUsuario", JSON.stringify(endereco));
   const addressContent = document.getElementById("addressContent");
   addressContent.innerHTML = `
         <p>${endereco.endereco},${endereco.complemento ? ' - ' + endereco.complemento : ''}</p>
@@ -165,18 +140,10 @@ function preencherEndereco(endereco) {
     `;
 
   // Pré‑preencher modal
-
-  // Pré‑preencher modal
   document.getElementById("cep").value = endereco.cep || "";
   document.getElementById("endereco").value = endereco.endereco || "";
   document.getElementById("complemento").value = endereco.complemento || "";
   document.getElementById("cidade").value = endereco.cidade || "";
-  document.getElementById("uf").value = endereco.uf || "";
-  document.getElementById("bairro").value = endereco.bairro || "";
-
-
-  // Guarde o id_endereco para PUT depois
-  addressForm.dataset.idEndereco = endereco.id_endereco;
   document.getElementById("uf").value = endereco.uf || "";
   document.getElementById("bairro").value = endereco.bairro || "";
 
@@ -277,10 +244,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // Atualizar dados no usuárioLogado (não salva no backend aqui, apenas prepara para o botão Salvar)
         if (infoItem.id === "profileFullName") {
           usuarioLogado.nome = newValue;
-          console.log("Novo nome:", usuarioLogado.nome);
         } else if (infoItem.id === "profilePhone") {
           usuarioLogado.telefone = newValue;
-          console.log("Novo telefone:", usuarioLogado.telefone);
         }
       });
 
@@ -307,11 +272,11 @@ document.addEventListener("DOMContentLoaded", () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          nome: usuarioLogado.nome || document.getElementById("profileFullName").textContent,
-          telefone: usuarioLogado.telefone || document.getElementById("profilePhone").textContent,
+          nome: usuarioLogado.nome,
+          telefone: usuarioLogado.telefone,
         }),
       });
-      carregarDadosUsuario();
+
       if (!response.ok) {
         throw new Error("Erro ao salvar informações pessoais");
       }
@@ -320,8 +285,9 @@ document.addEventListener("DOMContentLoaded", () => {
       showSuccess('Informações salvas!', 'Suas informações pessoais foram atualizadas com sucesso');
       carregarDadosUsuario(); // Recarrega para garantir que os dados exibidos estão atualizados
     } catch (error) {
-      console.error("salvo:", error);
-      alert("salvo");
+      console.error("Erro ao salvar informações pessoais:", error);
+      hideNotification(loadingId);
+      showError('Erro ao salvar', 'Não foi possível salvar suas informações. Tente novamente.');
     }
   });
 
@@ -332,7 +298,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeAddressModal = addressModal.querySelector(".close-modal");
   const cancelAddressBtn = document.getElementById("cancelAddressBtn");
   const addressForm = document.getElementById("addressForm");
-  loadAddress();
   loadAddress();
 
   updateAddressBtn.addEventListener("click", () => {
@@ -354,43 +319,105 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("addressForm").addEventListener("submit", async function (e) {
-  e.preventDefault();
+    e.preventDefault();
 
-  const idPessoa = sessionStorage.getItem("id_pessoa");
-  const token = sessionStorage.getItem("userToken");
+    const loadingId = showLoading('Salvando endereço...', 'Atualizando suas informações de entrega');
 
-  const body = {
-    uf: this.uf.value,
-    cep: this.cep.value,
-    cidade: this.cidade.value,
-    bairro: this.bairro.value,
-    endereco: this.endereco.value,
-    complemento: this.complemento.value,
-    }; 
+    const idPessoa = sessionStorage.getItem("id_pessoa");
+    const token = sessionStorage.getItem("userToken");
 
-  try {
-    const response = await fetch(`http://localhost:3008/pessoa/${idPessoa}/enderecos`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify(body),
-    });
+    const body = {
+      uf: this.uf.value,
+      cep: this.cep.value,
+      cidade: this.cidade.value,
+      bairro: this.bairro.value,
+      endereco: this.endereco.value,
+      complemento: this.complemento.value,
+    };
 
-    if (!response.ok) {
-      const erro = await response.json();
-      throw new Error(erro.error || "Erro ao atualizar endereço");
+    try {
+      // Tenta primeiro o servidor local, depois o online
+      let response;
+      try {
+        response = await fetch(`http://localhost:3008/pessoa/${idPessoa}/enderecos`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(body),
+        });
+      } catch (localError) {
+        console.log('Servidor local não disponível, tentando servidor online...');
+        response = await fetch(`${api.online}/pessoa/${idPessoa}/enderecos`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(body),
+        });
+      }
+
+      if (!response.ok) {
+        const erro = await response.json();
+        throw new Error(erro.error || "Erro ao atualizar endereço");
+      }
+
+      hideNotification(loadingId);
+      showSuccess('Endereço salvo!', 'Seu endereço foi atualizado com sucesso');
+
+      // Salva o endereço no sessionStorage para uso em outras páginas
+      sessionStorage.setItem("enderecoUsuario", JSON.stringify(body));
+      document.getElementById("addressModal").classList.add("hidden");
+      loadAddress(); // recarrega os dados na interface
+    } catch (err) {
+      console.error("Erro ao atualizar endereço:", err);
+      hideNotification(loadingId);
+      showError('Erro ao salvar endereço', err.message || 'Não foi possível atualizar seu endereço');
     }
+  });
 
-    alert("Endereço salvo com sucesso!");
-    document.getElementById("addressModal").classList.add("hidden");
-    loadAddress(); // recarrega os dados na interface
-  } catch (err) {
-    console.error("Erro ao atualizar endereço:", err);
-    alert("Erro ao atualizar endereço: " + err.message);
+  // Integração com ViaCEP para preenchimento automático de endereço
+  function buscarEnderecoPorCep(cep) {
+    // Remove caracteres não numéricos
+    cep = cep.replace(/\D/g, "");
+    if (cep.length !== 8) return;
+
+    const loadingId = showLoading('Buscando CEP...', 'Consultando dados do endereço');
+
+    fetch(`https://viacep.com.br/ws/${cep}/json/`)
+      .then((res) => res.json())
+      .then((data) => {
+        hideNotification(loadingId);
+        if (data.erro) {
+          showError('CEP não encontrado', 'Verifique se o CEP digitado está correto');
+          return;
+        }
+        document.getElementById("endereco").value = data.logradouro || "";
+        document.getElementById("bairro").value = data.bairro || "";
+        document.getElementById("cidade").value = data.localidade || "";
+        document.getElementById("uf").value = data.uf || "";
+        showSuccess('CEP encontrado!', 'Endereço preenchido automaticamente', { duration: 3000 });
+      })
+      .catch(() => {
+        hideNotification(loadingId);
+        showError('Erro ao buscar CEP', 'Não foi possível consultar o CEP. Tente novamente.');
+      });
   }
-});
+
+  // Adiciona evento ao campo de CEP do modal de endereço
+  const cepInput = document.getElementById("cep");
+  if (cepInput) {
+    cepInput.addEventListener("blur", function () {
+      buscarEnderecoPorCep(this.value);
+    });
+    cepInput.addEventListener("keyup", function () {
+      if (this.value.replace(/\D/g, "").length === 8) {
+        buscarEnderecoPorCep(this.value);
+      }
+    });
+  }
 
 
   // Lógica para o modal de exclusão de conta
