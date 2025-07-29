@@ -14,11 +14,18 @@ formularioCadastro.addEventListener("submit", async function (e) {
   const originalText = btEnviar.innerHTML;
 
   try {
-    // Mostra loading
-    btEnviar.disabled = true;
-    btEnviar.innerHTML = `
-      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-    `;
+    // Limpar mensagens anteriores
+    if (window.authModern) {
+      window.authModern.hideMessage();
+      window.authModern.hideAllValidationMessages();
+      window.authModern.setButtonLoading('cadastrar-usuario', true);
+    } else {
+      // Fallback para sistema antigo
+      btEnviar.disabled = true;
+      btEnviar.innerHTML = `
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      `;
+    }
 
     // Obtém valores
     const nome = document.getElementById("username").value.trim();
@@ -36,11 +43,19 @@ formularioCadastro.addEventListener("submit", async function (e) {
     await usuario.salvarUsuario();
   } catch (error) {
     console.error("Erro no cadastro:", error);
-    alert(error.message || "Erro ao cadastrar usuário");
+    if (window.authModern) {
+      window.authModern.showMessage(error.message || "Erro ao cadastrar usuário", "error");
+    } else {
+      alert(error.message || "Erro ao cadastrar usuário");
+    }
   } finally {
     // Restaura o botão
-    btEnviar.disabled = false;
-    btEnviar.innerHTML = originalText;
+    if (window.authModern) {
+      window.authModern.setButtonLoading('cadastrar-usuario', false);
+    } else {
+      btEnviar.disabled = false;
+      btEnviar.innerHTML = originalText;
+    }
   }
 });
 function removePunctuationAndSpaces(text) {

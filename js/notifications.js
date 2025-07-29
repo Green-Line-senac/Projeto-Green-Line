@@ -34,9 +34,13 @@ class NotificationManager {
       preventDuplicates = true
     } = options;
 
+    // Garantir que title e message sejam strings
+    const safeTitle = this.ensureString(title);
+    const safeMessage = this.ensureString(message);
+
     // Prevenir notificações duplicadas
     if (preventDuplicates) {
-      const duplicateKey = `${type}-${title}-${message}`;
+      const duplicateKey = `${type}-${safeTitle}-${safeMessage}`;
       const existingNotification = Array.from(this.notifications.values()).find(
         notification => notification.dataset.duplicateKey === duplicateKey
       );
@@ -58,8 +62,8 @@ class NotificationManager {
     const notification = this.createNotification({
       id,
       type,
-      title,
-      message,
+      title: safeTitle,
+      message: safeMessage,
       actions,
       closable,
       progress,
@@ -255,6 +259,38 @@ class NotificationManager {
     return 'notification-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
   }
 
+  // Garantir que o valor seja uma string
+  ensureString(value) {
+    if (value === null || value === undefined) {
+      return '';
+    }
+    if (typeof value === 'string') {
+      return value;
+    }
+    if (typeof value === 'object') {
+      // Se for um objeto Error, pegar a mensagem
+      if (value instanceof Error) {
+        return value.message || 'Erro desconhecido';
+      }
+      // Se for um objeto com propriedade message
+      if (value.message) {
+        return String(value.message);
+      }
+      // Se for um objeto com propriedade error
+      if (value.error) {
+        return String(value.error);
+      }
+      // Tentar JSON.stringify como último recurso
+      try {
+        return JSON.stringify(value);
+      } catch (e) {
+        return 'Objeto não serializável';
+      }
+    }
+    // Para outros tipos, converter para string
+    return String(value);
+  }
+
   getIcon(type) {
     const icons = {
       success: '✓',
@@ -352,19 +388,31 @@ function showNotification(options) {
 }
 
 function showSuccess(title, message, options = {}) {
-  return initNotifications().success(title, message, options);
+  // Garantir que title e message sejam strings
+  const safeTitle = typeof title === 'string' ? title : (title?.message || String(title) || 'Sucesso');
+  const safeMessage = typeof message === 'string' ? message : (message?.message || String(message) || '');
+  return initNotifications().success(safeTitle, safeMessage, options);
 }
 
 function showError(title, message, options = {}) {
-  return initNotifications().error(title, message, options);
+  // Garantir que title e message sejam strings
+  const safeTitle = typeof title === 'string' ? title : (title?.message || String(title) || 'Erro');
+  const safeMessage = typeof message === 'string' ? message : (message?.message || String(message) || '');
+  return initNotifications().error(safeTitle, safeMessage, options);
 }
 
 function showWarning(title, message, options = {}) {
-  return initNotifications().warning(title, message, options);
+  // Garantir que title e message sejam strings
+  const safeTitle = typeof title === 'string' ? title : (title?.message || String(title) || 'Aviso');
+  const safeMessage = typeof message === 'string' ? message : (message?.message || String(message) || '');
+  return initNotifications().warning(safeTitle, safeMessage, options);
 }
 
 function showInfo(title, message, options = {}) {
-  return initNotifications().info(title, message, options);
+  // Garantir que title e message sejam strings
+  const safeTitle = typeof title === 'string' ? title : (title?.message || String(title) || 'Informação');
+  const safeMessage = typeof message === 'string' ? message : (message?.message || String(message) || '');
+  return initNotifications().info(safeTitle, safeMessage, options);
 }
 
 function showValidationError(errors, options = {}) {
@@ -372,11 +420,60 @@ function showValidationError(errors, options = {}) {
 }
 
 function showLoading(title, message) {
-  return initNotifications().loading(title, message);
+  // Se o primeiro parâmetro for um objeto (como LoadingPresets), extrair as propriedades
+  if (typeof title === 'object' && title !== null) {
+    const config = title;
+    const safeTitle = config.text || config.title || 'Carregando...';
+    const safeMessage = config.subtext || config.message || 'Por favor, aguarde';
+    return initNotifications().loading(safeTitle, safeMessage);
+  }
+  
+  // Caso contrário, usar os parâmetros normalmente
+  const safeTitle = typeof title === 'string' ? title : 'Carregando...';
+  const safeMessage = typeof message === 'string' ? message : 'Por favor, aguarde';
+  return initNotifications().loading(safeTitle, safeMessage);
 }
 
 function hideNotification(id) {
   initNotifications().hide(id);
+}
+
+function hideLoading() {
+  // Esconder todas as notificações de loading
+  const notificationManager = initNotifications();
+  
+  // Procurar por notificações que tenham o ícone de loading ou sejam do tipo loading
+  const loadingNotifications = Array.from(notificationManager.notifications.values())
+    .filter(notification => {
+      // Verificar se é uma notificação de loading pelo ícone ou classe
+      const hasLoadingIcon = notification.querySelector('.notification-icon')?.textContent?.includes('⟳');
+      const hasLoadingClass = notification.classList.contains('loading');
+      const hasLoadingTitle = notification.querySelector('.notification-title')?.textContent?.toLowerCase().includes('carregando') ||
+                             notification.querySelector('.notification-title')?.textContent?.toLowerCase().includes('fazendo login') ||
+                             notification.querySelector('.notification-title')?.textContent?.toLowerCase().includes('processando');
+      
+      return hasLoadingIcon || hasLoadingClass || hasLoadingTitle;
+    });
+  
+  loadingNotifications.forEach(notification => {
+    const id = notification.dataset.id;
+    if (id) {
+      notificationManager.hide(id);
+    }
+  });
+  
+  // Se não encontrou nenhuma notificação específica, limpar todas as notificações que não são closable
+  if (loadingNotifications.length === 0) {
+    const nonClosableNotifications = Array.from(notificationManager.notifications.values())
+      .filter(notification => !notification.querySelector('.notification-close'));
+    
+    nonClosableNotifications.forEach(notification => {
+      const id = notification.dataset.id;
+      if (id) {
+        notificationManager.hide(id);
+      }
+    });
+  }
 }
 
 function clearAllNotifications() {

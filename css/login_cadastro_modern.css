@@ -1,0 +1,410 @@
+/* ===== DESIGN MODERNO PARA LOGIN E CADASTRO ===== */
+
+/* Reset e configurações base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #47946a 0%, #764ba2 100%); /* Gradienta das telas de fundo */
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Container principal */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* Card principal */
+.auth-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  max-width: 1000px;
+  width: 100%;
+  min-height: 600px;
+  display: flex;
+}
+
+/* Lado da imagem */
+.auth-image {
+  flex: 1;
+  background: linear-gradient(45deg, #28a745, #20c997);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.auth-image::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('../img/wallpaper_login.jpg') center/cover;
+  opacity: 0.3;
+  z-index: 1;
+}
+
+.auth-image-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: white;
+}
+
+.auth-image h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.auth-image p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  line-height: 1.6;
+}
+
+.eco-icon {
+  font-size: 4rem;
+  margin-bottom: 2rem;
+  opacity: 0.8;
+}
+
+/* Lado do formulário */
+.auth-form {
+  flex: 1;
+  padding: 60px 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Cabeçalho do formulário */
+.auth-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.auth-header h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 8px;
+}
+
+.auth-header p {
+  color: #718096;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* Grupos de input modernos */
+.modern-input-group {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.modern-input {
+  width: 100%;
+  padding: 16px 20px 16px 50px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: #f8fafc;
+}
+
+.modern-input:focus {
+  outline: none;
+  border-color: #28a745;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+}
+
+.modern-input::placeholder {
+  color: #a0aec0;
+}
+
+.input-icon {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a0aec0;
+  font-size: 1.1rem;
+  transition: color 0.3s ease;
+}
+
+.modern-input:focus + .input-icon {
+  color: #28a745;
+}
+
+/* Botão moderno */
+.modern-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #28a745, #20c997);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 20px;
+}
+
+.modern-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(40, 167, 69, 0.3);
+}
+
+.modern-btn:active {
+  transform: translateY(0);
+}
+
+/* Links */
+.auth-links {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.auth-link {
+  color: #28a745;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.auth-link:hover {
+  color: #20c997;
+  text-decoration: underline;
+}
+
+.forgot-password {
+  display: block;
+  margin-top: 16px;
+  color: #718096;
+  font-size: 0.9rem;
+}
+
+/* Botão de voltar moderno */
+.back-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  z-index: 10;
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateX(-3px);
+}
+
+/* Mensagens de erro/sucesso */
+.message {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  display: none; /* Escondido por padrão */
+}
+
+.message.show {
+  display: block; /* Mostrar quando necessário */
+}
+
+.message.error {
+  background: #fed7d7;
+  color: #c53030;
+  border: 1px solid #feb2b2;
+}
+
+.message.success {
+  background: #c6f6d5;
+  color: #2f855a;
+  border: 1px solid #9ae6b4;
+}
+
+/* Mensagens de validação específicas */
+.validation-message {
+  font-size: 0.8rem;
+  margin-top: -15px;
+  margin-bottom: 15px;
+  display: none;
+  color: #c53030;
+}
+
+.validation-message.show {
+  display: block;
+}
+
+/* Animações */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auth-card {
+  animation: slideInUp 0.6s ease-out;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .auth-card {
+    flex-direction: column;
+    margin: 10px;
+    min-height: auto;
+  }
+  
+  .auth-image {
+    min-height: 200px;
+    padding: 30px 20px;
+  }
+  
+  .auth-image h2 {
+    font-size: 1.8rem;
+  }
+  
+  .auth-form {
+    padding: 40px 30px;
+  }
+  
+  .auth-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .back-btn {
+    top: 15px;
+    left: 15px;
+    width: 45px;
+    height: 45px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-container {
+    padding: 10px;
+  }
+  
+  .auth-form {
+    padding: 30px 20px;
+  }
+  
+  .modern-input {
+    padding: 14px 18px 14px 45px;
+  }
+  
+  .input-icon {
+    left: 15px;
+  }
+}
+
+/* Estados de loading */
+.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.loading .modern-btn {
+  background: #a0aec0;
+  cursor: not-allowed;
+}
+
+/* Loading específico para botões */
+.modern-btn.loading {
+  opacity: 1;
+  cursor: not-allowed;
+  position: relative;
+}
+
+.modern-btn.loading .spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+  border-width: 0.15em;
+}
+
+/* Animação suave para o spinner */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spinner-border {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  vertical-align: text-bottom;
+  border: 0.15em solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+.spinner-border-sm {
+  width: 0.875rem;
+  height: 0.875rem;
+  border-width: 0.125em;
+}
+
+/* Efeitos visuais extras */
+.auth-image::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  z-index: 1;
+}
+
+/* Checkbox personalizado */
+.custom-checkbox {
+  display: flex;
+  align-items: center;
+  margin: 16px 0;
+  cursor: pointer;
+}
+
+.custom-checkbox input {
+  margin-right: 8px;
+  transform: scale(1.2);
+}
+
+.custom-checkbox label {
+  color: #4a5568;
+  font-size: 0.9rem;
+  cursor: pointer;
+}

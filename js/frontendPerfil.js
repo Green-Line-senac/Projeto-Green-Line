@@ -24,7 +24,7 @@ async function carregarDadosUsuario() {
 
     if (!token || !idPessoa) {
       console.error("Usuário não autenticado - redirecionando para login");
-      hideLoading();
+      hideNotification(loadingId);
       showError('Acesso negado', 'Você precisa fazer login para acessar esta página');
       setTimeout(() => {
         window.location.href = `${basePath}/login.html`;
@@ -45,7 +45,7 @@ async function carregarDadosUsuario() {
     if (!response.ok) {
       if (response.status === 401 || response.status === 403) {
         // Token inválido ou expirado - forçar logout
-        hideLoading();
+        hideNotification(loadingId);
         showError('Sessão expirada', 'Sua sessão expirou. Faça login novamente');
         setTimeout(() => {
           logout();
@@ -67,12 +67,12 @@ async function carregarDadosUsuario() {
     document.body.classList.toggle('dark-mode', darkModeEnabled);
     document.getElementById('darkModeToggle').checked = darkModeEnabled;
 
-    hideLoading();
+    hideNotification(loadingId);
     showSuccess('Perfil carregado!', 'Suas informações foram carregadas com sucesso', { duration: 3000 });
 
   } catch (error) {
     console.error("Erro ao carregar dados do usuário:", error);
-    hideLoading();
+    hideNotification(loadingId);
     showError('Erro ao carregar perfil', 'Não foi possível carregar suas informações. Tente novamente.');
   }
 }
@@ -316,7 +316,7 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error("Erro ao salvar informações pessoais");
       }
 
-      hideLoading();
+      hideNotification(loadingId);
       showSuccess('Informações salvas!', 'Suas informações pessoais foram atualizadas com sucesso');
       carregarDadosUsuario(); // Recarrega para garantir que os dados exibidos estão atualizados
     } catch (error) {
@@ -436,7 +436,7 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error("Erro ao deletar conta");
       }
 
-      hideLoading();
+      hideNotification(loadingId);
       showSuccess('Conta excluída!', 'Sua conta foi excluída com sucesso. Você será redirecionado.');
 
       setTimeout(() => {
@@ -444,7 +444,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 2000);
     } catch (error) {
       console.error("Erro ao deletar conta:", error);
-      hideLoading();
+      hideNotification(loadingId);
       showError('Erro ao excluir conta', 'Não foi possível excluir sua conta. Tente novamente.');
     }
   });
@@ -476,11 +476,11 @@ document.addEventListener("DOMContentLoaded", () => {
           // Em um ambiente de produção, é melhor fazer upload para um serviço de armazenamento de arquivos.
           await atualizarImagemPerfil(e.target.result);
           document.getElementById('profileAvatar').src = e.target.result;
-          hideLoading();
+          hideNotification(loadingId);
           showSuccess('Foto atualizada!', 'Sua imagem de perfil foi atualizada com sucesso');
         } catch (error) {
           console.error("Erro ao atualizar imagem de perfil:", error);
-          hideLoading();
+          hideNotification(loadingId);
           showError('Erro ao atualizar foto', 'Não foi possível atualizar sua imagem de perfil');
         }
       };
@@ -501,7 +501,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const resp = await fetch(`https://green-line-web.onrender.com/pessoa/${idPessoa}/pedidos`);
 
-      hideLoading();
+      hideNotification(loadingId);
 
       if (!resp.ok) {
         container.innerHTML = '<p>Nenhum pedido encontrado.</p>';
@@ -532,7 +532,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     } catch (err) {
       console.error('Erro ao carregar pedidos:', err);
-      hideLoading();
+      hideNotification(loadingId);
       container.innerHTML = '<p>Erro ao carregar pedidos.</p>';
       showError('Erro ao carregar histórico', 'Não foi possível carregar seus pedidos. Tente novamente.');
     }

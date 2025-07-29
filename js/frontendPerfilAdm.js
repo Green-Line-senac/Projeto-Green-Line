@@ -2,12 +2,29 @@
 
 // Dados do usuário
 let usuarioLogado = null;
-// URL da API
+// Configuração inteligente de API baseada no ambiente
+const isDeployment = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+
 const api = {
   online: "https://green-line-web.onrender.com",
-  perfil: "http://localhost:3008",
-  index: "http://localhost:3002",
+  perfil: isDeployment ? "https://green-line-web.onrender.com" : "http://localhost:3008",
+  index: isDeployment ? "https://green-line-web.onrender.com" : "http://localhost:3002",
 };
+
+// Função utilitária para fazer requisições com fallback automático
+async function fetchWithFallback(localUrl, onlineUrl, options = {}) {
+  if (isDeployment) {
+    console.log('Ambiente de deploy detectado, usando servidor online...');
+    return await fetch(onlineUrl, options);
+  } else {
+    try {
+      return await fetch(localUrl, options);
+    } catch (localError) {
+      console.log('Servidor local não disponível, tentando servidor online...');
+      return await fetch(onlineUrl, options);
+    }
+  }
+}
 const basePath = window.location.pathname.includes("green_line_web")
   ? "/green_line_web/public"
   : "/public";
@@ -603,15 +620,24 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
     const idPessoa = sessionStorage.getItem("id_pessoa");
     if (!idPessoa) return;
 
-    const container = document.getElementById("savedProductsContent");
+    const container = document.getElementById("purchaseHistoryContent");
+    if (!container) {
+      console.error('Elemento purchaseHistoryContent não encontrado');
+      return;
+    }
+
     const loadingId = showLoading('Carregando histórico...', 'Buscando seus pedidos anteriores');
 
     container.innerHTML = '<div class="text-center"><p>Carregando pedidos...</p></div>';
 
     try {
-      const resp = await fetch(`https://green-line-web.onrender.com/pessoa/${idPessoa}/pedidos`);
+      // Usar função utilitária com fallback automático
+      const resp = await fetchWithFallback(
+        `http://localhost:3008/pessoa/${idPessoa}/pedidos`,
+        `${api.online}/pessoa/${idPessoa}/pedidos`
+      );
 
-      hideLoading();
+      hideNotification(loadingId);
 
       if (!resp.ok) {
         container.innerHTML = '<p>Nenhum pedido encontrado.</p>';
@@ -642,7 +668,7 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
 
     } catch (err) {
       console.error('Erro ao carregar pedidos:', err);
-      hideLoading();
+      hideNotification(loadingId);
       container.innerHTML = '<p>Erro ao carregar pedidos.</p>';
       showError('Erro ao carregar histórico', 'Não foi possível carregar seus pedidos. Tente novamente.');
     }
@@ -679,65 +705,100 @@ async function atualizarImagemPerfil(imageData) {
   }
 }
 
-function loadTodosPedidos() {
-  fetch('http://localhost:3008/pedidos/todos')
-    .then(res => res.json())
-    .then(pedidos => {
-      const container = document.getElementById("purchaseHistoryContent");
-      if (!pedidos.length) {
-        container.innerHTML = "<p>Nenhum pedido encontrado.</p>";
-        return;
+async function loadTodosPedidos() {
+  const container = document.getElementById("purchaseHistoryContent");
+  if (!container) {
+    console.error('Elemento purchaseHistoryContent não encontrado');
+    return;
+  }
+
+  const loadingId = showLoading('Carregando pedidos...', 'Buscando todos os pedidos do sistema');
+
+  try {
+    // Usar função utilitária com fallback automático
+    const response = await fetchWithFallback(
+      'http://localhost:3008/pedidos/todos',
+      `${api.online}/pedidos/todos`
+    );
+
+    hideNotification(loadingId);
+
+    if (!response.ok) {
+      throw new Error(`Erro HTTP: ${response.status}`);
+    }
+
+    const pedidos = await response.json();
+
+    if (!Array.isArray(pedidos) || pedidos.length === 0) {
+      container.innerHTML = "<p>Nenhum pedido encontrado no sistema.</p>";
+      showInfo('Nenhum pedido', 'Não há pedidos cadastrados no sistema ainda', { duration: 3000 });
+      return;
+    }
+
+    const pedidosPorUsuario = {};
+
+    pedidos.forEach(p => {
+      if (!pedidosPorUsuario[p.numero_pedido]) {
+        pedidosPorUsuario[p.numero_pedido] = {
+          usuario: p.nome_usuario,
+          email: p.email,
+          telefone: p.telefone,
+          data: p.data_hora,
+          situacao: p.situacao,
+          valor_total: p.valor_total,
+          itens: [],
+        };
       }
 
-      const pedidosPorUsuario = {};
-
-      pedidos.forEach(p => {
-        if (!pedidosPorUsuario[p.numero_pedido]) {
-          pedidosPorUsuario[p.numero_pedido] = {
-            usuario: p.nome_usuario,
-            email: p.email,
-            telefone: p.telefone,
-            data: p.data_hora,
-            situacao: p.situacao,
-            valor_total: p.valor_total,
-            itens: [],
-          };
-        }
-
-        pedidosPorUsuario[p.numero_pedido].itens.push({
-          produto: p.nome_produto,
-          quantidade: p.quantidade,
-          preco: p.preco_unitario,
-        });
+      pedidosPorUsuario[p.numero_pedido].itens.push({
+        produto: p.nome_produto,
+        quantidade: p.quantidade,
+        preco: p.preco_unitario,
       });
-
-      container.innerHTML = "";
-
-      Object.entries(pedidosPorUsuario).forEach(([pedidoId, pedido]) => {
-        const pedidoEl = document.createElement("div");
-        pedidoEl.classList.add("admin-order");
-
-        pedidoEl.innerHTML = `
-          <h4>Pedido: ${pedidoId} - ${new Date(pedido.data).toLocaleString()}</h4>
-          <p><strong>Cliente:</strong> ${pedido.usuario} (${pedido.email})</p>
-          <p><strong>Telefone:</strong> ${pedido.telefone}</p>
-          <p><strong>Status:</strong> ${pedido.situacao}</p>
-          <p><strong>Total:</strong> R$ ${parseFloat(pedido.valor_total).toFixed(2)}</p>
-          <ul>
-            ${pedido.itens.map(item => `
-              <li>${item.quantidade}x ${item.produto} - R$ ${parseFloat(item.preco).toFixed(2)}</li>
-            `).join("")}
-          </ul>
-          <hr>
-        `;
-
-        container.appendChild(pedidoEl);
-      });
-    })
-    .catch(err => {
-      console.error("Erro ao carregar pedidos:", err);
-      document.getElementById("purchaseHistoryContent").innerHTML = "<p>Erro ao carregar pedidos.</p>";
     });
+
+    container.innerHTML = "";
+
+    Object.entries(pedidosPorUsuario).forEach(([pedidoId, pedido]) => {
+      const pedidoEl = document.createElement("div");
+      pedidoEl.classList.add("admin-order");
+
+      pedidoEl.innerHTML = `
+        <h4>Pedido: ${pedidoId} - ${new Date(pedido.data).toLocaleString()}</h4>
+        <p><strong>Cliente:</strong> ${pedido.usuario} (${pedido.email})</p>
+        <p><strong>Telefone:</strong> ${pedido.telefone}</p>
+        <p><strong>Status:</strong> ${pedido.situacao}</p>
+        <p><strong>Total:</strong> R$ ${parseFloat(pedido.valor_total).toFixed(2)}</p>
+        <ul>
+          ${pedido.itens.map(item => `
+            <li>${item.quantidade}x ${item.produto} - R$ ${parseFloat(item.preco).toFixed(2)}</li>
+          `).join("")}
+        </ul>
+        <hr>
+      `;
+
+      container.appendChild(pedidoEl);
+    });
+
+    showSuccess('Pedidos carregados!', `${Object.keys(pedidosPorUsuario).length} pedido(s) encontrado(s)`, { duration: 3000 });
+
+  } catch (err) {
+    console.error("Erro ao carregar pedidos:", err);
+    hideNotification(loadingId);
+    container.innerHTML = `
+      <div class="alert alert-warning">
+        <h5>Erro ao carregar pedidos</h5>
+        <p>Não foi possível carregar os pedidos do sistema. Isso pode acontecer se:</p>
+        <ul>
+          <li>O servidor backend não estiver rodando</li>
+          <li>Houver problemas de conectividade</li>
+          <li>A rota /pedidos/todos não estiver implementada</li>
+        </ul>
+        <button class="btn btn-primary btn-sm" onclick="loadTodosPedidos()">Tentar novamente</button>
+      </div>
+    `;
+    showError('Erro ao carregar pedidos', 'Não foi possível carregar os pedidos do sistema. Verifique se o servidor está funcionando.');
+  }
 }
 
 
