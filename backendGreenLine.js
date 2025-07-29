@@ -568,7 +568,7 @@ app.post("/recuperar-senha", async (req, res) => {
 
     // Verificar se o email existe no banco de dados
     const [usuario] = await db.query(
-      `SELECT id, email FROM usuarios WHERE email = ? LIMIT 1`,
+      `SELECT id_pessoa, email FROM pessoa WHERE email = ? LIMIT 1`,
       [email]
     );
 
