@@ -28,6 +28,9 @@ const elementos = {
   produtoModal: new bootstrap.Modal("#produtoModal"),
   modalAlert: document.getElementById("modal-alert"),
   carroselImagem: document.getElementById("carrosel-imagem"),
+  categoriaBadge: document.getElementById("categoria-badge"),
+  categoriaTitulo: document.getElementById("categoria-titulo"),
+  categoriaDescricao: document.getElementById("categoria-descricao"),
 };
 
 // Estado da aplicação
@@ -163,9 +166,20 @@ async function carregarProdutos() {
     // Fazendo a requisição
     const response = await fetch(url);
     let categoria = decodeURIComponent(categoriaSelecionada);
-    // Atualizando a imagem do carrossel
+    // Atualizando a imagem e conteúdo do carrossel
     elementos.carroselImagem.src = `../img/index_categorias/${categoria}.jpg`;
-    elementos.carroselImagem.alt = categoria;
+    elementos.carroselImagem.alt = `Produtos da categoria ${categoria}`;
+    
+    // Atualizando o conteúdo textual do carrossel
+    if (elementos.categoriaBadge) {
+      elementos.categoriaBadge.textContent = `🌱 ${categoria}`;
+    }
+    if (elementos.categoriaTitulo) {
+      elementos.categoriaTitulo.textContent = `${categoria}`;
+    }
+    if (elementos.categoriaDescricao) {
+      elementos.categoriaDescricao.textContent = `Explore nossa seleção especial de produtos da categoria ${categoria}`;
+    }
     const data = await response.json();
 
     if (!Array.isArray(data) || data.length === 0) {
@@ -211,12 +225,17 @@ function renderizarProdutos() {
 function criarCardProduto(produto) {
   const card = document.createElement("div");
   card.className = "col-12 col-sm-6 col-md-4 col-lg-3 mb-4";
-  const precoFormatado = produto.promocao
-    ? `<span style="text-decoration: line-through; font-size: 0.9rem;">R$ ${produto.preco.toFixed(
-        2
-      )}</span>
-       <span class="fs-5 ms-2">R$ ${(produto.preco * 0.8).toFixed(2)}</span>`
-    : `<span class="fs-5">R$ ${produto.preco.toFixed(2)}</span>`;
+  
+  // Lógica corrigida para preços
+  let precoFormatado;
+  if (produto.promocao && produto.preco_promocional > 0) {
+    // Produto em promoção com preço promocional válido
+    precoFormatado = `<span style="text-decoration: line-through; font-size: 0.9rem;">R$ ${produto.preco.toFixed(2)}</span>
+       <span class="fs-5 ms-2 text-success">R$ ${produto.preco_promocional.toFixed(2)}</span>`;
+  } else {
+    // Produto sem promoção ou sem preço promocional válido - usa preço normal
+    precoFormatado = `<span class="fs-5">R$ ${produto.preco.toFixed(2)}</span>`;
+  }
   card.innerHTML = `
     <div class="card h-100 cursor point">
       <img src="${
@@ -349,30 +368,33 @@ function abrirModalProduto(dadosProduto) {
     }
   }
 
-  // Preços
+  // Preços - Lógica corrigida
   const precoContainer = document.getElementById("produtoModalPreco");
   const precoBase = produto.preco.toLocaleString("pt-BR", {
     style: "currency",
     currency: "BRL",
   });
+  
   if (precoContainer) {
-    if (produto.promocao && produto.preco_promocional) {
+    // Verifica se está em promoção E tem preço promocional válido (maior que 0)
+    if (produto.promocao && produto.preco_promocional > 0) {
       const precoPromo = produto.preco_promocional.toLocaleString("pt-BR", {
         style: "currency",
         currency: "BRL",
       });
+      const desconto = Math.round(100 - (produto.preco_promocional / produto.preco) * 100);
+      
       precoContainer.innerHTML = `
         <div class="price-container">
           <span class="original-price">${precoBase}</span>
           <span class="discount-price">${precoPromo}</span>
           <span class="discount-badge">
-            ${Math.round(
-              100 - (produto.preco_promocional / produto.preco) * 100
-            )}% OFF
+            ${desconto}% OFF
           </span>
         </div>
       `;
     } else {
+      // Produto sem promoção ou sem preço promocional válido - mostra preço normal
       precoContainer.innerHTML = `
         <div class="price-container">
           <span class="current-price">${precoBase}</span>
@@ -465,11 +487,9 @@ function configurarEventos() {
       const discountPriceEl = document.querySelector(
         "#produtoModalPreco .discount-price"
       );
-
-      if (!originalPriceEl) {
-        mostrarFeedback("Erro ao obter preço do produto.", "danger");
-        return;
-      }
+      const currentPriceEl = document.querySelector(
+        "#produtoModalPreco .current-price"
+      );
 
       // Extrair preço de forma segura
       function extrairPreco(elemento) {
@@ -484,19 +504,22 @@ function configurarEventos() {
       }
 
       let preco_final;
-      const isPromocao = window
-        .getComputedStyle(originalPriceEl)
-        .textDecoration.includes("line-through");
 
-      if (isPromocao && discountPriceEl) {
+      // Lógica corrigida para obter o preço final
+      if (discountPriceEl) {
+        // Se existe preço promocional, usa ele
         preco_final = extrairPreco(discountPriceEl);
-      } else {
+      } else if (currentPriceEl) {
+        // Se não há promoção, usa o preço atual
+        preco_final = extrairPreco(currentPriceEl);
+      } else if (originalPriceEl) {
+        // Fallback para preço original
         preco_final = extrairPreco(originalPriceEl);
       }
 
       // Validar preço
       if (preco_final === null || preco_final <= 0) {
-        mostrarFeedback("Preço do produto inválido.", "danger");
+        mostrarFeedback("Erro ao obter preço do produto.", "danger");
         return;
       }
 
@@ -574,6 +597,10 @@ function configurarEventos() {
       }
     });
 }
+
+
+
+
 
 // == Inicialização ==
 

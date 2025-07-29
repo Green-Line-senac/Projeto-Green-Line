@@ -103,10 +103,17 @@ function formatarPrecoBR(valor) {
 function criarCardProduto(produto) {
   const card = document.createElement("div");
   card.className = "col-12 col-sm-6 col-md-4 col-lg-3 mb-4";
-  const precoFormatado = produto.promocao
-    ? `<span style="text-decoration: line-through; font-size: 0.9rem;">${formatarPrecoBR(produto.preco)}</span>
-       <span class="fs-5 ms-2">${formatarPrecoBR(produto.preco * 0.8)}</span>`
-    : `<span class="fs-5">${formatarPrecoBR(produto.preco)}</span>`;
+  
+  // Lógica corrigida para preços
+  let precoFormatado;
+  if (produto.promocao && produto.preco_promocional > 0) {
+    // Produto em promoção com preço promocional válido
+    precoFormatado = `<span style="text-decoration: line-through; font-size: 0.9rem;">${formatarPrecoBR(produto.preco)}</span>
+       <span class="fs-5 ms-2 text-success">${formatarPrecoBR(produto.preco_promocional)}</span>`;
+  } else {
+    // Produto sem promoção ou sem preço promocional válido - usa preço normal
+    precoFormatado = `<span class="fs-5">${formatarPrecoBR(produto.preco)}</span>`;
+  }
   card.innerHTML = `
     <div class="card h-100 cursor point">
       <img src="${
