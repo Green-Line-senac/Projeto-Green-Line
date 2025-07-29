@@ -31,72 +31,14 @@
           <p class="lead mb-4">Bem-vindo ao Green Line!</p>
           <div class="alert alert-success mb-4">
             <p class="mb-2">🎉 Sua conta foi ativada e está pronta para uso!</p>
-            <p class="mb-0">⏰ Você será redirecionado para o login em <span id="countdown-email" class="fw-bold text-primary">10</span> segundos</p>
-          </div>
-          <div class="progress mt-3" style="height: 6px;">
-            <div id="progress-bar-email" class="progress-bar bg-success progress-bar-animated" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
           </div>
           <div class="mt-3">
-            <a href="login.html" class="btn btn-success btn-sm">Fazer login agora</a>
+            <a href="login.html" class="btn btn-success">Fazer login agora</a>
           </div>
         </div>
       </div>
     </div>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // Função para iniciar contagem regressiva e redirecionamento
-    function iniciarRedirecionamentoEmail() {
-      let contador = 10;
-      const elementoContador = document.getElementById('countdown-email');
-      const progressBar = document.getElementById('progress-bar-email');
-      
-      // Atualizar contador a cada segundo
-      const intervalo = setInterval(() => {
-        contador--;
-        
-        if (elementoContador) {
-          elementoContador.textContent = contador;
-        }
-        
-        // Atualizar barra de progresso
-        if (progressBar) {
-          const porcentagem = (contador / 10) * 100;
-          progressBar.style.width = porcentagem + '%';
-          progressBar.setAttribute('aria-valuenow', porcentagem);
-        }
-        
-        // Quando chegar a 0, redirecionar
-        if (contador <= 0) {
-          clearInterval(intervalo);
-          window.location.href = 'login.html';
-        }
-      }, 1000);
-      
-      // Permitir que o usuário cancele o redirecionamento clicando no card
-      const cancelarRedirecionamento = () => {
-        clearInterval(intervalo);
-        document.removeEventListener('click', cancelarRedirecionamento);
-        
-        // Atualizar mensagem para mostrar que foi cancelado
-        if (elementoContador) {
-          elementoContador.parentElement.innerHTML = '⏸️ Redirecionamento cancelado. <a href="login.html" class="text-decoration-underline">Clique aqui para fazer login</a>';
-        }
-        
-        // Parar animação da barra de progresso
-        if (progressBar) {
-          progressBar.classList.remove('progress-bar-animated');
-        }
-      };
-      
-      // Adicionar listener para cancelar redirecionamento após 1 segundo
-      setTimeout(() => {
-        document.addEventListener('click', cancelarRedirecionamento, { once: true });
-      }, 1000);
-    }
-    
-    // Iniciar quando a página carregar
-    document.addEventListener('DOMContentLoaded', iniciarRedirecionamentoEmail);
-  </script>
 </body>
 </html>
