@@ -493,7 +493,22 @@ if (document.readyState === 'loading') {
   }
 }
 
-// Exportar para módulos se necessário
+// Exportações ES6 para módulos
+export {
+  NotificationManager,
+  notifications,
+  showNotification,
+  showSuccess,
+  showError,
+  showWarning,
+  showInfo,
+  showValidationError,
+  showLoading,
+  hideNotification,
+  clearAllNotifications
+};
+
+// Exportar para módulos CommonJS se necessário
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     NotificationManager,
