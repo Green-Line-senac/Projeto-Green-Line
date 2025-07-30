@@ -793,11 +793,10 @@ app.post("/salvar-pedido", async (req, res) => {
         .json({ error: "Dados do pedido inválidos", codigo: -1 });
     }
 
-    // Processar pagamento
-    if (
-      pedido.formaPagamentoVendas === "PIX" ||
-      pedido.formaPagamentoVendas === "BB"
-    ) {
+    const formaPagamento = pedido.formaPagamentoVendas;
+
+    // Se for string (PIX ou BB)
+    if (formaPagamento === "PIX" || formaPagamento === "BB") {
       console.log("Processando pagamento PIX/BB...");
       const sql = `
         INSERT INTO pedidos(
@@ -816,7 +815,7 @@ app.post("/salvar-pedido", async (req, res) => {
       await db.query(sql, [
         pedido.numeroPedido,
         pedido.idPessoa,
-        pedido.formaPagamentoVendas, // Aqui é direto "PIX" ou "BB"
+        formaPagamento,
         pedido.total,
         pedido.nomeTitular,
         pedido.metodoEntrega,
@@ -825,15 +824,17 @@ app.post("/salvar-pedido", async (req, res) => {
         pedido.subtotal,
         pedido.desconto,
       ]);
-    } else if (
-      pedido.formaPagamentoVendas.metodoPagamento === "CC" ||
-      pedido.formaPagamentoVendas.metodoPagamento === "DEB"
+    }
+
+    // Se for objeto (Cartão de Crédito ou Débito)
+    else if (
+      typeof formaPagamento === "object" &&
+      (formaPagamento.metodoPagamento === "CC" ||
+        formaPagamento.metodoPagamento === "DEB")
     ) {
       console.log("Processando pagamento com cartão...");
       const tipoPagamento =
-        pedido.formaPagamentoVendas.metodoPagamento === "CC"
-          ? "CRÉDITO"
-          : "DÉBITO";
+        formaPagamento.metodoPagamento === "CC" ? "CRÉDITO" : "DÉBITO";
 
       const sql = `
         INSERT INTO pedidos(
@@ -859,11 +860,11 @@ app.post("/salvar-pedido", async (req, res) => {
         pedido.idPessoa,
         tipoPagamento,
         pedido.total,
-        pedido.formaPagamentoVendas.parcelas?.replace("x", "") || 1,
-        pedido.formaPagamentoVendas.numeroCartao,
-        pedido.formaPagamentoVendas.nomeCartao,
-        pedido.formaPagamentoVendas.validadeCartao,
-        pedido.formaPagamentoVendas.cvv,
+        formaPagamento.parcelas?.replace("x", "") || 1,
+        formaPagamento.numeroCartao,
+        formaPagamento.nomeCartao,
+        formaPagamento.validadeCartao,
+        formaPagamento.cvv,
         pedido.nomeTitular,
         pedido.metodoEntrega,
         pedido.previsaoEntrega,
@@ -871,13 +872,16 @@ app.post("/salvar-pedido", async (req, res) => {
         pedido.subtotal,
         pedido.desconto,
       ]);
-    } else {
+    }
+
+    // Forma de pagamento inválida
+    else {
       return res
         .status(400)
         .json({ error: "Método de pagamento inválido", codigo: -3 });
     }
 
-    // Restante do código permanece igual...
+    // Obter ID do pedido recém inserido
     const ultimoPedido = await db.query(
       "SELECT id_pedido FROM pedidos WHERE numero_pedido = ? ORDER BY id_pedido DESC LIMIT 1",
       [pedido.numeroPedido]
@@ -885,7 +889,7 @@ app.post("/salvar-pedido", async (req, res) => {
     const idPedido = ultimoPedido[0].id_pedido;
     console.log("ID do pedido inserido:", idPedido);
 
-    // Inserir produtos do pedido e atualizar estoque
+    // Inserir produtos no pedido e atualizar estoque
     for (const produto of pedido.produtos) {
       const produtoExistente = await db.query(
         "SELECT id_produto, estoque FROM produto WHERE nome_produto = ? LIMIT 1",
@@ -901,7 +905,6 @@ app.post("/salvar-pedido", async (req, res) => {
       const estoqueAtual = produtoInfo.estoque;
       const quantidadeComprada = produto.quantidade;
 
-      // Verificar se há estoque suficiente
       if (estoqueAtual < quantidadeComprada) {
         console.error(
           `Estoque insuficiente para ${produto.nome}. Disponível: ${estoqueAtual}, Solicitado: ${quantidadeComprada}`
@@ -929,7 +932,7 @@ app.post("/salvar-pedido", async (req, res) => {
         ]
       );
 
-      // Atualizar estoque do produto
+      // Atualizar estoque
       const novoEstoque = estoqueAtual - quantidadeComprada;
       await db.query("UPDATE produto SET estoque = ? WHERE id_produto = ?", [
         novoEstoque,
