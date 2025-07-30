@@ -27,8 +27,8 @@ let estado = {
   quantidadeProdutos: 1,
 };
 const caminho = window.location.pathname.includes("green_line_web")
-          ? "/green_line_web/public"
-          : "/public";
+  ? "/green_line_web/public"
+  : "/public";
 
 // ==================== FUNÇÕES PRINCIPAIS ====================
 
@@ -97,31 +97,39 @@ function renderizarProdutos() {
 }
 
 function formatarPrecoBR(valor) {
-  return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  // Garantir que o valor seja um número
+  const numeroValor = typeof valor === 'string' ? parseFloat(valor.replace(',', '.')) : Number(valor);
+
+  // Verificar se é um número válido
+  if (isNaN(numeroValor)) {
+    console.warn('Valor inválido para formatação:', valor);
+    return 'R$ 0,00';
+  }
+
+  return numeroValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
 function criarCardProduto(produto) {
   const card = document.createElement("div");
   card.className = "col-12 col-sm-6 col-md-4 col-lg-3 mb-4";
-  
-  // Lógica corrigida para preços
+
+  // Lógica corrigida para preços com cores adequadas
   let precoFormatado;
   if (produto.promocao && produto.preco_promocional > 0) {
-    // Produto em promoção com preço promocional válido
-    precoFormatado = `<span style="text-decoration: line-through; font-size: 0.9rem;">${formatarPrecoBR(produto.preco)}</span>
-       <span class="fs-5 ms-2 text-success">${formatarPrecoBR(produto.preco_promocional)}</span>`;
+    // Produto em promoção: preço original riscado em cinza escuro, preço promocional em verde
+    precoFormatado = `<span style="text-decoration: line-through; font-size: 0.9rem; color: #555;">${formatarPrecoBR(produto.preco)}</span>
+       <span class="fs-5 ms-2" style="color: #28a745; font-weight: bold;">${formatarPrecoBR(produto.preco_promocional)}</span>`;
   } else {
-    // Produto sem promoção ou sem preço promocional válido - usa preço normal
-    precoFormatado = `<span class="fs-5">${formatarPrecoBR(produto.preco)}</span>`;
+    // Produto sem promoção: preço normal em cinza escuro
+    precoFormatado = `<span class="fs-5" style="color: #333;">${formatarPrecoBR(produto.preco)}</span>`;
   }
   card.innerHTML = `
     <div class="card h-100 cursor point">
-      <img src="${
-        produto.imagem_1 != null
-          ? produto.imagem_1
-          : "https://github.com/KauaNca/green_line_desktop/tree/main/imagens/produtos/" +
-            produto.imagem_1
-      }" 
+      <img src="${produto.imagem_1 != null
+      ? produto.imagem_1
+      : "https://github.com/KauaNca/green_line_desktop/tree/main/imagens/produtos/" +
+      produto.imagem_1
+    }" 
            class="card-img-top" 
            alt="${escapeHtml(produto.nome)}"
            loading="lazy"
@@ -134,20 +142,19 @@ function criarCardProduto(produto) {
           <small class="text-muted">${produto.numAvaliacoes} av.</small>
         </div>
         <p class="card-text text-muted small">${escapeHtml(
-          produto.descricao_curta.substring(0, 60)
-        )}${produto.descricao_curta.length > 60 ? "..." : ""}</p>
-        <p class="fw-bold mb-0 ${produto.promocao ? "text-success" : ""}">
+      produto.descricao_curta.substring(0, 60)
+    )}${produto.descricao_curta.length > 60 ? "..." : ""}</p>
+        <p class="fw-bold mb-0">
           ${precoFormatado}
-        </p class="">
+        </p>
         ${(produto.estoque = 0
-          ? '<span class="badge bg-secondary mt-2">Fora de estoque</span>'
-          : "")}
+      ? '<span class="badge bg-secondary mt-2">Fora de estoque</span>'
+      : "")}
         <p class="">
-          ${
-            produto.categoria
-              ? `<span class="badge bg-success mt-2">${produto.categoria}</span>`
-              : ""
-          }
+          ${produto.categoria
+      ? `<span class="badge bg-success mt-2">${produto.categoria}</span>`
+      : ""
+    }
         </p>
       </div>
     </div>
@@ -162,11 +169,16 @@ function criarCardProduto(produto) {
 // ==================== FUNÇÕES AUXILIARES ====================
 
 function sanitizarProduto(produto) {
+  const precoProcessado = typeof produto.preco === 'string' ? parseFloat(produto.preco.replace(',', '.')) : Number(produto.preco) || 0;
+  const precoPromocionalProcessado = typeof produto.preco_promocional === 'string' ? parseFloat(produto.preco_promocional.replace(',', '.')) : Number(produto.preco_promocional) || 0;
+
+  console.log('Sanitizando produto:', produto.nome || produto.produto, 'Preço original:', produto.preco, 'Preço processado:', precoProcessado);
+
   return {
     ...produto,
     id_produto: parseInt(produto.id_produto) || null,
-    preco: Number(produto.preco) || 0,
-    preco_promocional: produto.preco_promocional || 0,
+    preco: precoProcessado,
+    preco_promocional: precoPromocionalProcessado,
     promocao: Boolean(produto.promocao),
     avaliacao: Number(produto.avaliacao) || 0,
     numAvaliacoes: Number(produto.numAvaliacoes) || 0,

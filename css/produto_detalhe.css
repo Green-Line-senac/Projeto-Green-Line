@@ -65,12 +65,12 @@
 #produto-preco-promocional {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #059669;
+  color: #28a745;
   margin-left: 0.5em;
 }
 #produto-preco-original {
   font-size: 1rem;
-  color: #888;
+  color: #555;
   text-decoration: line-through;
 }
 #produto-parcelamento {

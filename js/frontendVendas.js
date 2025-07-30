@@ -1,4 +1,5 @@
 import { criarPedido } from './api/pedidosApi.js';
+import { showSuccess, showError, showWarning, showInfo, showValidationError, showLoading, hideNotification } from './notifications.js';
 
 const api = {
     online: 'https://green-line-web.onrender.com',
@@ -487,17 +488,33 @@ document.addEventListener('DOMContentLoaded', function() {
     let subtotal = 0;
     let frete = 0;
     if (subtotalEl) {
-      subtotal = parseFloat((subtotalEl.textContent || '0').replace(/[^\d,\.]/g, '').replace(',', '.')) || 0;
+      // Parsing correto do valor do subtotal brasileiro
+      const subtotalText = subtotalEl.textContent || '0';
+      // Remove R$ e espaços, depois trata pontos e vírgulas corretamente
+      let valorLimpo = subtotalText.replace(/[R$\s]/g, '');
+      
+      // Se tem vírgula, é o separador decimal brasileiro
+      if (valorLimpo.includes(',')) {
+        // Remove pontos (separadores de milhares) e substitui vírgula por ponto
+        valorLimpo = valorLimpo.replace(/\./g, '').replace(',', '.');
+      }
+      
+      subtotal = parseFloat(valorLimpo) || 0;
+      console.log('Subtotal parseado:', subtotal, 'de:', subtotalText);
     }
     const freteInput = document.getElementById('frete');
     if (freteInput && freteInput.value) {
       // Garante conversão correta
       frete = Number(freteInput.value.replace(/[^0-9,\.]/g, '').replace(',', '.')) || 0;
-      if (freteEl) freteEl.textContent = `R$ ${frete.toFixed(2)}`;
+      if (freteEl) freteEl.textContent = frete.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     } else {
       if (freteEl) freteEl.textContent = 'R$ 0,00';
     }
-    if (totalEl) totalEl.textContent = `R$ ${(subtotal + frete).toFixed(2)}`;
+    if (totalEl) {
+      const total = subtotal + frete;
+      console.log('Total calculado:', total, '(subtotal:', subtotal, '+ frete:', frete, ')');
+      totalEl.textContent = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
   }
 
   // Atualiza o resumo sempre que o campo frete mudar

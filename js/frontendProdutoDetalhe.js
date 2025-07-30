@@ -51,7 +51,16 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function formatarPrecoBR(valor) {
-  return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  // Garantir que o valor seja um número
+  const numeroValor = typeof valor === 'string' ? parseFloat(valor.replace(',', '.')) : Number(valor);
+  
+  // Verificar se é um número válido
+  if (isNaN(numeroValor)) {
+    console.warn('Valor inválido para formatação:', valor);
+    return 'R$ 0,00';
+  }
+  
+  return numeroValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
 function preencherCamposProduto(produto) {

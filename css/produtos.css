@@ -221,18 +221,18 @@ body {
 
 .original-price {
   text-decoration: line-through;
-  color: #6b7280;
+  color: #555;
   font-size: 0.9rem;
 }
 
 .discount-price {
-  color: #059669;
+  color: #28a745;
   font-weight: bold;
   font-size: 1.2rem;
 }
 
 .current-price {
-  color: #1f2937;
+  color: #333;
   font-weight: bold;
   font-size: 1.2rem;
 }

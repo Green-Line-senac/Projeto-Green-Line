@@ -1,3 +1,5 @@
+import { showSuccess, showError, showWarning, showInfo, showValidationError, showLoading, hideNotification } from './notifications.js';
+
 // Dados do usuário
 let usuarioLogado = null;
 // URL da API
