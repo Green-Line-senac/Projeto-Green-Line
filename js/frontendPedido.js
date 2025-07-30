@@ -150,6 +150,7 @@ async function enviarEmailConfirmacao(pedido) {
           pedido: {
             numeroPedido: pedido.numeroPedido,
             dataConfirmacao: pedido.dataConfirmacao,
+            metodoPagamento: pedido.formaPagamento,
             total: pedido.total,
             previsaoEntrega: pedido.previsaoEntrega,
             produtos: pedido.produtos || []
