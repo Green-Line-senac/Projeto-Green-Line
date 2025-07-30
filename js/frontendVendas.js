@@ -1,4 +1,5 @@
 import { criarPedido } from './api/pedidosApi.js';
+import { showSuccess, showError, showWarning, showInfo, showValidationError, showLoading, hideNotification } from './notifications.js';
 
 const api = {
     online: 'https://green-line-web.onrender.com',
@@ -213,8 +214,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         dadosCompra.forEach(element => {
             const precoFormatado = formatarPrecoBR(element.preco_final);
-            const subtotalFormatado = formatarPrecoBR(element.subtotal);
-            valorTotal += parseFloat(element.subtotal);
+            
+            // Calcular subtotal corretamente
+            const preco = typeof element.preco_final === 'string' 
+                ? parseFloat(element.preco_final.replace(',', '.')) 
+                : Number(element.preco_final);
+            const quantidade = Number(element.quantidade) || 1;
+            const subtotal = preco * quantidade;
+            
+            const subtotalFormatado = formatarPrecoBR(subtotal);
+            valorTotal += subtotal;
 
             htmlContent += `
             <hr>
@@ -227,6 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
         containerProdutos.innerHTML = htmlContent;
         
         // Atualiza os totais
+        console.log("Valor total calculado para exibição:", valorTotal);
         const valorTotalFormatado = formatarPrecoBR(valorTotal);
         document.getElementById("contador-subtotal").textContent = valorTotalFormatado;
         document.getElementById("contador-total").textContent = valorTotalFormatado;
@@ -487,17 +497,22 @@ document.addEventListener('DOMContentLoaded', function() {
     let subtotal = 0;
     let frete = 0;
     if (subtotalEl) {
-      subtotal = parseFloat((subtotalEl.textContent || '0').replace(/[^\d,\.]/g, '').replace(',', '.')) || 0;
+      // Melhor parsing do valor do subtotal
+      const subtotalText = subtotalEl.textContent || '0';
+      subtotal = parseFloat(subtotalText.replace(/[R$\s]/g, '').replace(/\./g, '').replace(',', '.')) || 0;
     }
     const freteInput = document.getElementById('frete');
     if (freteInput && freteInput.value) {
       // Garante conversão correta
       frete = Number(freteInput.value.replace(/[^0-9,\.]/g, '').replace(',', '.')) || 0;
-      if (freteEl) freteEl.textContent = `R$ ${frete.toFixed(2)}`;
+      if (freteEl) freteEl.textContent = frete.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     } else {
       if (freteEl) freteEl.textContent = 'R$ 0,00';
     }
-    if (totalEl) totalEl.textContent = `R$ ${(subtotal + frete).toFixed(2)}`;
+    if (totalEl) {
+      const total = subtotal + frete;
+      totalEl.textContent = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
   }
 
   // Atualiza o resumo sempre que o campo frete mudar
