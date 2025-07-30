@@ -64,7 +64,7 @@ async function carregarDadosUsuario() {
     }
 
     // 4. Processar os dados do usuário
-    const usuarioLogado = await response.json();
+    usuarioLogado = await response.json();
     console.log("Dados do usuário carregados:", usuarioLogado);
     preencherDadosPerfil(usuarioLogado);
     await loadAddress();
@@ -240,91 +240,89 @@ document.addEventListener("DOMContentLoaded", () => {
       document.body.classList.remove("dark-mode");
       localStorage.setItem("darkMode", "false");
     }
+
   });
 
-  // Lógica para editar campos de texto (Nome Completo e Telefone)
-  document.querySelectorAll(".info-value.editable").forEach((element) => {
-    element.addEventListener("click", function () {
-      const currentValue = this.textContent;
-      const input = document.createElement("input");
-      input.type = "text";
-      input.value = currentValue;
-      input.classList.add("edit-input"); // Adicione uma classe para estilização
+// Lógica para editar campos de texto (Nome Completo e Telefone)
+document.querySelectorAll(".info-value.editable").forEach((element) => {
+    // Crie uma função nomeada para o event listener
+    const handleEditClick = function () {
+        const currentValue = this.textContent;
+        const input = document.createElement("input");
+        input.type = "text";
+        input.value = currentValue;
+        input.classList.add("edit-input"); // Adicione uma classe para estilização
 
-      this.replaceWith(input);
-      input.focus();
+        this.replaceWith(input);
+        input.focus();
 
-      input.addEventListener("blur", async () => {
-        const newValue = input.value.trim();
-        const infoItem = document.createElement("div");
-        infoItem.classList.add("info-value", "editable");
-        infoItem.id = this.id; // Restaurar o ID original
-        infoItem.textContent = newValue || currentValue; // Usar valor antigo se novo estiver vazio
+        input.addEventListener("blur", async () => {
+            const newValue = input.value.trim();
+            const infoItem = document.createElement("div");
+            infoItem.classList.add("info-value", "editable");
+            infoItem.id = this.id; // Restaurar o ID original
+            infoItem.textContent = newValue || currentValue; // Usar valor antigo se novo estiver vazio
 
-        input.replaceWith(infoItem);
-        // Re-adicionar o event listener
-        infoItem.addEventListener("click", arguments.callee);
+            input.replaceWith(infoItem);
+            // Re-adicionar o event listener usando a função nomeada
+            infoItem.addEventListener("click", handleEditClick);
 
-        // Atualizar dados no usuárioLogado (não salva no backend aqui, apenas prepara para o botão Salvar)
-        if (infoItem.id === "profileFullName") {
-          usuarioLogado.nome = newValue;
-        } else if (infoItem.id === "profilePhone") {
-          usuarioLogado.telefone = newValue;
-        }
-      });
+            // Atualizar dados no usuárioLogado (não salva no backend aqui, apenas prepara para o botão Salvar)
+            if (infoItem.id === "profileFullName") {
+                usuarioLogado.nome = newValue;
+                console.log("Nome atualizado:", usuarioLogado.nome);
+            } else if (infoItem.id === "profilePhone") {
+                usuarioLogado.telefone = newValue;
+                console.log("Telefone atualizado:", usuarioLogado.telefone);
+            }
+        });
 
-      input.addEventListener("keypress", function (e) {
-        if (e.key === "Enter") {
-          input.blur(); // Simula o blur para salvar
-        }
-      });
-    });
-  });
+        input.addEventListener("keypress", function (e) {
+            if (e.key === 'Enter') {
+                input.blur(); // Simula o blur para salvar
+            }
+        });
+    };
+
+    // Adiciona o event listener usando a função nomeada
+    element.addEventListener("click", handleEditClick);
+});
 
   // Botão Salvar Alterações para Informações Pessoais
-  document
-    .getElementById("savePersonalBtn")
-    .addEventListener("click", async () => {
-      const loadingId = showLoading(
-        "Salvando alterações...",
-        "Atualizando suas informações"
-      );
-
-      try {
+  document.getElementById("savePersonalBtn").addEventListener("click", async () => {
+    try {
         const token = sessionStorage.getItem("userToken");
         const idPessoa = sessionStorage.getItem("id_pessoa");
 
-        const response = await fetch(`${api.online}/pessoa/${idPessoa}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            nome: usuarioLogado.nome,
-            telefone: usuarioLogado.telefone,
-          }),
-        });
+        // Captura os valores mais recentes dos elementos HTML
+        const nomeAtualizado = document.getElementById("profileFullName").textContent.trim();
+        const telefoneAtualizado = document.getElementById("profilePhone").textContent.trim();
 
+        // Faz a requisição PUT com os dados capturados da tela
+        const response = await fetch(`${api.online}/pessoa/${idPessoa}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+           body: JSON.stringify({
+              // Captura o texto atual dos elementos de nome e telefone
+              nome: document.getElementById("profileFullName").textContent,
+              telefone: document.getElementById("profilePhone").textContent,
+            }),
+        });
+         carregarDadosUsuario();
         if (!response.ok) {
-          throw new Error("Erro ao salvar informações pessoais");
+            throw new Error("Erro ao salvar informações pessoais");
         }
 
-        hideNotification(loadingId);
-        showSuccess(
-          "Informações salvas!",
-          "Suas informações pessoais foram atualizadas com sucesso"
-        );
+        alert("Informações pessoais salvas com sucesso!");
         carregarDadosUsuario(); // Recarrega para garantir que os dados exibidos estão atualizados
-      } catch (error) {
+    } catch (error) {
         console.error("Erro ao salvar informações pessoais:", error);
-        hideNotification(loadingId);
-        showError(
-          "Erro ao salvar",
-          "Não foi possível salvar suas informações. Tente novamente."
-        );
-      }
-    });
+        alert("Erro ao salvar informações pessoais. Por favor, tente novamente.");
+    }
+});
 
   // Lógica para o modal de endereço
   const addressModal = document.getElementById("addressModal");
@@ -675,6 +673,11 @@ document.addEventListener("DOMContentLoaded", () => {
   if (navPurchaseHistory) {
     navPurchaseHistory.addEventListener("click", carregarPedidosUsuario);
   }
+
+   const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", logout);
+    }
 });
 
 // Função para atualizar imagem de perfil

@@ -228,42 +228,48 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
 
   // Lógica para editar campos de texto (Nome Completo e Telefone)
   document.querySelectorAll(".info-value.editable").forEach((element) => {
-    element.addEventListener("click", function () {
-      const currentValue = this.textContent;
-      const input = document.createElement("input");
-      input.type = "text";
-      input.value = currentValue;
-      input.classList.add("edit-input"); // Adicione uma classe para estilização
+    // Crie uma função nomeada para o event listener
+    const handleEditClick = function () {
+        const currentValue = this.textContent;
+        const input = document.createElement("input");
+        input.type = "text";
+        input.value = currentValue;
+        input.classList.add("edit-input"); // Adicione uma classe para estilização
 
-      this.replaceWith(input);
-      input.focus();
+        this.replaceWith(input);
+        input.focus();
 
-      input.addEventListener("blur", async () => {
-        const newValue = input.value.trim();
-        const infoItem = document.createElement("div");
-        infoItem.classList.add("info-value", "editable");
-        infoItem.id = this.id; // Restaurar o ID original
-        infoItem.textContent = newValue || currentValue; // Usar valor antigo se novo estiver vazio
+        input.addEventListener("blur", async () => {
+            const newValue = input.value.trim();
+            const infoItem = document.createElement("div");
+            infoItem.classList.add("info-value", "editable");
+            infoItem.id = this.id; // Restaurar o ID original
+            infoItem.textContent = newValue || currentValue; // Usar valor antigo se novo estiver vazio
 
-        input.replaceWith(infoItem);
-        // Re-adicionar o event listener
-        infoItem.addEventListener("click", arguments.callee);
+            input.replaceWith(infoItem);
+            // Re-adicionar o event listener usando a função nomeada
+            infoItem.addEventListener("click", handleEditClick);
 
-        // Atualizar dados no usuárioLogado (não salva no backend aqui, apenas prepara para o botão Salvar)
-        if (infoItem.id === "profileFullName") {
-          usuarioLogado.nome = newValue;
-        } else if (infoItem.id === "profilePhone") {
-          usuarioLogado.telefone = newValue;
-        }
-      });
+            // Atualizar dados no usuárioLogado (não salva no backend aqui, apenas prepara para o botão Salvar)
+            if (infoItem.id === "profileFullName") {
+                usuarioLogado.nome = newValue;
+                console.log("Nome atualizado:", usuarioLogado.nome);
+            } else if (infoItem.id === "profilePhone") {
+                usuarioLogado.telefone = newValue;
+                console.log("Telefone atualizado:", usuarioLogado.telefone);
+            }
+        });
 
-      input.addEventListener("keypress", function (e) {
-        if (e.key === 'Enter') {
-          input.blur(); // Simula o blur para salvar
-        }
-      });
-    });
-  });
+        input.addEventListener("keypress", function (e) {
+            if (e.key === 'Enter') {
+                input.blur(); // Simula o blur para salvar
+            }
+        });
+    };
+
+    // Adiciona o event listener usando a função nomeada
+    element.addEventListener("click", handleEditClick);
+});
 
   // Botão Salvar Alterações para Informações Pessoais
   document.getElementById("savePersonalBtn").addEventListener("click", async () => {
@@ -522,7 +528,7 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
   // --- Funções ADM ---
   function loadUsersList() {
     const token = sessionStorage.getItem("userToken");
-    fetch(`${api.online}/pessoa`, {
+    fetch("http://localhost:3008/pessoa", {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -563,8 +569,44 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
         document.getElementById("userStatus").value = u.situacao;
         document.getElementById("userType").value = u.id_tipo_usuario;
         document.getElementById("userManagementModal").classList.remove("hidden");
+        
       });
   }
+
+  document.getElementById("deleteUserBtn")?.addEventListener("click", async () => {
+    const id = document.getElementById("userId").value;
+    const token = sessionStorage.getItem("userToken");
+    
+    // Confirmação para evitar exclusões acidentais
+    if (!confirm("Tem certeza que deseja deletar este usuário? Esta ação é irreversível.")) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${api.online}/pessoa/${id}`, {
+            method: "DELETE",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error("Erro ao deletar usuário");
+        }
+
+        alert("Usuário deletado com sucesso!");
+        document.getElementById("userManagementModal").classList.add("hidden");
+        loadUsersList(); // Recarrega a lista de usuários
+    } catch (error) {
+        console.error("Erro ao deletar usuário:", error);
+        alert("Erro ao deletar usuário. Por favor, tente novamente.");
+    }
+});
+
+document.getElementById("cancelUserEditBtn")?.addEventListener("click", () => {
+    document.getElementById("userManagementModal").classList.add("hidden");
+});
+
 
   document.getElementById("userManagementForm").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -591,6 +633,7 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
     document.getElementById("userManagementModal").classList.add("hidden");
     loadUsersList();
   });
+ 
 
   // Carregar imagens carrossel
   function loadCarouselImages() {
@@ -683,6 +726,11 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
 
   carregarDadosUsuario();
   document.querySelector(".nav-item.active")?.click(); // ativar seção inicial
+
+   const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", logout);
+    }
 });
 
 // Função para atualizar imagem de perfil
