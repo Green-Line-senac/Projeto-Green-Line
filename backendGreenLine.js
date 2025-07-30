@@ -892,7 +892,7 @@ app.post("/salvar-pedido", async (req, res) => {
     // Inserir produtos e atualizar estoque
     for (const produto of pedido.produtos) {
       const produtoExistente = await db.query(
-        "SELECT id_produto, estoque FROM produto WHERE nome_produto = ? LIMIT 1",
+        "SELECT id_produto, estoque FROM produto WHERE produto = ? LIMIT 1",
         [produto.nome]
       );
 
