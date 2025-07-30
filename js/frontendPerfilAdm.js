@@ -528,7 +528,7 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
   // --- Funções ADM ---
   function loadUsersList() {
     const token = sessionStorage.getItem("userToken");
-    fetch("http://localhost:3008/pessoa", {
+    fetch(`${api.online}/pessoa`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
