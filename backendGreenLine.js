@@ -826,7 +826,7 @@ app.post("/salvar-pedido", async (req, res) => {
       ]);
     }
 
-    // Se for objeto (Cartão de Crédito ou Débito)
+    // Se for objeto (Cartão)
     else if (
       typeof formaPagamento === "object" &&
       (formaPagamento.metodoPagamento === "CC" ||
@@ -889,7 +889,7 @@ app.post("/salvar-pedido", async (req, res) => {
     const idPedido = ultimoPedido[0].id_pedido;
     console.log("ID do pedido inserido:", idPedido);
 
-    // Inserir produtos no pedido e atualizar estoque
+    // Inserir produtos e atualizar estoque
     for (const produto of pedido.produtos) {
       const produtoExistente = await db.query(
         "SELECT id_produto, estoque FROM produto WHERE nome_produto = ? LIMIT 1",
@@ -918,7 +918,6 @@ app.post("/salvar-pedido", async (req, res) => {
         });
       }
 
-      // Inserir produto no pedido
       await db.query(
         `INSERT INTO pedido_produto(
           id_pedido, id_produto, quantidade, preco_unitario, nome_produto
@@ -932,7 +931,6 @@ app.post("/salvar-pedido", async (req, res) => {
         ]
       );
 
-      // Atualizar estoque
       const novoEstoque = estoqueAtual - quantidadeComprada;
       await db.query("UPDATE produto SET estoque = ? WHERE id_produto = ?", [
         novoEstoque,
@@ -944,17 +942,23 @@ app.post("/salvar-pedido", async (req, res) => {
       );
     }
 
+    // ✅ Finaliza com sucesso e encerra a função
     return res.status(200).json({
       mensagem: "Pedido cadastrado com sucesso",
       idPedido: idPedido,
     });
+
+    // 🚫 Nada deve vir depois deste return
   } catch (erro) {
     console.error("Erro ao salvar pedido:", erro);
-    return res
-      .status(500)
-      .json({ erro: "Erro ao processar pedido", codigo: -2 });
+    return res.status(500).json({
+      erro: "Erro ao processar pedido",
+      codigo: -2,
+      detalhe: erro.message, // mostra erro real no JSON
+    });
   }
 });
+
 // Endpoint para registrar avaliação
 app.post("/avaliacoes", async (req, res) => {
   // Debug: Exibe o corpo recebido
