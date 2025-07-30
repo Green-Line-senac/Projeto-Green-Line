@@ -1348,24 +1348,32 @@ app.get("/pessoa/:id_pessoa", verificarToken, async (req, res) => {
 });
 
 // [5] ATUALIZAR USUÁRIO (PUT)
-app.put("/pessoa/:id_pessoa", async (req, res) => {
+app.put("/pessoa/:id_pessoa", verificarToken, async (req, res) => {
   const { id_pessoa } = req.params;
   const { nome, telefone } = req.body;
+
+  // Verificar se o usuário está atualizando seu próprio perfil
+  if (parseInt(id_pessoa) !== req.usuario.userId) {
+    return res.status(403).json({ error: "Não autorizado a atualizar este perfil" });
+  }
 
   try {
     const [result] = await db.query(
       "UPDATE pessoa SET nome = ?, telefone = ? WHERE id_pessoa = ?",
       [nome, telefone, id_pessoa]
     );
+    
     if (result.affectedRows > 0) {
       res.json({ message: "Pessoa atualizada com sucesso" });
     } else {
       res.status(404).json({ error: "Pessoa não encontrada" });
     }
   } catch (err) {
+    console.error("Erro ao atualizar pessoa:", err);
     res.status(500).json({ error: "Erro ao atualizar pessoa" });
   }
 });
+
 
 // [6] DELETAR USUÁRIO (DELETE)
 app.delete("/pessoa/:id_pessoa", async (req, res) => {
