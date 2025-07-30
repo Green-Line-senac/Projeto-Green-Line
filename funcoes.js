@@ -123,7 +123,6 @@ class FuncaoUteis {
           TOTAL: formatarValor(pedido.total),
           METODO_ENTREGA: pedido.metodoEntrega || 'Entrega padrão',
           PREVISAO_ENTREGA: pedido.previsaoEntrega,
-          ENDERECO_ENTREGA: pedido.enderecoEntrega || 'Endereço cadastrado',
           LINK_ACOMPANHAR: 'https://green-line-web.onrender.com/public/pedido_confirmado.html',
           LINK_SUPORTE: 'https://green-line-web.onrender.com/public/contato.html'
         });
