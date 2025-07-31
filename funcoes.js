@@ -78,7 +78,7 @@ class FuncaoUteis {
           return new Intl.NumberFormat("pt-BR", {
             style: "currency",
             currency: "BRL",
-          }).format(valor);
+          }).format(parseFloat(valor) || 0);
         };
 
         // Gerar HTML dos produtos
@@ -116,26 +116,52 @@ class FuncaoUteis {
           : 'http://localhost:3000';
         
         const emailVariables = {
-          NOME_USUARIO: pedido.nomeTitular || pedido.nomeCliente || 'Cliente',
-          NUMERO_PEDIDO: pedido.numeroPedido,
-          DATA_PEDIDO: pedido.dataConfirmacao,
-          METODO_PAGAMENTO: pedido.metodoPagamento || 'Não informado',
-          SUBTOTAL: formatarValor(pedido.subtotal || pedido.total),
-          FRETE: formatarValor(pedido.frete || 0),
-          TOTAL: formatarValor(pedido.total),
-          METODO_ENTREGA: pedido.metodoEntrega || 'Entrega padrão',
-          PREVISAO_ENTREGA: pedido.previsaoEntrega || 'A definir',
-          ENDERECO_ENTREGA: pedido.enderecoCompleto || pedido.endereco || 'Endereço não informado',
-          LINK_ACOMPANHAR: `${baseUrl}/acompanhar_pedido.html?from=email`,
+          NOME_USUARIO: pedido.nomeTitular || pedido.nomeCliente || pedido.nome || 'Cliente',
+          NUMERO_PEDIDO: pedido.numeroPedido || pedido.numero_pedido || 'N/A',
+          DATA_PEDIDO: pedido.dataConfirmacao || pedido.data_pedido || new Date().toLocaleDateString('pt-BR'),
+          METODO_PAGAMENTO: pedido.metodoPagamento || pedido.metodo_pagamento || pedido.formaPagamentoVendas || 'Não informado',
+          SUBTOTAL: formatarValor(pedido.subtotal || (pedido.total - (pedido.frete || 0))),
+          FRETE: formatarValor(pedido.frete || pedido.valor_frete || 0),
+          TOTAL: formatarValor(pedido.total || pedido.valor_total || 0),
+          METODO_ENTREGA: pedido.metodoEntrega || pedido.metodo_entrega || 'Entrega padrão',
+          PREVISAO_ENTREGA: pedido.previsaoEntrega || pedido.previsao_entrega || '5-7 dias úteis',
+          ENDERECO_ENTREGA: pedido.enderecoCompleto || pedido.endereco_completo || pedido.endereco || 'Endereço não informado',
+          LINK_ACOMPANHAR: `${baseUrl}/acompanhar_pedido.html?from=email&pedido=${encodeURIComponent(pedido.numeroPedido || '')}`,
           LINK_SUPORTE: `${baseUrl}/contato.html`
         };
 
+        // Validar parâmetros obrigatórios
+        const requiredParams = ['NOME_USUARIO', 'NUMERO_PEDIDO', 'DATA_PEDIDO', 'TOTAL'];
+        const missingParams = requiredParams.filter(param => {
+          const value = emailVariables[param];
+          return !value || value === 'N/A' || value === 'R$ 0,00' || value === '';
+        });
+        
+        if (missingParams.length > 0) {
+          console.error('❌ Parâmetros críticos faltando no email:', missingParams);
+          console.error('📋 Objeto pedido completo recebido:', JSON.stringify(pedido, null, 2));
+          console.error('📧 Variáveis geradas:', JSON.stringify(emailVariables, null, 2));
+        } else {
+          console.log('✅ Todos os parâmetros obrigatórios estão presentes');
+        }
+        
         console.log('📧 Variáveis do email:', emailVariables);
-        mensagem = getOrderConfirmationEmailHTML(emailVariables);
+        try {
+          mensagem = getOrderConfirmationEmailHTML(emailVariables);
+        } catch (templateError) {
+          console.error('❌ Erro ao processar template de email:', templateError);
+          mensagem = null;
+        }
         
         // Debug: verificar se a mensagem foi gerada
         if (!mensagem) {
           console.error('❌ Falha ao gerar email com template. Usando fallback.');
+          console.error('🔍 Verificando se arquivo de template existe...');
+          const fs = require('fs');
+          const path = require('path');
+          const templatePath = path.join(__dirname, 'templates', 'email-pedido-confirmado.html');
+          console.error('📂 Caminho do template:', templatePath);
+          console.error('📄 Template existe:', fs.existsSync(templatePath));
         } else {
           console.log('✅ Email gerado com sucesso usando template');
           console.log('🔗 URLs no email:', {
@@ -204,7 +230,7 @@ class FuncaoUteis {
                     <p>Você pode acompanhar o status do seu pedido a qualquer momento em nosso site.</p>
                     
                     <div style="text-align: center;">
-                        <a href="https://green-line-web.onrender.com/acompanhar_pedido.html" class="btn">
+                        <a href="https://green-line-web.onrender.com./public/acompanhar_pedido.html" class="btn">
                             Acompanhar Pedido
                         </a>
                     </div>

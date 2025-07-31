@@ -20,6 +20,17 @@ const db = new Database();
 const funcoesUteis = new funcoes();
 const segredo = process.env.SEGREDO_JWT;
 
+// Validar variáveis de ambiente críticas
+const requiredEnvVars = ['EMAIL_USER', 'EMAIL_PASS', 'SEGREDO_JWT'];
+const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+
+if (missingEnvVars.length > 0) {
+  console.error('❌ Variáveis de ambiente faltando:', missingEnvVars);
+  console.error('⚠️ O envio de emails pode não funcionar corretamente');
+} else {
+  console.log('✅ Todas as variáveis de ambiente necessárias estão configuradas');
+}
+
 //BACKEND CADASTRO
 app.post("/cadastrarUsuario", async (req, res) => {
   const { nome, email, cpf, telefone, senha } = req.body;
@@ -663,9 +674,9 @@ app.post("/cadastro-produto", async (req, res) => {
       outrosDados.dimensoes || "0x0x0",
       outrosDados.ativo ? 1 : 0,
       imagem_1 ||
-        "https://www.malhariapradense.com.br/wp-content/uploads/2017/08/produto-sem-imagem.png",
+      "https://www.malhariapradense.com.br/wp-content/uploads/2017/08/produto-sem-imagem.png",
       imagem_2 ||
-        "https://www.malhariapradense.com.br/wp-content/uploads/2017/08/produto-sem-imagem.png",
+      "https://www.malhariapradense.com.br/wp-content/uploads/2017/08/produto-sem-imagem.png",
       outrosDados.categoria,
     ]);
 
@@ -891,10 +902,10 @@ app.post("/salvar-pedido", async (req, res) => {
 
     // Inserir produtos e atualizar estoque
     console.log(`Processando ${pedido.produtos.length} produtos do pedido...`);
-    
+
     for (const produto of pedido.produtos) {
       console.log(`Processando produto: ${produto.nome}`);
-      
+
       const produtoExistente = await db.query(
         "SELECT id_produto, produto, estoque FROM produto WHERE produto = ? LIMIT 1",
         [produto.nome]
@@ -904,7 +915,7 @@ app.post("/salvar-pedido", async (req, res) => {
 
       if (!produtoExistente || produtoExistente.length === 0) {
         console.error(`❌ Produto não encontrado no banco: ${produto.nome}`);
-        
+
         // Tentar buscar por ID se disponível
         if (produto.id_produto) {
           console.log(`Tentando buscar por ID: ${produto.id_produto}`);
@@ -912,7 +923,7 @@ app.post("/salvar-pedido", async (req, res) => {
             "SELECT id_produto, produto, estoque FROM produto WHERE id_produto = ? LIMIT 1",
             [produto.id_produto]
           );
-          
+
           if (produtoPorId && produtoPorId.length > 0) {
             console.log(`✅ Produto encontrado por ID:`, produtoPorId[0]);
             produtoExistente[0] = produtoPorId[0];
@@ -928,7 +939,7 @@ app.post("/salvar-pedido", async (req, res) => {
       const produtoInfo = produtoExistente[0];
       const estoqueAtual = parseInt(produtoInfo.estoque) || 0;
       const quantidadeComprada = parseInt(produto.quantidade) || 1;
-      
+
       console.log(`📦 Produto: ${produtoInfo.produto}`);
       console.log(`📊 Estoque atual: ${estoqueAtual}`);
       console.log(`🛒 Quantidade solicitada: ${quantidadeComprada}`);
@@ -960,27 +971,27 @@ app.post("/salvar-pedido", async (req, res) => {
       );
 
       const novoEstoque = estoqueAtual - quantidadeComprada;
-      
+
       console.log(`🔄 Atualizando estoque: ${estoqueAtual} - ${quantidadeComprada} = ${novoEstoque}`);
-      
+
       // Executar update do estoque
       const updateResult = await db.query("UPDATE produto SET estoque = ? WHERE id_produto = ?", [
         novoEstoque,
         produtoInfo.id_produto,
       ]);
-      
+
       console.log(`📝 Resultado do UPDATE:`, updateResult);
-      
+
       // Verificar se a atualização foi bem-sucedida
       const estoqueVerificacao = await db.query(
         "SELECT estoque FROM produto WHERE id_produto = ?",
         [produtoInfo.id_produto]
       );
-      
+
       if (estoqueVerificacao && estoqueVerificacao.length > 0) {
         const estoqueAtualizado = estoqueVerificacao[0].estoque;
         console.log(`✅ Estoque verificado após update: ${estoqueAtualizado}`);
-        
+
         if (parseInt(estoqueAtualizado) !== novoEstoque) {
           console.error(`❌ ERRO: Estoque não foi atualizado corretamente!`);
           console.error(`   Esperado: ${novoEstoque}, Atual: ${estoqueAtualizado}`);
@@ -990,6 +1001,57 @@ app.post("/salvar-pedido", async (req, res) => {
       } else {
         console.error(`❌ Erro ao verificar estoque atualizado para produto ID: ${produtoInfo.id_produto}`);
       }
+    }
+
+    // ✅ Enviar email de confirmação
+    console.log("📧 Enviando email de confirmação do pedido...");
+    try {
+      // Buscar dados do cliente para o email
+      const clienteData = await db.query(
+        "SELECT nome, email FROM pessoa WHERE id_pessoa = ?",
+        [pedido.idPessoa]
+      );
+
+      if (clienteData && clienteData.length > 0) {
+        const cliente = clienteData[0];
+
+        // Preparar dados do pedido para o email
+        const metodoPagamento = typeof pedido.formaPagamentoVendas === 'string'
+          ? pedido.formaPagamentoVendas
+          : (pedido.formaPagamentoVendas?.metodoPagamento || 'Não informado');
+
+        const pedidoParaEmail = {
+          numeroPedido: pedido.numeroPedido || 'N/A',
+          nomeTitular: pedido.nomeTitular || cliente.nome || 'Cliente',
+          nomeCliente: cliente.nome || 'Cliente',
+          email: cliente.email,
+          dataConfirmacao: new Date().toLocaleDateString('pt-BR'),
+          metodoPagamento: metodoPagamento,
+          total: parseFloat(pedido.total) || 0,
+          subtotal: parseFloat(pedido.subtotal) || parseFloat(pedido.total) || 0,
+          frete: parseFloat(pedido.frete) || 0,
+          metodoEntrega: pedido.metodoEntrega || 'Entrega padrão',
+          previsaoEntrega: pedido.previsaoEntrega || '5-7 dias úteis',
+          endereco: pedido.endereco || pedido.enderecoCompleto || 'Endereço não informado',
+          produtos: pedido.produtos || []
+        };
+
+        console.log("📋 Dados do pedido para email:", pedidoParaEmail);
+
+        await funcoesUteis.enviarEmail(
+          cliente.email,
+          `Pedido Confirmado - ${pedido.numeroPedido}`,
+          "pedido_confirmado",
+          pedidoParaEmail
+        );
+
+        console.log(`✅ Email de confirmação enviado para: ${cliente.email}`);
+      } else {
+        console.warn("⚠️ Cliente não encontrado para envio de email");
+      }
+    } catch (emailError) {
+      console.error("❌ Erro ao enviar email de confirmação:", emailError);
+      // Não falha o pedido por causa do email
     }
 
     // ✅ Finaliza com sucesso e encerra a função
@@ -1014,74 +1076,102 @@ app.post("/salvar-pedido", async (req, res) => {
 // ==================== ROTA PARA CANCELAR PEDIDO E RESTAURAR ESTOQUE ====================
 app.post("/cancelar-pedido", async (req, res) => {
   const { idPedido, numeroPedido, motivo } = req.body;
-  
+
   if (!idPedido && !numeroPedido) {
     return res.status(400).json({ error: "ID ou número do pedido é obrigatório" });
   }
-  
+
   try {
     let pedidoId = idPedido;
     let pedidoNumero = numeroPedido;
-    
+
     // Se foi passado número do pedido, buscar o ID
     if (numeroPedido && !idPedido) {
       const pedidoBusca = await db.query(
         "SELECT id_pedido FROM pedido WHERE numero_pedido = ?",
         [numeroPedido]
       );
-      
+
       if (!pedidoBusca || pedidoBusca.length === 0) {
         return res.status(404).json({ error: "Pedido não encontrado" });
       }
-      
+
       pedidoId = pedidoBusca[0].id_pedido;
     }
-    
+
     console.log(`Iniciando cancelamento do pedido ${pedidoNumero || pedidoId}...`);
-    
+
     // Verificar se o pedido existe e pode ser cancelado
     const pedidoExistente = await db.query(
       "SELECT * FROM pedido WHERE id_pedido = ? AND situacao IN ('P', 'C')",
       [pedidoId]
     );
-    
+
     if (!pedidoExistente || pedidoExistente.length === 0) {
-      return res.status(404).json({ 
-        error: "Pedido não encontrado ou não pode ser cancelado" 
+      return res.status(404).json({
+        error: "Pedido não encontrado ou não pode ser cancelado"
       });
     }
-    
+
     // Buscar produtos do pedido
     const produtosPedido = await db.query(
       "SELECT pp.id_produto, pp.quantidade, p.produto FROM pedido_produto pp JOIN produto p ON pp.id_produto = p.id_produto WHERE pp.id_pedido = ?",
       [pedidoId]
     );
-    
+
     // Restaurar estoque para cada produto
     for (const item of produtosPedido) {
       await db.query(
         "UPDATE produto SET estoque = estoque + ? WHERE id_produto = ?",
         [item.quantidade, item.id_produto]
       );
-      
+
       console.log(`Estoque restaurado para ${item.produto}: +${item.quantidade}`);
     }
-    
+
     // Atualizar status do pedido para cancelado
     await db.query(
       "UPDATE pedido SET situacao = 'X', data_cancelamento = NOW(), motivo_cancelamento = ? WHERE id_pedido = ?",
       [motivo || 'Cancelado pelo sistema', pedidoId]
     );
-    
+
+    // Enviar email de notificação de cancelamento
+    try {
+      const clienteData = await db.query(
+        "SELECT nome, email FROM pessoa WHERE id_pessoa = ?",
+        [pedidoBusca[0].id_pessoa]
+      );
+
+      if (clienteData && clienteData.length > 0) {
+        const cliente = clienteData[0];
+
+        await funcoesUteis.enviarEmail(
+          cliente.email,
+          `Pedido Cancelado - ${pedidoNumero}`,
+          "pedido_cancelado",
+          {
+            numeroPedido: pedidoNumero,
+            nomeCliente: cliente.nome,
+            motivo: motivo || 'Cancelado pelo sistema',
+            dataCancelamento: new Date().toLocaleDateString('pt-BR')
+          }
+        );
+
+        console.log(`📧 Email de cancelamento enviado para: ${cliente.email}`);
+      }
+    } catch (emailError) {
+      console.error("❌ Erro ao enviar email de cancelamento:", emailError);
+    }
+
     console.log(`Pedido ${pedidoNumero || pedidoId} cancelado com sucesso. Estoque restaurado.`);
-    
+
     return res.status(200).json({
       mensagem: "Pedido cancelado com sucesso",
       idPedido: pedidoId,
       numeroPedido: pedidoNumero,
       produtosRestaurados: produtosPedido.length
     });
-    
+
   } catch (error) {
     console.error("Erro ao cancelar pedido:", error);
     return res.status(500).json({ error: "Erro interno do servidor" });
@@ -1091,23 +1181,23 @@ app.post("/cancelar-pedido", async (req, res) => {
 // ==================== ROTA PARA VERIFICAR ESTOQUE ====================
 app.get("/verificar-estoque/:idProduto", async (req, res) => {
   const { idProduto } = req.params;
-  
+
   try {
     const produto = await db.query(
       "SELECT id_produto, produto, estoque FROM produto WHERE id_produto = ?",
       [idProduto]
     );
-    
+
     if (!produto || produto.length === 0) {
       return res.status(404).json({ error: "Produto não encontrado" });
     }
-    
+
     return res.status(200).json({
       id_produto: produto[0].id_produto,
       nome: produto[0].produto,
       estoque: produto[0].estoque
     });
-    
+
   } catch (error) {
     console.error("Erro ao verificar estoque:", error);
     return res.status(500).json({ error: "Erro interno do servidor" });
@@ -1118,31 +1208,31 @@ app.get("/verificar-estoque/:idProduto", async (req, res) => {
 app.get("/diagnostico-banco", async (req, res) => {
   try {
     console.log("🔍 Iniciando diagnóstico do banco de dados...");
-    
+
     // Teste 1: Conectividade básica
     const testeConexao = await db.query("SELECT 1 as teste");
     console.log("✅ Teste de conexão:", testeConexao);
-    
+
     // Teste 2: Verificar estrutura da tabela produto
     const estruturaTabela = await db.query("DESCRIBE produto");
     console.log("📋 Estrutura da tabela produto:", estruturaTabela);
-    
+
     // Teste 3: Contar produtos
     const totalProdutos = await db.query("SELECT COUNT(*) as total FROM produto");
     console.log("📊 Total de produtos:", totalProdutos);
-    
+
     // Teste 4: Listar alguns produtos com estoque
     const produtosComEstoque = await db.query(
       "SELECT id_produto, produto, estoque FROM produto WHERE estoque > 0 LIMIT 5"
     );
     console.log("🛍️ Produtos com estoque:", produtosComEstoque);
-    
+
     // Teste 5: Verificar se há produtos com estoque zero
     const produtosSemEstoque = await db.query(
       "SELECT COUNT(*) as total FROM produto WHERE estoque = 0"
     );
     console.log("📦 Produtos sem estoque:", produtosSemEstoque);
-    
+
     return res.status(200).json({
       sucesso: true,
       testes: {
@@ -1153,13 +1243,13 @@ app.get("/diagnostico-banco", async (req, res) => {
         produtosSemEstoque: produtosSemEstoque[0].total
       }
     });
-    
+
   } catch (error) {
     console.error("❌ Erro no diagnóstico:", error);
-    return res.status(500).json({ 
-      erro: "Erro no diagnóstico", 
+    return res.status(500).json({
+      erro: "Erro no diagnóstico",
       detalhes: error.message,
-      stack: error.stack 
+      stack: error.stack
     });
   }
 });
@@ -1167,42 +1257,42 @@ app.get("/diagnostico-banco", async (req, res) => {
 // ==================== ROTA DE TESTE PARA ESTOQUE ====================
 app.post("/teste-estoque", async (req, res) => {
   const { idProduto, novoEstoque } = req.body;
-  
+
   try {
     console.log(`🧪 TESTE: Atualizando estoque do produto ${idProduto} para ${novoEstoque}`);
-    
+
     // Verificar estoque atual
     const produtoAntes = await db.query(
       "SELECT id_produto, produto, estoque FROM produto WHERE id_produto = ?",
       [idProduto]
     );
-    
+
     if (!produtoAntes || produtoAntes.length === 0) {
       return res.status(404).json({ error: "Produto não encontrado" });
     }
-    
+
     const estoqueAntes = produtoAntes[0].estoque;
     console.log(`📊 Estoque antes: ${estoqueAntes}`);
-    
+
     // Atualizar estoque
     const updateResult = await db.query(
       "UPDATE produto SET estoque = ? WHERE id_produto = ?",
       [novoEstoque, idProduto]
     );
-    
+
     console.log(`📝 Resultado do UPDATE:`, updateResult);
-    
+
     // Verificar estoque após update
     const produtoDepois = await db.query(
       "SELECT id_produto, produto, estoque FROM produto WHERE id_produto = ?",
       [idProduto]
     );
-    
+
     const estoqueDepois = produtoDepois[0].estoque;
     console.log(`📊 Estoque depois: ${estoqueDepois}`);
-    
+
     const sucesso = parseInt(estoqueDepois) === parseInt(novoEstoque);
-    
+
     return res.status(200).json({
       sucesso: sucesso,
       produto: produtoAntes[0].produto,
@@ -1211,7 +1301,7 @@ app.post("/teste-estoque", async (req, res) => {
       estoqueEsperado: novoEstoque,
       updateResult: updateResult
     });
-    
+
   } catch (error) {
     console.error("Erro no teste de estoque:", error);
     return res.status(500).json({ error: "Erro interno do servidor", detalhes: error.message });
@@ -1221,16 +1311,16 @@ app.post("/teste-estoque", async (req, res) => {
 // ==================== ROTA PARA BUSCAR PEDIDO POR NÚMERO ====================
 app.get("/buscar-pedido/:numeroPedido", async (req, res) => {
   let { numeroPedido } = req.params;
-  
+
   try {
     // Decodificar URL e normalizar o número do pedido
     numeroPedido = decodeURIComponent(numeroPedido);
-    
+
     console.log(`Número do pedido recebido: "${numeroPedido}"`);
-    
+
     // Tentar buscar com e sem # para garantir que encontre
     let pedido = [];
-    
+
     // Primeiro, tentar buscar exatamente como veio
     pedido = await db.query(`
       SELECT 
@@ -1251,12 +1341,12 @@ app.get("/buscar-pedido/:numeroPedido", async (req, res) => {
       WHERE p.numero_pedido = ?
       LIMIT 1
     `, [numeroPedido]);
-    
+
     // Se não encontrou, tentar com # adicionado
     if (!pedido || pedido.length === 0) {
       const numeroComHash = numeroPedido.startsWith('#') ? numeroPedido : '#' + numeroPedido;
       console.log(`Tentando buscar com #: "${numeroComHash}"`);
-      
+
       pedido = await db.query(`
         SELECT 
           p.id_pedido,
@@ -1277,12 +1367,12 @@ app.get("/buscar-pedido/:numeroPedido", async (req, res) => {
         LIMIT 1
       `, [numeroComHash]);
     }
-    
+
     // Se ainda não encontrou, tentar sem # 
     if (!pedido || pedido.length === 0) {
       const numeroSemHash = numeroPedido.startsWith('#') ? numeroPedido.substring(1) : numeroPedido;
       console.log(`Tentando buscar sem #: "${numeroSemHash}"`);
-      
+
       pedido = await db.query(`
         SELECT 
           p.id_pedido,
@@ -1303,18 +1393,18 @@ app.get("/buscar-pedido/:numeroPedido", async (req, res) => {
         LIMIT 1
       `, [numeroSemHash]);
     }
-    
+
     console.log(`Resultado da busca: ${pedido.length} pedido(s) encontrado(s)`);
-    
+
     if (!pedido || pedido.length === 0) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         error: "Pedido não encontrado",
         codigo: -1
       });
     }
-    
+
     const pedidoInfo = pedido[0];
-    
+
     // Buscar produtos do pedido
     const produtos = await db.query(`
       SELECT 
@@ -1326,10 +1416,10 @@ app.get("/buscar-pedido/:numeroPedido", async (req, res) => {
       LEFT JOIN produto p ON pp.id_produto = p.id_produto
       WHERE pp.id_pedido = ?
     `, [pedidoInfo.id_pedido]);
-    
+
     // Determinar status do pedido
     const statusPedido = determinarStatusPedido(pedidoInfo.situacao, pedidoInfo.data_pedido);
-    
+
     // Montar resposta
     const resposta = {
       numero: pedidoInfo.numero_pedido,
@@ -1352,13 +1442,13 @@ app.get("/buscar-pedido/:numeroPedido", async (req, res) => {
       status: statusPedido,
       cancelado: pedidoInfo.situacao === 'X',
       motivoCancelamento: pedidoInfo.motivo_cancelamento,
-      dataCancelamento: pedidoInfo.data_cancelamento ? 
+      dataCancelamento: pedidoInfo.data_cancelamento ?
         new Date(pedidoInfo.data_cancelamento).toLocaleString('pt-BR') : null
     };
-    
+
     console.log(`Pedido encontrado: ${numeroPedido}`);
     return res.status(200).json(resposta);
-    
+
   } catch (error) {
     console.error("Erro ao buscar pedido:", error);
     return res.status(500).json({ error: "Erro interno do servidor" });
@@ -1370,14 +1460,14 @@ function determinarStatusPedido(situacao, dataPedido) {
   const agora = new Date();
   const dataP = new Date(dataPedido);
   const diffHoras = (agora - dataP) / (1000 * 60 * 60);
-  
+
   let status = [
     { nome: 'Pedido Confirmado', data: dataP.toLocaleString('pt-BR'), ativo: true, icone: 'bi-check-circle-fill' },
     { nome: 'Em Preparação', data: 'Em breve', ativo: false, icone: 'bi-box-seam' },
     { nome: 'Em Transporte', data: 'Em breve', ativo: false, icone: 'bi-truck' },
     { nome: 'Entregue', data: 'Em breve', ativo: false, icone: 'bi-house-door' }
   ];
-  
+
   if (situacao === 'X') {
     // Pedido cancelado
     return [
@@ -1385,30 +1475,30 @@ function determinarStatusPedido(situacao, dataPedido) {
       { nome: 'Cancelado', data: 'Pedido foi cancelado', ativo: true, icone: 'bi-x-circle-fill' }
     ];
   }
-  
+
   // Simular progresso baseado no tempo
   if (diffHoras > 2) {
     status[1].ativo = true;
     status[1].data = 'Em preparação';
   }
-  
+
   if (diffHoras > 24) {
     status[2].ativo = true;
     status[2].data = 'Em transporte';
   }
-  
+
   if (diffHoras > 72) {
     status[3].ativo = true;
     status[3].data = 'Entregue';
   }
-  
+
   return status;
 }
 
 // Função auxiliar para formatar forma de pagamento
 function formatarFormaPagamento(formaPagamento) {
   if (!formaPagamento) return 'Não informado';
-  
+
   if (typeof formaPagamento === 'string') {
     switch (formaPagamento) {
       case 'PIX': return 'PIX';
@@ -1417,12 +1507,12 @@ function formatarFormaPagamento(formaPagamento) {
       default: return formaPagamento;
     }
   }
-  
+
   // Se for objeto (cartão de crédito)
   if (typeof formaPagamento === 'object') {
     return `Cartão de Crédito (${formaPagamento.parcelas || '1x'})`;
   }
-  
+
   return 'Não informado';
 }
 
@@ -1829,7 +1919,7 @@ app.put("/pessoa/:id_pessoa", verificarToken, async (req, res) => {
       "UPDATE pessoa SET nome = ?, telefone = ? WHERE id_pessoa = ?",
       [nome, telefone, id_pessoa]
     );
-    
+
     if (result.affectedRows > 0) {
       res.json({ message: "Pessoa atualizada com sucesso" });
     } else {
@@ -2278,7 +2368,7 @@ app.get('/termos_de_uso.html', (req, res) => {
 app.get('/*.html', (req, res) => {
   const fileName = req.params[0] + '.html';
   const filePath = path.join(__dirname, 'public', fileName);
-  
+
   // Verifica se o arquivo existe
   if (fs.existsSync(filePath)) {
     res.sendFile(filePath);
