@@ -8,7 +8,21 @@ class FuncaoUteis {
     return jwt.sign({ email }, process.env.SEGREDO_JWT, { expiresIn: "10m" });
   }
   async enviarEmail(email, assunto, tipo, pedido = null) {
+    console.log("📧 === INÍCIO DA FUNÇÃO enviarEmail ===");
+    console.log("📧 Parâmetros recebidos:", {
+      email: email,
+      assunto: assunto,
+      tipo: tipo,
+      pedidoFornecido: !!pedido
+    });
+    
     try {
+      console.log("🔧 Configurando transportador SMTP...");
+      console.log("📧 Variáveis de ambiente:", {
+        EMAIL_USER: process.env.EMAIL_USER ? "✅ Definida" : "❌ Não definida",
+        EMAIL_PASS: process.env.EMAIL_PASS ? "✅ Definida" : "❌ Não definida"
+      });
+      
       const transportador = nodemailer.createTransport({
         host: "smtp.gmail.com",
         port: 465,
@@ -18,8 +32,13 @@ class FuncaoUteis {
           pass: process.env.EMAIL_PASS,
         },
       });
+      
+      console.log("✅ Transportador SMTP configurado");
       let mensagem;
+      console.log("🎯 Processando tipo de email:", tipo);
+      
       if (tipo === "recuperacao") {
+        console.log("🔑 Gerando email de recuperação de senha...");
         const resetLink = `https://green-line-web.onrender.com/redefinir-senha?token=${this.criarToken(email)}`;
 
         mensagem = getPasswordResetEmailHTML({
@@ -66,12 +85,18 @@ class FuncaoUteis {
           `;
         }
       }
-      if (tipo === "compra-concluida") {
+      if (tipo === "pedido_confirmado" || tipo === "compra-concluida") {
+        console.log("🛒 Processando email de pedido confirmado...");
+        console.log("📦 Dados do pedido recebidos:", JSON.stringify(pedido, null, 2));
         if (!pedido?.numeroPedido) {
+          console.error("❌ Número do pedido não fornecido");
+          console.error("📦 Objeto pedido:", pedido);
           throw new Error(
             "Dados do pedido são necessários para este tipo de e-mail."
           );
         }
+        
+        console.log("✅ Número do pedido validado:", pedido.numeroPedido);
 
         // Função para formatar valor monetário
         const formatarValor = (valor) => {
@@ -246,16 +271,48 @@ class FuncaoUteis {
           `;
         }
       }
-      await transportador.sendMail({
+      console.log("📤 Enviando email...");
+      console.log("📧 Configurações do email:", {
+        from: "Green Line <greenline.ecologic@gmail.com>",
+        to: email,
+        subject: assunto,
+        htmlLength: mensagem ? mensagem.length : 0
+      });
+      
+      if (!mensagem) {
+        console.error("❌ Mensagem HTML está vazia ou nula!");
+        throw new Error("Conteúdo do email não foi gerado");
+      }
+      
+      const emailResult = await transportador.sendMail({
         from: "Green Line <greenline.ecologic@gmail.com>",
         to: email,
         subject: assunto,
         html: mensagem,
       });
-      console.log("✅ E-mail enviado com sucesso.");
+      
+      console.log("✅ Email enviado com sucesso!");
+      console.log("📧 Resultado do envio:", {
+        messageId: emailResult.messageId,
+        accepted: emailResult.accepted,
+        rejected: emailResult.rejected
+      });
     } catch (erro) {
-      console.error("Erro ao enviar o email:", erro);
+      console.error("💥 === ERRO NA FUNÇÃO enviarEmail ===");
+      console.error("🔥 Tipo do erro:", erro.name);
+      console.error("🔥 Mensagem:", erro.message);
+      console.error("🔥 Stack trace:", erro.stack);
+      console.error("📧 Parâmetros que causaram erro:", {
+        email: email,
+        assunto: assunto,
+        tipo: tipo,
+        pedidoFornecido: !!pedido
+      });
+      console.error("💥 === FIM DO ERRO enviarEmail ===");
+      throw erro;
     }
+    
+    console.log("📧 === FIM DA FUNÇÃO enviarEmail ===");
   }
 }
 

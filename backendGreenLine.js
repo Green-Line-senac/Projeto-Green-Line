@@ -788,27 +788,50 @@ app.get("/checar-cep", async (req, res) => {
 });
 app.post("/salvar-pedido", async (req, res) => {
   let pedido = req.body;
-  console.log("Pedido recebido:", pedido);
+  console.log("🚀 === INÍCIO DA ROTA /salvar-pedido ===");
+  console.log("📦 Pedido recebido:", JSON.stringify(pedido, null, 2));
+  console.log("🔍 Validando dados do pedido...");
 
   try {
     // Validação básica
-    if (
-      !pedido ||
-      !pedido.numeroPedido ||
-      !pedido.produtos ||
-      pedido.produtos.length === 0 ||
-      !pedido.idPessoa
-    ) {
-      return res
-        .status(400)
-        .json({ error: "Dados do pedido inválidos", codigo: -1 });
+    console.log("📋 Validando campos obrigatórios...");
+    const validationErrors = [];
+
+    if (!pedido) validationErrors.push("Objeto pedido não fornecido");
+    if (!pedido?.numeroPedido) validationErrors.push("numeroPedido ausente");
+    if (!pedido?.produtos || pedido.produtos.length === 0) validationErrors.push("produtos ausentes ou vazios");
+    if (!pedido?.idPessoa) validationErrors.push("idPessoa ausente");
+
+    if (validationErrors.length > 0) {
+      console.error("❌ Validação falhou:", validationErrors);
+      return res.status(400).json({
+        error: "Dados do pedido inválidos",
+        codigo: -1,
+        detalhes: validationErrors
+      });
     }
 
+    console.log("✅ Validação básica passou");
+
     const formaPagamento = pedido.formaPagamentoVendas;
+    console.log("💳 Forma de pagamento recebida:", formaPagamento);
+    console.log("💳 Tipo da forma de pagamento:", typeof formaPagamento);
 
     // Se for string (PIX ou BB)
     if (formaPagamento === "PIX" || formaPagamento === "BB") {
-      console.log("Processando pagamento PIX/BB...");
+      console.log("💰 Processando pagamento PIX/BB...");
+      console.log("📝 Dados para inserção no banco:", {
+        numeroPedido: pedido.numeroPedido,
+        idPessoa: pedido.idPessoa,
+        tipoPagamento: formaPagamento,
+        valorTotal: pedido.total,
+        nomeTitular: pedido.nomeTitular,
+        metodoEntrega: pedido.metodoEntrega,
+        previsaoEntrega: pedido.previsaoEntrega,
+        frete: pedido.frete,
+        subtotal: pedido.subtotal,
+        desconto: pedido.desconto
+      });
       const sql = `
         INSERT INTO pedidos(
           numero_pedido,
@@ -1004,7 +1027,10 @@ app.post("/salvar-pedido", async (req, res) => {
     }
 
     // ✅ Enviar email de confirmação
-    console.log("📧 Enviando email de confirmação do pedido...");
+    console.log("📧 === INICIANDO ENVIO DE EMAIL ===");
+    console.log("🔍 Buscando dados do cliente para email...");
+    console.log("👤 ID da pessoa:", pedido.idPessoa);
+
     try {
       // Buscar dados do cliente para o email
       const clienteData = await db.query(
@@ -1012,13 +1038,19 @@ app.post("/salvar-pedido", async (req, res) => {
         [pedido.idPessoa]
       );
 
+      console.log("📊 Resultado da busca do cliente:", clienteData);
+
       if (clienteData && clienteData.length > 0) {
         const cliente = clienteData[0];
+        console.log("✅ Cliente encontrado:", cliente);
 
         // Preparar dados do pedido para o email
+        console.log("🔧 Preparando dados para o email...");
         const metodoPagamento = typeof pedido.formaPagamentoVendas === 'string'
           ? pedido.formaPagamentoVendas
           : (pedido.formaPagamentoVendas?.metodoPagamento || 'Não informado');
+
+        console.log("💳 Método de pagamento processado:", metodoPagamento);
 
         const pedidoParaEmail = {
           numeroPedido: pedido.numeroPedido || 'N/A',
@@ -1036,7 +1068,13 @@ app.post("/salvar-pedido", async (req, res) => {
           produtos: pedido.produtos || []
         };
 
-        console.log("📋 Dados do pedido para email:", pedidoParaEmail);
+        console.log("📋 Dados do pedido para email:", JSON.stringify(pedidoParaEmail, null, 2));
+        console.log("📧 Chamando função enviarEmail...");
+        console.log("📧 Parâmetros:", {
+          email: cliente.email,
+          assunto: `Pedido Confirmado - ${pedido.numeroPedido}`,
+          tipo: "pedido_confirmado"
+        });
 
         await funcoesUteis.enviarEmail(
           cliente.email,
@@ -1045,17 +1083,31 @@ app.post("/salvar-pedido", async (req, res) => {
           pedidoParaEmail
         );
 
-        console.log(`✅ Email de confirmação enviado para: ${cliente.email}`);
+        console.log(`✅ Email de confirmação enviado com sucesso para: ${cliente.email}`);
       } else {
-        console.warn("⚠️ Cliente não encontrado para envio de email");
+        console.error("❌ Cliente não encontrado para envio de email");
+        console.error("🔍 Dados da consulta:", {
+          idPessoa: pedido.idPessoa,
+          resultadoConsulta: clienteData
+        });
       }
     } catch (emailError) {
-      console.error("❌ Erro ao enviar email de confirmação:", emailError);
+      console.error("❌ ERRO CRÍTICO ao enviar email de confirmação:");
+      console.error("📧 Tipo do erro:", emailError.name);
+      console.error("📧 Mensagem do erro:", emailError.message);
+      console.error("📧 Stack trace:", emailError.stack);
       // Não falha o pedido por causa do email
     }
 
     // ✅ Finaliza com sucesso e encerra a função
-    console.log("Pedido salvo com sucesso. Estoque atualizado para todos os produtos.");
+    console.log("🎉 === PEDIDO SALVO COM SUCESSO ===");
+    console.log("📊 Resumo do processamento:");
+    console.log("   - ID do pedido:", idPedido);
+    console.log("   - Número do pedido:", pedido.numeroPedido);
+    console.log("   - Produtos processados:", pedido.produtos.length);
+    console.log("   - Total do pedido:", pedido.total);
+    console.log("🏁 === FIM DA ROTA /salvar-pedido ===");
+
     return res.status(200).json({
       mensagem: "Pedido cadastrado com sucesso",
       idPedido: idPedido,
@@ -1064,11 +1116,18 @@ app.post("/salvar-pedido", async (req, res) => {
 
     // 🚫 Nada deve vir depois deste return
   } catch (erro) {
-    console.error("Erro ao salvar pedido:", erro);
+    console.error("💥 === ERRO CRÍTICO NA ROTA /salvar-pedido ===");
+    console.error("🔥 Tipo do erro:", erro.name);
+    console.error("🔥 Mensagem:", erro.message);
+    console.error("🔥 Stack trace:", erro.stack);
+    console.error("🔥 Dados do pedido que causaram erro:", JSON.stringify(pedido, null, 2));
+    console.error("💥 === FIM DO ERRO ===");
+
     return res.status(500).json({
       erro: "Erro ao processar pedido",
       codigo: -2,
-      detalhe: erro.message, // mostra erro real no JSON
+      detalhe: erro.message,
+      timestamp: new Date().toISOString()
     });
   }
 });
@@ -2379,5 +2438,18 @@ app.get('/*.html', (req, res) => {
 
 // ==================== INICIAR SERVIDOR ====================
 app.listen(3010, () => {
-  console.log("🚀 SERVIDOR RODANDO NO ONLINE");
+  console.log("🚀 === SERVIDOR GREEN LINE INICIADO ===");
+  console.log("🌐 Porta: 3010");
+  console.log("📧 Sistema de email:", process.env.EMAIL_USER ? "✅ Configurado" : "❌ Não configurado");
+  console.log("🔐 JWT Secret:", process.env.SEGREDO_JWT ? "✅ Configurado" : "❌ Não configurado");
+  console.log("🗄️ Banco de dados: Conectado");
+  console.log("📁 Templates de email: Verificando...");
+
+  // Verificar se templates existem
+  const fs = require('fs');
+  const path = require('path');
+  const templatePath = path.join(__dirname, 'templates', 'email-pedido-confirmado.html');
+  console.log("📄 Template de pedido confirmado:", fs.existsSync(templatePath) ? "✅ Encontrado" : "❌ Não encontrado");
+
+  console.log("🚀 === SERVIDOR PRONTO PARA RECEBER REQUISIÇÕES ===");
 });
