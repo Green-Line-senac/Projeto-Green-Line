@@ -493,22 +493,21 @@ if (document.readyState === 'loading') {
   }
 }
 
-// Exportações ES6 para módulos
-export {
-  NotificationManager,
-  notifications,
-  showNotification,
-  showSuccess,
-  showError,
-  showWarning,
-  showInfo,
-  showValidationError,
-  showLoading,
-  hideNotification,
-  clearAllNotifications
-};
+// Disponibilizar funções globalmente para uso direto no navegador
+window.NotificationManager = NotificationManager;
+window.notifications = notifications;
+window.showNotification = showNotification;
+window.showSuccess = showSuccess;
+window.showError = showError;
+window.showWarning = showWarning;
+window.showInfo = showInfo;
+window.showValidationError = showValidationError;
+window.showLoading = showLoading;
+window.hideNotification = hideNotification;
+window.hideLoading = hideLoading;
+window.clearAllNotifications = clearAllNotifications;
 
-// Exportar para módulos CommonJS se necessário
+// Exportar para módulos CommonJS se necessário (para Node.js)
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     NotificationManager,
@@ -521,6 +520,7 @@ if (typeof module !== 'undefined' && module.exports) {
     showValidationError,
     showLoading,
     hideNotification,
+    hideLoading,
     clearAllNotifications
   };
 }

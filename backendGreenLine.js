@@ -890,20 +890,48 @@ app.post("/salvar-pedido", async (req, res) => {
     console.log("ID do pedido inserido:", idPedido);
 
     // Inserir produtos e atualizar estoque
+    console.log(`Processando ${pedido.produtos.length} produtos do pedido...`);
+    
     for (const produto of pedido.produtos) {
+      console.log(`Processando produto: ${produto.nome}`);
+      
       const produtoExistente = await db.query(
-        "SELECT id_produto, estoque FROM produto WHERE produto = ? LIMIT 1",
+        "SELECT id_produto, produto, estoque FROM produto WHERE produto = ? LIMIT 1",
         [produto.nome]
       );
 
+      console.log(`Resultado da busca do produto "${produto.nome}":`, produtoExistente);
+
       if (!produtoExistente || produtoExistente.length === 0) {
-        console.error(`Produto não encontrado: ${produto.nome}`);
-        continue;
+        console.error(`❌ Produto não encontrado no banco: ${produto.nome}`);
+        
+        // Tentar buscar por ID se disponível
+        if (produto.id_produto) {
+          console.log(`Tentando buscar por ID: ${produto.id_produto}`);
+          const produtoPorId = await db.query(
+            "SELECT id_produto, produto, estoque FROM produto WHERE id_produto = ? LIMIT 1",
+            [produto.id_produto]
+          );
+          
+          if (produtoPorId && produtoPorId.length > 0) {
+            console.log(`✅ Produto encontrado por ID:`, produtoPorId[0]);
+            produtoExistente[0] = produtoPorId[0];
+          } else {
+            console.error(`❌ Produto também não encontrado por ID: ${produto.id_produto}`);
+            continue;
+          }
+        } else {
+          continue;
+        }
       }
 
       const produtoInfo = produtoExistente[0];
-      const estoqueAtual = produtoInfo.estoque;
-      const quantidadeComprada = produto.quantidade;
+      const estoqueAtual = parseInt(produtoInfo.estoque) || 0;
+      const quantidadeComprada = parseInt(produto.quantidade) || 1;
+      
+      console.log(`📦 Produto: ${produtoInfo.produto}`);
+      console.log(`📊 Estoque atual: ${estoqueAtual}`);
+      console.log(`🛒 Quantidade solicitada: ${quantidadeComprada}`);
 
       if (estoqueAtual < quantidadeComprada) {
         console.error(
@@ -932,20 +960,44 @@ app.post("/salvar-pedido", async (req, res) => {
       );
 
       const novoEstoque = estoqueAtual - quantidadeComprada;
-      await db.query("UPDATE produto SET estoque = ? WHERE id_produto = ?", [
+      
+      console.log(`🔄 Atualizando estoque: ${estoqueAtual} - ${quantidadeComprada} = ${novoEstoque}`);
+      
+      // Executar update do estoque
+      const updateResult = await db.query("UPDATE produto SET estoque = ? WHERE id_produto = ?", [
         novoEstoque,
         produtoInfo.id_produto,
       ]);
-
-      console.log(
-        `Estoque atualizado para ${produto.nome}: ${estoqueAtual} -> ${novoEstoque}`
+      
+      console.log(`📝 Resultado do UPDATE:`, updateResult);
+      
+      // Verificar se a atualização foi bem-sucedida
+      const estoqueVerificacao = await db.query(
+        "SELECT estoque FROM produto WHERE id_produto = ?",
+        [produtoInfo.id_produto]
       );
+      
+      if (estoqueVerificacao && estoqueVerificacao.length > 0) {
+        const estoqueAtualizado = estoqueVerificacao[0].estoque;
+        console.log(`✅ Estoque verificado após update: ${estoqueAtualizado}`);
+        
+        if (parseInt(estoqueAtualizado) !== novoEstoque) {
+          console.error(`❌ ERRO: Estoque não foi atualizado corretamente!`);
+          console.error(`   Esperado: ${novoEstoque}, Atual: ${estoqueAtualizado}`);
+        } else {
+          console.log(`✅ Estoque atualizado com sucesso para ${produtoInfo.produto}: ${estoqueAtual} -> ${novoEstoque}`);
+        }
+      } else {
+        console.error(`❌ Erro ao verificar estoque atualizado para produto ID: ${produtoInfo.id_produto}`);
+      }
     }
 
     // ✅ Finaliza com sucesso e encerra a função
+    console.log("Pedido salvo com sucesso. Estoque atualizado para todos os produtos.");
     return res.status(200).json({
       mensagem: "Pedido cadastrado com sucesso",
       idPedido: idPedido,
+      produtosProcessados: pedido.produtos.length
     });
 
     // 🚫 Nada deve vir depois deste return
@@ -958,6 +1010,421 @@ app.post("/salvar-pedido", async (req, res) => {
     });
   }
 });
+
+// ==================== ROTA PARA CANCELAR PEDIDO E RESTAURAR ESTOQUE ====================
+app.post("/cancelar-pedido", async (req, res) => {
+  const { idPedido, numeroPedido, motivo } = req.body;
+  
+  if (!idPedido && !numeroPedido) {
+    return res.status(400).json({ error: "ID ou número do pedido é obrigatório" });
+  }
+  
+  try {
+    let pedidoId = idPedido;
+    let pedidoNumero = numeroPedido;
+    
+    // Se foi passado número do pedido, buscar o ID
+    if (numeroPedido && !idPedido) {
+      const pedidoBusca = await db.query(
+        "SELECT id_pedido FROM pedido WHERE numero_pedido = ?",
+        [numeroPedido]
+      );
+      
+      if (!pedidoBusca || pedidoBusca.length === 0) {
+        return res.status(404).json({ error: "Pedido não encontrado" });
+      }
+      
+      pedidoId = pedidoBusca[0].id_pedido;
+    }
+    
+    console.log(`Iniciando cancelamento do pedido ${pedidoNumero || pedidoId}...`);
+    
+    // Verificar se o pedido existe e pode ser cancelado
+    const pedidoExistente = await db.query(
+      "SELECT * FROM pedido WHERE id_pedido = ? AND situacao IN ('P', 'C')",
+      [pedidoId]
+    );
+    
+    if (!pedidoExistente || pedidoExistente.length === 0) {
+      return res.status(404).json({ 
+        error: "Pedido não encontrado ou não pode ser cancelado" 
+      });
+    }
+    
+    // Buscar produtos do pedido
+    const produtosPedido = await db.query(
+      "SELECT pp.id_produto, pp.quantidade, p.produto FROM pedido_produto pp JOIN produto p ON pp.id_produto = p.id_produto WHERE pp.id_pedido = ?",
+      [pedidoId]
+    );
+    
+    // Restaurar estoque para cada produto
+    for (const item of produtosPedido) {
+      await db.query(
+        "UPDATE produto SET estoque = estoque + ? WHERE id_produto = ?",
+        [item.quantidade, item.id_produto]
+      );
+      
+      console.log(`Estoque restaurado para ${item.produto}: +${item.quantidade}`);
+    }
+    
+    // Atualizar status do pedido para cancelado
+    await db.query(
+      "UPDATE pedido SET situacao = 'X', data_cancelamento = NOW(), motivo_cancelamento = ? WHERE id_pedido = ?",
+      [motivo || 'Cancelado pelo sistema', pedidoId]
+    );
+    
+    console.log(`Pedido ${pedidoNumero || pedidoId} cancelado com sucesso. Estoque restaurado.`);
+    
+    return res.status(200).json({
+      mensagem: "Pedido cancelado com sucesso",
+      idPedido: pedidoId,
+      numeroPedido: pedidoNumero,
+      produtosRestaurados: produtosPedido.length
+    });
+    
+  } catch (error) {
+    console.error("Erro ao cancelar pedido:", error);
+    return res.status(500).json({ error: "Erro interno do servidor" });
+  }
+});
+
+// ==================== ROTA PARA VERIFICAR ESTOQUE ====================
+app.get("/verificar-estoque/:idProduto", async (req, res) => {
+  const { idProduto } = req.params;
+  
+  try {
+    const produto = await db.query(
+      "SELECT id_produto, produto, estoque FROM produto WHERE id_produto = ?",
+      [idProduto]
+    );
+    
+    if (!produto || produto.length === 0) {
+      return res.status(404).json({ error: "Produto não encontrado" });
+    }
+    
+    return res.status(200).json({
+      id_produto: produto[0].id_produto,
+      nome: produto[0].produto,
+      estoque: produto[0].estoque
+    });
+    
+  } catch (error) {
+    console.error("Erro ao verificar estoque:", error);
+    return res.status(500).json({ error: "Erro interno do servidor" });
+  }
+});
+
+// ==================== ROTA DE DIAGNÓSTICO DO BANCO ====================
+app.get("/diagnostico-banco", async (req, res) => {
+  try {
+    console.log("🔍 Iniciando diagnóstico do banco de dados...");
+    
+    // Teste 1: Conectividade básica
+    const testeConexao = await db.query("SELECT 1 as teste");
+    console.log("✅ Teste de conexão:", testeConexao);
+    
+    // Teste 2: Verificar estrutura da tabela produto
+    const estruturaTabela = await db.query("DESCRIBE produto");
+    console.log("📋 Estrutura da tabela produto:", estruturaTabela);
+    
+    // Teste 3: Contar produtos
+    const totalProdutos = await db.query("SELECT COUNT(*) as total FROM produto");
+    console.log("📊 Total de produtos:", totalProdutos);
+    
+    // Teste 4: Listar alguns produtos com estoque
+    const produtosComEstoque = await db.query(
+      "SELECT id_produto, produto, estoque FROM produto WHERE estoque > 0 LIMIT 5"
+    );
+    console.log("🛍️ Produtos com estoque:", produtosComEstoque);
+    
+    // Teste 5: Verificar se há produtos com estoque zero
+    const produtosSemEstoque = await db.query(
+      "SELECT COUNT(*) as total FROM produto WHERE estoque = 0"
+    );
+    console.log("📦 Produtos sem estoque:", produtosSemEstoque);
+    
+    return res.status(200).json({
+      sucesso: true,
+      testes: {
+        conexao: testeConexao,
+        estruturaTabela: estruturaTabela,
+        totalProdutos: totalProdutos[0].total,
+        produtosComEstoque: produtosComEstoque,
+        produtosSemEstoque: produtosSemEstoque[0].total
+      }
+    });
+    
+  } catch (error) {
+    console.error("❌ Erro no diagnóstico:", error);
+    return res.status(500).json({ 
+      erro: "Erro no diagnóstico", 
+      detalhes: error.message,
+      stack: error.stack 
+    });
+  }
+});
+
+// ==================== ROTA DE TESTE PARA ESTOQUE ====================
+app.post("/teste-estoque", async (req, res) => {
+  const { idProduto, novoEstoque } = req.body;
+  
+  try {
+    console.log(`🧪 TESTE: Atualizando estoque do produto ${idProduto} para ${novoEstoque}`);
+    
+    // Verificar estoque atual
+    const produtoAntes = await db.query(
+      "SELECT id_produto, produto, estoque FROM produto WHERE id_produto = ?",
+      [idProduto]
+    );
+    
+    if (!produtoAntes || produtoAntes.length === 0) {
+      return res.status(404).json({ error: "Produto não encontrado" });
+    }
+    
+    const estoqueAntes = produtoAntes[0].estoque;
+    console.log(`📊 Estoque antes: ${estoqueAntes}`);
+    
+    // Atualizar estoque
+    const updateResult = await db.query(
+      "UPDATE produto SET estoque = ? WHERE id_produto = ?",
+      [novoEstoque, idProduto]
+    );
+    
+    console.log(`📝 Resultado do UPDATE:`, updateResult);
+    
+    // Verificar estoque após update
+    const produtoDepois = await db.query(
+      "SELECT id_produto, produto, estoque FROM produto WHERE id_produto = ?",
+      [idProduto]
+    );
+    
+    const estoqueDepois = produtoDepois[0].estoque;
+    console.log(`📊 Estoque depois: ${estoqueDepois}`);
+    
+    const sucesso = parseInt(estoqueDepois) === parseInt(novoEstoque);
+    
+    return res.status(200).json({
+      sucesso: sucesso,
+      produto: produtoAntes[0].produto,
+      estoqueAntes: estoqueAntes,
+      estoqueDepois: estoqueDepois,
+      estoqueEsperado: novoEstoque,
+      updateResult: updateResult
+    });
+    
+  } catch (error) {
+    console.error("Erro no teste de estoque:", error);
+    return res.status(500).json({ error: "Erro interno do servidor", detalhes: error.message });
+  }
+});
+
+// ==================== ROTA PARA BUSCAR PEDIDO POR NÚMERO ====================
+app.get("/buscar-pedido/:numeroPedido", async (req, res) => {
+  let { numeroPedido } = req.params;
+  
+  try {
+    // Decodificar URL e normalizar o número do pedido
+    numeroPedido = decodeURIComponent(numeroPedido);
+    
+    console.log(`Número do pedido recebido: "${numeroPedido}"`);
+    
+    // Tentar buscar com e sem # para garantir que encontre
+    let pedido = [];
+    
+    // Primeiro, tentar buscar exatamente como veio
+    pedido = await db.query(`
+      SELECT 
+        p.id_pedido,
+        p.numero_pedido,
+        p.data_pedido,
+        p.valor_total,
+        p.situacao,
+        p.forma_pagamento,
+        p.endereco_entrega,
+        p.previsao_entrega,
+        p.data_cancelamento,
+        p.motivo_cancelamento,
+        pe.nome as nome_cliente,
+        pe.email
+      FROM pedido p
+      LEFT JOIN pessoa pe ON p.id_pessoa = pe.id_pessoa
+      WHERE p.numero_pedido = ?
+      LIMIT 1
+    `, [numeroPedido]);
+    
+    // Se não encontrou, tentar com # adicionado
+    if (!pedido || pedido.length === 0) {
+      const numeroComHash = numeroPedido.startsWith('#') ? numeroPedido : '#' + numeroPedido;
+      console.log(`Tentando buscar com #: "${numeroComHash}"`);
+      
+      pedido = await db.query(`
+        SELECT 
+          p.id_pedido,
+          p.numero_pedido,
+          p.data_pedido,
+          p.valor_total,
+          p.situacao,
+          p.forma_pagamento,
+          p.endereco_entrega,
+          p.previsao_entrega,
+          p.data_cancelamento,
+          p.motivo_cancelamento,
+          pe.nome as nome_cliente,
+          pe.email
+        FROM pedido p
+        LEFT JOIN pessoa pe ON p.id_pessoa = pe.id_pessoa
+        WHERE p.numero_pedido = ?
+        LIMIT 1
+      `, [numeroComHash]);
+    }
+    
+    // Se ainda não encontrou, tentar sem # 
+    if (!pedido || pedido.length === 0) {
+      const numeroSemHash = numeroPedido.startsWith('#') ? numeroPedido.substring(1) : numeroPedido;
+      console.log(`Tentando buscar sem #: "${numeroSemHash}"`);
+      
+      pedido = await db.query(`
+        SELECT 
+          p.id_pedido,
+          p.numero_pedido,
+          p.data_pedido,
+          p.valor_total,
+          p.situacao,
+          p.forma_pagamento,
+          p.endereco_entrega,
+          p.previsao_entrega,
+          p.data_cancelamento,
+          p.motivo_cancelamento,
+          pe.nome as nome_cliente,
+          pe.email
+        FROM pedido p
+        LEFT JOIN pessoa pe ON p.id_pessoa = pe.id_pessoa
+        WHERE p.numero_pedido = ?
+        LIMIT 1
+      `, [numeroSemHash]);
+    }
+    
+    console.log(`Resultado da busca: ${pedido.length} pedido(s) encontrado(s)`);
+    
+    if (!pedido || pedido.length === 0) {
+      return res.status(404).json({ 
+        error: "Pedido não encontrado",
+        codigo: -1
+      });
+    }
+    
+    const pedidoInfo = pedido[0];
+    
+    // Buscar produtos do pedido
+    const produtos = await db.query(`
+      SELECT 
+        pp.quantidade,
+        pp.preco_unitario,
+        pp.nome_produto,
+        p.imagem_1
+      FROM pedido_produto pp
+      LEFT JOIN produto p ON pp.id_produto = p.id_produto
+      WHERE pp.id_pedido = ?
+    `, [pedidoInfo.id_pedido]);
+    
+    // Determinar status do pedido
+    const statusPedido = determinarStatusPedido(pedidoInfo.situacao, pedidoInfo.data_pedido);
+    
+    // Montar resposta
+    const resposta = {
+      numero: pedidoInfo.numero_pedido,
+      data: new Date(pedidoInfo.data_pedido).toLocaleDateString('pt-BR'),
+      dataCompleta: new Date(pedidoInfo.data_pedido).toLocaleString('pt-BR'),
+      total: `R$ ${parseFloat(pedidoInfo.valor_total).toFixed(2).replace('.', ',')}`,
+      situacao: pedidoInfo.situacao,
+      pagamento: formatarFormaPagamento(pedidoInfo.forma_pagamento),
+      endereco: pedidoInfo.endereco_entrega || 'Endereço não informado',
+      previsao: pedidoInfo.previsao_entrega || 'A definir',
+      cliente: pedidoInfo.nome_cliente || 'Cliente',
+      email: pedidoInfo.email,
+      produtos: produtos.map(prod => ({
+        nome: prod.nome_produto,
+        quantidade: prod.quantidade,
+        preco: parseFloat(prod.preco_unitario),
+        subtotal: parseFloat(prod.preco_unitario) * parseInt(prod.quantidade),
+        imagem: prod.imagem_1
+      })),
+      status: statusPedido,
+      cancelado: pedidoInfo.situacao === 'X',
+      motivoCancelamento: pedidoInfo.motivo_cancelamento,
+      dataCancelamento: pedidoInfo.data_cancelamento ? 
+        new Date(pedidoInfo.data_cancelamento).toLocaleString('pt-BR') : null
+    };
+    
+    console.log(`Pedido encontrado: ${numeroPedido}`);
+    return res.status(200).json(resposta);
+    
+  } catch (error) {
+    console.error("Erro ao buscar pedido:", error);
+    return res.status(500).json({ error: "Erro interno do servidor" });
+  }
+});
+
+// Função auxiliar para determinar status do pedido
+function determinarStatusPedido(situacao, dataPedido) {
+  const agora = new Date();
+  const dataP = new Date(dataPedido);
+  const diffHoras = (agora - dataP) / (1000 * 60 * 60);
+  
+  let status = [
+    { nome: 'Pedido Confirmado', data: dataP.toLocaleString('pt-BR'), ativo: true, icone: 'bi-check-circle-fill' },
+    { nome: 'Em Preparação', data: 'Em breve', ativo: false, icone: 'bi-box-seam' },
+    { nome: 'Em Transporte', data: 'Em breve', ativo: false, icone: 'bi-truck' },
+    { nome: 'Entregue', data: 'Em breve', ativo: false, icone: 'bi-house-door' }
+  ];
+  
+  if (situacao === 'X') {
+    // Pedido cancelado
+    return [
+      { nome: 'Pedido Confirmado', data: dataP.toLocaleString('pt-BR'), ativo: true, icone: 'bi-check-circle-fill' },
+      { nome: 'Cancelado', data: 'Pedido foi cancelado', ativo: true, icone: 'bi-x-circle-fill' }
+    ];
+  }
+  
+  // Simular progresso baseado no tempo
+  if (diffHoras > 2) {
+    status[1].ativo = true;
+    status[1].data = 'Em preparação';
+  }
+  
+  if (diffHoras > 24) {
+    status[2].ativo = true;
+    status[2].data = 'Em transporte';
+  }
+  
+  if (diffHoras > 72) {
+    status[3].ativo = true;
+    status[3].data = 'Entregue';
+  }
+  
+  return status;
+}
+
+// Função auxiliar para formatar forma de pagamento
+function formatarFormaPagamento(formaPagamento) {
+  if (!formaPagamento) return 'Não informado';
+  
+  if (typeof formaPagamento === 'string') {
+    switch (formaPagamento) {
+      case 'PIX': return 'PIX';
+      case 'BB': return 'Boleto Bancário';
+      case 'DEB': return 'Cartão de Débito';
+      default: return formaPagamento;
+    }
+  }
+  
+  // Se for objeto (cartão de crédito)
+  if (typeof formaPagamento === 'object') {
+    return `Cartão de Crédito (${formaPagamento.parcelas || '1x'})`;
+  }
+  
+  return 'Não informado';
+}
 
 // Endpoint para registrar avaliação
 app.post("/avaliacoes", async (req, res) => {
@@ -1764,6 +2231,60 @@ app.get("/pedidos/todos", async (req, res) => {
 // ==================== ROTA DE TESTE ====================
 app.get("/teste", (req, res) => {
   res.json({ mensagem: "API está funcionando!" });
+});
+
+// ==================== ROTAS PARA PÁGINAS ESTÁTICAS ====================
+// Rota específica para página de pedido confirmado
+app.get('/pedido_confirmado.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'pedido_confirmado.html'));
+});
+
+// Rota específica para página de acompanhar pedido
+app.get('/acompanhar_pedido.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'acompanhar_pedido.html'));
+});
+
+// Rota específica para página de contato
+app.get('/contato.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'contato.html'));
+});
+
+// Rota específica para página de perfil
+app.get('/perfil.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'perfil.html'));
+});
+
+// Rota específica para página de produtos
+app.get('/produtos.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'produtos.html'));
+});
+
+// Rota específica para página sobre
+app.get('/sobre.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'sobre.html'));
+});
+
+// Rota específica para política de privacidade
+app.get('/politica_privacidade.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'politica_privacidade.html'));
+});
+
+// Rota específica para termos de uso
+app.get('/termos_de_uso.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'termos_de_uso.html'));
+});
+
+// Rota catch-all para outras páginas HTML na pasta public
+app.get('/*.html', (req, res) => {
+  const fileName = req.params[0] + '.html';
+  const filePath = path.join(__dirname, 'public', fileName);
+  
+  // Verifica se o arquivo existe
+  if (fs.existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.status(404).send('Página não encontrada');
+  }
 });
 
 // ==================== INICIAR SERVIDOR ====================

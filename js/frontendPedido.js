@@ -1,4 +1,6 @@
-import { showSuccess, showError, showWarning, showLoading, hideNotification } from "./notifications.js";
+// Usando funções globais do notifications.js em vez de importações ES6
+// As funções showSuccess, showError, showWarning, showLoading, hideNotification 
+// estão disponíveis globalmente através do window object
 
 const apiPedido = {
   online: "https://green-line-web.onrender.com",
@@ -269,9 +271,20 @@ async function carregarDadosPedido() {
       hideNotification(loadingId);
       showError('Login necessário', 'Você precisa estar logado para finalizar a compra. Redirecionando para o login...');
       setTimeout(() => {
-        window.location.href = "/public/login.html";
+        window.location.href = "/login.html";
       }, 2000);
       return;
+    }
+
+    // Recupera endereço completo do sessionStorage
+    const endereco = JSON.parse(sessionStorage.getItem('enderecoEntrega') || '{}');
+    let enderecoCompleto = 'Endereço não informado';
+    
+    if (endereco && endereco.logradouro) {
+      enderecoCompleto = `${sessionStorage.getItem("usuario") || "Cliente"}
+${endereco.logradouro}, ${endereco.numeroCasa || ''}${endereco.complementoCasa ? ' - ' + endereco.complementoCasa : ''}
+${endereco.bairro}
+${endereco.cidade} - ${endereco.uf}, ${endereco.cep}`;
     }
 
     // Monta objeto completo do pedido
@@ -280,6 +293,9 @@ async function carregarDadosPedido() {
       idPessoa,
       email,
       nomeTitular: sessionStorage.getItem("usuario") || "Cliente",
+      nomeCliente: sessionStorage.getItem("usuario") || "Cliente",
+      enderecoCompleto,
+      endereco: enderecoCompleto,
       metodoEntrega,
       previsaoEntrega,
       produtos: dadosCompra.map((item) => ({
@@ -393,7 +409,7 @@ async function salvarPedido(pedido) {
               text: 'Ajustar quantidade',
               type: 'primary',
               handler: () => {
-                window.location.href = '/public/carrinho.html';
+                window.location.href = '/carrinho.html';
               }
             }
           ]
@@ -701,20 +717,40 @@ function continuarComprando() {
         text: 'Ver ofertas',
         type: 'primary',
         handler: () => {
-          window.location.href = "/public/produtos.html?categoria=ofertas";
+          window.location.href = "/produtos.html?categoria=ofertas";
         }
       }
     ]
   });
 
   setTimeout(() => {
-    window.location.href = "/public/produtos.html";
+    window.location.href = "/produtos.html";
   }, 2000);
 }
 
 async function acompanharPedido() {
+  console.log("Função acompanharPedido chamada");
+  
+  // Primeiro, verifica se deve abrir o modal ou redirecionar
+  const urlParams = new URLSearchParams(window.location.search);
+  const fromEmail = urlParams.get('from') === 'email';
+  
+  console.log("URL params:", urlParams.toString());
+  console.log("From email:", fromEmail);
+  
+  if (fromEmail) {
+    // Se veio do email, redireciona para uma página específica de acompanhamento
+    console.log("Redirecionando para página de acompanhamento...");
+    alert('Redirecionando para página de acompanhamento...');
+    setTimeout(() => {
+      window.location.href = '/acompanhar_pedido.html';
+    }, 1500);
+    return;
+  }
+
   const numeroPedido = document.getElementById("numeroPedido").textContent;
   let dataConfirmacao = document.getElementById("dataConfirmacao").textContent;
+  
   // Se a data estiver vazia, tenta buscar do sessionStorage ou mostra mensagem padrão
   if (!dataConfirmacao || dataConfirmacao.trim() === "") {
     const ultimoPedido = sessionStorage.getItem("ultimoPedido");
@@ -729,9 +765,13 @@ async function acompanharPedido() {
       dataConfirmacao = "Data não disponível";
     }
   }
+  
   // Atualiza informações básicas no modal
-  document.getElementById("modalNumeroPedido").textContent = numeroPedido;
-  document.getElementById("modalDataPedido").textContent = dataConfirmacao;
+  const modalNumeroPedido = document.getElementById("modalNumeroPedido");
+  const modalDataPedido = document.getElementById("modalDataPedido");
+  
+  if (modalNumeroPedido) modalNumeroPedido.textContent = numeroPedido;
+  if (modalDataPedido) modalDataPedido.textContent = dataConfirmacao;
 
   // Monta a timeline de status
   const timelineTracking = document.querySelector(".timeline-tracking");
@@ -849,10 +889,12 @@ Obrigado por escolher produtos sustentáveis!
 }
 
 function entrarContato() {
-  mostrarInfo("Redirecionando para a página de contato...");
+  console.log("Função entrarContato chamada");
+  alert("Redirecionando para a página de contato...");
   setTimeout(() => {
-    window.location.href = "/public/contato.html";
-  }, 1000);
+    console.log("Redirecionando para /contato.html");
+    window.location.href = "/contato.html";
+  }, 500);
 }
 
 // Função para enviar solicitação de atualizações por email
@@ -951,20 +993,51 @@ function formatarPrecoBR(valor) {
 
 // Inicialização do módulo
 document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOM carregado, inicializando página de pedido confirmado...");
+  
   // Carrega dados do pedido
   carregarDadosPedido();
 
   // Event listeners para os botões
   const btnContinuar = document.getElementById("btnContinuarComprando");
-  if (btnContinuar) btnContinuar.addEventListener("click", continuarComprando);
+  if (btnContinuar) {
+    btnContinuar.addEventListener("click", continuarComprando);
+    console.log("Event listener adicionado para btnContinuarComprando");
+  } else {
+    console.warn("Botão btnContinuarComprando não encontrado");
+  }
+  
   const btnAcompanhar = document.getElementById("btnAcompanharPedido");
-  if (btnAcompanhar) btnAcompanhar.addEventListener("click", acompanharPedido);
+  if (btnAcompanhar) {
+    btnAcompanhar.addEventListener("click", acompanharPedido);
+    console.log("Event listener adicionado para btnAcompanharPedido");
+  } else {
+    console.warn("Botão btnAcompanharPedido não encontrado");
+  }
+  
   const btnBaixar = document.getElementById("btnBaixarComprovante");
-  if (btnBaixar) btnBaixar.addEventListener("click", baixarComprovante);
+  if (btnBaixar) {
+    btnBaixar.addEventListener("click", baixarComprovante);
+    console.log("Event listener adicionado para btnBaixarComprovante");
+  } else {
+    console.warn("Botão btnBaixarComprovante não encontrado");
+  }
+  
   const btnContato = document.getElementById("btnEntrarContato");
-  if (btnContato) btnContato.addEventListener("click", entrarContato);
+  if (btnContato) {
+    btnContato.addEventListener("click", entrarContato);
+    console.log("Event listener adicionado para btnEntrarContato");
+  } else {
+    console.warn("Botão btnEntrarContato não encontrado");
+  }
+  
   const btnAtualizacoes = document.getElementById("btnEnviarAtualizacoes");
-  if (btnAtualizacoes) btnAtualizacoes.addEventListener("click", enviarAtualizacoes);
+  if (btnAtualizacoes) {
+    btnAtualizacoes.addEventListener("click", enviarAtualizacoes);
+    console.log("Event listener adicionado para btnEnviarAtualizacoes");
+  } else {
+    console.warn("Botão btnEnviarAtualizacoes não encontrado");
+  }
 
   // Carrega produtos relacionados
   //carregarProdutosRelacionados();

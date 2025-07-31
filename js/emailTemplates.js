@@ -11,9 +11,12 @@ class EmailTemplateManager {
   loadTemplate(templateName) {
     try {
       const templatePath = path.join(this.templatesPath, `${templateName}.html`);
-      return fs.readFileSync(templatePath, 'utf8');
+      console.log(`📂 Carregando template: ${templatePath}`);
+      const template = fs.readFileSync(templatePath, 'utf8');
+      console.log(`✅ Template ${templateName} carregado com sucesso`);
+      return template;
     } catch (error) {
-      console.error(`Erro ao carregar template ${templateName}:`, error);
+      console.error(`❌ Erro ao carregar template ${templateName}:`, error.message);
       return null;
     }
   }
@@ -22,9 +25,31 @@ class EmailTemplateManager {
   replaceVariables(template, variables) {
     let processedTemplate = template;
     
+    console.log('🔄 Iniciando substituição de variáveis...');
+    console.log('📝 Variáveis recebidas:', Object.keys(variables));
+    
+    // Substituir todas as variáveis fornecidas usando split/join (mais confiável)
     for (const [key, value] of Object.entries(variables)) {
       const placeholder = `{{${key}}}`;
-      processedTemplate = processedTemplate.replace(new RegExp(placeholder, 'g'), value || '');
+      const safeValue = String(value || '');
+      
+      // Contar ocorrências antes da substituição
+      const beforeCount = processedTemplate.split(placeholder).length - 1;
+      
+      if (beforeCount > 0) {
+        processedTemplate = processedTemplate.split(placeholder).join(safeValue);
+        console.log(`✅ Substituído ${beforeCount} ocorrências de ${placeholder} por "${safeValue}"`);
+      }
+    }
+    
+    // Verificar se ainda há placeholders não substituídos
+    const remainingPlaceholders = processedTemplate.match(/\{\{[^}]+\}\}/g);
+    if (remainingPlaceholders) {
+      console.warn('⚠️ Placeholders não substituídos encontrados:', remainingPlaceholders);
+      // Remover placeholders não substituídos para evitar erros
+      processedTemplate = processedTemplate.replace(/\{\{[^}]+\}\}/g, '');
+    } else {
+      console.log('✅ Todos os placeholders foram substituídos com sucesso');
     }
     
     return processedTemplate;
@@ -62,7 +87,10 @@ class EmailTemplateManager {
   // Gerar email de pedido confirmado
   generateOrderConfirmationEmail(variables) {
     const template = this.loadTemplate('email-pedido-confirmado');
-    if (!template) return null;
+    if (!template) {
+      console.error('❌ Template email-pedido-confirmado não encontrado!');
+      return null;
+    }
 
     const defaultVariables = {
       NOME_USUARIO: 'Usuário',
@@ -79,7 +107,12 @@ class EmailTemplateManager {
       LINK_SUPORTE: '#'
     };
 
-    return this.replaceVariables(template, { ...defaultVariables, ...variables });
+    const finalVariables = { ...defaultVariables, ...variables };
+    console.log('📝 Variáveis finais para substituição:', finalVariables);
+    
+    const result = this.replaceVariables(template, finalVariables);
+    
+    return result;
   }
 
   // Método genérico para qualquer template

@@ -21,7 +21,7 @@ class FuncaoUteis {
       let mensagem;
       if (tipo === "recuperacao") {
         const resetLink = `https://green-line-web.onrender.com/redefinir-senha?token=${this.criarToken(email)}`;
-        
+
         mensagem = getPasswordResetEmailHTML({
           NOME_USUARIO: email.split('@')[0], // Usar parte do email como nome se não tiver nome
           LINK_RESET: resetLink,
@@ -29,7 +29,7 @@ class FuncaoUteis {
           IP_USUARIO: 'Não disponível', // Pode ser passado como parâmetro se necessário
           USER_AGENT: 'Não disponível' // Pode ser passado como parâmetro se necessário
         });
-        
+
         // Fallback para template simples se o novo não funcionar
         if (!mensagem) {
           mensagem = `
@@ -49,12 +49,12 @@ class FuncaoUteis {
       }
       if (tipo === "confirmacao") {
         const confirmationLink = `https://green-line-web.onrender.com/validar?token=${this.criarToken(email)}`;
-        
+
         mensagem = getConfirmationEmailHTML({
           NOME_USUARIO: email.split('@')[0], // Usar parte do email como nome se não tiver nome
           LINK_CONFIRMACAO: confirmationLink
         });
-        
+
         // Fallback para template simples se o novo não funcionar
         if (!mensagem) {
           mensagem = `
@@ -93,19 +93,16 @@ class FuncaoUteis {
                 "https://green-line-web.onrender.com/img/imagem-nao-disponivel.png";
               return `
               <div style="display: flex; align-items: center; background: white; padding: 15px; margin: 10px 0; border-radius: 8px; border: 1px solid #e9ecef;">
-                <img src="${imagemUrl}" alt="${
-                produto.nome
-              }" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin-right: 15px;">
+                <img src="${imagemUrl}" alt="${produto.nome
+                }" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin-right: 15px;">
                 <div style="flex: 1;">
-                  <h4 style="margin: 0 0 5px 0; color: #28a745;">${
-                    produto.nome
-                  }</h4>
-                  <p style="margin: 0; color: #6c757d;">Quantidade: ${
-                    produto.quantidade
-                  }</p>
+                  <h4 style="margin: 0 0 5px 0; color: #28a745;">${produto.nome
+                }</h4>
+                  <p style="margin: 0; color: #6c757d;">Quantidade: ${produto.quantidade
+                }</p>
                   <p style="margin: 5px 0 0 0; font-weight: bold; color: #333;">Subtotal: ${formatarValor(
-                    produto.subtotal
-                  )}</p>
+                  produto.subtotal
+                )}</p>
                 </div>
               </div>
             `;
@@ -113,8 +110,13 @@ class FuncaoUteis {
             .join("");
         }
 
-        mensagem = getOrderConfirmationEmailHTML({
-          NOME_USUARIO: 'Cliente', // Pode ser passado como parâmetro se necessário
+        // Detectar URL base baseado no ambiente
+        const baseUrl = process.env.NODE_ENV === 'production' 
+          ? 'https://green-line-web.onrender.com'
+          : 'http://localhost:3000';
+        
+        const emailVariables = {
+          NOME_USUARIO: pedido.nomeTitular || pedido.nomeCliente || 'Cliente',
           NUMERO_PEDIDO: pedido.numeroPedido,
           DATA_PEDIDO: pedido.dataConfirmacao,
           METODO_PAGAMENTO: pedido.metodoPagamento || 'Não informado',
@@ -122,11 +124,37 @@ class FuncaoUteis {
           FRETE: formatarValor(pedido.frete || 0),
           TOTAL: formatarValor(pedido.total),
           METODO_ENTREGA: pedido.metodoEntrega || 'Entrega padrão',
-          PREVISAO_ENTREGA: pedido.previsaoEntrega,
-          LINK_ACOMPANHAR: 'https://green-line-web.onrender.com/public/pedido_confirmado.html',
-          LINK_SUPORTE: 'https://green-line-web.onrender.com/public/contato.html'
-        });
+          PREVISAO_ENTREGA: pedido.previsaoEntrega || 'A definir',
+          ENDERECO_ENTREGA: pedido.enderecoCompleto || pedido.endereco || 'Endereço não informado',
+          LINK_ACOMPANHAR: `${baseUrl}/acompanhar_pedido.html?from=email`,
+          LINK_SUPORTE: `${baseUrl}/contato.html`
+        };
+
+        console.log('📧 Variáveis do email:', emailVariables);
+        mensagem = getOrderConfirmationEmailHTML(emailVariables);
         
+        // Debug: verificar se a mensagem foi gerada
+        if (!mensagem) {
+          console.error('❌ Falha ao gerar email com template. Usando fallback.');
+        } else {
+          console.log('✅ Email gerado com sucesso usando template');
+          console.log('🔗 URLs no email:', {
+            acompanhar: emailVariables.LINK_ACOMPANHAR,
+            suporte: emailVariables.LINK_SUPORTE
+          });
+          
+          // Verificar se ainda há placeholders não substituídos
+          const remainingPlaceholders = mensagem.match(/\{\{[^}]+\}\}/g);
+          if (remainingPlaceholders) {
+            console.error('❌ Placeholders não substituídos no email final:', remainingPlaceholders);
+            // Forçar substituição manual se necessário
+            remainingPlaceholders.forEach(placeholder => {
+              console.log(`🔧 Removendo placeholder não substituído: ${placeholder}`);
+              mensagem = mensagem.replace(new RegExp(placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), '');
+            });
+          }
+        }
+
         // Fallback para template atual se o novo não funcionar
         if (!mensagem) {
           mensagem = `
@@ -176,7 +204,7 @@ class FuncaoUteis {
                     <p>Você pode acompanhar o status do seu pedido a qualquer momento em nosso site.</p>
                     
                     <div style="text-align: center;">
-                        <a href="https://green-line-web.onrender.com/public/pedido_confirmado.html" class="btn">
+                        <a href="https://green-line-web.onrender.com/acompanhar_pedido.html" class="btn">
                             Acompanhar Pedido
                         </a>
                     </div>

@@ -215,6 +215,37 @@ function renderizarProdutos() {
   });
 }
 
+/**
+ * Atualiza o estoque de um produto específico na interface
+ * @param {number} idProduto - ID do produto
+ * @param {number} novoEstoque - Novo valor do estoque
+ */
+function atualizarEstoqueInterface(idProduto, novoEstoque) {
+  // Atualizar no array de produtos
+  const produto = estado.produtos.find(p => p.id_produto === idProduto);
+  if (produto) {
+    produto.estoque = novoEstoque;
+  }
+  
+  // Atualizar cards na tela
+  const cards = document.querySelectorAll('.card');
+  cards.forEach(card => {
+    const cardIdProduto = card.getAttribute('data-produto-id');
+    if (cardIdProduto == idProduto) {
+      const estoqueSpan = card.querySelector('.badge-estoque');
+      if (estoqueSpan) {
+        if (novoEstoque <= 0) {
+          estoqueSpan.className = 'badge bg-secondary mt-2 badge-estoque';
+          estoqueSpan.textContent = 'Fora de estoque';
+        } else {
+          estoqueSpan.className = 'badge bg-success mt-2 badge-estoque';
+          estoqueSpan.textContent = `Estoque: ${novoEstoque}`;
+        }
+      }
+    }
+  });
+}
+
 // == Renderização ==
 
 /**
@@ -237,7 +268,7 @@ function criarCardProduto(produto) {
     precoFormatado = `<span class="fs-5">R$ ${produto.preco.toFixed(2)}</span>`;
   }
   card.innerHTML = `
-    <div class="card h-100 cursor point">
+    <div class="card h-100 cursor point" data-produto-id="${produto.id_produto}">
       <img src="${
         produto.imagem_1 != null
           ? produto.imagem_1
@@ -263,13 +294,16 @@ function criarCardProduto(produto) {
         <p class="fw-bold mb-0 ${produto.promocao ? "text-success" : ""}">
           ${precoFormatado}
         </p class="">
-        ${(produto.estoque = 0
-          ? '<span class="badge bg-secondary mt-2">Fora de estoque</span>'
-          : "")}
+        ${produto.estoque <= 0
+          ? '<span class="badge bg-secondary mt-2 badge-estoque">Fora de estoque</span>'
+          : produto.estoque <= 5
+          ? `<span class="badge bg-warning mt-2 badge-estoque">Últimas ${produto.estoque} unidades</span>`
+          : `<span class="badge bg-success mt-2 badge-estoque">Estoque: ${produto.estoque}</span>`
+        }
         <p class="">
           ${
             produto.categoria
-              ? `<span class="badge bg-success mt-2">${produto.categoria}</span>`
+              ? `<span class="badge bg-info mt-2">${produto.categoria}</span>`
               : ""
           }
         </p>
@@ -564,6 +598,26 @@ function configurarEventos() {
       }
 
       try {
+        // Primeiro, verificar se há estoque suficiente
+        const estoqueResponse = await fetch(`${apiProduto.online}/verificar-estoque/${estado.id_produto}`);
+        
+        if (estoqueResponse.ok) {
+          const estoqueData = await estoqueResponse.json();
+          
+          if (estoqueData.estoque < quantidade) {
+            mostrarFeedback(
+              `❌ Estoque insuficiente! Disponível: ${estoqueData.estoque} unidade(s)`,
+              "danger"
+            );
+            return;
+          }
+          
+          if (estoqueData.estoque === 0) {
+            mostrarFeedback("❌ Produto fora de estoque!", "danger");
+            return;
+          }
+        }
+
         const requisicao = await fetch(`${apiProduto.online}/carrinho`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
