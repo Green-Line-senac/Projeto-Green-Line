@@ -1,1 +1,14 @@
-[]
+[
+    {
+        "nomeImagem":"../img/index_carousel/carrossel1.jpg"
+    },
+    {
+        "nomeImagem":"../img/index_carousel/carrossel2.jpg"
+    },
+    {
+        "nomeImagem":"../img/index_carousel/carrossel3.jpg"
+    },
+    {
+        "nomeImagem":"../img/index_carousel/carrossel4.jpg"
+    }
+]

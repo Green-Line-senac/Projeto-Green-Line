@@ -507,35 +507,4 @@ window.hideNotification = hideNotification;
 window.hideLoading = hideLoading;
 window.clearAllNotifications = clearAllNotifications;
 
-// Exportações ES6 modules
-export {
-  NotificationManager,
-  showNotification,
-  showSuccess,
-  showError,
-  showWarning,
-  showInfo,
-  showValidationError,
-  showLoading,
-  hideNotification,
-  hideLoading,
-  clearAllNotifications
-};
-
-// Exportar para módulos CommonJS se necessário (para Node.js)
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    NotificationManager,
-    notifications,
-    showNotification,
-    showSuccess,
-    showError,
-    showWarning,
-    showInfo,
-    showValidationError,
-    showLoading,
-    hideNotification,
-    hideLoading,
-    clearAllNotifications
-  };
-}
+// Todas as funções já estão disponíveis via window object

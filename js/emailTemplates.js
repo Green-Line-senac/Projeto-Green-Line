@@ -11,22 +11,13 @@ class EmailTemplateManager {
   loadTemplate(templateName) {
     try {
       const templatePath = path.join(this.templatesPath, `${templateName}.html`);
-      console.log(`📂 Carregando template: ${templatePath}`);
+      console.log(`Tentando carregar template: ${templatePath}`);
       const template = fs.readFileSync(templatePath, 'utf8');
-      console.log(`✅ Template ${templateName} carregado com sucesso`);
-      console.log(`📄 Tamanho do template: ${template.length} caracteres`);
-      
-      // Verificar se há botões no template carregado
-      const hasButtons = template.includes('Acompanhar Pedido') || template.includes('Suporte') || template.includes('track-button');
-      if (hasButtons) {
-        console.error('❌ TEMPLATE CONTÉM BOTÕES! Verificar arquivo:', templatePath);
-      } else {
-        console.log('✅ Template limpo - sem botões');
-      }
-      
+      console.log(`Template ${templateName} carregado com sucesso, tamanho: ${template.length}`);
       return template;
     } catch (error) {
-      console.error(`❌ Erro ao carregar template ${templateName}:`, error.message);
+      console.error(`Erro ao carregar template ${templateName}:`, error.message);
+      console.error(`Caminho tentado: ${path.join(this.templatesPath, `${templateName}.html`)}`);
       return null;
     }
   }
@@ -35,32 +26,15 @@ class EmailTemplateManager {
   replaceVariables(template, variables) {
     let processedTemplate = template;
     
-    console.log('🔄 Iniciando substituição de variáveis...');
-    console.log('📝 Variáveis recebidas:', Object.keys(variables));
-    
-    // Substituir todas as variáveis fornecidas usando split/join (mais confiável)
+    // Substituir todas as variáveis fornecidas usando split/join
     for (const [key, value] of Object.entries(variables)) {
       const placeholder = `{{${key}}}`;
       const safeValue = String(value || '');
-      
-      // Contar ocorrências antes da substituição
-      const beforeCount = processedTemplate.split(placeholder).length - 1;
-      
-      if (beforeCount > 0) {
-        processedTemplate = processedTemplate.split(placeholder).join(safeValue);
-        console.log(`✅ Substituído ${beforeCount} ocorrências de ${placeholder} por "${safeValue}"`);
-      }
+      processedTemplate = processedTemplate.split(placeholder).join(safeValue);
     }
     
-    // Verificar se ainda há placeholders não substituídos
-    const remainingPlaceholders = processedTemplate.match(/\{\{[^}]+\}\}/g);
-    if (remainingPlaceholders) {
-      console.warn('⚠️ Placeholders não substituídos encontrados:', remainingPlaceholders);
-      // Remover placeholders não substituídos para evitar erros
-      processedTemplate = processedTemplate.replace(/\{\{[^}]+\}\}/g, '');
-    } else {
-      console.log('✅ Todos os placeholders foram substituídos com sucesso');
-    }
+    // Remover placeholders não substituídos
+    processedTemplate = processedTemplate.replace(/\{\{[^}]+\}\}/g, '');
     
     return processedTemplate;
   }
@@ -117,11 +91,7 @@ class EmailTemplateManager {
     };
 
     const finalVariables = { ...defaultVariables, ...variables };
-    console.log('📝 Variáveis finais para substituição:', finalVariables);
-    
-    const result = this.replaceVariables(template, finalVariables);
-    
-    return result;
+    return this.replaceVariables(template, finalVariables);
   }
 
   // Método genérico para qualquer template

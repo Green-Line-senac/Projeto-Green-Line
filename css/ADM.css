@@ -222,3 +222,42 @@ body.dark-mode .user-email,
 body.dark-mode .product-category {
     color: #aaa;
 }
+
+/* Correção do tamanho das imagens na seção Gerenciar Carrossel */
+.carousel-image-item {
+  display: inline-block;
+  margin: 10px;
+  position: relative;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  overflow: hidden;
+  width: 220px;
+  height: 130px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.carousel-image-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.delete-carousel-image-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background-color: rgba(220, 53, 69, 0.85);
+  border: none;
+  color: white;
+  font-size: 14px;
+  padding: 6px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  z-index: 2;
+  transition: background-color 0.3s;
+}
+
+.delete-carousel-image-btn:hover {
+  background-color: rgba(200, 0, 40, 0.9);
+}
