@@ -112,7 +112,8 @@ class EmailTemplateManager {
       TOTAL: '0,00',
       METODO_ENTREGA: 'N/A',
       PREVISAO_ENTREGA: 'N/A',
-      ENDERECO_ENTREGA: 'N/A'
+      ENDERECO_ENTREGA: 'N/A',
+      PRODUTOS_HTML: '<p>Nenhum produto encontrado.</p>'
     };
 
     const finalVariables = { ...defaultVariables, ...variables };

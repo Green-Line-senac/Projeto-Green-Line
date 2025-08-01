@@ -104,6 +104,41 @@ class FuncaoUteis {
           }).format(parseFloat(valor) || 0);
         };
 
+        // Gerar HTML dos produtos
+        let produtosHtml = "";
+        if (pedido.produtos && Array.isArray(pedido.produtos)) {
+          console.log('🛒 Gerando HTML para', pedido.produtos.length, 'produtos');
+          produtosHtml = pedido.produtos
+            .map((produto) => {
+              const imagemUrl =
+                produto.imagem_principal ||
+                produto.imagem_1 ||
+                produto.imagem ||
+                produto.img ||
+                "https://green-line-web.onrender.com/img/imagem-nao-disponivel.png";
+
+              const subtotal = produto.subtotal || (produto.preco * produto.quantidade);
+
+              console.log('📦 Produto:', produto.nome, 'Imagem:', imagemUrl);
+
+              return `
+                <div class="product-item">
+                  <img src="${imagemUrl}" alt="${produto.nome}" class="product-image" onerror="this.src='https://green-line-web.onrender.com/img/imagem-nao-disponivel.png'">
+                  <div class="product-details">
+                    <h4 class="product-name">${produto.nome}</h4>
+                    <p class="product-info">Quantidade: ${produto.quantidade}</p>
+                    <p class="product-info">Preço unitário: ${formatarValor(produto.preco)}</p>
+                    <p class="product-price">Subtotal: ${formatarValor(subtotal)}</p>
+                  </div>
+                </div>
+              `;
+            })
+            .join("");
+        } else {
+          console.log('⚠️ Nenhum produto encontrado no pedido');
+          produtosHtml = '<p class="product-info">Nenhum produto encontrado no pedido.</p>';
+        }
+
         const emailVariables = {
           NOME_USUARIO: pedido.nomeTitular || pedido.nomeCliente || pedido.nome || 'Cliente',
           NUMERO_PEDIDO: pedido.numeroPedido || pedido.numero_pedido || 'N/A',
@@ -114,7 +149,8 @@ class FuncaoUteis {
           TOTAL: formatarValor(pedido.total || pedido.valor_total || 0),
           METODO_ENTREGA: pedido.metodoEntrega || pedido.metodo_entrega || 'Entrega padrão',
           PREVISAO_ENTREGA: pedido.previsaoEntrega || pedido.previsao_entrega || '5-7 dias úteis',
-          ENDERECO_ENTREGA: pedido.enderecoCompleto || pedido.endereco_completo || pedido.endereco || 'Endereço não informado'
+          ENDERECO_ENTREGA: pedido.enderecoCompleto || pedido.endereco_completo || pedido.endereco || 'Endereço não informado',
+          PRODUTOS_HTML: produtosHtml
         };
 
         // Validar parâmetros obrigatórios
@@ -165,7 +201,12 @@ class FuncaoUteis {
                     body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
                     .header { background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
                     .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
-
+                    .product-item { display: flex; align-items: center; background: white; padding: 15px; margin: 10px 0; border-radius: 8px; border: 1px solid #e9ecef; }
+                    .product-image { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin-right: 15px; }
+                    .product-details { flex: 1; }
+                    .product-name { font-size: 16px; font-weight: bold; color: #28a745; margin: 0 0 5px 0; }
+                    .product-info { font-size: 14px; color: #666; margin: 2px 0; }
+                    .product-price { font-size: 16px; font-weight: bold; color: #333; margin: 5px 0 0 0; }
                     .footer { text-align: center; margin-top: 30px; padding: 20px; background: #e9ecef; border-radius: 5px; }
                 </style>
             </head>
@@ -183,6 +224,10 @@ class FuncaoUteis {
                         <p><strong>Data:</strong> ${emailVariables.DATA_PEDIDO}</p>
                         <p><strong>Total:</strong> ${emailVariables.TOTAL}</p>
                         <p><strong>Previsão de entrega:</strong> ${emailVariables.PREVISAO_ENTREGA}</p>
+                    </div>
+                    <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <h3>🛒 Produtos do Pedido</h3>
+                        ${emailVariables.PRODUTOS_HTML}
                     </div>
 
                 </div>
