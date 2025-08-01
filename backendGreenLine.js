@@ -21,16 +21,7 @@ const db = new Database();
 const funcoesUteis = new funcoes();
 const segredo = process.env.SEGREDO_JWT;
 
-// Validar variáveis de ambiente críticas
-const requiredEnvVars = ['EMAIL_USER', 'EMAIL_PASS', 'SEGREDO_JWT'];
-const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
-if (missingEnvVars.length > 0) {
-  console.error('❌ Variáveis de ambiente faltando:', missingEnvVars);
-  console.error('⚠️ O envio de emails pode não funcionar corretamente');
-} else {
-  console.log('✅ Todas as variáveis de ambiente necessárias estão configuradas');
-}
 
 //BACKEND CADASTRO
 app.post("/cadastrarUsuario", async (req, res) => {
@@ -789,50 +780,27 @@ app.get("/checar-cep", async (req, res) => {
 });
 app.post("/salvar-pedido", async (req, res) => {
   let pedido = req.body;
-  console.log("🚀 === INÍCIO DA ROTA /salvar-pedido ===");
-  console.log("📦 Pedido recebido:", JSON.stringify(pedido, null, 2));
-  console.log("🔍 Validando dados do pedido...");
 
   try {
     // Validação básica
-    console.log("📋 Validando campos obrigatórios...");
-    const validationErrors = [];
-
-    if (!pedido) validationErrors.push("Objeto pedido não fornecido");
-    if (!pedido?.numeroPedido) validationErrors.push("numeroPedido ausente");
-    if (!pedido?.produtos || pedido.produtos.length === 0) validationErrors.push("produtos ausentes ou vazios");
-    if (!pedido?.idPessoa) validationErrors.push("idPessoa ausente");
-
-    if (validationErrors.length > 0) {
-      console.error("❌ Validação falhou:", validationErrors);
-      return res.status(400).json({
-        error: "Dados do pedido inválidos",
-        codigo: -1,
-        detalhes: validationErrors
-      });
+    if (
+      !pedido ||
+      !pedido.numeroPedido ||
+      !pedido.produtos ||
+      pedido.produtos.length === 0 ||
+      !pedido.idPessoa
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Dados do pedido inválidos", codigo: -1 });
     }
 
     console.log("✅ Validação básica passou");
 
     const formaPagamento = pedido.formaPagamentoVendas;
-    console.log("💳 Forma de pagamento recebida:", formaPagamento);
-    console.log("💳 Tipo da forma de pagamento:", typeof formaPagamento);
 
     // Se for string (PIX ou BB)
     if (formaPagamento === "PIX" || formaPagamento === "BB") {
-      console.log("💰 Processando pagamento PIX/BB...");
-      console.log("📝 Dados para inserção no banco:", {
-        numeroPedido: pedido.numeroPedido,
-        idPessoa: pedido.idPessoa,
-        tipoPagamento: formaPagamento,
-        valorTotal: pedido.total,
-        nomeTitular: pedido.nomeTitular,
-        metodoEntrega: pedido.metodoEntrega,
-        previsaoEntrega: pedido.previsaoEntrega,
-        frete: pedido.frete,
-        subtotal: pedido.subtotal,
-        desconto: pedido.desconto
-      });
       const sql = `
         INSERT INTO pedidos(
           numero_pedido,
@@ -867,7 +835,6 @@ app.post("/salvar-pedido", async (req, res) => {
       (formaPagamento.metodoPagamento === "CC" ||
         formaPagamento.metodoPagamento === "DEB")
     ) {
-      console.log("Processando pagamento com cartão...");
       const tipoPagamento =
         formaPagamento.metodoPagamento === "CC" ? "CRÉDITO" : "DÉBITO";
 
@@ -922,37 +889,26 @@ app.post("/salvar-pedido", async (req, res) => {
       [pedido.numeroPedido]
     );
     const idPedido = ultimoPedido[0].id_pedido;
-    console.log("ID do pedido inserido:", idPedido);
 
     // Inserir produtos e atualizar estoque
-    console.log(`Processando ${pedido.produtos.length} produtos do pedido...`);
 
     for (const produto of pedido.produtos) {
-      console.log(`Processando produto: ${produto.nome}`);
-
       const produtoExistente = await db.query(
         "SELECT id_produto, produto, estoque FROM produto WHERE produto = ? LIMIT 1",
         [produto.nome]
       );
 
-      console.log(`Resultado da busca do produto "${produto.nome}":`, produtoExistente);
-
       if (!produtoExistente || produtoExistente.length === 0) {
-        console.error(`❌ Produto não encontrado no banco: ${produto.nome}`);
-
         // Tentar buscar por ID se disponível
         if (produto.id_produto) {
-          console.log(`Tentando buscar por ID: ${produto.id_produto}`);
           const produtoPorId = await db.query(
             "SELECT id_produto, produto, estoque FROM produto WHERE id_produto = ? LIMIT 1",
             [produto.id_produto]
           );
 
           if (produtoPorId && produtoPorId.length > 0) {
-            console.log(`✅ Produto encontrado por ID:`, produtoPorId[0]);
             produtoExistente[0] = produtoPorId[0];
           } else {
-            console.error(`❌ Produto também não encontrado por ID: ${produto.id_produto}`);
             continue;
           }
         } else {
@@ -964,14 +920,7 @@ app.post("/salvar-pedido", async (req, res) => {
       const estoqueAtual = parseInt(produtoInfo.estoque) || 0;
       const quantidadeComprada = parseInt(produto.quantidade) || 1;
 
-      console.log(`📦 Produto: ${produtoInfo.produto}`);
-      console.log(`📊 Estoque atual: ${estoqueAtual}`);
-      console.log(`🛒 Quantidade solicitada: ${quantidadeComprada}`);
-
       if (estoqueAtual < quantidadeComprada) {
-        console.error(
-          `Estoque insuficiente para ${produto.nome}. Disponível: ${estoqueAtual}, Solicitado: ${quantidadeComprada}`
-        );
         return res.status(400).json({
           error: `Estoque insuficiente para o produto ${produto.nome}. Disponível: ${estoqueAtual}`,
           codigo: -4,
@@ -996,42 +945,14 @@ app.post("/salvar-pedido", async (req, res) => {
 
       const novoEstoque = estoqueAtual - quantidadeComprada;
 
-      console.log(`🔄 Atualizando estoque: ${estoqueAtual} - ${quantidadeComprada} = ${novoEstoque}`);
-
       // Executar update do estoque
-      const updateResult = await db.query("UPDATE produto SET estoque = ? WHERE id_produto = ?", [
+      await db.query("UPDATE produto SET estoque = ? WHERE id_produto = ?", [
         novoEstoque,
         produtoInfo.id_produto,
       ]);
-
-      console.log(`📝 Resultado do UPDATE:`, updateResult);
-
-      // Verificar se a atualização foi bem-sucedida
-      const estoqueVerificacao = await db.query(
-        "SELECT estoque FROM produto WHERE id_produto = ?",
-        [produtoInfo.id_produto]
-      );
-
-      if (estoqueVerificacao && estoqueVerificacao.length > 0) {
-        const estoqueAtualizado = estoqueVerificacao[0].estoque;
-        console.log(`✅ Estoque verificado após update: ${estoqueAtualizado}`);
-
-        if (parseInt(estoqueAtualizado) !== novoEstoque) {
-          console.error(`❌ ERRO: Estoque não foi atualizado corretamente!`);
-          console.error(`   Esperado: ${novoEstoque}, Atual: ${estoqueAtualizado}`);
-        } else {
-          console.log(`✅ Estoque atualizado com sucesso para ${produtoInfo.produto}: ${estoqueAtual} -> ${novoEstoque}`);
-        }
-      } else {
-        console.error(`❌ Erro ao verificar estoque atualizado para produto ID: ${produtoInfo.id_produto}`);
-      }
     }
 
     // ✅ Enviar email de confirmação
-    console.log("📧 === INICIANDO ENVIO DE EMAIL ===");
-    console.log("🔍 Buscando dados do cliente para email...");
-    console.log("👤 ID da pessoa:", pedido.idPessoa);
-
     try {
       // Buscar dados do cliente para o email
       const clienteData = await db.query(
@@ -1039,19 +960,13 @@ app.post("/salvar-pedido", async (req, res) => {
         [pedido.idPessoa]
       );
 
-      console.log("📊 Resultado da busca do cliente:", clienteData);
-
       if (clienteData && clienteData.length > 0) {
         const cliente = clienteData[0];
-        console.log("✅ Cliente encontrado:", cliente);
 
         // Preparar dados do pedido para o email
-        console.log("🔧 Preparando dados para o email...");
         const metodoPagamento = typeof pedido.formaPagamentoVendas === 'string'
           ? pedido.formaPagamentoVendas
           : (pedido.formaPagamentoVendas?.metodoPagamento || 'Não informado');
-
-        console.log("💳 Método de pagamento processado:", metodoPagamento);
 
         const pedidoParaEmail = {
           numeroPedido: pedido.numeroPedido || 'N/A',
@@ -1069,34 +984,15 @@ app.post("/salvar-pedido", async (req, res) => {
           produtos: pedido.produtos || []
         };
 
-        console.log("📋 Dados do pedido para email:", JSON.stringify(pedidoParaEmail, null, 2));
-        console.log("📧 Chamando função enviarEmail...");
-        console.log("📧 Parâmetros:", {
-          email: cliente.email,
-          assunto: `Pedido Confirmado - ${pedido.numeroPedido}`,
-          tipo: "pedido_confirmado"
-        });
-
         await funcoesUteis.enviarEmail(
           cliente.email,
           `Pedido Confirmado - ${pedido.numeroPedido}`,
           "pedido_confirmado",
           pedidoParaEmail
         );
-
-        console.log(`✅ Email de confirmação enviado com sucesso para: ${cliente.email}`);
-      } else {
-        console.error("❌ Cliente não encontrado para envio de email");
-        console.error("🔍 Dados da consulta:", {
-          idPessoa: pedido.idPessoa,
-          resultadoConsulta: clienteData
-        });
       }
     } catch (emailError) {
-      console.error("❌ ERRO CRÍTICO ao enviar email de confirmação:");
-      console.error("📧 Tipo do erro:", emailError.name);
-      console.error("📧 Mensagem do erro:", emailError.message);
-      console.error("📧 Stack trace:", emailError.stack);
+      console.error("Erro ao enviar email de confirmação:", emailError);
       // Não falha o pedido por causa do email
     }
 
@@ -2181,40 +2077,12 @@ app.put("/pessoa/:id_pessoa/enderecos", async (req, res) => {
       .json({ error: "Erro ao atualizar endereço", details: err.message }); // Inclua detalhes do erro
   }
 });
-// Rota para listar todos os usuários (apenas para ADMs) - REMOVIDA (DUPLICADA)
-      console.log("Token do ADM recebido:", token);
-    }
-
-    const decoded = jwt.verify(token, SEGREDO_JWT);
-
-    // Verificar se o usuário é administrador
-    const [isAdmin] = await db.query(
-      "SELECT email FROM pessoa WHERE id_pessoa = ?",
-      [decoded.id_pessoa]
-    );
-    if (isAdmin.length === 0 || isAdmin[0].email !== "greenl.adm@gmail.com") {
-      console.log("Usuário não é administrador:", decoded.id_pessoa);
-      return res
-        .status(403)
-        .json({ error: "Acesso negado - apenas administradores" });
-    }
-
-    // Buscar todos os usuários (exceto senhas)
-    const [rows] =
-      await db.query(`SELECT id_pessoa, nome, email, telefone, cpf, id_tipo_usuario, situacao, imagem_perfil 
-            FROM pessoa`);
-
-    res.json(rows);
-  } catch (err) {
-    console.error("Erro ao listar usuários:", err);
-    res.status(500).json({ error: "Erro ao listar usuários" });
-  }
-});
+// Rota duplicada removida
 
 // GET /pedidos/todos
 app.get("/pedidos/todos", async (req, res) => {
   try {
-    const [pedidos] = await conexao.execute(`
+    const pedidos = await db.query(`
       SELECT 
         p.id_pedido,
         p.numero_pedido,
@@ -2342,35 +2210,6 @@ app.post(
   }
 );
 
-// GET /pedidos/todos
-app.get("/pedidos/todos", async (req, res) => {
-  try {
-    const [pedidos] = await conexao.execute(`
-      SELECT 
-        p.id_pedido,
-        p.numero_pedido,
-        p.data_hora,
-        p.situacao,
-        p.valor_total,
-        pe.nome AS nome_usuario,
-        pe.email,
-        pe.telefone,
-        pp.nome_produto,
-        pp.quantidade,
-        pp.preco_unitario
-      FROM pedidos p
-      JOIN pessoa pe ON pe.id_pessoa = p.id_pessoa
-      JOIN pedido_produto pp ON pp.id_pedido = p.id_pedido
-      ORDER BY p.data_hora DESC
-    `);
-
-    res.json(pedidos);
-  } catch (err) {
-    console.error("Erro ao buscar pedidos:", err);
-    res.status(500).json({ erro: "Erro ao buscar pedidos" });
-  }
-});
-
 // ==================== ROTA DE TESTE ====================
 app.get("/teste", (req, res) => {
   res.json({ mensagem: "API está funcionando!" });
@@ -2430,9 +2269,9 @@ app.get('/:filename.html', (req, res) => {
   }
 });
 
-  console.log("📄 Template de pedido confirmado:", fs.existsSync(templatePath) ? "✅ Encontrado" : "❌ Não encontrado");
+console.log("📄 Template de pedido confirmado:", fs.existsSync(templatePath) ? "✅ Encontrado" : "❌ Não encontrado");
 
-  console.log("🚀 === SERVIDOR PRONTO PARA RECEBER REQUISIÇÕES ===");
+console.log("🚀 === SERVIDOR PRONTO PARA RECEBER REQUISIÇÕES ===");
 
 // ==================== INICIAR SERVIDOR ====================
 app.listen(3010, () => {
