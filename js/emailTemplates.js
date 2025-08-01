@@ -11,10 +11,13 @@ class EmailTemplateManager {
   loadTemplate(templateName) {
     try {
       const templatePath = path.join(this.templatesPath, `${templateName}.html`);
+      console.log(`Tentando carregar template: ${templatePath}`);
       const template = fs.readFileSync(templatePath, 'utf8');
+      console.log(`Template ${templateName} carregado com sucesso, tamanho: ${template.length}`);
       return template;
     } catch (error) {
       console.error(`Erro ao carregar template ${templateName}:`, error.message);
+      console.error(`Caminho tentado: ${path.join(this.templatesPath, `${templateName}.html`)}`);
       return null;
     }
   }

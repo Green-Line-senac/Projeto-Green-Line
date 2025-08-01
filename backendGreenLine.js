@@ -18,7 +18,12 @@ app.use(express.static(path.join(__dirname, "..")));
 const templatePath = path.join(__dirname, 'templates', 'email-pedido-confirmado.html');
 
 const db = new Database();
+
+// Verificar se a classe funcoes foi carregada corretamente
+console.log("Carregando classe funcoes...", typeof funcoes);
 const funcoesUteis = new funcoes();
+console.log("Instância funcoesUteis criada:", typeof funcoesUteis.enviarEmail);
+
 const segredo = process.env.SEGREDO_JWT;
 
 
@@ -351,15 +356,15 @@ app.post("/enviar-email", async (req, res) => {
   }
 
   try {
-    console.log(`Preparando para enviar email para ${email}`, {
-      tipo,
-      assunto,
-    });
-
+    console.log("Tentando enviar email...", { email, tipo, assunto });
+    
+    if (!funcoesUteis || typeof funcoesUteis.enviarEmail !== 'function') {
+      throw new Error("Função enviarEmail não está disponível");
+    }
+    
     await funcoesUteis.enviarEmail(email, assunto, tipo, pedido);
 
-    console.log(`Email enviado com sucesso para ${email}`);
-
+    console.log("Email enviado com sucesso");
     return res.json({
       conclusao: 2,
       mensagem: "Email enviado com sucesso",
@@ -367,15 +372,17 @@ app.post("/enviar-email", async (req, res) => {
     });
   } catch (erro) {
     console.error("Falha no envio de email:", {
-      erro: erro.message,
+      message: erro.message,
+      stack: erro.stack,
       email,
-      tipo,
+      tipo
     });
 
     return res.status(500).json({
       conclusao: 3,
       mensagem: "Falha ao enviar email",
-      erro: process.env.NODE_ENV === "development" ? erro.message : undefined,
+      erro: erro.message,
+      stack: erro.stack
     });
   }
 });
@@ -2273,9 +2280,36 @@ console.log("📄 Template de pedido confirmado:", fs.existsSync(templatePath) ?
 
 console.log("🚀 === SERVIDOR PRONTO PARA RECEBER REQUISIÇÕES ===");
 
+// ==================== TESTE DE EMAIL ====================
+app.post("/teste-email", async (req, res) => {
+  try {
+    console.log("🧪 INICIANDO TESTE DE EMAIL");
+    
+    const funcoesUteis = new funcoes();
+    
+    await funcoesUteis.enviarEmail(
+      "gabreel47@gmail.com",
+      "Teste de Email - GreenLine",
+      "teste-verificacao"
+    );
+    
+    return res.status(200).json({
+      conclusao: 2,
+      mensagem: "Email de teste enviado com sucesso!"
+    });
+    
+  } catch (erro) {
+    console.error("❌ ERRO NO TESTE DE EMAIL:", erro);
+    return res.status(500).json({
+      conclusao: 3,
+      mensagem: "Falha no teste de email: " + erro.message
+    });
+  }
+});
+
 // ==================== INICIAR SERVIDOR ====================
 app.listen(3010, () => {
-  console.log("🚀 === SERVIDOR GREEN LINE INICIADO ===");
+  console.log("🚀 === SERVIDOR GREEN LINE INICIADO - v2.0 ===");
   console.log("🌐 Porta: 3010");
   console.log("📧 Sistema de email:", process.env.EMAIL_USER ? "✅ Configurado" : "❌ Não configurado");
   console.log("🔐 JWT Secret:", process.env.SEGREDO_JWT ? "✅ Configurado" : "❌ Não configurado");
