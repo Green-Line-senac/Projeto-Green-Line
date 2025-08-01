@@ -15,6 +15,7 @@ app.use(express.json({ limit: "100mb" }));
 app.use(cors());
 app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, "..")));
+const templatePath = path.join(__dirname, 'templates', 'email-pedido-confirmado.html');
 
 const db = new Database();
 const funcoesUteis = new funcoes();
@@ -2429,6 +2430,10 @@ app.get('/:filename.html', (req, res) => {
   }
 });
 
+  console.log("📄 Template de pedido confirmado:", fs.existsSync(templatePath) ? "✅ Encontrado" : "❌ Não encontrado");
+
+  console.log("🚀 === SERVIDOR PRONTO PARA RECEBER REQUISIÇÕES ===");
+
 // ==================== INICIAR SERVIDOR ====================
 app.listen(3010, () => {
   console.log("🚀 === SERVIDOR GREEN LINE INICIADO ===");
@@ -2438,11 +2443,4 @@ app.listen(3010, () => {
   console.log("🗄️ Banco de dados: Conectado");
   console.log("📁 Templates de email: Verificando...");
 
-  // Verificar se templates existem
-  const fs = require('fs');
-  const path = require('path');
-  const templatePath = path.join(__dirname, 'templates', 'email-pedido-confirmado.html');
-  console.log("📄 Template de pedido confirmado:", fs.existsSync(templatePath) ? "✅ Encontrado" : "❌ Não encontrado");
-
-  console.log("🚀 === SERVIDOR PRONTO PARA RECEBER REQUISIÇÕES ===");
 });
