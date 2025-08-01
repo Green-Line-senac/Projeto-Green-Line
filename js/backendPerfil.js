@@ -1,3 +1,5 @@
+// backendPerfil.js (Código Atualizado)
+
 require('dotenv').config();
 const express = require('express');
 const conexao = require('./conexao.js');
@@ -6,6 +8,8 @@ const crypto = require('crypto');
 const cors = require('cors');
 const multer = require('multer');
 const jwt = require('jsonwebtoken');
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
 let db = new conexao();
@@ -30,26 +34,30 @@ const verificarToken = (req, res, next) => {
 // Configuração do multer para upload de imagens
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, '../img/index_carousel') // Pasta onde as imagens serão salvas
+    const uploadPath = path.join(__dirname, '..', 'img', 'index_carousel');
+    // Cria a pasta se não existir
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
-    // Gera um nome único para o arquivo
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-    cb(null, 'carrossel-' + uniqueSuffix + '.' + file.originalname.split('.').pop())
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'carrossel-' + uniqueSuffix + path.extname(file.originalname));
   }
-})
+});
 
 const upload = multer({ 
   storage: storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // Limite de 5MB
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
-      cb(null, true)
+      cb(null, true);
     } else {
-      cb(new Error('Apenas arquivos de imagem são permitidos!'), false)
+      cb(new Error('Apenas arquivos de imagem são permitidos!'), false);
     }
   }
-})
+});
 
 
 // ==================== FUNÇÕES AUXILIARES ====================
@@ -168,14 +176,14 @@ app.post('/login', async (req, res) => {
     
     
     const token = jwt.sign(
-  { 
-    userId: user.id_pessoa, // Certifique-se que está usando id_pessoa
-    email: user.email,
-    tipo_usuario: user.id_tipo_usuario 
-  },
-  process.env.SEGREDO_JWT,
-  { expiresIn: '1h' }
-);
+      { 
+        userId: user.id_pessoa, 
+        email: user.email,
+        tipo_usuario: user.id_tipo_usuario 
+      },
+      process.env.SEGREDO_JWT,
+      { expiresIn: '1h' }
+    );
 
     console.log('Token JWT gerado:', token);
     
@@ -195,9 +203,6 @@ app.post('/login', async (req, res) => {
     console.error(error);
     res.status(500).json({ error: 'Erro no servidor' });
   }
-
-  // Middleware de autenticação
-
 
 });
 
@@ -234,61 +239,61 @@ app.get('/profile', async (req, res) => {
 });
 
 
-// [3] LISTAR USUÁRIOS (GET)
+// [3] LISTAR USUÁRIOS (GET) - Versão para ADM
 app.get('/pessoa', async (req, res) => {
-  try {
-    let rows;
-    const resposta = await db.query('SELECT id_pessoa, nome, email, telefone, cpf, id_tipo_usuario, situacao, imagem_perfil FROM pessoa');
-    console.log(resposta);
-    rows = resposta;
-    res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar usuários' });
-  }
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ error: 'Token não fornecido' });
+        }
+        
+        const decoded = jwt.verify(token, process.env.SEGREDO_JWT);
+       
+        // Verificar se o usuário é administrador (exemplo de e-mail fixo)
+        const [isAdmin] = await db.query('SELECT email FROM pessoa WHERE id_pessoa = ?', [decoded.userId]);
+        if (isAdmin.length === 0 || isAdmin[0].email !== "greenl.adm@gmail.com") {
+          return res.status(403).json({ error: 'Acesso negado - apenas administradores' });
+        }
+        
+        const [rows] = await db.query(`SELECT id_pessoa, nome, email, telefone, cpf, id_tipo_usuario, situacao, imagem_perfil 
+            FROM pessoa`);
+        
+        res.json(rows);
+    } catch (err) {
+        console.error('Erro ao listar usuários:', err);
+        res.status(500).json({ error: 'Erro ao listar usuários' });
+    }
 });
-
 
 
 // [4] BUSCAR USUÁRIO POR ID (GET)
 app.get('/pessoa/:id_pessoa', verificarToken, async (req, res) => {
   try {
-    console.log('Buscando usuário com ID:', req.params.id_pessoa);
     const id = parseInt(req.params.id_pessoa);
     if (isNaN(id) || id <= 0) {
       return res.status(400).json({ error: 'ID inválido' });
     }
-    let rows;
-    const resposta = await db.query(
+    const [rows] = await db.query(
       'SELECT id_pessoa, nome, email, telefone, cpf, id_tipo_usuario, situacao, imagem_perfil FROM pessoa WHERE id_pessoa = ?',
       [id]
     );
-    console.log('Resposta da consulta:', resposta);
-    rows = resposta;
     
     if (rows.length === 0) {
-      return res.status(404).json({ 
-        error: 'Usuário não encontrado',
-        details: `Nenhum usuário encontrado com o ID ${id}`
-      });
+      return res.status(404).json({ error: 'Usuário não encontrado' });
     }
     
     res.json(rows);
   } catch (err) {
     console.error('Erro detalhado:', err);
-    res.status(500).json({ 
-      error: 'Erro ao buscar usuário',
-      details: err.message 
-    });
+    res.status(500).json({ error: 'Erro ao buscar usuário' });
   }
 });
 
 // [5] ATUALIZAR USUÁRIO (PUT)
-// [5] ATUALIZAR USUÁRIO (PUT) - VERSÃO CORRIGIDA
 app.put("/pessoa/:id_pessoa", verificarToken, async (req, res) => {
   const { id_pessoa } = req.params;
   const { nome, telefone } = req.body;
 
-  // Verificar se o usuário está atualizando seu próprio perfil
   if (parseInt(id_pessoa) !== req.usuario.userId) {
     return res.status(403).json({ error: "Não autorizado a atualizar este perfil" });
   }
@@ -325,36 +330,10 @@ app.delete('/pessoa/:id_pessoa', async (req, res) => {
   }
 });
 
-// buscar pedidos do usuário
-app.get('/pessoa/:id_pessoa/pedidos', async (req, res) => {
-  try {
-    const idPessoa = req.params.id_pessoa;
-    const [rows] = await db.query(
-      'SELECT * FROM pedidos WHERE id_pessoa = ?',
-      [idPessoa]
-    );
-
-    if (rows.length === 0) {
-      return res.status(404).json({ error: 'Nenhum pedido encontrado para este usuário' });
-    }
-
-    res.json(rows);
-  } catch (err) {
-    console.error('Erro ao buscar pedidos:', err);
-    res.status(500).json({ error: 'Erro ao buscar pedidos', details: err.message });
-  }
-});
-
 // [7] OBTER DADOS DO USUÁRIO LOGADO (GET)
-app.get('/pessoa/me', async (req, res) => {
+app.get('/pessoa/me', verificarToken, async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) {
-      return res.status(401).json({ error: 'Token não fornecido' });
-    }
-
-    // Em produção, decodifique o token JWT para obter o ID
-    const userId = req.body.userId || req.query.userId;
+    const userId = req.usuario.userId;
     
     const [rows] = await db.query(
       'SELECT id_pessoa, nome, email, telefone, cpf, situacao, imagem_perfil FROM pessoa WHERE id_pessoa = ?',
@@ -376,13 +355,17 @@ app.get('/pessoa/me', async (req, res) => {
 });
 
 // [8] ATUALIZAR IMAGEM DE PERFIL (PUT)
-app.put('/pessoa/:id_pessoa/imagem', async (req, res) => {
+app.put('/pessoa/:id_pessoa/imagem', verificarToken, async (req, res) => {
     try {
         const { imagem_perfil } = req.body;
         const id = parseInt(req.params.id_pessoa);
         
         if (isNaN(id) || id <= 0) {
             return res.status(400).json({ error: 'ID inválido' });
+        }
+        
+        if (id !== req.usuario.userId) {
+            return res.status(403).json({ error: 'Não autorizado a atualizar a imagem deste perfil' });
         }
 
         const [result] = await db.query(
@@ -402,66 +385,47 @@ app.put('/pessoa/:id_pessoa/imagem', async (req, res) => {
 });
 
 // [9] ROTAS PARA ENDEREÇO
-app.get('/pessoa/:id_pessoa/enderecos', async (req, res) => {
+app.get('/pessoa/:id_pessoa/enderecos', verificarToken, async (req, res) => {
     try {
         const idPessoa = req.params.id_pessoa;
-        console.log(idPessoa);
+        
+        if (parseInt(idPessoa) !== req.usuario.userId) {
+            return res.status(403).json({ error: 'Não autorizado a ver este endereço' });
+        }
 
-        // Execute a consulta e capture o resultado completo
-        const queryResult = await db.query(
+        const [rows] = await db.query(
             'SELECT id_endereco, uf, cep, cidade, bairro, endereco, complemento FROM enderecos WHERE id_pessoa = ?',
             [idPessoa]
         );
-        console.log("Resultado bruto da consulta GET de endereço:", queryResult);
 
-        let rows;
-        // Adapte esta parte dependendo do que seu db.query realmente retorna
-        // Se db.query retorna [rows, fields], então:
-        if (Array.isArray(queryResult) && Array.isArray(queryResult[0])) {
-            rows = queryResult[0];
-        } else { // Se db.query retorna apenas as rows diretamente:
-            rows = queryResult;
-        }
-
-        // Verifique se 'rows' é um array e se tem elementos antes de acessar .length
-        if (Array.isArray(rows) && rows.length > 0) {
-            res.json(rows[0]); // Retorna o primeiro endereço encontrado
+        if (rows && rows.length > 0) {
+            res.json(rows[0]);
         } else {
-            // Se nenhum endereço for encontrado, retorna 404
             return res.status(404).json({ error: 'Endereço não encontrado' });
         }
     } catch (err) {
-        console.error('Erro detalhado ao buscar endereço:', err); // Log mais detalhado
-        res.status(500).json({ error: 'Erro ao buscar endereço', details: err.message }); // Inclua detalhes do erro
+        console.error('Erro detalhado ao buscar endereço:', err);
+        res.status(500).json({ error: 'Erro ao buscar endereço', details: err.message });
     }
 });
-app.put('/pessoa/:id_pessoa/enderecos', async (req, res) => {
+
+app.put('/pessoa/:id_pessoa/enderecos', verificarToken, async (req, res) => {
     try {
         const { uf, cep, cidade, bairro, endereco, complemento } = req.body;
         const idPessoa = req.params.id_pessoa;
 
-        // Execute a consulta e capture o resultado completo
-        const queryResult = await db.query('SELECT id_endereco FROM enderecos WHERE id_pessoa = ?', [idPessoa]);
-        console.log("Resultado bruto da consulta de existência de endereço:", queryResult);
-
-        let existingRows;
-        // Adapte esta parte dependendo do que seu db.query realmente retorna
-        // Se db.query retorna [rows, fields], então:
-        if (Array.isArray(queryResult) && Array.isArray(queryResult[0])) {
-            existingRows = queryResult[0];
-        } else { // Se db.query retorna apenas as rows diretamente:
-            existingRows = queryResult;
+        if (parseInt(idPessoa) !== req.usuario.userId) {
+            return res.status(403).json({ error: 'Não autorizado a atualizar este endereço' });
         }
 
-        // Verifique se existingRows é um array e se tem elementos antes de acessar .length
-        if (Array.isArray(existingRows) && existingRows.length > 0) {
-            // Atualiza existente
+        const [existingRows] = await db.query('SELECT id_endereco FROM enderecos WHERE id_pessoa = ?', [idPessoa]);
+        
+        if (existingRows && existingRows.length > 0) {
             await db.query(
                 'UPDATE enderecos SET uf = ?, cep = ?, cidade = ?, bairro = ?, endereco = ?, complemento = ? WHERE id_pessoa = ?',
                 [uf, cep, cidade, bairro, endereco, complemento, idPessoa]
             );
         } else {
-            // Cria novo
             await db.query(
                 'INSERT INTO enderecos (id_pessoa, uf, cep, cidade, bairro, endereco, complemento) VALUES (?, ?, ?, ?, ?, ?, ?)',
                 [idPessoa, uf, cep, cidade, bairro || null, endereco || null, complemento || null]
@@ -470,69 +434,10 @@ app.put('/pessoa/:id_pessoa/enderecos', async (req, res) => {
 
         res.json({ message: 'Endereço atualizado com sucesso' });
     } catch (err) {
-        console.error('Erro detalhado ao tentar atualizar/inserir endereço:', err); // Log mais detalhado
-        res.status(500).json({ error: 'Erro ao atualizar endereço', details: err.message }); // Inclua detalhes do erro
+        console.error('Erro detalhado ao tentar atualizar/inserir endereço:', err);
+        res.status(500).json({ error: 'Erro ao atualizar endereço', details: err.message });
     }
 });
-// Rota para listar todos os usuários (apenas para ADMs)
-app.get('/pessoa', async (req, res) => {
-    try {
-        // Verificar se o usuário é ADM
-        const token = req.headers.authorization?.split(' ')[1];
-        if (!token) {
-            return res.status(401).json({ error: 'Token não fornecido' });
-        }else{ console.log('Token do ADM recebido:', token);}
-        
-        const decoded = jwt.verify(token, SEGREDO_JWT);
-       
-        
-        // Verificar se o usuário é administrador
-        const [isAdmin] = await db.query('SELECT email FROM pessoa WHERE id_pessoa = ?', [decoded.id_pessoa]);
-        if (isAdmin.length === 0 || isAdmin[0].email !== "greenl.adm@gmail.com") {
-          console.log('Usuário não é administrador:', decoded.id_pessoa)
-          return res.status(403).json({ error: 'Acesso negado - apenas administradores' });
-        }
-        
-        // Buscar todos os usuários (exceto senhas)
-        const [rows] = await db.query(`SELECT id_pessoa, nome, email, telefone, cpf, id_tipo_usuario, situacao, imagem_perfil 
-            FROM pessoa`);
-        
-        res.json(rows);
-    } catch (err) {
-        console.error('Erro ao listar usuários:', err);
-        res.status(500).json({ error: 'Erro ao listar usuários' });
-    }
-});
-
-// GET /pedidos/todos
-app.get('/pedidos/todos', async (req, res) => {
-  try {
-    const [pedidos] = await conexao.execute(`
-      SELECT 
-        p.id_pedido,
-        p.numero_pedido,
-        p.data_hora,
-        p.situacao,
-        p.valor_total,
-        pe.nome AS nome_usuario,
-        pe.email,
-        pe.telefone,
-        pp.nome_produto,
-        pp.quantidade,
-        pp.preco_unitario
-      FROM pedidos p
-      JOIN pessoa pe ON pe.id_pessoa = p.id_pessoa
-      JOIN pedido_produto pp ON pp.id_pedido = p.id_pedido
-      ORDER BY p.data_hora DESC
-    `);
-    
-    res.json(pedidos);
-  } catch (err) {
-    console.error("Erro ao buscar pedidos:", err);
-    res.status(500).json({ erro: 'Erro ao buscar pedidos' });
-  }
-});
-
 
 //Rota atualizar tipo de usuário
 app.put('/pessoa/:id_pessoa/tipo', async (req, res) => {
@@ -544,7 +449,6 @@ app.put('/pessoa/:id_pessoa/tipo', async (req, res) => {
             return res.status(400).json({ error: 'ID inválido' });
         }
 
-        // Verifica se o tipo de usuário é válido
         if (![1, 2].includes(id_tipo_usuario)) {
             return res.status(400).json({ error: 'Tipo de usuário inválido' });
         }
@@ -565,11 +469,105 @@ app.put('/pessoa/:id_pessoa/tipo', async (req, res) => {
     }
 });
 
+// Pedidos
+
+app.get('/pessoa/pedidos', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ error: 'Token não fornecido' });
+        }
+        
+        const decoded = jwt.verify(token, process.env.SEGREDO_JWT);
+       
+        // Verificar se o usuário é administrador (exemplo de e-mail fixo)
+        const [isAdmin] = await db.query('SELECT email FROM pessoa WHERE id_pessoa = ?', [decoded.userId]);
+        if (isAdmin.length === 0) {
+          return res.status(403).json({ error: 'Acesso negado - apenas administradores' });
+        }
+        
+        const [rows] = await db.query(`SELECT * FROM vw_carrinho_itens_detalhados`);
+        
+        res.json(rows);
+    } catch (err) {
+        console.error('Erro ao listar usuários:', err);
+        res.status(500).json({ error: 'Erro ao listar usuários' });
+    }
+});
+
+// app.get('/pessoa/pedidos', verificarToken, async (req, res) => {
+//   try {
+//     const { userId } = req.usuario;
+
+//     // Verificar se é administrador
+//     const [adminRows] = await db.query(
+//       'SELECT id_tipo_usuario FROM pessoa WHERE id_pessoa = ?',
+//       [userId]
+//     );
+
+//     if (adminRows.length === 0 || adminRows[0].id_tipo_usuario !== 1) {
+//       return res.status(403).json({ error: 'Acesso negado. Apenas administradores podem visualizar todos os pedidos.' });
+//     }
+
+//     // Consulta dos pedidos com os campos corretos
+//     const [pedidos] = await db.query(`
+//       SELECT 
+//         p.id_pedido,
+//         p.numero_pedido,
+//         p.data_hora,
+//         p.situacao,
+//         p.valor_total,
+//         p.pagamento_situacao,
+//         pes.nome AS nome_cliente
+//       FROM pedidos p
+//       JOIN pessoa pes ON pes.id_pessoa = p.id_pessoa
+//       ORDER BY p.data_hora DESC
+//     `);
+
+//     res.json(pedidos);
+//   } catch (err) {
+//     console.error('Erro ao buscar pedidos:', err);
+//     res.status(500).json({ error: 'Erro ao buscar pedidos.' });
+//   }
+// });
+
+
+
+app.get('/pessoa/:id_pessoa/pedidos', verificarToken, async (req, res) => {
+    try {
+        const { id_pessoa } = req.params;
+        
+        // Proteção: Garante que o usuário só possa ver os próprios pedidos
+        if (parseInt(id_pessoa) !== req.usuario.userId) {
+            return res.status(403).json({ error: 'Acesso negado. Você não tem permissão para visualizar este histórico de pedidos.' });
+        }
+
+        const [pedidos] = await db.query(
+            `SELECT
+                p.id_pedido,
+                p.numero_pedido,
+                p.data_hora,
+                p.situacao,
+                p.valor_total,
+                p.pagamento_situacao
+            FROM pedidos p
+            WHERE p.id_pessoa = ?
+            ORDER BY p.data_hora DESC`,
+            [id_pessoa]
+        );
+
+        res.json(pedidos);
+    } catch (err) {
+        console.error('Erro ao buscar pedidos do usuário:', err);
+        res.status(500).json({ error: 'Erro ao buscar histórico de pedidos.' });
+    }
+});
+
+
 // Rota para obter imagens do carrossel
 app.get('/carousel-images', (req, res) => {
     try {
-        // Simulando leitura do arquivo JSON
-        const carouselData = require('./carousel-index.json');
+        const carouselData = JSON.parse(fs.readFileSync(path.join(__dirname, 'carousel-index.json'), 'utf8'));
         res.json(carouselData);
     } catch (err) {
         console.error('Erro ao carregar imagens do carrossel:', err);
@@ -577,17 +575,26 @@ app.get('/carousel-images', (req, res) => {
     }
 });
 
-// Rota para deletar imagem do carrossel
-app.post('/delete-carousel-image', (req, res) => {
+// Rota para deletar imagem do carrossel (Método DELETE)
+app.delete('/carousel-image/:imageName', (req, res) => {
+    const { imageName } = req.params;
+    const jsonPath = path.join(__dirname, 'carousel-index.json');
+    const imagePath = path.join(__dirname, '..', 'img', 'index_carousel', imageName);
+    
     try {
-        const { imageName } = req.body;
+        // Ler o JSON
+        const carouselData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
         
-        // Simulando atualização do arquivo JSON
-        const carouselData = require('./carousel-index.json');
-        const updatedData = carouselData.filter(img => img.nomeImagem !== imageName);
+        // Filtrar a imagem a ser deletada
+        const updatedData = carouselData.filter(img => path.basename(img.nomeImagem) !== imageName);
         
-        // Aqui você salvaria o updatedData de volta no arquivo JSON
-        // fs.writeFileSync('./carousel-index.json', JSON.stringify(updatedData, null, 2));
+        // Salvar o JSON atualizado
+        fs.writeFileSync(jsonPath, JSON.stringify(updatedData, null, 2));
+        
+        // Deletar o arquivo de imagem
+        if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+        }
         
         res.json({ success: true, message: 'Imagem removida com sucesso' });
     } catch (err) {
@@ -604,20 +611,17 @@ app.post('/upload-carousel-images', upload.array('carouselImages'), (req, res) =
             return res.status(400).json({ success: false, message: 'Nenhuma imagem enviada' });
         }
         
-        // Simulando atualização do carrossel
-        const carouselData = require('./carousel-index.json');
+        const jsonPath = path.join(__dirname, 'carousel-index.json');
+        const carouselData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
         
         files.forEach(file => {
-            // Aqui você moveria o arquivo para o diretório de imagens
-            // e adicionaria ao carrossel-index.json
             const newImage = {
-                nomeImagem: file.originalname
+                nomeImagem: path.join('..', 'img', 'index_carousel', path.basename(file.filename))
             };
             carouselData.push(newImage);
         });
         
-        // Aqui você salvaria o carouselData de volta no arquivo JSON
-        // fs.writeFileSync('./carousel-index.json', JSON.stringify(carouselData, null, 2));
+        fs.writeFileSync(jsonPath, JSON.stringify(carouselData, null, 2));
         
         res.json({ success: true, message: 'Imagens adicionadas com sucesso' });
     } catch (err) {
@@ -630,7 +634,4 @@ app.post('/upload-carousel-images', upload.array('carouselImages'), (req, res) =
 const PORTA8 = process.env.PORTA8 || 3008;
 app.listen(PORTA8, () => {
   console.log(`✅ Servidor rodando na porta ${PORTA8}`);
-  console.log(`🔗 Acesse a documentação em http://localhost:${PORTA8}/`);
-  console.log(`🔗 Acesse a API em http://localhost:${PORTA8}/pessoa`);
-
 });
