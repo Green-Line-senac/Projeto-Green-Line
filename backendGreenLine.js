@@ -1654,75 +1654,70 @@ app.put("/pessoa/:id_pessoa/tipo", async (req, res) => {
 });
 
 // Rota para obter imagens do carrossel
-app.get("/carousel-images", (req, res) => {
-  try {
-    // Simulando leitura do arquivo JSON
-    const carouselData = require("./carousel-index.json");
-    res.json(carouselData);
-  } catch (err) {
-    console.error("Erro ao carregar imagens do carrossel:", err);
-    res.status(500).json({ error: "Erro ao carregar imagens do carrossel" });
-  }
+app.get('/carousel-images', (req, res) => {
+    try {
+        const carouselData = JSON.parse(fs.readFileSync(path.join(__dirname, 'carousel-index.json'), 'utf8'));
+        res.json(carouselData);
+    } catch (err) {
+        console.error('Erro ao carregar imagens do carrossel:', err);
+        res.status(500).json({ error: 'Erro ao carregar imagens do carrossel' });
+    }
 });
 
-// Rota para deletar imagem do carrossel
-app.post("/delete-carousel-image", (req, res) => {
-  try {
-    const { imageName } = req.body;
-
-    // Simulando atualização do arquivo JSON
-    const carouselData = require("./carousel-index.json");
-    const updatedData = carouselData.filter(
-      (img) => img.nomeImagem !== imageName
-    );
-
-    // Aqui você salvaria o updatedData de volta no arquivo JSON
-    // fs.writeFileSync('./carousel-index.json', JSON.stringify(updatedData, null, 2));
-
-    res.json({ success: true, message: "Imagem removida com sucesso" });
-  } catch (err) {
-    console.error("Erro ao remover imagem do carrossel:", err);
-    res.status(500).json({ success: false, message: "Erro ao remover imagem" });
-  }
+// Rota para deletar imagem do carrossel (Método DELETE)
+app.delete('/carousel-image/:imageName', (req, res) => {
+    const { imageName } = req.params;
+    const jsonPath = path.join(__dirname, 'carousel-index.json');
+    const imagePath = path.join(__dirname, '..', 'img', 'index_carousel', imageName);
+    
+    try {
+        // Ler o JSON
+        const carouselData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+        
+        // Filtrar a imagem a ser deletada
+        const updatedData = carouselData.filter(img => path.basename(img.nomeImagem) !== imageName);
+        
+        // Salvar o JSON atualizado
+        fs.writeFileSync(jsonPath, JSON.stringify(updatedData, null, 2));
+        
+        // Deletar o arquivo de imagem
+        if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+        }
+        
+        res.json({ success: true, message: 'Imagem removida com sucesso' });
+    } catch (err) {
+        console.error('Erro ao remover imagem do carrossel:', err);
+        res.status(500).json({ success: false, message: 'Erro ao remover imagem' });
+    }
 });
 
 // Rota para upload de novas imagens do carrossel
-app.post(
-  "/upload-carousel-images",
-  upload.array("carouselImages"),
-  (req, res) => {
+app.post('/upload-carousel-images', upload.array('carouselImages'), (req, res) => {
     try {
-      const files = req.files;
-      if (!files || files.length === 0) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Nenhuma imagem enviada" });
-      }
-
-      // Simulando atualização do carrossel
-      const carouselData = require("./carousel-index.json");
-
-      files.forEach((file) => {
-        // Aqui você moveria o arquivo para o diretório de imagens
-        // e adicionaria ao carrossel-index.json
-        const newImage = {
-          nomeImagem: file.originalname,
-        };
-        carouselData.push(newImage);
-      });
-
-      // Aqui você salvaria o carouselData de volta no arquivo JSON
-      // fs.writeFileSync('./carousel-index.json', JSON.stringify(carouselData, null, 2));
-
-      res.json({ success: true, message: "Imagens adicionadas com sucesso" });
+        const files = req.files;
+        if (!files || files.length === 0) {
+            return res.status(400).json({ success: false, message: 'Nenhuma imagem enviada' });
+        }
+        
+        const jsonPath = path.join(__dirname, 'carousel-index.json');
+        const carouselData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+        
+        files.forEach(file => {
+            const newImage = {
+                nomeImagem: path.join('..', 'img', 'index_carousel', path.basename(file.filename))
+            };
+            carouselData.push(newImage);
+        });
+        
+        fs.writeFileSync(jsonPath, JSON.stringify(carouselData, null, 2));
+        
+        res.json({ success: true, message: 'Imagens adicionadas com sucesso' });
     } catch (err) {
-      console.error("Erro ao adicionar imagens ao carrossel:", err);
-      res
-        .status(500)
-        .json({ success: false, message: "Erro ao adicionar imagens" });
+        console.error('Erro ao adicionar imagens ao carrossel:', err);
+        res.status(500).json({ success: false, message: 'Erro ao adicionar imagens' });
     }
-  }
-);
+});
 
 // GET /pedidos/todos
 app.get("/pedidos/todos", async (req, res) => {

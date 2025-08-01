@@ -30,6 +30,61 @@ const basePath = window.location.pathname.includes("green_line_web")
   ? "/green_line_web/public"
   : "/public";
 
+async function loadCarouselImages() {
+  const container = document.getElementById("currentCarouselImages");
+  container.innerHTML = "Carregando imagens...";
+
+  try {
+    const response = await fetch(`${api.perfil}/carousel-images`);
+    if (!response.ok) {
+      throw new Error("Erro ao buscar imagens do carrossel");
+    }
+
+    const images = await response.json();
+    container.innerHTML = "";
+
+    if (images.length === 0) {
+      container.innerHTML = "<p>Nenhuma imagem no carrossel. Faça upload para adicionar.</p>";
+      return;
+    }
+
+    images.forEach(image => {
+      const imgItem = document.createElement("div");
+      imgItem.classList.add("carousel-image-item");
+      imgItem.innerHTML = `
+        <img src="${image.nomeImagem}" alt="Imagem do Carrossel">
+        <button class="delete-carousel-image-btn" data-image-name="${image.nomeImagem}">Deletar</button>
+      `;
+      container.appendChild(imgItem);
+    });
+
+    document.querySelectorAll(".delete-carousel-image-btn").forEach(button => {
+      button.addEventListener("click", async (e) => {
+        const imageName = e.target.dataset.imageName;
+        try {
+          const deleteResponse = await fetch(`${api.perfil}/carousel-image/${imageName}`, {
+            method: "DELETE"
+          });
+          if (deleteResponse.ok) {
+            alert("Imagem deletada com sucesso!");
+            loadCarouselImages();
+          } else {
+            throw new Error("Erro ao deletar imagem.");
+          }
+        } catch (error) {
+          console.error("Erro ao deletar imagem:", error);
+          alert("Erro ao deletar imagem. Tente novamente.");
+        }
+      });
+    });
+
+  } catch (error) {
+    console.error("Erro ao carregar imagens do carrossel:", error);
+    container.innerHTML = "<p>Erro ao carregar imagens. Verifique se o backend está ativo.</p>";
+  }
+}
+
+
 document.addEventListener('DOMContentLoaded', async function () {
   const isAdmin = sessionStorage.getItem('isAdmin') === 'true';
 
@@ -214,7 +269,7 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
       // Carregamento dinâmico por seção
       if (section === "admin-users") loadUsersList();
       if (section === "admin-carousel") loadCarouselImages();
-      if (section === "purchase-history") loadTodosPedidos();
+      if (section === "purchase-history") loadUserPedidos();
 
     });
   });
@@ -528,7 +583,7 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
   // --- Funções ADM ---
   function loadUsersList() {
     const token = sessionStorage.getItem("userToken");
-    fetch("http://localhost:3008/pessoa", {
+    fetch(`${api.online}/pessoa`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -633,99 +688,12 @@ document.getElementById("cancelUserEditBtn")?.addEventListener("click", () => {
     document.getElementById("userManagementModal").classList.add("hidden");
     loadUsersList();
   });
- 
 
-  // Carregar imagens carrossel
-  function loadCarouselImages() {
-    fetch('/carousel-images')
-      .then(res => res.json())
-      .then(images => {
-        const container = document.getElementById("currentCarouselImages");
-        container.innerHTML = "";
-        images.forEach(img => {
-          container.innerHTML += `
-            <div class="current-carousel-image">
-              <img src="../img/carousel/${img.nomeImagem}" />
-              <button class="delete-image" data-image="${img.nomeImagem}">
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-          `;
-        });
-      });
-  }
-
-  document.getElementById("addProductBtn")?.addEventListener("click", () => {
-    window.location.href = "../public/cadastroProdutos.html";
-  });
-
-  // Função para buscar e exibir pedidos feitos na seção de histórico de compras
-  async function carregarPedidosUsuario() {
-    const idPessoa = sessionStorage.getItem("id_pessoa");
-    if (!idPessoa) return;
-
-    const container = document.getElementById("purchaseHistoryContent");
-    if (!container) {
-      console.error('Elemento purchaseHistoryContent não encontrado');
-      return;
-    }
-
-    const loadingId = showLoading('Carregando histórico...', 'Buscando seus pedidos anteriores');
-
-    container.innerHTML = '<div class="text-center"><p>Carregando pedidos...</p></div>';
-
-    try {
-      // Usar função utilitária com fallback automático
-      const resp = await fetchWithFallback(
-        `${api.online}/pessoa/${idPessoa}/pedidos`,
-        `${api.online}/pessoa/${idPessoa}/pedidos`
-      );
-
-      hideNotification(loadingId);
-
-      if (!resp.ok) {
-        container.innerHTML = '<p>Nenhum pedido encontrado.</p>';
-        showInfo('Histórico vazio', 'Você ainda não fez nenhum pedido', { duration: 3000 });
-        return;
-      }
-
-      const pedidos = await resp.json();
-
-      if (!Array.isArray(pedidos) || pedidos.length === 0) {
-        container.innerHTML = '<p>Nenhum pedido encontrado.</p>';
-        showInfo('Histórico vazio', 'Você ainda não fez nenhum pedido', { duration: 3000 });
-        return;
-      }
-
-      let html = '';
-      pedidos.forEach(pedido => {
-        html += `<div class="pedido-card">
-          <h4>Pedido: <span class="text-success">${pedido.numero_pedido || pedido.numeroPedido || pedido.id_pedido}</span></h4>
-          <p><strong>Data:</strong> ${pedido.data_hora ? new Date(pedido.data_hora).toLocaleString('pt-BR') : (pedido.dataConfirmacao || '')}</p>
-          <p><strong>Status:</strong> ${pedido.situacao || 'Confirmado'}</p>
-          <p><strong>Total:</strong> R$ ${(pedido.valor_total || pedido.total || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
-        </div>`;
-      });
-
-      container.innerHTML = html;
-      showSuccess('Histórico carregado!', `${pedidos.length} pedido(s) encontrado(s)`, { duration: 3000 });
-
-    } catch (err) {
-      console.error('Erro ao carregar pedidos:', err);
-      hideNotification(loadingId);
-      container.innerHTML = '<p>Erro ao carregar pedidos.</p>';
-      showError('Erro ao carregar histórico', 'Não foi possível carregar seus pedidos. Tente novamente.');
-    }
-  }
-
-  // Carregar pedidos ao abrir a seção de histórico de compras
-  const navPurchaseHistory = document.querySelector('.nav-item[data-section="purchase-history"]');
-  if (navPurchaseHistory) {
-    navPurchaseHistory.addEventListener('click', carregarPedidosUsuario);
-  }
 
   carregarDadosUsuario();
   document.querySelector(".nav-item.active")?.click(); // ativar seção inicial
+
+  
 
    const logoutBtn = document.getElementById("logoutBtn");
     if (logoutBtn) {
@@ -754,101 +722,7 @@ async function atualizarImagemPerfil(imageData) {
   }
 }
 
-async function loadTodosPedidos() {
-  const container = document.getElementById("purchaseHistoryContent");
-  if (!container) {
-    console.error('Elemento purchaseHistoryContent não encontrado');
-    return;
-  }
-
-  const loadingId = showLoading('Carregando pedidos...', 'Buscando todos os pedidos do sistema');
-
-  try {
-    // Usar função utilitária com fallback automático
-    const response = await fetchWithFallback(
-      `${api.online}/pedidos/todos`,
-      `${api.online}/pedidos/todos`
-    );
-
-    hideNotification(loadingId);
-
-    if (!response.ok) {
-      throw new Error(`Erro HTTP: ${response.status}`);
-    }
-
-    const pedidos = await response.json();
-
-    if (!Array.isArray(pedidos) || pedidos.length === 0) {
-      container.innerHTML = "<p>Nenhum pedido encontrado no sistema.</p>";
-      showInfo('Nenhum pedido', 'Não há pedidos cadastrados no sistema ainda', { duration: 3000 });
-      return;
-    }
-
-    const pedidosPorUsuario = {};
-
-    pedidos.forEach(p => {
-      if (!pedidosPorUsuario[p.numero_pedido]) {
-        pedidosPorUsuario[p.numero_pedido] = {
-          usuario: p.nome_usuario,
-          email: p.email,
-          telefone: p.telefone,
-          data: p.data_hora,
-          situacao: p.situacao,
-          valor_total: p.valor_total,
-          itens: [],
-        };
-      }
-
-      pedidosPorUsuario[p.numero_pedido].itens.push({
-        produto: p.nome_produto,
-        quantidade: p.quantidade,
-        preco: p.preco_unitario,
-      });
-    });
-
-    container.innerHTML = "";
-
-    Object.entries(pedidosPorUsuario).forEach(([pedidoId, pedido]) => {
-      const pedidoEl = document.createElement("div");
-      pedidoEl.classList.add("admin-order");
-
-      pedidoEl.innerHTML = `
-        <h4>Pedido: ${pedidoId} - ${new Date(pedido.data).toLocaleString()}</h4>
-        <p><strong>Cliente:</strong> ${pedido.usuario} (${pedido.email})</p>
-        <p><strong>Telefone:</strong> ${pedido.telefone}</p>
-        <p><strong>Status:</strong> ${pedido.situacao}</p>
-        <p><strong>Total:</strong> R$ ${parseFloat(pedido.valor_total).toFixed(2)}</p>
-        <ul>
-          ${pedido.itens.map(item => `
-            <li>${item.quantidade}x ${item.produto} - R$ ${parseFloat(item.preco).toFixed(2)}</li>
-          `).join("")}
-        </ul>
-        <hr>
-      `;
-
-      container.appendChild(pedidoEl);
-    });
-
-    showSuccess('Pedidos carregados!', `${Object.keys(pedidosPorUsuario).length} pedido(s) encontrado(s)`, { duration: 3000 });
-
-  } catch (err) {
-    console.error("Erro ao carregar pedidos:", err);
-    hideNotification(loadingId);
-    container.innerHTML = `
-      <div class="alert alert-warning">
-        <h5>Erro ao carregar pedidos</h5>
-        <p>Não foi possível carregar os pedidos do sistema. Isso pode acontecer se:</p>
-        <ul>
-          <li>O servidor backend não estiver rodando</li>
-          <li>Houver problemas de conectividade</li>
-          <li>A rota /pedidos/todos não estiver implementada</li>
-        </ul>
-        <button class="btn btn-primary btn-sm" onclick="loadTodosPedidos()">Tentar novamente</button>
-      </div>
-    `;
-    showError('Erro ao carregar pedidos', 'Não foi possível carregar os pedidos do sistema. Verifique se o servidor está funcionando.');
-  }
-}
+// Variável global para armazenar todos os pedidos
 
 
 // Logout

@@ -590,95 +590,229 @@ document.querySelectorAll(".info-value.editable").forEach((element) => {
     }
   });
 
-  // Função para buscar e exibir pedidos feitos na seção de histórico de compras
-  async function carregarPedidosUsuario() {
-    const idPessoa = sessionStorage.getItem("id_pessoa");
-    if (!idPessoa) return;
+ 
+// Event listener
+ // Configura os filtros
+  configurarFiltros();
+  
+  // Quando clicar no histórico de compras
+  document.querySelector('[data-section="purchase-history"]').addEventListener('click', async (e) => {
+    e.preventDefault();
+    document.querySelectorAll('.main-content > div').forEach(sec => sec.classList.add('hidden'));
+    document.getElementById('saved-section').classList.remove('hidden');
+    
+    // Mostrar loading enquanto carrega
+    const container = document.getElementById('savedProductsContent');
+    container.innerHTML = '<div class="loading-placeholder"><p>Carregando histórico de compras...</p></div>';
+    
+    await loadUserPedidos();
+  });
+  function configurarFiltros() {
+  document.getElementById('searchPurchases').addEventListener('input', aplicarFiltros);
+  document.getElementById('statusFilter').addEventListener('change', aplicarFiltros);
+  document.getElementById('periodFilter').addEventListener('change', aplicarFiltros);
+  document.getElementById('refreshPurchases').addEventListener('click', () => {
+    document.getElementById('searchPurchases').value = '';
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('periodFilter').value = '';
+    aplicarFiltros();
+  });
+}
 
-    const container = document.getElementById("savedProductsContent");
-    const loadingId = showLoading(
-      "Carregando histórico...",
-      "Buscando seus pedidos anteriores"
-    );
-
-    container.innerHTML =
-      '<div class="text-center"><p>Carregando pedidos...</p></div>';
-
-    try {
-      const resp = await fetch(
-        `https://green-line-web.onrender.com/pessoa/${idPessoa}/pedidos`
-      );
-
-      hideNotification(loadingId);
-
-      if (!resp.ok) {
-        container.innerHTML = "<p>Nenhum pedido encontrado.</p>";
-        showInfo("Histórico vazio", "Você ainda não fez nenhum pedido", {
-          duration: 3000,
-        });
-        return;
-      }
-
-      const pedidos = await resp.json();
-
-      if (!Array.isArray(pedidos) || pedidos.length === 0) {
-        container.innerHTML = "<p>Nenhum pedido encontrado.</p>";
-        showInfo("Histórico vazio", "Você ainda não fez nenhum pedido", {
-          duration: 3000,
-        });
-        return;
-      }
-
-      let html = "";
-      pedidos.forEach((pedido) => {
-        html += `<div class="pedido-card">
-          <h4>Pedido: <span class="text-success">${
-            pedido.numero_pedido || pedido.numeroPedido || pedido.id_pedido
-          }</span></h4>
-          <p><strong>Data:</strong> ${
-            pedido.data_hora
-              ? new Date(pedido.data_hora).toLocaleString("pt-BR")
-              : pedido.dataConfirmacao || ""
-          }</p>
-          <p><strong>Status:</strong> ${pedido.situacao || "Confirmado"}</p>
-          <p><strong>Total:</strong> R$ ${(
-            pedido.valor_total ||
-            pedido.total ||
-            0
-          ).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</p>
-        </div>`;
-      });
-
-      container.innerHTML = html;
-      showSuccess(
-        "Histórico carregado!",
-        `${pedidos.length} pedido(s) encontrado(s)`,
-        { duration: 3000 }
-      );
-    } catch (err) {
-      console.error("Erro ao carregar pedidos:", err);
-      hideNotification(loadingId);
-      container.innerHTML = "<p>Erro ao carregar pedidos.</p>";
-      showError(
-        "Erro ao carregar histórico",
-        "Não foi possível carregar seus pedidos. Tente novamente."
-      );
-    }
-  }
-
-  // Carregar pedidos ao abrir a seção de histórico de compras
-  const navPurchaseHistory = document.querySelector(
-    '.nav-item[data-section="purchase-history"]'
-  );
-  if (navPurchaseHistory) {
-    navPurchaseHistory.addEventListener("click", carregarPedidosUsuario);
-  }
-
-   const logoutBtn = document.getElementById("logoutBtn");
+ const logoutBtn = document.getElementById("logoutBtn");
     if (logoutBtn) {
         logoutBtn.addEventListener("click", logout);
     }
+
 });
+
+// Variável global para armazenar todos os pedidos
+let todosPedidos = [];
+
+async function loadUserPedidos() {
+  const token = sessionStorage.getItem('userToken');
+  const idPessoa = sessionStorage.getItem('id_pessoa');
+  
+  if (!token || !idPessoa) {
+    showError("Acesso negado", "Faça login para ver seu histórico.");
+    return;
+  }
+
+  let loadingId;
+  try {
+    loadingId = showLoading("Carregando pedidos...", "Buscando seu histórico de compras");
+    
+    const response = await fetch(`${api.online}/pessoa/${idPessoa}/pedidos`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Erro ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('Dados recebidos:', data);
+    
+    // Armazena todos os pedidos para filtragem
+    todosPedidos = normalizePedidosData(data);
+    
+    // Aplica os filtros iniciais
+    aplicarFiltros();
+    
+  } catch (err) {
+    console.error("Erro ao carregar pedidos:", err);
+    document.getElementById('savedProductsContent').innerHTML = 
+      `<div class="error-message">
+        <p>Não foi possível carregar o histórico de compras.</p>
+        <p><small>${err.message}</small></p>
+      </div>`;
+  } finally {
+    if (loadingId) hideNotification(loadingId);
+  }
+}
+
+// Função para aplicar os filtros
+function aplicarFiltros() {
+  const termoBusca = document.getElementById('searchPurchases').value.toLowerCase();
+  const statusFiltro = document.getElementById('statusFilter').value;
+  const periodoFiltro = document.getElementById('periodFilter').value;
+  
+  // Filtra os pedidos
+  let pedidosFiltrados = todosPedidos.filter(pedido => {
+    // Filtro por termo de busca
+    const matchTermo = termoBusca === '' || 
+      (pedido.numero_pedido && pedido.numero_pedido.toLowerCase().includes(termoBusca)) ||
+      (pedido.produtos && pedido.produtos.some(p => p.nome.toLowerCase().includes(termoBusca)));
+    
+    // Filtro por status
+    const matchStatus = statusFiltro === '' || 
+      (pedido.situacao && pedido.situacao.toLowerCase() === statusFiltro.toLowerCase());
+    
+    // Filtro por período
+    let matchPeriodo = true;
+    if (periodoFiltro !== '') {
+      const dias = parseInt(periodoFiltro);
+      const dataLimite = new Date();
+      dataLimite.setDate(dataLimite.getDate() - dias);
+      
+      matchPeriodo = pedido.data_hora && new Date(pedido.data_hora) >= dataLimite;
+    }
+    
+    return matchTermo && matchStatus && matchPeriodo;
+  });
+
+  // Atualiza as estatísticas
+  atualizarEstatisticas(pedidosFiltrados);
+  
+  // Exibe os pedidos filtrados
+  displayPedidos(pedidosFiltrados);
+}
+
+// Função para atualizar as estatísticas
+function atualizarEstatisticas(pedidos) {
+  const totalPedidos = pedidos.length;
+  const totalGasto = pedidos.reduce((sum, pedido) => sum + (pedido.valor_total || 0), 0);
+  const ticketMedio = totalPedidos > 0 ? totalGasto / totalPedidos : 0;
+  const ultimaCompra = pedidos.length > 0 
+    ? new Date(pedidos[0].data_hora).toLocaleDateString('pt-BR') 
+    : '-';
+
+  document.getElementById('totalPurchases').textContent = totalPedidos;
+  document.getElementById('totalSpent').textContent = formatCurrency(totalGasto);
+  document.getElementById('averageOrder').textContent = formatCurrency(ticketMedio);
+  document.getElementById('lastPurchase').textContent = ultimaCompra;
+}
+
+// Função auxiliar para normalizar os dados dos pedidos
+function normalizePedidosData(data) {
+  if (Array.isArray(data)) {
+    return data;
+  }
+  if (data && typeof data === 'object' && data.id_pedido) {
+    return [data]; // Transforma objeto único em array
+  }
+  if (data && data.pedidos && Array.isArray(data.pedidos)) {
+    return data.pedidos;
+  }
+  return []; // Retorna array vazio se não reconhecer o formato
+}
+
+// Função auxiliar para exibir os pedidos na interface
+function displayPedidos(pedidos) {
+  const container = document.getElementById('savedProductsContent');
+  container.innerHTML = '';
+
+  if (pedidos.length === 0) {
+    container.innerHTML = '<p class="no-orders">Nenhum pedido encontrado.</p>';
+    return;
+  }
+
+  // Ordena por data (mais recente primeiro)
+  pedidos.sort((a, b) => {
+    const dateA = a.data_hora ? new Date(a.data_hora) : 0;
+    const dateB = b.data_hora ? new Date(b.data_hora) : 0;
+    return dateB - dateA;
+  });
+
+  // Cria os cards para cada pedido
+  pedidos.forEach(pedido => {
+    const card = document.createElement('div');
+    card.className = 'purchase-card';
+    
+    // Formata os dados do pedido
+    const numeroPedido = pedido.numero_pedido || 'N/A';
+    const dataPedido = pedido.data_hora 
+      ? new Date(pedido.data_hora).toLocaleDateString('pt-BR') 
+      : 'Não informada';
+    const situacao = pedido.situacao || 'Não informada';
+    const pagamento = pedido.pagamento_situacao || 'Não informado';
+    const valorTotal = formatCurrency(pedido.valor_total);
+
+    card.innerHTML = `
+      <div class="purchase-header">
+        <h3>Pedido #${numeroPedido}</h3>
+        <span class="status-badge ${getStatusClass(situacao)}">${situacao}</span>
+      </div>
+      <div class="purchase-details">
+        <p><strong>Data:</strong> ${dataPedido}</p>
+        <p><strong>Pagamento:</strong> ${pagamento}</p>
+        <p class="purchase-total"><strong>Total:</strong> ${valorTotal}</p>
+      </div>
+    `;
+    
+    container.appendChild(card);
+  });
+}
+
+// Função para formatar valores monetários
+function formatCurrency(value) {
+  try {
+    const numericValue = parseFloat(value || 0);
+    return 'R$ ' + numericValue.toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  } catch (e) {
+    console.error('Erro ao formatar valor:', e);
+    return 'R$ 0,00';
+  }
+}
+
+// Função para determinar classe CSS baseada no status
+function getStatusClass(status) {
+  const statusMap = {
+    'Pendente': 'status-pending',
+    'Confirmado': 'status-confirmed',
+    'Cancelado': 'status-cancelled',
+    'Enviado': 'status-shipped',
+    'Entregue': 'status-delivered'
+  };
+  return statusMap[status] || 'status-default';
+}
 
 // Função para atualizar imagem de perfil
 async function atualizarImagemPerfil(imageData) {
