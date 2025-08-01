@@ -102,9 +102,7 @@ class EmailTemplateManager {
       TOTAL: '0,00',
       METODO_ENTREGA: 'N/A',
       PREVISAO_ENTREGA: 'N/A',
-      ENDERECO_ENTREGA: 'N/A',
-      LINK_ACOMPANHAR: '#',
-      LINK_SUPORTE: '#'
+      ENDERECO_ENTREGA: 'N/A'
     };
 
     const finalVariables = { ...defaultVariables, ...variables };
