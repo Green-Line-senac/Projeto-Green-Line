@@ -7,7 +7,7 @@ class FuncaoUteis {
   criarToken(email) {
     return jwt.sign({ email }, process.env.SEGREDO_JWT, { expiresIn: "10m" });
   }
-  
+
   async enviarEmail(email, assunto, tipo, pedido = null) {
     console.log("📧 === INÍCIO DA FUNÇÃO enviarEmail ===");
     console.log("📧 Parâmetros recebidos:", {
@@ -16,14 +16,14 @@ class FuncaoUteis {
       tipo: tipo,
       pedidoFornecido: !!pedido
     });
-    
+
     try {
       console.log("🔧 Configurando transportador SMTP...");
       console.log("📧 Variáveis de ambiente:", {
         EMAIL_USER: process.env.EMAIL_USER ? "✅ Definida" : "❌ Não definida",
         EMAIL_PASS: process.env.EMAIL_PASS ? "✅ Definida" : "❌ Não definida"
       });
-      
+
       const transportador = nodemailer.createTransport({
         host: "smtp.gmail.com",
         port: 465,
@@ -33,12 +33,12 @@ class FuncaoUteis {
           pass: process.env.EMAIL_PASS,
         },
       });
-      
+
       console.log("✅ Transportador SMTP configurado");
-      
+
       let mensagem;
       console.log("🎯 Processando tipo de email:", tipo);
-      
+
       if (tipo === "recuperacao") {
         console.log("🔑 Gerando email de recuperação de senha...");
         const resetLink = `https://green-line-web.onrender.com/redefinir-senha?token=${this.criarToken(email)}`;
@@ -63,7 +63,7 @@ class FuncaoUteis {
           `;
         }
       }
-      
+
       if (tipo === "confirmacao") {
         console.log("✅ Gerando email de confirmação de cadastro...");
         const confirmationLink = `https://green-line-web.onrender.com/validar?token=${this.criarToken(email)}`;
@@ -83,17 +83,17 @@ class FuncaoUteis {
           `;
         }
       }
-      
+
       if (tipo === "pedido_confirmado" || tipo === "compra-concluida") {
         console.log("🛒 Processando email de pedido confirmado...");
         console.log("📦 Dados do pedido recebidos:", JSON.stringify(pedido, null, 2));
-        
+
         if (!pedido?.numeroPedido) {
           console.error("❌ Número do pedido não fornecido");
           console.error("📦 Objeto pedido:", pedido);
           throw new Error("Dados do pedido são necessários para este tipo de e-mail.");
         }
-        
+
         console.log("✅ Número do pedido validado:", pedido.numeroPedido);
 
         // Função para formatar valor monetário
@@ -103,7 +103,7 @@ class FuncaoUteis {
             currency: "BRL",
           }).format(parseFloat(valor) || 0);
         };
-        
+
         const emailVariables = {
           NOME_USUARIO: pedido.nomeTitular || pedido.nomeCliente || pedido.nome || 'Cliente',
           NUMERO_PEDIDO: pedido.numeroPedido || pedido.numero_pedido || 'N/A',
@@ -123,7 +123,7 @@ class FuncaoUteis {
           const value = emailVariables[param];
           return !value || value === 'N/A' || value === 'R$ 0,00' || value === '';
         });
-        
+
         if (missingParams.length > 0) {
           console.error('❌ Parâmetros críticos faltando no email:', missingParams);
           console.error('📋 Objeto pedido completo recebido:', JSON.stringify(pedido, null, 2));
@@ -131,16 +131,18 @@ class FuncaoUteis {
         } else {
           console.log('✅ Todos os parâmetros obrigatórios estão presentes');
         }
-        
+
         console.log('📧 Variáveis do email:', emailVariables);
-        
+
         try {
+          console.log('🔄 Tentando carregar template externo...');
           mensagem = getOrderConfirmationEmailHTML(emailVariables);
+          console.log('📄 Template externo carregado, tamanho:', mensagem ? mensagem.length : 0);
         } catch (templateError) {
           console.error('❌ Erro ao processar template de email:', templateError);
           mensagem = null;
         }
-        
+
         // Debug: verificar se a mensagem foi gerada
         if (!mensagem) {
           console.error('❌ Falha ao gerar email com template. Usando fallback.');
@@ -150,7 +152,7 @@ class FuncaoUteis {
           const templatePath = path.join(__dirname, 'templates', 'email-pedido-confirmado.html');
           console.error('📂 Caminho do template:', templatePath);
           console.error('📄 Template existe:', fs.existsSync(templatePath));
-          
+
           // Fallback para template simples
           mensagem = `
             <!DOCTYPE html>
@@ -163,7 +165,7 @@ class FuncaoUteis {
                     body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
                     .header { background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
                     .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
-                    .btn { display: inline-block; padding: 12px 24px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 15px 5px; }
+
                     .footer { text-align: center; margin-top: 30px; padding: 20px; background: #e9ecef; border-radius: 5px; }
                 </style>
             </head>
@@ -194,7 +196,20 @@ class FuncaoUteis {
           `;
         } else {
           console.log('✅ Email gerado com sucesso usando template');
-          
+
+          // Verificar se há botões no template final
+          const hasButtons = mensagem.includes('Acompanhar Pedido') || mensagem.includes('Suporte') || mensagem.includes('href=');
+          if (hasButtons) {
+            console.warn('⚠️ ATENÇÃO: Template ainda contém botões ou links!');
+            console.log('🔍 Trechos encontrados:', {
+              acompanhar: mensagem.includes('Acompanhar Pedido'),
+              suporte: mensagem.includes('Suporte'),
+              links: mensagem.includes('href=')
+            });
+          } else {
+            console.log('✅ Template limpo - sem botões');
+          }
+
           // Verificar se ainda há placeholders não substituídos
           const remainingPlaceholders = mensagem.match(/\{\{[^}]+\}\}/g);
           if (remainingPlaceholders) {
@@ -207,7 +222,7 @@ class FuncaoUteis {
           }
         }
       }
-      
+
       console.log("📤 Enviando email...");
       console.log("📧 Configurações do email:", {
         from: "Green Line <greenline.ecologic@gmail.com>",
@@ -215,26 +230,26 @@ class FuncaoUteis {
         subject: assunto,
         htmlLength: mensagem ? mensagem.length : 0
       });
-      
+
       if (!mensagem) {
         console.error("❌ Mensagem HTML está vazia ou nula!");
         throw new Error("Conteúdo do email não foi gerado");
       }
-      
+
       const emailResult = await transportador.sendMail({
         from: "Green Line <greenline.ecologic@gmail.com>",
         to: email,
         subject: assunto,
         html: mensagem,
       });
-      
+
       console.log("✅ Email enviado com sucesso!");
       console.log("📧 Resultado do envio:", {
         messageId: emailResult.messageId,
         accepted: emailResult.accepted,
         rejected: emailResult.rejected
       });
-      
+
     } catch (erro) {
       console.error("💥 === ERRO NA FUNÇÃO enviarEmail ===");
       console.error("🔥 Tipo do erro:", erro.name);
@@ -249,7 +264,7 @@ class FuncaoUteis {
       console.error("💥 === FIM DO ERRO enviarEmail ===");
       throw erro;
     }
-    
+
     console.log("📧 === FIM DA FUNÇÃO enviarEmail ===");
   }
 }

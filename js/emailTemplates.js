@@ -14,6 +14,16 @@ class EmailTemplateManager {
       console.log(`📂 Carregando template: ${templatePath}`);
       const template = fs.readFileSync(templatePath, 'utf8');
       console.log(`✅ Template ${templateName} carregado com sucesso`);
+      console.log(`📄 Tamanho do template: ${template.length} caracteres`);
+      
+      // Verificar se há botões no template carregado
+      const hasButtons = template.includes('Acompanhar Pedido') || template.includes('Suporte') || template.includes('track-button');
+      if (hasButtons) {
+        console.error('❌ TEMPLATE CONTÉM BOTÕES! Verificar arquivo:', templatePath);
+      } else {
+        console.log('✅ Template limpo - sem botões');
+      }
+      
       return template;
     } catch (error) {
       console.error(`❌ Erro ao carregar template ${templateName}:`, error.message);

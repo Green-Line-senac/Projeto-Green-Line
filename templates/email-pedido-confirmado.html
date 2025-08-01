@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,14 +10,14 @@
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
             color: #333;
             background-color: #f4f4f4;
         }
-
+        
         .email-container {
             max-width: 600px;
             margin: 20px auto;
@@ -27,42 +26,42 @@
             overflow: hidden;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-
+        
         .header {
             background: linear-gradient(135deg, #4CAF50, #66BB6A);
             color: white;
             padding: 30px 20px;
             text-align: center;
         }
-
+        
         .logo {
             font-size: 28px;
             font-weight: bold;
             margin-bottom: 10px;
         }
-
+        
         .header-subtitle {
             font-size: 16px;
             opacity: 0.9;
         }
-
+        
         .content {
             padding: 40px 30px;
         }
-
+        
         .greeting {
             font-size: 18px;
             margin-bottom: 20px;
             color: #333;
         }
-
+        
         .message {
             font-size: 16px;
             margin-bottom: 30px;
             line-height: 1.8;
             color: #555;
         }
-
+        
         .success-box {
             background-color: #d4edda;
             border: 1px solid #c3e6cb;
@@ -72,19 +71,19 @@
             margin: 20px 0;
             text-align: center;
         }
-
+        
         .success-box h3 {
             color: #155724;
             margin-bottom: 10px;
             font-size: 20px;
         }
-
+        
         .success-box p {
             color: #155724;
             margin: 0;
             font-size: 16px;
         }
-
+        
         .order-details {
             background-color: #f8f9fa;
             border: 1px solid #e9ecef;
@@ -92,7 +91,7 @@
             padding: 20px;
             margin: 20px 0;
         }
-
+        
         .order-details h4 {
             color: #333;
             margin-bottom: 15px;
@@ -100,7 +99,7 @@
             border-bottom: 2px solid #4CAF50;
             padding-bottom: 5px;
         }
-
+        
         .detail-row {
             display: flex;
             justify-content: space-between;
@@ -108,24 +107,24 @@
             padding: 8px 0;
             border-bottom: 1px solid #e9ecef;
         }
-
+        
         .detail-row:last-child {
             border-bottom: none;
             font-weight: bold;
             font-size: 16px;
             color: #4CAF50;
         }
-
+        
         .detail-label {
             font-weight: 500;
             color: #666;
         }
-
+        
         .detail-value {
             font-weight: 600;
             color: #333;
         }
-
+        
         .tracking-info {
             background-color: #e8f5e8;
             border: 1px solid #c3e6cb;
@@ -134,74 +133,69 @@
             border-radius: 5px;
             margin: 20px 0;
         }
-
+        
         .tracking-info h4 {
             color: #155724;
             margin-bottom: 10px;
             font-size: 16px;
         }
-
+        
         .tracking-info p {
             color: #155724;
             margin: 5px 0;
             font-size: 14px;
         }
-
-
-
+        
         .footer {
             background-color: #f8f9fa;
             padding: 20px 30px;
             text-align: center;
             border-top: 1px solid #e9ecef;
         }
-
+        
         .footer-text {
             font-size: 14px;
             color: #666;
             margin-bottom: 10px;
         }
-
+        
         .company-info {
             font-size: 12px;
             color: #999;
         }
-
+        
         .divider {
             height: 1px;
             background-color: #e9ecef;
             margin: 20px 0;
         }
-
+        
         @media only screen and (max-width: 600px) {
             .email-container {
                 margin: 10px;
                 border-radius: 0;
             }
-
+            
             .content {
                 padding: 30px 20px;
             }
-
+            
             .header {
                 padding: 25px 20px;
             }
-
+            
             .logo {
                 font-size: 24px;
             }
-
+            
             .detail-row {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 5px;
             }
-
-
         }
     </style>
 </head>
-
 <body>
     <div class="email-container">
         <!-- Header -->
@@ -209,93 +203,87 @@
             <div class="logo">🎉 Green Line</div>
             <div class="header-subtitle">Pedido Confirmado com Sucesso!</div>
         </div>
-
+        
         <!-- Content -->
         <div class="content">
             <div class="greeting">Olá, {{NOME_USUARIO}}!</div>
-
+            
             <div class="success-box">
                 <h3>✅ Pedido Confirmado!</h3>
                 <p>Seu pedido foi recebido e está sendo processado.</p>
             </div>
-
+            
             <div class="message">
-                Obrigado por escolher a <strong>Green Line</strong> para suas compras sustentáveis! Seu pedido foi
-                confirmado e em breve você receberá seus produtos ecológicos.
+                Obrigado por escolher a <strong>Green Line</strong> para suas compras sustentáveis! Seu pedido foi confirmado e em breve você receberá seus produtos ecológicos.
             </div>
-
+            
             <div class="order-details">
                 <h4>📋 Detalhes do Pedido</h4>
-
+                
                 <div class="detail-row">
                     <span class="detail-label">Número do Pedido:</span>
                     <span class="detail-value">{{NUMERO_PEDIDO}}</span>
                 </div>
-
+                
                 <div class="detail-row">
                     <span class="detail-label">Data do Pedido:</span>
                     <span class="detail-value">{{DATA_PEDIDO}}</span>
                 </div>
-
+                
                 <div class="detail-row">
                     <span class="detail-label">Método de Pagamento:</span>
                     <span class="detail-value">{{METODO_PAGAMENTO}}</span>
                 </div>
-
+                
                 <div class="detail-row">
                     <span class="detail-label">Subtotal:</span>
                     <span class="detail-value">R$ {{SUBTOTAL}}</span>
                 </div>
-
+                
                 <div class="detail-row">
                     <span class="detail-label">Frete:</span>
                     <span class="detail-value">R$ {{FRETE}}</span>
                 </div>
-
+                
                 <div class="detail-row">
                     <span class="detail-label">Total:</span>
                     <span class="detail-value">R$ {{TOTAL}}</span>
                 </div>
             </div>
-
+            
             <div class="tracking-info">
                 <h4>🚚 Informações de Entrega</h4>
                 <p><strong>Método:</strong> {{METODO_ENTREGA}}</p>
                 <p><strong>Previsão de Entrega:</strong> {{PREVISAO_ENTREGA}}</p>
                 <p><strong>Endereço:</strong> {{ENDERECO_ENTREGA}}</p>
             </div>
-
+            
             <div class="message">
                 <strong>Próximos passos:</strong><br>
                 1. Você receberá um email com o código de rastreamento<br>
                 2. Acompanhe seu pedido através do nosso site<br>
                 3. Prepare-se para receber seus produtos sustentáveis!
             </div>
-
-
+            
+            <div class="divider"></div>
+            
+            <div class="message">
+                <strong>🌱 Obrigado por escolher produtos sustentáveis!</strong><br>
+                Com sua compra, você está contribuindo para um mundo mais verde e sustentável. Cada produto Green Line é cuidadosamente selecionado pensando no meio ambiente.
+            </div>
         </div>
-
-        <div class="divider"></div>
-
-        <div class="message">
-            <strong>🌱 Obrigado por escolher produtos sustentáveis!</strong><br>
-            Com sua compra, você está contribuindo para um mundo mais verde e sustentável. Cada produto Green Line é
-            cuidadosamente selecionado pensando no meio ambiente.
+        
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-text">
+                Em caso de dúvidas, entre em contato conosco através do email ou telefone.
+            </div>
+            <div class="company-info">
+                © 2025 Green Line - Produtos Ecológicos<br>
+                Ceilândia, Brasília-DF | CNPJ: 74.707.730/0001-63<br>
+                Email: greenline.ecologic@gmail.com | WhatsApp: (61) 99999-9999
+            </div>
         </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="footer">
-        <div class="footer-text">
-            Em caso de dúvidas, entre em contato conosco através do email ou telefone.
-        </div>
-        <div class="company-info">
-            © 2025 Green Line - Produtos Ecológicos<br>
-            Ceilândia, Brasília-DF | CNPJ: 74.707.730/0001-63<br>
-            Email: greenline.ecologic@gmail.com | WhatsApp: (61) 99999-9999
-        </div>
-    </div>
     </div>
 </body>
-
 </html>
