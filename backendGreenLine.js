@@ -2436,6 +2436,14 @@ app.get('/*.html', (req, res) => {
   }
 });
 
+  // Verificar se templates existem
+  const fs = require('fs');
+  const path = require('path');
+  const templatePath = path.join(__dirname, 'templates', 'email-pedido-confirmado.html');
+  console.log("📄 Template de pedido confirmado:", fs.existsSync(templatePath) ? "✅ Encontrado" : "❌ Não encontrado");
+
+  console.log("🚀 === SERVIDOR PRONTO PARA RECEBER REQUISIÇÕES ===");
+
 // ==================== INICIAR SERVIDOR ====================
 app.listen(3010, () => {
   console.log("🚀 === SERVIDOR GREEN LINE INICIADO ===");
@@ -2445,11 +2453,4 @@ app.listen(3010, () => {
   console.log("🗄️ Banco de dados: Conectado");
   console.log("📁 Templates de email: Verificando...");
 
-  // Verificar se templates existem
-  const fs = require('fs');
-  const path = require('path');
-  const templatePath = path.join(__dirname, 'templates', 'email-pedido-confirmado.html');
-  console.log("📄 Template de pedido confirmado:", fs.existsSync(templatePath) ? "✅ Encontrado" : "❌ Não encontrado");
-
-  console.log("🚀 === SERVIDOR PRONTO PARA RECEBER REQUISIÇÕES ===");
 });
