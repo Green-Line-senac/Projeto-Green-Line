@@ -2180,14 +2180,7 @@ app.put("/pessoa/:id_pessoa/enderecos", async (req, res) => {
       .json({ error: "Erro ao atualizar endereço", details: err.message }); // Inclua detalhes do erro
   }
 });
-// Rota para listar todos os usuários (apenas para ADMs)
-app.get("/pessoa", async (req, res) => {
-  try {
-    // Verificar se o usuário é ADM
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) {
-      return res.status(401).json({ error: "Token não fornecido" });
-    } else {
+// Rota para listar todos os usuários (apenas para ADMs) - REMOVIDA (DUPLICADA)
       console.log("Token do ADM recebido:", token);
     }
 
@@ -2424,8 +2417,8 @@ app.get('/termos_de_uso.html', (req, res) => {
 });
 
 // Rota catch-all para outras páginas HTML na pasta public
-app.get('/*.html', (req, res) => {
-  const fileName = req.params[0] + '.html';
+app.get('/:filename.html', (req, res) => {
+  const fileName = req.params.filename + '.html';
   const filePath = path.join(__dirname, 'public', fileName);
 
   // Verifica se o arquivo existe
