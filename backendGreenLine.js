@@ -2275,6 +2275,139 @@ console.log("📄 Template de pedido confirmado:", fs.existsSync(templatePath) ?
 
 console.log("🚀 === SERVIDOR PRONTO PARA RECEBER REQUISIÇÕES ===");
 
+// ==================== SETUP TABELA CONTATOS ====================
+async function criarTabelaContatos() {
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS contatos (
+        id_contato INT AUTO_INCREMENT PRIMARY KEY,
+        nome VARCHAR(100) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        mensagem TEXT NOT NULL,
+        data_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        status ENUM('novo', 'lido', 'respondido') DEFAULT 'novo',
+        ip_origem VARCHAR(45),
+        user_agent TEXT,
+        INDEX idx_email (email),
+        INDEX idx_data (data_envio),
+        INDEX idx_status (status)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+    console.log("✅ Tabela 'contatos' verificada/criada com sucesso");
+  } catch (error) {
+    console.warn("⚠️ Erro ao criar tabela contatos:", error.message);
+  }
+}
+
+// Criar tabela na inicialização
+criarTabelaContatos();
+
+// ==================== BACKEND CONTATO ====================
+app.post("/contato", async (req, res) => {
+  try {
+    const { nome, email, assunto, tipo } = req.body;
+
+    // Validação básica
+    if (!nome || !email || !assunto) {
+      return res.status(400).json({
+        conclusao: 1,
+        mensagem: "Nome, email e mensagem são obrigatórios"
+      });
+    }
+
+    // Validação do email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        conclusao: 1,
+        mensagem: "Email inválido"
+      });
+    }
+
+    // Validação do nome
+    if (nome.length < 2 || nome.length > 50) {
+      return res.status(400).json({
+        conclusao: 1,
+        mensagem: "Nome deve ter entre 2 e 50 caracteres"
+      });
+    }
+
+    // Validação da mensagem
+    if (assunto.length < 10 || assunto.length > 1000) {
+      return res.status(400).json({
+        conclusao: 1,
+        mensagem: "Mensagem deve ter entre 10 e 1000 caracteres"
+      });
+    }
+
+    console.log("📧 Nova mensagem de contato recebida:", { nome, email, tipo });
+
+    // Capturar informações adicionais
+    const ipOrigem = req.ip || req.connection.remoteAddress || 'desconhecido';
+    const userAgent = req.get('User-Agent') || 'desconhecido';
+
+    // Salvar no banco de dados
+    try {
+      await db.query(
+        `INSERT INTO contatos (nome, email, mensagem, data_envio, status, ip_origem, user_agent) 
+         VALUES (?, ?, ?, NOW(), 'novo', ?, ?)`,
+        [nome, email, assunto, ipOrigem, userAgent]
+      );
+      console.log("✅ Mensagem salva no banco de dados");
+    } catch (dbError) {
+      console.warn("⚠️ Erro ao salvar no banco (continuando):", dbError.message);
+      // Continua mesmo se não conseguir salvar no banco
+    }
+
+    // Enviar email de notificação para a empresa
+    try {
+      const funcoesUteis = new funcoes();
+      
+      // Email para a empresa
+      await funcoesUteis.enviarEmail(
+        "greenline.ecologic@gmail.com",
+        `Nova mensagem de contato - ${nome}`,
+        "contato_empresa",
+        {
+          nome,
+          email,
+          mensagem: assunto,
+          dataEnvio: new Date().toLocaleString('pt-BR')
+        }
+      );
+
+      // Email de confirmação para o cliente
+      await funcoesUteis.enviarEmail(
+        email,
+        "Mensagem recebida - GreenLine",
+        "contato_confirmacao",
+        {
+          nome,
+          mensagem: assunto,
+          dataEnvio: new Date().toLocaleString('pt-BR')
+        }
+      );
+
+      console.log("✅ Emails de contato enviados com sucesso");
+    } catch (emailError) {
+      console.error("❌ Erro ao enviar emails:", emailError.message);
+      // Não falha a requisição por causa do email
+    }
+
+    return res.status(200).json({
+      conclusao: 2,
+      mensagem: "Mensagem enviada com sucesso! Responderemos em breve."
+    });
+
+  } catch (erro) {
+    console.error("❌ Erro no processamento do contato:", erro);
+    return res.status(500).json({
+      conclusao: 3,
+      mensagem: "Erro interno no servidor"
+    });
+  }
+});
+
 // ==================== TESTE DE EMAIL ====================
 app.post("/teste-email", async (req, res) => {
   try {

@@ -1,7 +1,7 @@
 require("dotenv").config();
 const nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
-const { getConfirmationEmailHTML, getPasswordResetEmailHTML, getOrderConfirmationEmailHTML } = require("./js/emailTemplates");
+const { getConfirmationEmailHTML, getPasswordResetEmailHTML, getOrderConfirmationEmailHTML, getContactCompanyEmailHTML, getContactConfirmationEmailHTML } = require("./js/emailTemplates");
 
 // Verificar se as funções foram importadas corretamente
 console.log("Funções de template importadas:", {
@@ -221,6 +221,57 @@ class FuncaoUteis {
                 </div>
             </body>
             </html>
+          `;
+        }
+      }
+
+      // Emails de contato
+      if (tipo === "contato_empresa") {
+        console.log("Processando email de contato para empresa");
+
+        mensagem = getContactCompanyEmailHTML({
+          nome: pedido?.nome || 'Cliente',
+          email: pedido?.email || email,
+          mensagem: pedido?.mensagem || 'Mensagem não fornecida',
+          dataEnvio: pedido?.dataEnvio || new Date().toLocaleString('pt-BR')
+        });
+
+        if (!mensagem) {
+          mensagem = `
+            <h2>Nova Mensagem de Contato - GreenLine</h2>
+            <p><strong>Nome:</strong> ${pedido?.nome || 'Cliente'}</p>
+            <p><strong>Email:</strong> ${pedido?.email || email}</p>
+            <p><strong>Data:</strong> ${pedido?.dataEnvio || new Date().toLocaleString('pt-BR')}</p>
+            <div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #28a745; margin: 20px 0;">
+              <h3>Mensagem:</h3>
+              <p>${pedido?.mensagem || 'Mensagem não fornecida'}</p>
+            </div>
+            <p>Responda o cliente o mais breve possível.</p>
+          `;
+        }
+      }
+
+      if (tipo === "contato_confirmacao") {
+        console.log("Processando email de confirmação de contato");
+
+        mensagem = getContactConfirmationEmailHTML({
+          nome: pedido?.nome || 'Cliente',
+          mensagem: pedido?.mensagem || 'Sua mensagem foi recebida',
+          dataEnvio: pedido?.dataEnvio || new Date().toLocaleString('pt-BR')
+        });
+
+        if (!mensagem) {
+          mensagem = `
+            <h2>Mensagem Recebida - GreenLine</h2>
+            <p>Olá <strong>${pedido?.nome || 'Cliente'}</strong>!</p>
+            <p>Recebemos sua mensagem e nossa equipe responderá em breve.</p>
+            <div style="background: #d4edda; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <h3>Sua mensagem:</h3>
+              <p style="font-style: italic;">"${pedido?.mensagem || 'Mensagem recebida'}"</p>
+              <p><small>Enviado em: ${pedido?.dataEnvio || new Date().toLocaleString('pt-BR')}</small></p>
+            </div>
+            <p>Obrigado por entrar em contato conosco!</p>
+            <p><strong>GreenLine</strong> - Produtos Ecológicos</p>
           `;
         }
       }

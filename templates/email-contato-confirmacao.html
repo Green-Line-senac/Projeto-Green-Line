@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mensagem Recebida - GreenLine</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #28a745;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+        .title {
+            color: #28a745;
+            font-size: 24px;
+            margin: 0;
+        }
+        .success-badge {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .greeting {
+            font-size: 18px;
+            color: #495057;
+            margin-bottom: 20px;
+        }
+        .confirmation-section {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border: 2px solid #28a745;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .confirmation-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        .confirmation-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #155724;
+            margin-bottom: 10px;
+        }
+        .message-recap {
+            background: #f8f9fa;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .message-title {
+            color: #495057;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .message-content {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #e9ecef;
+            font-style: italic;
+            color: #6c757d;
+        }
+        .info-section {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .info-title {
+            color: #28a745;
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .info-list {
+            list-style: none;
+            padding: 0;
+        }
+        .info-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f8f9fa;
+            display: flex;
+            align-items: center;
+        }
+        .info-list li:last-child {
+            border-bottom: none;
+        }
+        .info-icon {
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        .contact-section {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .contact-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .contact-info {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .social-links {
+            margin: 15px 0;
+        }
+        .social-links a {
+            display: inline-block;
+            margin: 0 10px;
+            color: #28a745;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .container { padding: 20px; }
+            .contact-info { flex-direction: column; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🌱 GreenLine</div>
+            <h1 class="title">Mensagem Recebida com Sucesso!</h1>
+            <div class="success-badge">✅ CONFIRMADO</div>
+        </div>
+
+        <div class="greeting">
+            Olá <strong>{{nome}}</strong>! 👋
+        </div>
+
+        <div class="confirmation-section">
+            <div class="confirmation-icon">📧</div>
+            <div class="confirmation-text">Sua mensagem foi recebida!</div>
+            <p style="margin: 0; color: #155724;">
+                Obrigado por entrar em contato conosco. Nossa equipe analisará sua mensagem e responderá em breve.
+            </p>
+        </div>
+
+        <div class="message-recap">
+            <div class="message-title">📝 Resumo da sua mensagem:</div>
+            <div class="message-content">
+                "{{mensagem}}"
+            </div>
+            <p style="margin-top: 15px; margin-bottom: 0; font-size: 14px; color: #6c757d;">
+                <strong>Enviado em:</strong> {{dataEnvio}}
+            </p>
+        </div>
+
+        <div class="info-section">
+            <div class="info-title">
+                ⏰ O que acontece agora?
+            </div>
+            <ul class="info-list">
+                <li>
+                    <span class="info-icon">1️⃣</span>
+                    <span>Nossa equipe recebeu sua mensagem e está analisando</span>
+                </li>
+                <li>
+                    <span class="info-icon">2️⃣</span>
+                    <span>Você receberá uma resposta personalizada em até 24 horas</span>
+                </li>
+                <li>
+                    <span class="info-icon">3️⃣</span>
+                    <span>A resposta será enviada para este mesmo email</span>
+                </li>
+                <li>
+                    <span class="info-icon">4️⃣</span>
+                    <span>Caso seja urgente, entre em contato pelo telefone</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="contact-section">
+            <div class="contact-title">📞 Outros Canais de Contato</div>
+            <div class="contact-info">
+                <div class="contact-item">
+                    <span>📱</span>
+                    <span>(00) 99999-9999</span>
+                </div>
+                <div class="contact-item">
+                    <span>📧</span>
+                    <span>greenline.ecologic@gmail.com</span>
+                </div>
+                <div class="contact-item">
+                    <span>🌐</span>
+                    <span>Site GreenLine</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <div class="info-title">
+                🌱 Enquanto isso, que tal conhecer nossos produtos?
+            </div>
+            <p style="margin-bottom: 15px;">
+                Explore nossa linha completa de produtos ecológicos e sustentáveis:
+            </p>
+            <ul class="info-list">
+                <li>
+                    <span class="info-icon">🧴</span>
+                    <span>Produtos de limpeza biodegradáveis</span>
+                </li>
+                <li>
+                    <span class="info-icon">🌿</span>
+                    <span>Cosméticos naturais e orgânicos</span>
+                </li>
+                <li>
+                    <span class="info-icon">♻️</span>
+                    <span>Itens reutilizáveis para o dia a dia</span>
+                </li>
+                <li>
+                    <span class="info-icon">🏠</span>
+                    <span>Soluções sustentáveis para casa</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p><strong>Obrigado por escolher a GreenLine!</strong></p>
+            <p>Juntos construímos um futuro mais sustentável. 🌍💚</p>
+            
+            <div class="social-links">
+                <a href="https://green-line-web.onrender.com">🌐 Visite nosso site</a>
+                <a href="mailto:greenline.ecologic@gmail.com">📧 Email direto</a>
+            </div>
+            
+            <p style="margin-top: 20px;">
+                <small>
+                    🌱 <strong>GreenLine</strong> - Produtos Ecológicos<br>
+                    📍 Ceilândia, Brasília-DF | CNPJ: 74.707.730/0001-63<br>
+                    <em>Este email foi enviado automaticamente. Por favor, não responda diretamente.</em>
+                </small>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

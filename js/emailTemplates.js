@@ -123,11 +123,21 @@ function getCustomEmailHTML(templateName, variables) {
   return emailTemplates.generateEmail(templateName, variables);
 }
 
+function getContactCompanyEmailHTML(variables) {
+  return emailTemplates.generateEmail('email-contato-empresa', variables);
+}
+
+function getContactConfirmationEmailHTML(variables) {
+  return emailTemplates.generateEmail('email-contato-confirmacao', variables);
+}
+
 module.exports = {
   EmailTemplateManager,
   emailTemplates,
   getConfirmationEmailHTML,
   getPasswordResetEmailHTML,
   getOrderConfirmationEmailHTML,
-  getCustomEmailHTML
+  getCustomEmailHTML,
+  getContactCompanyEmailHTML,
+  getContactConfirmationEmailHTML
 };
