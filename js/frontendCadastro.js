@@ -85,6 +85,31 @@ document.getElementById("cpf").addEventListener("input", function (e) {
 
   e.target.value = value;
 });
+document.getElementById("password").addEventListener("input", function (e) {
+  const value = e.target.value;
+  const erroElement = document.getElementById("erro");
+
+  // Impede mais de 5 caracteres
+  if (value.length > 5) {
+    e.target.value = value.substring(0, 5);
+    return;
+  }
+
+  // Valida quando tiver 5 caracteres
+  if (value.length === 5) {
+    const hasLetter = /[a-zA-Z]/.test(value);
+    const hasNumber = /\d/.test(value);
+
+    if (!hasLetter || !hasNumber) {
+      erroElement.style.display = "block";
+      e.target.value = ""; // Limpa se não for válido
+    } else {
+      erroElement.style.display = "none";
+    }
+  } else {
+    erroElement.style.display = "none";
+  }
+});
 
 document.getElementById("telefone").addEventListener("input", function (e) {
   let value = e.target.value.replace(/\D/g, "");
