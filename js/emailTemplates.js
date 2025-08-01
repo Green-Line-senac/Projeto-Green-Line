@@ -11,9 +11,10 @@ class EmailTemplateManager {
   loadTemplate(templateName) {
     try {
       const templatePath = path.join(this.templatesPath, `${templateName}.html`);
-      return fs.readFileSync(templatePath, 'utf8');
+      const template = fs.readFileSync(templatePath, 'utf8');
+      return template;
     } catch (error) {
-      console.error(`Erro ao carregar template ${templateName}:`, error);
+      console.error(`Erro ao carregar template ${templateName}:`, error.message);
       return null;
     }
   }
@@ -22,10 +23,15 @@ class EmailTemplateManager {
   replaceVariables(template, variables) {
     let processedTemplate = template;
     
+    // Substituir todas as variáveis fornecidas usando split/join
     for (const [key, value] of Object.entries(variables)) {
       const placeholder = `{{${key}}}`;
-      processedTemplate = processedTemplate.replace(new RegExp(placeholder, 'g'), value || '');
+      const safeValue = String(value || '');
+      processedTemplate = processedTemplate.split(placeholder).join(safeValue);
     }
+    
+    // Remover placeholders não substituídos
+    processedTemplate = processedTemplate.replace(/\{\{[^}]+\}\}/g, '');
     
     return processedTemplate;
   }
@@ -62,7 +68,10 @@ class EmailTemplateManager {
   // Gerar email de pedido confirmado
   generateOrderConfirmationEmail(variables) {
     const template = this.loadTemplate('email-pedido-confirmado');
-    if (!template) return null;
+    if (!template) {
+      console.error('❌ Template email-pedido-confirmado não encontrado!');
+      return null;
+    }
 
     const defaultVariables = {
       NOME_USUARIO: 'Usuário',
@@ -75,11 +84,11 @@ class EmailTemplateManager {
       METODO_ENTREGA: 'N/A',
       PREVISAO_ENTREGA: 'N/A',
       ENDERECO_ENTREGA: 'N/A',
-      LINK_ACOMPANHAR: '#',
-      LINK_SUPORTE: '#'
+      PRODUTOS_HTML: '<p>Nenhum produto encontrado.</p>'
     };
 
-    return this.replaceVariables(template, { ...defaultVariables, ...variables });
+    const finalVariables = { ...defaultVariables, ...variables };
+    return this.replaceVariables(template, finalVariables);
   }
 
   // Método genérico para qualquer template

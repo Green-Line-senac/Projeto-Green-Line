@@ -7,9 +7,10 @@ class FuncaoUteis {
   criarToken(email) {
     return jwt.sign({ email }, process.env.SEGREDO_JWT, { expiresIn: "10m" });
   }
+  
   async enviarEmail(email, assunto, tipo, pedido = null) {
     try {
-      const transportador = nodemailer.createTransport({
+      const transportador = nodemailer.createTransporter({
         host: "smtp.gmail.com",
         port: 465,
         secure: true,
@@ -18,27 +19,24 @@ class FuncaoUteis {
           pass: process.env.EMAIL_PASS,
         },
       });
+      
       let mensagem;
+      
       if (tipo === "recuperacao") {
         const resetLink = `https://green-line-web.onrender.com/redefinir-senha?token=${this.criarToken(email)}`;
-        
+
         mensagem = getPasswordResetEmailHTML({
-          NOME_USUARIO: email.split('@')[0], // Usar parte do email como nome se não tiver nome
+          NOME_USUARIO: email.split('@')[0],
           LINK_RESET: resetLink,
           DATA_SOLICITACAO: new Date().toLocaleString('pt-BR'),
-          IP_USUARIO: 'Não disponível', // Pode ser passado como parâmetro se necessário
-          USER_AGENT: 'Não disponível' // Pode ser passado como parâmetro se necessário
+          IP_USUARIO: 'Não disponível',
+          USER_AGENT: 'Não disponível'
         });
-        
-        // Fallback para template simples se o novo não funcionar
+
         if (!mensagem) {
           mensagem = `
-            <h1>Faça do meio ambiente o seu meio de vida</h1>
-            <p>Olá,</p>
-            <p>Você solicitou a redefinição de senha na Green Line. Aqui está sua senha temporária:</p>
-            <div style="background-color: #f0f8ff; padding: 15px; border-radius: 5px; text-align: center; font-size: 18px; margin: 20px 0;">
-                <strong>123GL</strong>
-            </div>
+            <h1>Redefinir sua senha - GreenLine</h1>
+            <p>Olá, você solicitou a redefinição de sua senha.</p>
             <p>Clicando no botão a seguir, sua senha será reiniciada.</p>
             <a href="${resetLink}" style="display: inline-block; padding: 12px 24px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 15px 0;">
                 Redefinir sua senha
@@ -47,15 +45,15 @@ class FuncaoUteis {
           `;
         }
       }
+      
       if (tipo === "confirmacao") {
         const confirmationLink = `https://green-line-web.onrender.com/validar?token=${this.criarToken(email)}`;
-        
+
         mensagem = getConfirmationEmailHTML({
-          NOME_USUARIO: email.split('@')[0], // Usar parte do email como nome se não tiver nome
+          NOME_USUARIO: email.split('@')[0],
           LINK_CONFIRMACAO: confirmationLink
         });
-        
-        // Fallback para template simples se o novo não funcionar
+
         if (!mensagem) {
           mensagem = `
             <h1>Faça do meio ambiente o seu meio de vida</h1>
@@ -66,11 +64,10 @@ class FuncaoUteis {
           `;
         }
       }
-      if (tipo === "compra-concluida") {
+      
+      if (tipo === "pedido_confirmado" || tipo === "compra-concluida") {
         if (!pedido?.numeroPedido) {
-          throw new Error(
-            "Dados do pedido são necessários para este tipo de e-mail."
-          );
+          throw new Error("Dados do pedido são necessários para este tipo de e-mail.");
         }
 
         // Função para formatar valor monetário
@@ -78,9 +75,9 @@ class FuncaoUteis {
           return new Intl.NumberFormat("pt-BR", {
             style: "currency",
             currency: "BRL",
-          }).format(valor);
+          }).format(parseFloat(valor) || 0);
         };
-
+        
         // Gerar HTML dos produtos
         let produtosHtml = "";
         if (pedido.produtos && Array.isArray(pedido.produtos)) {
@@ -90,44 +87,61 @@ class FuncaoUteis {
                 produto.imagem_principal ||
                 produto.imagem_1 ||
                 produto.imagem ||
+                produto.img ||
                 "https://green-line-web.onrender.com/img/imagem-nao-disponivel.png";
+              
+              const subtotal = produto.subtotal || (produto.preco * produto.quantidade);
+              
               return `
-              <div style="display: flex; align-items: center; background: white; padding: 15px; margin: 10px 0; border-radius: 8px; border: 1px solid #e9ecef;">
-                <img src="${imagemUrl}" alt="${
-                produto.nome
-              }" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin-right: 15px;">
-                <div style="flex: 1;">
-                  <h4 style="margin: 0 0 5px 0; color: #28a745;">${
-                    produto.nome
-                  }</h4>
-                  <p style="margin: 0; color: #6c757d;">Quantidade: ${
-                    produto.quantidade
-                  }</p>
-                  <p style="margin: 5px 0 0 0; font-weight: bold; color: #333;">Subtotal: ${formatarValor(
-                    produto.subtotal
-                  )}</p>
+                <div class="product-item">
+                  <img src="${imagemUrl}" alt="${produto.nome}" class="product-image" onerror="this.src='https://green-line-web.onrender.com/img/imagem-nao-disponivel.png'">
+                  <div class="product-details">
+                    <h4 class="product-name">${produto.nome}</h4>
+                    <p class="product-info">Quantidade: ${produto.quantidade}</p>
+                    <p class="product-info">Preço unitário: ${formatarValor(produto.preco)}</p>
+                    <p class="product-price">Subtotal: ${formatarValor(subtotal)}</p>
+                  </div>
                 </div>
-              </div>
-            `;
+              `;
             })
             .join("");
+        } else {
+          produtosHtml = '<p class="product-info">Nenhum produto encontrado no pedido.</p>';
         }
+        
+        const emailVariables = {
+          NOME_USUARIO: pedido.nomeTitular || pedido.nomeCliente || pedido.nome || 'Cliente',
+          NUMERO_PEDIDO: pedido.numeroPedido || pedido.numero_pedido || 'N/A',
+          DATA_PEDIDO: pedido.dataConfirmacao || pedido.data_pedido || new Date().toLocaleDateString('pt-BR'),
+          METODO_PAGAMENTO: pedido.metodoPagamento || pedido.metodo_pagamento || pedido.formaPagamentoVendas || 'Não informado',
+          SUBTOTAL: formatarValor(pedido.subtotal || (pedido.total - (pedido.frete || 0))),
+          FRETE: formatarValor(pedido.frete || pedido.valor_frete || 0),
+          TOTAL: formatarValor(pedido.total || pedido.valor_total || 0),
+          METODO_ENTREGA: pedido.metodoEntrega || pedido.metodo_entrega || 'Entrega padrão',
+          PREVISAO_ENTREGA: pedido.previsaoEntrega || pedido.previsao_entrega || '5-7 dias úteis',
+          ENDERECO_ENTREGA: pedido.enderecoCompleto || pedido.endereco_completo || pedido.endereco || 'Endereço não informado',
+          PRODUTOS_HTML: produtosHtml
+        };
 
-        mensagem = getOrderConfirmationEmailHTML({
-          NOME_USUARIO: 'Cliente', // Pode ser passado como parâmetro se necessário
-          NUMERO_PEDIDO: pedido.numeroPedido,
-          DATA_PEDIDO: pedido.dataConfirmacao,
-          METODO_PAGAMENTO: pedido.metodoPagamento || 'Não informado',
-          SUBTOTAL: formatarValor(pedido.subtotal || pedido.total),
-          FRETE: formatarValor(pedido.frete || 0),
-          TOTAL: formatarValor(pedido.total),
-          METODO_ENTREGA: pedido.metodoEntrega || 'Entrega padrão',
-          PREVISAO_ENTREGA: pedido.previsaoEntrega,
-          LINK_ACOMPANHAR: 'https://green-line-web.onrender.com/public/pedido_confirmado.html',
-          LINK_SUPORTE: 'https://green-line-web.onrender.com/public/contato.html'
+        // Validar parâmetros obrigatórios
+        const requiredParams = ['NOME_USUARIO', 'NUMERO_PEDIDO', 'DATA_PEDIDO', 'TOTAL'];
+        const missingParams = requiredParams.filter(param => {
+          const value = emailVariables[param];
+          return !value || value === 'N/A' || value === 'R$ 0,00' || value === '';
         });
         
-        // Fallback para template atual se o novo não funcionar
+        if (missingParams.length > 0) {
+          console.error('Parâmetros críticos faltando no email:', missingParams);
+        }
+        
+        try {
+          mensagem = getOrderConfirmationEmailHTML(emailVariables);
+        } catch (templateError) {
+          console.error('Erro ao processar template de email:', templateError);
+          mensagem = null;
+        }
+        
+        // Fallback para template simples se o template externo falhar
         if (!mensagem) {
           mensagem = `
             <!DOCTYPE html>
@@ -140,50 +154,37 @@ class FuncaoUteis {
                     body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
                     .header { background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
                     .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
-                    .order-info { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #28a745; }
-                    .products-section { margin: 20px 0; }
-                    .eco-badge { background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; text-align: center; margin: 20px 0; }
-                    .footer { text-align: center; margin-top: 30px; color: #6c757d; font-size: 14px; }
-                    .btn { display: inline-block; background: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+                    .product-item { display: flex; align-items: center; background: white; padding: 15px; margin: 10px 0; border-radius: 8px; border: 1px solid #e9ecef; }
+                    .product-image { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin-right: 15px; }
+                    .product-details { flex: 1; }
+                    .product-name { font-size: 16px; font-weight: bold; color: #28a745; margin: 0 0 5px 0; }
+                    .product-info { font-size: 14px; color: #666; margin: 2px 0; }
+                    .product-price { font-size: 16px; font-weight: bold; color: #333; margin: 5px 0 0 0; }
+                    .footer { text-align: center; margin-top: 30px; padding: 20px; background: #e9ecef; border-radius: 5px; }
                 </style>
             </head>
             <body>
                 <div class="header">
-                    <h1>🌱 Pedido Confirmado!</h1>
-                    <p>Obrigado por escolher produtos sustentáveis</p>
+                    <h1>🎉 Pedido Confirmado!</h1>
+                    <p>Obrigado por escolher a Green Line</p>
                 </div>
-                
                 <div class="content">
-                    <p>Olá! Seu pedido foi confirmado com sucesso e já está sendo processado.</p>
-                    
-                    <div class="order-info">
-                        <h3>📦 Detalhes do Pedido</h3>
-                        <p><strong>Número:</strong> ${pedido.numeroPedido}</p>
-                        <p><strong>Data:</strong> ${pedido.dataConfirmacao}</p>
-                        <p><strong>Total:</strong> ${formatarValor(pedido.total)}</p>
-                        <p><strong>Previsão de entrega:</strong> ${pedido.previsaoEntrega}</p>
+                    <h2>Olá, ${emailVariables.NOME_USUARIO}!</h2>
+                    <p>Seu pedido foi confirmado com sucesso e está sendo processado.</p>
+                    <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <h3>📋 Detalhes do Pedido</h3>
+                        <p><strong>Número:</strong> ${emailVariables.NUMERO_PEDIDO}</p>
+                        <p><strong>Data:</strong> ${emailVariables.DATA_PEDIDO}</p>
+                        <p><strong>Total:</strong> ${emailVariables.TOTAL}</p>
+                        <p><strong>Previsão de entrega:</strong> ${emailVariables.PREVISAO_ENTREGA}</p>
                     </div>
-
-                    <div class="products-section">
-                        <h3>🛍️ Produtos Comprados</h3>
-                        ${produtosHtml}
-                    </div>
-                    
-                    <div class="eco-badge">
-                        🌍 <strong>Impacto Sustentável:</strong> Com esta compra, você contribuiu para um planeta mais verde!
-                    </div>
-                    
-                    <p>Você pode acompanhar o status do seu pedido a qualquer momento em nosso site.</p>
-                    
-                    <div style="text-align: center;">
-                        <a href="https://green-line-web.onrender.com/public/pedido_confirmado.html" class="btn">
-                            Acompanhar Pedido
-                        </a>
+                    <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <h3>🛒 Produtos do Pedido</h3>
+                        ${emailVariables.PRODUTOS_HTML}
                     </div>
                 </div>
-                
                 <div class="footer">
-                    <p>Este é um e-mail automático, não responda.</p>
+                    <p>🌱 Obrigado por escolher produtos sustentáveis!</p>
                     <p><strong>GreenLine</strong> - Faça do meio ambiente o seu meio de vida</p>
                     <p>Ceilândia, Brasília-DF | greenline.ecologic@gmail.com</p>
                 </div>
@@ -192,15 +193,21 @@ class FuncaoUteis {
           `;
         }
       }
+      
+      if (!mensagem) {
+        throw new Error("Conteúdo do email não foi gerado");
+      }
+      
       await transportador.sendMail({
         from: "Green Line <greenline.ecologic@gmail.com>",
         to: email,
         subject: assunto,
         html: mensagem,
       });
-      console.log("✅ E-mail enviado com sucesso.");
+      
     } catch (erro) {
-      console.error("Erro ao enviar o email:", erro);
+      console.error("Erro ao enviar e-mail:", erro);
+      throw erro;
     }
   }
 }

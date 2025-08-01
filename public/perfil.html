@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Perfil</title>
-        <link rel="icon" type="image/png" href="../img/favicon/favicon-96x96.png" sizes="96x96" />
-<link rel="icon" type="image/svg+xml" href="../img/favicon/favicon/favicon.svg" />
-<link rel="icon" type="image/png" href="../img/favicon/logo.png" sizes="96x96" />
-<link rel="shortcut icon" href="../img/favicon/favicon/favicon.ico" />
-<link rel="apple-touch-icon" sizes="180x180" href="../img/favicon/favicon/apple-touch-icon.png" />
-<link rel="manifest" href="../site.webmanifest" />
+    <link rel="icon" type="image/png" href="../img/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon/favicon.svg" />
+    <link rel="icon" type="image/png" href="../img/favicon/logo.png" sizes="96x96" />
+    <link rel="shortcut icon" href="../img/favicon/favicon/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../img/favicon/favicon/apple-touch-icon.png" />
+    <link rel="manifest" href="../site.webmanifest" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/reset.css">
     <link rel="stylesheet" href="../css/perfil.css">
@@ -19,6 +20,7 @@
     <script type="module" src="../js/notifications.js"></script>
     <script type="module" src="../js/frontendPerfil.js" defer></script>
 </head>
+
 <body>
     <button class="back-button" onclick="window.location.href='../index.html'">
         <i class="fas fa-arrow-left"></i>
@@ -27,7 +29,9 @@
         <div class="sidebar">
             <div class="profile-header">
                 <div class="profile-avatar">
-                    <img id="profileAvatar" src="https://w7.pngwing.com/pngs/81/570/png-transparent-profile-logo-computer-icons-user-user-blue-heroes-logo-thumbnail.png" alt="Avatar">
+                    <img id="profileAvatar"
+                        src="https://w7.pngwing.com/pngs/81/570/png-transparent-profile-logo-computer-icons-user-user-blue-heroes-logo-thumbnail.png"
+                        alt="Avatar">
                     <label class="change-avatar" for="avatarInput">
                         <i class="fas fa-camera"></i>
                         <input type="file" id="avatarInput" accept="image/*">
@@ -36,7 +40,7 @@
                 <h2 class="profile-name" id="profileName">Carregando...</h2>
                 <div class="profile-email" id="profileEmail">carregando...</div>
             </div>
-            
+
             <div class="nav-menu">
                 <div class="nav-item active" data-section="personal">
                     <i class="fas fa-user"></i> Informações Pessoais
@@ -55,7 +59,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="main-content">
             <div id="personal-section">
                 <h2 class="section-title">Informações Pessoais</h2>
@@ -81,23 +85,25 @@
                         <div class="info-value" id="profileStatus">carregando...</div>
                     </div>
                 </div>
-                <button class="btn btn-primary" id="savePersonalBtn" style="margin-top: 20px;">Salvar Alterações</button>
+                <button class="btn btn-primary" id="savePersonalBtn" style="margin-top: 20px;">Salvar
+                    Alterações</button>
             </div>
-            
+
             <div id="orders-section" class="hidden">
                 <h2 class="section-title">Meu Carrinho</h2>
                 <div id="ordersContent">
                     <p>Clique em "Meu Carrinho" na barra lateral para acessar seu carrinho de compras.</p>
                 </div>
             </div>
-            
+
             <div id="saved-section" class="hidden">
                 <h2 class="section-title">Histórico de Compras</h2>
-                
+
                 <!-- Filtros e Controles -->
                 <div class="purchase-controls">
                     <div class="search-filter">
-                        <input type="text" id="searchPurchases" placeholder="Buscar por produto ou número do pedido..." class="search-input">
+                        <input type="text" id="searchPurchases" placeholder="Buscar por produto ou número do pedido..."
+                            class="search-input">
                         <select id="statusFilter" class="filter-select">
                             <option value="">Todos os status</option>
                             <option value="Confirmado">Confirmado</option>
@@ -153,10 +159,10 @@
                     <button id="nextPage" class="btn-pagination">Próxima</button>
                 </div>
             </div>
-            
+
             <div id="gears-section" class="hidden">
                 <h2 class="section-title">Configurações</h2>
-                
+
                 <div class="settings-grid">
                     <div class="setting-item">
                         <div class="setting-label">Modo Noturno</div>
@@ -165,7 +171,7 @@
                             <span class="slider round"></span>
                         </label>
                     </div>
-                    
+
                     <div class="setting-item">
                         <div class="setting-label">Meu Endereço</div>
                         <div class="address-card" id="addressContent">
@@ -173,7 +179,7 @@
                         </div>
                         <button class="btn btn-primary" id="updateAddressBtn">Atualizar Endereço</button>
                     </div>
-                    
+
                     <div class="setting-item danger-zone">
                         <div class="setting-label">Zona de Perigo</div>
                         <button class="btn btn-danger" id="deleteAccountBtn">
@@ -234,4 +240,5 @@
         </div>
     </div>
 </body>
+
 </html>

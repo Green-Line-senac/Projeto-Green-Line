@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <title>Acompanhar Pedido - GreenLine | Sustentabilidade e Qualidade</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="Acompanhe o status do seu pedido na GreenLine em tempo real." />
+
+    <!--Favicon-->
+    <link rel="icon" type="image/png" href="../img/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="shortcut icon" href="../img/favicon/favicon/favicon.ico" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="../css/menu_rodape.css">
+    <link rel="stylesheet" href="../css/pedido_confirmado.css">
+    <style>
+        .status-step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .status-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 40px;
+            width: 2px;
+            height: 40px;
+            background-color: #e9ecef;
+        }
+
+        .status-step.active:not(:last-child)::after {
+            background-color: #28a745;
+        }
+
+        .status-step.cancelled:not(:last-child)::after {
+            background-color: #dc3545;
+        }
+
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .status-step.active .step-icon {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .status-step.cancelled .step-icon {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .step-content h4 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.1rem;
+        }
+
+        .step-content p {
+            margin: 0;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .produtos-lista {
+            background-color: #f8f9fa;
+            border-radius: 0.375rem;
+            padding: 1rem;
+        }
+
+        .produto-item:last-child {
+            border-bottom: none !important;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #28a745;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navegação principal -->
+    <nav class="holo-header menu_green_line" role="navigation">
+        <nav class="navbar navbar-expand-lg container bg-dark.bg-gradient">
+            <img src="../img/logo.png" alt="Logo GreenLine" width="40" height="40">
+            <a class="navbar-brand" href="../index.html">GreenLine</a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html">Início</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="produtos.html">Produtos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="sobre.html">Sobre</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="contato.html">Contato</a>
+                    </li>
+                </ul>
+
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link icon-btn" href="carrinho.html">
+                            <i class="bi bi-cart"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link icon-btn" href="login.html">
+                            <i class="bi bi-person"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </nav>
+
+    <!-- Conteúdo principal -->
+    <main class="container-fluid px-3 mt-5" role="main">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8">
+                <!-- Header -->
+                <div class="text-center mb-5">
+                    <div class="success-icon mb-3">
+                        <i class="bi bi-truck text-success" style="font-size: 4rem;"></i>
+                    </div>
+                    <h1 class="confirmation-title">Acompanhar Pedido</h1>
+                    <p class="confirmation-subtitle">
+                        Digite o número do seu pedido para acompanhar o status
+                    </p>
+                </div>
+
+                <!-- Formulário de busca -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <form id="formBuscarPedido">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <label for="numeroPedido" class="form-label">Número do Pedido</label>
+                                    <input type="text" class="form-control" id="numeroPedido"
+                                        placeholder="Ex: GL-2025-001234 ou #GL-2025-001234" required>
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-success w-100">
+                                        <i class="bi bi-search me-2"></i>
+                                        Buscar Pedido
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Resultado da busca -->
+                <div id="resultadoBusca" style="display: none;">
+                    <!-- Status do pedido -->
+                    <div class="order-status-card mb-4">
+                        <h3 class="card-title">
+                            <i class="bi bi-truck me-2"></i>
+                            Status do Pedido <span id="pedidoNumero"></span>
+                        </h3>
+                        <div class="status-timeline" id="statusTimeline">
+                            <!-- Timeline será preenchida via JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Informações do pedido -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="bi bi-info-circle me-2"></i>Informações do Pedido</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Data:</strong> <span id="dataPedido"></span></p>
+                                    <p><strong>Total:</strong> <span id="totalPedido"></span></p>
+                                    <p><strong>Pagamento:</strong> <span id="pagamentoPedido"></span></p>
+                                    <p><strong>Previsão de Entrega:</strong> <span id="previsaoEntrega"></span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="bi bi-geo-alt me-2"></i>Endereço de Entrega</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p id="enderecoEntrega">Carregando...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ações -->
+                    <div class="text-center mt-4" id="acoesPedido"></div>
+                    <button class="btn btn-outline-success me-2" onclick="window.print()">
+                        <i class="bi bi-printer me-2"></i>
+                        Imprimir
+                    </button>
+                    <a href="contato.html" class="btn btn-outline-success me-2">
+                        <i class="bi bi-headset me-2"></i>
+                        Falar com Suporte
+                    </a>
+                    <button class="btn btn-outline-danger" id="btnCancelarPedido" style="display: none;">
+                        <i class="bi bi-x-circle me-2"></i>
+                        Cancelar Pedido
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mensagem de pedido não encontrado -->
+            <div id="pedidoNaoEncontrado" class="alert alert-warning text-center" style="display: none;">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                Pedido não encontrado. Verifique o número e tente novamente.
+            </div>
+        </div>
+        </div>
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="footer-global bg-dark text-white pt-4 pb-0 mt-5" role="contentinfo">
+        <div class="container text-center">
+            <div class="row justify-content-center mb-3">
+                <div class="col-6 col-sm-4 col-md-2">
+                    <a href="politica_privacidade.html" class="text-white text-decoration-none">
+                        Política de Privacidade
+                    </a>
+                </div>
+                <div class="col-6 col-sm-4 col-md-2 ms-2">
+                    <a href="termos_de_uso.html" class="text-white text-decoration-none">
+                        Termos de Uso
+                    </a>
+                </div>
+                <div class="col-6 col-sm-4 col-md-2">
+                    <a href="trocas_devolucoes.html" class="text-white text-decoration-none">
+                        Trocas e Devoluções
+                    </a>
+                </div>
+            </div>
+            <hr class="border-secondary my-2 mx-auto" style="max-width: 80%" />
+            <div class="row mb-3">
+                <div class="col-12 text-center">
+                    <address class="mb-2 fs-7">
+                        71080-020 | CNPJ: 74.707.730/0001-63<br />
+                        Ceilândia, Brasília-DF
+                    </address>
+                </div>
+            </div>
+        </div>
+        <div class="text-white text-center py-3">
+            <small class="text-white">
+                © 2025 GreenLine - Todos os direitos reservados
+            </small>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Função para buscar pedido
+        document.getElementById('formBuscarPedido').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const numeroPedido = document.getElementById('numeroPedido').value.trim();
+
+            if (!numeroPedido) {
+                alert('Por favor, digite o número do pedido');
+                return;
+            }
+
+            // Validação básica do formato do número do pedido
+            const numeroLimpo = numeroPedido.replace('#', '');
+            if (numeroLimpo.length < 5) {
+                alert('Número do pedido parece estar incompleto. Verifique e tente novamente.');
+                return;
+            }
+
+            buscarPedido(numeroPedido);
+        });
+
+        async function buscarPedido(numeroPedido) {
+            // Normalizar número do pedido
+            numeroPedido = numeroPedido.trim();
+
+            // Remover # se estiver presente para evitar problemas de encoding
+            if (numeroPedido.startsWith('#')) {
+                numeroPedido = numeroPedido.substring(1);
+            }
+
+            // Mostrar loading
+            document.getElementById('resultadoBusca').style.display = 'none';
+            document.getElementById('pedidoNaoEncontrado').style.display = 'none';
+
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'loading';
+            loadingDiv.className = 'text-center py-4';
+            loadingDiv.innerHTML = `
+                <div class="spinner-border text-success" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p class="mt-2">Buscando pedido...</p>
+            `;
+
+            const container = document.querySelector('.col-12.col-lg-8');
+            container.appendChild(loadingDiv);
+
+            try {
+                console.log('Buscando pedido (sem #):', numeroPedido);
+
+                // Usar o número sem # na URL para evitar problemas de encoding
+                const response = await fetch(`https://green-line-web.onrender.com/buscar-pedido/${encodeURIComponent(numeroPedido)}`);
+
+                // Remove loading
+                const loading = document.getElementById('loading');
+                if (loading) loading.remove();
+
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        document.getElementById('pedidoNaoEncontrado').style.display = 'block';
+                        return;
+                    }
+                    throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                }
+
+                const pedidoEncontrado = await response.json();
+                console.log('Pedido encontrado:', pedidoEncontrado);
+
+                mostrarResultado(pedidoEncontrado);
+
+            } catch (error) {
+                console.error('Erro ao buscar pedido:', error);
+
+                // Remove loading
+                const loading = document.getElementById('loading');
+                if (loading) loading.remove();
+
+                // Mostrar erro mais específico
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'alert alert-danger text-center';
+                errorDiv.innerHTML = `
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>Erro ao buscar pedido:</strong><br>
+                    ${error.message || 'Verifique sua conexão e tente novamente.'}
+                `;
+
+                const container = document.querySelector('.col-12.col-lg-8');
+                container.appendChild(errorDiv);
+
+                // Remove erro após 5 segundos
+                setTimeout(() => {
+                    if (errorDiv.parentNode) {
+                        errorDiv.remove();
+                    }
+                }, 5000);
+            }
+        }
+
+        function mostrarResultado(pedido) {
+            console.log('Exibindo resultado do pedido:', pedido);
+
+            // Preenche informações básicas
+            document.getElementById('pedidoNumero').textContent = pedido.numero;
+            document.getElementById('dataPedido').textContent = pedido.dataCompleta || pedido.data;
+            document.getElementById('totalPedido').textContent = pedido.total;
+            document.getElementById('pagamentoPedido').textContent = pedido.pagamento;
+            document.getElementById('previsaoEntrega').textContent = pedido.previsao;
+
+            // Formatar endereço
+            const enderecoFormatado = pedido.endereco.replace(/\n/g, '<br>');
+            document.getElementById('enderecoEntrega').innerHTML = enderecoFormatado;
+
+            // Monta timeline de status
+            const timeline = document.getElementById('statusTimeline');
+            timeline.innerHTML = '';
+
+            pedido.status.forEach((status, index) => {
+                const statusElement = document.createElement('div');
+                statusElement.className = `status-step ${status.ativo ? 'active' : ''}`;
+
+                // Cor especial para cancelado
+                if (status.nome === 'Cancelado') {
+                    statusElement.classList.add('cancelled');
+                }
+
+                statusElement.innerHTML = `
+                    <div class="step-icon">
+                        <i class="bi ${status.icone}"></i>
+                    </div>
+                    <div class="step-content">
+                        <h4>${status.nome}</h4>
+                        <p>${status.data}</p>
+                    </div>
+                `;
+                timeline.appendChild(statusElement);
+            });
+
+            // Adicionar informações de cancelamento se aplicável
+            if (pedido.cancelado) {
+                const cancelInfo = document.createElement('div');
+                cancelInfo.className = 'alert alert-warning mt-3';
+                cancelInfo.innerHTML = `
+                    <h6><i class="bi bi-exclamation-triangle me-2"></i>Pedido Cancelado</h6>
+                    <p class="mb-1"><strong>Data do cancelamento:</strong> ${pedido.dataCancelamento}</p>
+                    <p class="mb-0"><strong>Motivo:</strong> ${pedido.motivoCancelamento}</p>
+                `;
+                timeline.appendChild(cancelInfo);
+            }
+
+            // Adicionar lista de produtos se disponível
+            if (pedido.produtos && pedido.produtos.length > 0) {
+                const produtosSection = document.createElement('div');
+                produtosSection.className = 'mt-4';
+                produtosSection.innerHTML = `
+                    <h5><i class="bi bi-bag me-2"></i>Produtos do Pedido</h5>
+                    <div class="produtos-lista">
+                        ${pedido.produtos.map(produto => `
+                            <div class="produto-item d-flex justify-content-between align-items-center py-2 border-bottom">
+                                <div class="produto-info">
+                                    <strong>${produto.nome}</strong><br>
+                                    <small class="text-muted">Qtd: ${produto.quantidade} × R$ ${produto.preco.toFixed(2).replace('.', ',')}</small>
+                                </div>
+                                <div class="produto-total">
+                                    <strong>R$ ${produto.subtotal.toFixed(2).replace('.', ',')}</strong>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                // Inserir antes dos botões
+                const cardBody = document.querySelector('#resultadoBusca .card-body');
+                if (cardBody) {
+                    cardBody.appendChild(produtosSection);
+                }
+            }
+
+            // Configurar botão de cancelamento
+            const btnCancelar = document.getElementById('btnCancelarPedido');
+            if (!pedido.cancelado && (pedido.situacao === 'P' || pedido.situacao === 'C')) {
+                btnCancelar.style.display = 'inline-block';
+                btnCancelar.onclick = () => cancelarPedido(pedido.numero);
+            } else {
+                btnCancelar.style.display = 'none';
+            }
+
+            // Mostra resultado e esconde mensagem de erro
+            document.getElementById('resultadoBusca').style.display = 'block';
+            document.getElementById('pedidoNaoEncontrado').style.display = 'none';
+        }
+
+        async function cancelarPedido(numeroPedido) {
+            if (!confirm('Tem certeza que deseja cancelar este pedido? Esta ação não pode ser desfeita.')) {
+                return;
+            }
+
+            const motivo = prompt('Por favor, informe o motivo do cancelamento (opcional):') || 'Cancelado pelo cliente';
+
+            try {
+                const response = await fetch('https://green-line-web.onrender.com/cancelar-pedido', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        numeroPedido: numeroPedido,
+                        motivo: motivo
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Pedido cancelado com sucesso! O estoque dos produtos foi restaurado.');
+                    // Recarregar informações do pedido
+                    buscarPedido(numeroPedido);
+                } else {
+                    const error = await response.json();
+                    alert('Erro ao cancelar pedido: ' + (error.error || 'Erro desconhecido'));
+                }
+
+            } catch (error) {
+                console.error('Erro ao cancelar pedido:', error);
+                alert('Erro ao cancelar pedido. Verifique sua conexão e tente novamente.');
+            }
+        }
+
+        // Auto-preenche se vier com parâmetro na URL
+        window.addEventListener('load', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const numeroPedido = urlParams.get('pedido');
+
+            if (numeroPedido) {
+                document.getElementById('numeroPedido').value = numeroPedido;
+                buscarPedido(numeroPedido);
+            }
+        });
+    </script>
+</body>
+
+</html>
