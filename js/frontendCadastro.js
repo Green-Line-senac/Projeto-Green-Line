@@ -5,6 +5,13 @@ const api = {
   online: "https://green-line-web.onrender.com",
   cadastro: "http://localhost:3000",
 };
+function showModernMessage(message, type = "error") {
+  if (window.authModern) {
+    window.authModern.showMessage(message, type);
+  } else {
+    showAlert(message, type === "error" ? "danger" : type);
+  }
+}
 
 const formularioCadastro = document.getElementById("formularioCadastro");
 formularioCadastro.addEventListener("submit", async function (e) {
@@ -18,7 +25,7 @@ formularioCadastro.addEventListener("submit", async function (e) {
     if (window.authModern) {
       window.authModern.hideMessage();
       window.authModern.hideAllValidationMessages();
-      window.authModern.setButtonLoading('cadastrar-usuario', true);
+      window.authModern.setButtonLoading("cadastrar-usuario", true);
     } else {
       // Fallback para sistema antigo
       btEnviar.disabled = true;
@@ -44,14 +51,17 @@ formularioCadastro.addEventListener("submit", async function (e) {
   } catch (error) {
     console.error("Erro no cadastro:", error);
     if (window.authModern) {
-      window.authModern.showMessage(error.message || "Erro ao cadastrar usuário", "error");
+      window.authModern.showMessage(
+        error.message || "Erro ao cadastrar usuário",
+        "error"
+      );
     } else {
       alert(error.message || "Erro ao cadastrar usuário");
     }
   } finally {
     // Restaura o botão
     if (window.authModern) {
-      window.authModern.setButtonLoading('cadastrar-usuario', false);
+      window.authModern.setButtonLoading("cadastrar-usuario", false);
     } else {
       btEnviar.disabled = false;
       btEnviar.innerHTML = originalText;
@@ -84,6 +94,31 @@ document.getElementById("cpf").addEventListener("input", function (e) {
     .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
 
   e.target.value = value;
+});
+document.getElementById("password").addEventListener("input", function (e) {
+  const value = e.target.value;
+  const erroElement = document.getElementById("erro");
+
+  // Impede mais de 5 caracteres
+  if (value.length > 5) {
+    e.target.value = value.substring(0, 5);
+    return;
+  }
+
+  // Valida quando tiver 5 caracteres
+  if (value.length === 5) {
+    const hasLetter = /[a-zA-Z]/.test(value);
+    const hasNumber = /\d/.test(value);
+
+    if (!hasLetter || !hasNumber) {
+      erroElement.style.display = "block";
+      e.target.value = ""; // Limpa se não for válido
+    } else {
+      erroElement.style.display = "none";
+    }
+  } else {
+    erroElement.style.display = "none";
+  }
 });
 
 document.getElementById("telefone").addEventListener("input", function (e) {

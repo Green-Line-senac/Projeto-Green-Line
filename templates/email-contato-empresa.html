@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Mensagem de Contato - GreenLine</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #28a745;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+        .title {
+            color: #dc3545;
+            font-size: 24px;
+            margin: 0;
+        }
+        .info-section {
+            background: #f8f9fa;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .info-row {
+            display: flex;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #495057;
+            min-width: 120px;
+            margin-right: 10px;
+        }
+        .info-value {
+            color: #28a745;
+            font-weight: 500;
+        }
+        .message-section {
+            background: #fff;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .message-title {
+            color: #495057;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #28a745;
+            padding-bottom: 5px;
+        }
+        .message-content {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #28a745;
+            font-style: italic;
+            line-height: 1.8;
+        }
+        .action-section {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .action-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .reply-button {
+            display: inline-block;
+            background: white;
+            color: #28a745;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .priority-badge {
+            display: inline-block;
+            background: #dc3545;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .container { padding: 20px; }
+            .info-row { flex-direction: column; align-items: flex-start; }
+            .info-label { min-width: auto; margin-bottom: 5px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🌱 GreenLine</div>
+            <h1 class="title">Nova Mensagem de Contato <span class="priority-badge">NOVA</span></h1>
+        </div>
+
+        <div class="info-section">
+            <h2 style="color: #28a745; margin-top: 0;">📋 Informações do Cliente</h2>
+            
+            <div class="info-row">
+                <span class="info-label">👤 Nome:</span>
+                <span class="info-value">{{nome}}</span>
+            </div>
+            
+            <div class="info-row">
+                <span class="info-label">📧 Email:</span>
+                <span class="info-value">{{email}}</span>
+            </div>
+            
+            <div class="info-row">
+                <span class="info-label">📅 Data/Hora:</span>
+                <span class="info-value">{{dataEnvio}}</span>
+            </div>
+        </div>
+
+        <div class="message-section">
+            <div class="message-title">💬 Mensagem do Cliente</div>
+            <div class="message-content">
+                "{{mensagem}}"
+            </div>
+        </div>
+
+        <div class="action-section">
+            <div class="action-title">⚡ Ação Necessária</div>
+            <p>Um cliente entrou em contato conosco. Responda o mais breve possível para manter a qualidade do atendimento.</p>
+            <a href="mailto:{{email}}?subject=Re: Sua mensagem para GreenLine&body=Olá {{nome}},%0A%0AObrigado por entrar em contato conosco.%0A%0A" class="reply-button">
+                📧 Responder Cliente
+            </a>
+        </div>
+
+        <div class="footer">
+            <p><strong>GreenLine - Sistema de Contato Automático</strong></p>
+            <p>Este email foi gerado automaticamente pelo sistema de contato do site.</p>
+            <p style="margin-top: 15px;">
+                <small>
+                    🌱 <strong>GreenLine</strong> - Produtos Ecológicos<br>
+                    📍 Ceilândia, Brasília-DF | 📞 (00) 99999-9999<br>
+                    🌐 <a href="https://green-line-web.onrender.com" style="color: #28a745;">green-line-web.onrender.com</a>
+                </small>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="#"><img src="https://img.shields.io/badge/Status-Em%20Desenvolvimento-FFA500?style=flat-square" alt="Status: Em Desenvolvimento"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Status-Concluído-00FF00?style=flat-square" alt="Status: Concluído"></a>
 </p>
 
 ---
@@ -21,19 +21,6 @@ Plataforma de e-commerce para **consumo consciente**, com produtos ecológicos (
 - Promover impacto ambiental positivo
 
 ---
-## 🔐 Contas de Teste
-
-Disponibilizamos duas contas para que os usuários possam acessar as versões **Web**, **Android** e **Desktop** do sistema para fins de teste.
-
-> 💡 Apenas a conta de **Administrador** tem permissão para acessar a versão **Desktop**.
-
-### 👤 Cliente
-- **Usuário:** `Cliente`
-- **Senha:** `123GL`
-
-### 🛠️ Administrador (acesso exclusivo à versão Desktop)
-- **Usuário:** `AdmTeste`
-- **Senha:** Manutenção
 
 Para mais informações sobre as demais versões do sistema, acesse os outros repositórios da **Green Line** nos links abaixo
 
@@ -44,11 +31,12 @@ Acesse o site do sistema por meio do seguinte link:
 
 ---
 
-## ⬇️ Downloads para Testes
-Faça o download das versões em fase de testes abaixo:
+## 🌐 Downloads
+- ⬇️ [Download Web Desktop](https://www.mediafire.com/file/o9ajkpivr4assuc/Green_Line_Web.rar/file)
+- ⬇️ [APK Android](https://www.mediafire.com/file/dj0vkh8z5r89rah/Green_Line.apk/file)
+- ⬇️ [Download Desktop](https://www.mediafire.com/file/ty6vx48d1vafddi/GreenLineDesktop.rar/file)
 
-- 📱 **Android** → [Download APK](https://www.mediafire.com/file/dj0vkh8z5r89rah/Green_Line.apk/file)  
-- 🖥️ **Desktop** → [Download Executável](https://www.mediafire.com/file/356yg9ge1x5jnyd/GreenLineDesktop.rar/file)
+---
 
 
 ## 💾 Versões  
@@ -56,7 +44,7 @@ Faça o download das versões em fase de testes abaixo:
 | Versão       | Descrição                          | Status            | Repositório       |  
 |--------------|-----------------------------------|-------------------|-------------------|  
 | 🌐 **Web**   | Frontend responsivo (HTML/CSS/JS) | 🟢 Funcional      | [Link](https://github.com/KauaNca/green_line_web)         |  
-| 📱 **Android**| App (JAVA)               | 🟡 Em desenvolvimento | [Link](https://github.com/KauaNca/green_line_mobile)      |  
+| 📱 **Android**| App (JAVA)               | 🟢 Funcional | [Link](https://github.com/KauaNca/green_line_mobile)      |  
 | 🖥️ **Desktop**| Sistema administrativo (Java)     | 🟢 Funcional      | [Link](https://github.com/KauaNca/green_line_desktop)|  
 
 ---
@@ -85,22 +73,6 @@ Faça o download das versões em fase de testes abaixo:
 </p>
 
 ---
-
-## 📁 Estrutura do Projeto
-
-```bash
-📦 Green-Line-Web/
-├── index.html # Página principal
-├── css/ # Estilos
-│ └── style.css
-├── js/ # Scripts
-│ ├── conexao.js # Conexão com backend
-├── img/ # Imagens
-├── backendGreen/ # Backend Node.js
-├── LICENSE
-└── README.md
-```
-
 
 ## 🎯 Público-Alvo
 
@@ -142,7 +114,7 @@ O Green Line é ideal para quem:
 
 <h1 align="center">🖥️ Protótipo Figma (Versão Web)</h1>
 
-- [Acesse aqui](https://www.figma.com/design/zqz3oTlb1rMefWhi7QIEJB/WEB--Copy-?t=J0166Bdd1txpyvDJ-1)
+- [Acesse aqui](https://www.figma.com/design/7GGlS8aUe45ODwhU3OIHsW/Green-Line?node-id=0-1&t=NDZPe0HaZUIMbDTK-1)
 
 ---
 
@@ -152,8 +124,8 @@ O Green Line é ideal para quem:
 |--------------------------|--------------|
 | Levantamento de requisitos | ✅ Concluído |
 | Protótipo (Figma)          | ✅ Concluído |
-| Desenvolvimento Web        | ⚙️ Em andamento |
-| Desenvolvimento Desktop    | ⚙️ Em andamento |
+| Desenvolvimento Web        | ✅ Concluído |
+| Desenvolvimento Desktop    | ✅ Concluído |
 | Testes                     | 🔜 Em breve |
 | Documentação Final         | 🔜 Em breve |
 

@@ -64,6 +64,11 @@ CREATE TABLE produto (
     categoria VARCHAR(50) NOT NULL
 );
 
+ALTER TABLE produto
+ADD COLUMN medida VARCHAR(10) NULL DEFAULT NULL COMMENT 'Unidade de medida (ex: ml, g, cm, un)',
+ADD COLUMN tamanho VARCHAR(15) NULL DEFAULT NULL COMMENT 'Tamanho do produto (ex: P, M, G, 42, Único)';
+
+
 CREATE TABLE avaliacoes (
   id_avaliacao INT PRIMARY KEY AUTO_INCREMENT,
   id_produto INT NOT NULL,

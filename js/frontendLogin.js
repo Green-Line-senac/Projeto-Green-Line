@@ -87,7 +87,7 @@ function validarCampos(usuario, senha) {
   }
 
   if (senha.length < 4) {
-    mostrarMensagem("A senha deve ter pelo menos 6 caracteres.", "warning");
+    mostrarMensagem("A senha deve ter pelo menos 5 caracteres.", "warning");
     reativarBotao();
     return false;
   }
@@ -242,6 +242,31 @@ function logout() {
   // Redirecionar para login com parâmetro de logout
   window.location.href = "login.html?logout=success";
 }
+document.getElementById("senha").addEventListener("input", function (e) {
+  const value = e.target.value;
+  const erroElement = document.getElementById("erro");
+
+  // Impede mais de 5 caracteres
+  if (value.length > 5) {
+    e.target.value = value.substring(0, 5);
+    return;
+  }
+
+  // Valida quando tiver 5 caracteres
+  if (value.length === 5) {
+    const hasLetter = /[a-zA-Z]/.test(value);
+    const hasNumber = /\d/.test(value);
+
+    if (!hasLetter || !hasNumber) {
+      erroElement.style.display = "block";
+      e.target.value = ""; // Limpa se não for válido
+    } else {
+      erroElement.style.display = "none";
+    }
+  } else {
+    erroElement.style.display = "none";
+  }
+});
 
 // Verificar parâmetro de logout na URL
 document.addEventListener("DOMContentLoaded", () => {

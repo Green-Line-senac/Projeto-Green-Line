@@ -1,16 +1,33 @@
 require("dotenv").config();
 const nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
-const { getConfirmationEmailHTML, getPasswordResetEmailHTML, getOrderConfirmationEmailHTML } = require("./js/emailTemplates");
+const { getConfirmationEmailHTML, getPasswordResetEmailHTML, getOrderConfirmationEmailHTML, getContactCompanyEmailHTML, getContactConfirmationEmailHTML } = require("./js/emailTemplates");
+
+// Verificar se as funções foram importadas corretamente
+console.log("Funções de template importadas:", {
+  getConfirmationEmailHTML: typeof getConfirmationEmailHTML,
+  getPasswordResetEmailHTML: typeof getPasswordResetEmailHTML,
+  getOrderConfirmationEmailHTML: typeof getOrderConfirmationEmailHTML
+});
 
 class FuncaoUteis {
   criarToken(email) {
-    return jwt.sign({ email }, process.env.SEGREDO_JWT, { expiresIn: "10m" });
+    return jwt.sign({ email }, process.env.SEGREDO_JWT, { expiresIn: "30m" });
   }
-  
+
   async enviarEmail(email, assunto, tipo, pedido = null) {
     try {
-      const transportador = nodemailer.createTransporter({
+      console.log("🚀 Iniciando envio de email:", { email, tipo, temPedido: !!pedido });
+
+      console.log("Verificando variáveis de ambiente...");
+      console.log("EMAIL_USER:", process.env.EMAIL_USER ? "✅ Definida" : "❌ Não definida");
+      console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "✅ Definida" : "❌ Não definida");
+
+      if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        throw new Error("Variáveis de ambiente EMAIL_USER ou EMAIL_PASS não configuradas");
+      }
+
+      const transportador = nodemailer.createTransport({
         host: "smtp.gmail.com",
         port: 465,
         secure: true,
@@ -19,9 +36,11 @@ class FuncaoUteis {
           pass: process.env.EMAIL_PASS,
         },
       });
-      
+
+      console.log("Transportador SMTP configurado");
+
       let mensagem;
-      
+
       if (tipo === "recuperacao") {
         const resetLink = `https://green-line-web.onrender.com/redefinir-senha?token=${this.criarToken(email)}`;
 
@@ -45,7 +64,7 @@ class FuncaoUteis {
           `;
         }
       }
-      
+
       if (tipo === "confirmacao") {
         const confirmationLink = `https://green-line-web.onrender.com/validar?token=${this.criarToken(email)}`;
 
@@ -64,11 +83,17 @@ class FuncaoUteis {
           `;
         }
       }
-      
+
       if (tipo === "pedido_confirmado" || tipo === "compra-concluida") {
+        console.log("Processando email de pedido confirmado");
+        console.log("Dados do pedido recebidos:", pedido);
+
         if (!pedido?.numeroPedido) {
+          console.error("Número do pedido não fornecido:", pedido);
           throw new Error("Dados do pedido são necessários para este tipo de e-mail.");
         }
+
+        console.log("Número do pedido validado:", pedido.numeroPedido);
 
         // Função para formatar valor monetário
         const formatarValor = (valor) => {
@@ -77,10 +102,11 @@ class FuncaoUteis {
             currency: "BRL",
           }).format(parseFloat(valor) || 0);
         };
-        
+
         // Gerar HTML dos produtos
         let produtosHtml = "";
         if (pedido.produtos && Array.isArray(pedido.produtos)) {
+          console.log("Gerando HTML para", pedido.produtos.length, "produtos");
           produtosHtml = pedido.produtos
             .map((produto) => {
               const imagemUrl =
@@ -89,9 +115,9 @@ class FuncaoUteis {
                 produto.imagem ||
                 produto.img ||
                 "https://green-line-web.onrender.com/img/imagem-nao-disponivel.png";
-              
+
               const subtotal = produto.subtotal || (produto.preco * produto.quantidade);
-              
+
               return `
                 <div class="product-item">
                   <img src="${imagemUrl}" alt="${produto.nome}" class="product-image" onerror="this.src='https://green-line-web.onrender.com/img/imagem-nao-disponivel.png'">
@@ -106,9 +132,10 @@ class FuncaoUteis {
             })
             .join("");
         } else {
+          console.log("Nenhum produto encontrado no pedido");
           produtosHtml = '<p class="product-info">Nenhum produto encontrado no pedido.</p>';
         }
-        
+
         const emailVariables = {
           NOME_USUARIO: pedido.nomeTitular || pedido.nomeCliente || pedido.nome || 'Cliente',
           NUMERO_PEDIDO: pedido.numeroPedido || pedido.numero_pedido || 'N/A',
@@ -123,26 +150,30 @@ class FuncaoUteis {
           PRODUTOS_HTML: produtosHtml
         };
 
-        // Validar parâmetros obrigatórios
-        const requiredParams = ['NOME_USUARIO', 'NUMERO_PEDIDO', 'DATA_PEDIDO', 'TOTAL'];
-        const missingParams = requiredParams.filter(param => {
-          const value = emailVariables[param];
-          return !value || value === 'N/A' || value === 'R$ 0,00' || value === '';
-        });
-        
-        if (missingParams.length > 0) {
-          console.error('Parâmetros críticos faltando no email:', missingParams);
-        }
-        
+        console.log("Tentando gerar email com template externo...");
+        console.log("Variáveis do email:", Object.keys(emailVariables));
+
         try {
+          if (typeof getOrderConfirmationEmailHTML !== 'function') {
+            throw new Error("getOrderConfirmationEmailHTML não é uma função");
+          }
+
           mensagem = getOrderConfirmationEmailHTML(emailVariables);
+          console.log("Template externo gerado com sucesso, tamanho:", mensagem ? mensagem.length : 0);
+
+          if (!mensagem || mensagem.length === 0) {
+            throw new Error("Template retornou conteúdo vazio");
+          }
+
         } catch (templateError) {
           console.error('Erro ao processar template de email:', templateError);
+          console.error('Stack do erro do template:', templateError.stack);
           mensagem = null;
         }
-        
+
         // Fallback para template simples se o template externo falhar
         if (!mensagem) {
+          console.log("Template externo falhou, usando fallback...");
           mensagem = `
             <!DOCTYPE html>
             <html lang="pt-BR">
@@ -193,18 +224,73 @@ class FuncaoUteis {
           `;
         }
       }
-      
+
+      // Emails de contato
+      if (tipo === "contato_empresa") {
+        console.log("Processando email de contato para empresa");
+
+        mensagem = getContactCompanyEmailHTML({
+          nome: pedido?.nome || 'Cliente',
+          email: pedido?.email || email,
+          mensagem: pedido?.mensagem || 'Mensagem não fornecida',
+          dataEnvio: pedido?.dataEnvio || new Date().toLocaleString('pt-BR')
+        });
+
+        if (!mensagem) {
+          mensagem = `
+            <h2>Nova Mensagem de Contato - GreenLine</h2>
+            <p><strong>Nome:</strong> ${pedido?.nome || 'Cliente'}</p>
+            <p><strong>Email:</strong> ${pedido?.email || email}</p>
+            <p><strong>Data:</strong> ${pedido?.dataEnvio || new Date().toLocaleString('pt-BR')}</p>
+            <div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #28a745; margin: 20px 0;">
+              <h3>Mensagem:</h3>
+              <p>${pedido?.mensagem || 'Mensagem não fornecida'}</p>
+            </div>
+            <p>Responda o cliente o mais breve possível.</p>
+          `;
+        }
+      }
+
+      if (tipo === "contato_confirmacao") {
+        console.log("Processando email de confirmação de contato");
+
+        mensagem = getContactConfirmationEmailHTML({
+          nome: pedido?.nome || 'Cliente',
+          mensagem: pedido?.mensagem || 'Sua mensagem foi recebida',
+          dataEnvio: pedido?.dataEnvio || new Date().toLocaleString('pt-BR')
+        });
+
+        if (!mensagem) {
+          mensagem = `
+            <h2>Mensagem Recebida - GreenLine</h2>
+            <p>Olá <strong>${pedido?.nome || 'Cliente'}</strong>!</p>
+            <p>Recebemos sua mensagem e nossa equipe responderá em breve.</p>
+            <div style="background: #d4edda; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <h3>Sua mensagem:</h3>
+              <p style="font-style: italic;">"${pedido?.mensagem || 'Mensagem recebida'}"</p>
+              <p><small>Enviado em: ${pedido?.dataEnvio || new Date().toLocaleString('pt-BR')}</small></p>
+            </div>
+            <p>Obrigado por entrar em contato conosco!</p>
+            <p><strong>GreenLine</strong> - Produtos Ecológicos</p>
+          `;
+        }
+      }
+
       if (!mensagem) {
+        console.error("Nenhuma mensagem foi gerada");
         throw new Error("Conteúdo do email não foi gerado");
       }
-      
-      await transportador.sendMail({
+
+      console.log("Enviando email via SMTP...");
+      const result = await transportador.sendMail({
         from: "Green Line <greenline.ecologic@gmail.com>",
         to: email,
         subject: assunto,
         html: mensagem,
       });
-      
+
+      console.log("Email enviado com sucesso:", result.messageId);
+
     } catch (erro) {
       console.error("Erro ao enviar e-mail:", erro);
       throw erro;
