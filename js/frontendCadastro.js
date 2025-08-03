@@ -5,6 +5,13 @@ const api = {
   online: "https://green-line-web.onrender.com",
   cadastro: "http://localhost:3000",
 };
+function showModernMessage(message, type = "error") {
+  if (window.authModern) {
+    window.authModern.showMessage(message, type);
+  } else {
+    showAlert(message, type === "error" ? "danger" : type);
+  }
+}
 
 const formularioCadastro = document.getElementById("formularioCadastro");
 formularioCadastro.addEventListener("submit", async function (e) {
@@ -18,7 +25,7 @@ formularioCadastro.addEventListener("submit", async function (e) {
     if (window.authModern) {
       window.authModern.hideMessage();
       window.authModern.hideAllValidationMessages();
-      window.authModern.setButtonLoading('cadastrar-usuario', true);
+      window.authModern.setButtonLoading("cadastrar-usuario", true);
     } else {
       // Fallback para sistema antigo
       btEnviar.disabled = true;
@@ -44,14 +51,17 @@ formularioCadastro.addEventListener("submit", async function (e) {
   } catch (error) {
     console.error("Erro no cadastro:", error);
     if (window.authModern) {
-      window.authModern.showMessage(error.message || "Erro ao cadastrar usuário", "error");
+      window.authModern.showMessage(
+        error.message || "Erro ao cadastrar usuário",
+        "error"
+      );
     } else {
       alert(error.message || "Erro ao cadastrar usuário");
     }
   } finally {
     // Restaura o botão
     if (window.authModern) {
-      window.authModern.setButtonLoading('cadastrar-usuario', false);
+      window.authModern.setButtonLoading("cadastrar-usuario", false);
     } else {
       btEnviar.disabled = false;
       btEnviar.innerHTML = originalText;

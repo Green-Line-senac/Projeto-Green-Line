@@ -12,7 +12,7 @@ console.log("Funções de template importadas:", {
 
 class FuncaoUteis {
   criarToken(email) {
-    return jwt.sign({ email }, process.env.SEGREDO_JWT, { expiresIn: "10m" });
+    return jwt.sign({ email }, process.env.SEGREDO_JWT, { expiresIn: "30m" });
   }
 
   async enviarEmail(email, assunto, tipo, pedido = null) {
