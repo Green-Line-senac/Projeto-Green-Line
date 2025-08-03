@@ -471,29 +471,41 @@ app.put('/pessoa/:id_pessoa/tipo', async (req, res) => {
 
 // Pedidos
 
-app.get('/pessoa/pedidos', async (req, res) => {
-    try {
-        const token = req.headers.authorization?.split(' ')[1];
-        if (!token) {
-            return res.status(401).json({ error: 'Token não fornecido' });
-        }
-        
-        const decoded = jwt.verify(token, process.env.SEGREDO_JWT);
-       
-        // Verificar se o usuário é administrador (exemplo de e-mail fixo)
-        const [isAdmin] = await db.query('SELECT email FROM pessoa WHERE id_pessoa = ?', [decoded.userId]);
-        if (isAdmin.length === 0) {
-          return res.status(403).json({ error: 'Acesso negado - apenas administradores' });
-        }
-        
-        const [rows] = await db.query(`SELECT * FROM vw_carrinho_itens_detalhados`);
-        
-        res.json(rows);
-    } catch (err) {
-        console.error('Erro ao listar usuários:', err);
-        res.status(500).json({ error: 'Erro ao listar usuários' });
+app.get('/pessoa/pedidos', verificarToken, async (req, res) => {
+  try {
+    const userId = req.usuario.userId;
+
+    const [adminRows] = await db.query(
+      'SELECT id_tipo_usuario FROM pessoa WHERE id_pessoa = ?',
+      [userId]
+    );
+
+    if (adminRows.length === 0 || adminRows[0].id_tipo_usuario !== 1) {
+      return res.status(403).json({ error: 'Acesso negado. Apenas administradores podem visualizar todos os pedidos.' });
     }
+
+    const [pedidos] = await db.query(`
+      SELECT 
+        p.id_pedido,
+        p.numero_pedido,
+        p.data_hora,
+        p.situacao,
+        p.valor_total,
+        p.pagamento_situacao,
+        pes.nome AS nome_cliente
+      FROM pedidos p
+      JOIN pessoa pes ON pes.id_pessoa = p.id_pessoa
+      ORDER BY p.data_hora DESC
+    `);
+
+    res.json(pedidos);
+  } catch (err) {
+    console.error('Erro ao buscar pedidos:', err);
+    res.status(500).json({ error: 'Erro ao buscar pedidos' });
+  }
 });
+
+
 
 // app.get('/pessoa/pedidos', verificarToken, async (req, res) => {
 //   try {
@@ -538,7 +550,7 @@ app.get('/pessoa/:id_pessoa/pedidos', verificarToken, async (req, res) => {
         const { id_pessoa } = req.params;
         
         // Proteção: Garante que o usuário só possa ver os próprios pedidos
-        if (parseInt(id_pessoa) !== req.usuario.userId) {
+        if (parseInt(id_pessoa) !== req.usuario.id_pessoa) {
             return res.status(403).json({ error: 'Acesso negado. Você não tem permissão para visualizar este histórico de pedidos.' });
         }
 
@@ -562,6 +574,162 @@ app.get('/pessoa/:id_pessoa/pedidos', verificarToken, async (req, res) => {
         res.status(500).json({ error: 'Erro ao buscar histórico de pedidos.' });
     }
 });
+
+//Adm pedidos
+app.get("/historico-compras/:id_pessoa", async (req, res) => {
+    const { id_pessoa } = req.params;
+    if (!id_pessoa) {
+        return res.status(400).json({ mensagem: "ID da pessoa é obrigatório." });
+    }
+    try {
+        const pedidos = await db.query(
+            `SELECT 
+                c.id_carrinho,
+                c.situacao,
+                DATE_FORMAT(c.data_hora, '%d/%m/%Y %H:%i') as data_criacao,
+                ci.id_item as id_carrinho_item,
+                ci.quantidade,
+                p.produto as nome_produto,
+                p.preco,
+                p.imagem_1 as imagem_principal
+            FROM carrinho c
+            JOIN carrinho_itens ci ON c.id_carrinho = ci.id_carrinho
+            JOIN produto p ON ci.id_produto = p.id_produto
+            WHERE c.id_pessoa = ? AND c.situacao IN ('P') -- Usando 'F' para finalizado, 'P' é pendente
+            ORDER BY c.data_hora DESC;`,
+            [id_pessoa]
+        );
+        res.status(200).json(pedidos);
+    } catch (erro) {
+        console.error("Erro ao buscar histórico de compras:", erro);
+        res.status(500).json({ mensagem: "Erro interno no servidor." });
+    }
+});
+
+// Rota para o histórico de compras para o administrador (ajustada para o erro)
+app.get("/admin/historico-compras", async (req, res) => {
+    try {
+        const todosPedidos = await db.query(
+            `SELECT 
+                c.id_carrinho,
+                c.situacao,
+                DATE_FORMAT(c.data_hora, '%d/%m/%Y %H:%i') as data_criacao,
+                ci.id_item as id_carrinho_item,
+                ci.quantidade,
+                p.produto as nome_produto,
+                p.preco,
+                p.imagem_1 as imagem_principal,
+                pe.nome as nome_usuario
+            FROM carrinho c
+            JOIN carrinho_itens ci ON c.id_carrinho = ci.id_carrinho
+            JOIN produto p ON ci.id_produto = p.id_produto
+            JOIN pessoa pe ON c.id_pessoa = pe.id_pessoa
+            ORDER BY c.data_hora DESC;`
+        );
+    
+        const pedidosAgrupados = todosPedidos.reduce((acc, item) => {
+            const pedidoExistente = acc.find(p => p.id_carrinho === item.id_carrinho);
+            if (pedidoExistente) {
+                pedidoExistente.itens.push({
+                    nome_produto: item.nome_produto,
+                    quantidade: item.quantidade,
+                    // Garante que 'preco' é um número
+                    preco: parseFloat(item.preco), 
+                    imagem_principal: item.imagem_principal,
+                });
+            } else {
+                acc.push({
+                    id_carrinho: item.id_carrinho,
+                    nome_usuario: item.nome_usuario,
+                    data_criacao: item.data_criacao,
+                    situacao: item.situacao,
+                    itens: [{
+                        nome_produto: item.nome_produto,
+                        quantidade: item.quantidade,
+                        // Garante que 'preco' é um número
+                        preco: parseFloat(item.preco), 
+                        imagem_principal: item.imagem_principal,
+                    }]
+                });
+            }
+            return acc;
+        }, []);
+    
+        res.status(200).json(pedidosAgrupados);
+    } catch (erro) {
+        console.error("Erro ao buscar todos os históricos de compras:", erro);
+        res.status(500).json({ mensagem: "Erro interno no servidor." });
+    }
+});
+
+// Rota para pedidos reais (tabela pedidos + pedido_produto) para admin
+// Rota para pedidos reais (tabela pedidos + pedido_produto) para admin
+app.get("/admin/pedidos", verificarToken, async (req, res) => {
+  try {
+    const { userId } = req.usuario;
+
+    // Verifica se é admin
+    const [adminRows] = await db.query('SELECT id_tipo_usuario FROM pessoa WHERE id_pessoa = ?', [userId]);
+    if (!adminRows.length || adminRows[0].id_tipo_usuario !== 1) {
+      return res.status(403).json({ error: "Apenas administradores têm acesso." });
+    }
+
+    const [pedidosComProdutos] = await db.query(`
+      SELECT 
+        p.id_pedido,
+        p.numero_pedido,
+        p.data_hora,
+        p.situacao,
+        p.valor_total,
+        p.pagamento_situacao,
+        pe.nome AS nome_cliente,
+        pr.produto AS nome_produto,
+        pr.imagem_1 AS imagem_produto,
+        pp.quantidade,
+        pp.preco_unitario
+      FROM pedidos p
+      JOIN pessoa pe ON p.id_pessoa = pe.id_pessoa
+      JOIN pedido_produto pp ON p.id_pedido = pp.id_pedido
+      JOIN produto pr ON pp.id_produto = pr.id_produto
+      ORDER BY p.data_hora DESC
+    `);
+
+    // Agrupar por pedido
+    const agrupado = pedidosComProdutos.reduce((acc, item) => {
+      const existente = acc.find(p => p.id_pedido === item.id_pedido);
+      const produto = {
+        nome_produto: item.nome_produto,
+        imagem_produto: item.imagem_produto,
+        quantidade: item.quantidade,
+        preco_unitario: parseFloat(item.preco_unitario)
+      };
+
+      if (existente) {
+        existente.produtos.push(produto);
+      } else {
+        acc.push({
+          id_pedido: item.id_pedido,
+          numero_pedido: item.numero_pedido,
+          data_pedido: item.data_hora,
+          situacao: item.situacao,
+          pagamento_situacao: item.pagamento_situacao,
+          valor_total: item.valor_total,
+          nome_cliente: item.nome_cliente,
+          produtos: [produto]
+        });
+      }
+
+      return acc;
+    }, []);
+
+    res.status(200).json(agrupado);
+
+  } catch (erro) {
+    console.error("Erro ao buscar pedidos do admin:", erro);
+    res.status(500).json({ mensagem: "Erro interno ao buscar pedidos." });
+  }
+});
+
 
 
 // Rota para obter imagens do carrossel

@@ -57,7 +57,7 @@ async function carregarDadosUsuario() {
         );
         setTimeout(() => {
           logout();
-        }, 2000);
+        }, 4000);
         return;
       }
       throw new Error(`Erro HTTP: ${response.status} ${response.statusText}`);
@@ -121,12 +121,13 @@ async function loadAddress() {
   } catch (err) {
     console.error("Erro ao buscar endereço:", err);
     document.getElementById("addressContent").innerHTML =
-      "<p>Erro ao carregar endereço.</p>";
+      "<p>Endereço não encontrado ou não cadastrado.</p>";
   }
 }
 
 // Função para preencher os dados do perfil na página
 function preencherDadosPerfil(usuario) {
+  
   document.getElementById("profileName").textContent =
     usuario[0].nome || "Nome do Usuário";
   document.getElementById("profileEmail").textContent =
@@ -295,8 +296,8 @@ document.querySelectorAll(".info-value.editable").forEach((element) => {
         const idPessoa = sessionStorage.getItem("id_pessoa");
 
         // Captura os valores mais recentes dos elementos HTML
-        const nomeAtualizado = document.getElementById("profileFullName").textContent.trim();
-        const telefoneAtualizado = document.getElementById("profilePhone").textContent.trim();
+        let nomeAtualizado = usuarioLogado.nome;
+        let telefoneAtualizado = usuarioLogado.telefone;
 
         // Faz a requisição PUT com os dados capturados da tela
         const response = await fetch(`${api.online}/pessoa/${idPessoa}`, {
@@ -307,8 +308,8 @@ document.querySelectorAll(".info-value.editable").forEach((element) => {
             },
            body: JSON.stringify({
               // Captura o texto atual dos elementos de nome e telefone
-              nome: document.getElementById("profileFullName").textContent,
-              telefone: document.getElementById("profilePhone").textContent,
+              nome: nomeAtualizado,
+              telefone: telefoneAtualizado,
             }),
         });
          carregarDadosUsuario();
@@ -667,8 +668,8 @@ async function loadUserPedidos() {
     console.error("Erro ao carregar pedidos:", err);
     document.getElementById('savedProductsContent').innerHTML = 
       `<div class="error-message">
-        <p>Não foi possível carregar o histórico de compras.</p>
-        <p><small>${err.message}</small></p>
+        <p style= "margin-bottom:20px">Não possui histórico de compras.</p>
+        <a href="${basePath}/produtos.html" class="btn btn-primary">Ir para a loja</a>
       </div>`;
   } finally {
     if (loadingId) hideNotification(loadingId);

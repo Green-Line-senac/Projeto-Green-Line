@@ -261,3 +261,133 @@ body.dark-mode .product-category {
 .delete-carousel-image-btn:hover {
   background-color: rgba(200, 0, 40, 0.9);
 }
+
+/* ==================== Estilos para o Histórico de Compras do ADM ==================== */
+
+/* Estilo geral para o container do histórico de pedidos */
+.historico-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    background-color: var(--card-bg-color); /* Usando variável para dark-mode */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Cartão individual de cada pedido */
+.pedido-card {
+    border: 1px solid var(--border-color); /* Usando variável para dark-mode */
+    border-radius: 8px;
+    padding: 20px;
+    background-color: var(--bg-color-light); /* Fundo claro para o card */
+    transition: box-shadow 0.3s ease;
+}
+
+.pedido-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Cabeçalho do pedido (número do pedido e status) */
+.pedido-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.pedido-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--primary-color);
+}
+
+/* Status do pedido */
+.status {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: white;
+}
+
+.status-concluido {
+    background-color: #28a745; /* Verde para concluído */
+}
+
+.status-pendente {
+    background-color: #ffc107; /* Amarelo para pendente */
+    color: #212529;
+}
+
+/* Informações do pedido (usuário e data) */
+.pedido-info {
+    margin-bottom: 15px;
+    color: var(--text-color-secondary);
+}
+
+.pedido-info p {
+    margin: 5px 0;
+}
+
+/* Estilo para a lista de itens do pedido */
+.pedido-itens {
+    border-top: 1px solid #e0e0e0;
+    padding-top: 15px;
+}
+
+.pedido-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.pedido-item img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 15px;
+    border: 1px solid var(--border-color);
+}
+
+.item-info {
+    flex-grow: 1;
+}
+
+.item-info h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text-color-primary);
+}
+
+.item-info p {
+    margin: 2px 0;
+    font-size: 0.9rem;
+    color: var(--text-color-secondary);
+}
+
+/* Ajuste para o dark-mode */
+body.dark-mode .historico-container {
+    background-color: #222;
+    box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+}
+body.dark-mode .pedido-card {
+    background-color: #2d2d2d;
+    border-color: #444;
+}
+body.dark-mode .pedido-header {
+    border-bottom-color: #444;
+}
+body.dark-mode .pedido-itens {
+    border-top-color: #444;
+}
+body.dark-mode .item-info h4 {
+    color: var(--dark-text-color-primary);
+}
+body.dark-mode .item-info p,
+body.dark-mode .pedido-info p {
+    color: var(--dark-text-color-secondary);
+}

@@ -269,7 +269,11 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
       // Carregamento dinâmico por seção
       if (section === "admin-users") loadUsersList();
       if (section === "admin-carousel") loadCarouselImages();
-      if (section === "purchase-history") loadUserPedidos();
+     if (section === "purchase-history") {
+  carregarHistoricoComprasAdmin(); // se ainda usa
+  carregarPedidosAdm(); // necessário
+}
+
 
     });
   });
@@ -723,6 +727,148 @@ async function atualizarImagemPerfil(imageData) {
 }
 
 // Variável global para armazenar todos os pedidos
+// Localize o botão do histórico de compras e a seção de conteúdo do histórico
+const historicoBtn = document.querySelector('[data-section="purchase-history"]');
+const historicoSection = document.getElementById('purchase-history-section');
+const historicoContainer = document.getElementById('purchaseHistoryContent');
+
+// Adicione um evento de clique ao botão do histórico
+if (historicoBtn && historicoSection && historicoContainer) {
+    historicoBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        // Lógica para mostrar/esconder as seções
+        document.querySelectorAll('.main-content > div').forEach(section => {
+            section.classList.add('hidden');
+        });
+        historicoSection.classList.remove('hidden');
+
+        // Chame a função para carregar o histórico de compras
+        carregarHistoricoComprasAdmin();
+    });
+}
+
+// A função que carrega os pedidos de todos os usuários
+async function carregarHistoricoComprasAdmin() {
+    const loadingId = showLoading('Carregando Histórico...', 'Buscando todos os pedidos do sistema');
+    // Limpa o conteúdo atual
+    historicoContainer.innerHTML = '';
+
+    try {
+        const token = sessionStorage.getItem('userToken');
+        if (!token) {
+            throw new Error('Token de autenticação não encontrado.');
+        }
+
+        const response = await fetchWithFallback(
+            `${api.perfil}/admin/historico-compras`,
+            `${api.online}/admin/historico-compras`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error('Erro ao carregar o histórico de compras do administrador.');
+        }
+
+        const pedidos = await response.json();
+        hideNotification(loadingId);
+
+        if (pedidos.length === 0) {
+            historicoContainer.innerHTML = '<p>Nenhum pedido encontrado no sistema.</p>';
+            return;
+        }
+
+        pedidos.forEach(pedido => {
+            const pedidoDiv = document.createElement('div');
+            pedidoDiv.classList.add('pedido-card');
+
+            let itensHtml = pedido.itens.map(item => `
+                <div class="pedido-item">
+                    <img src="${item.imagem_principal}" alt="${item.nome_produto}">
+                    <div class="item-info">
+                        <h4>${item.nome_produto}</h4>
+                        <p>Quantidade: ${item.quantidade}</p>
+                        <p>Preço Unitário: R$ ${item.preco.toFixed(2).replace('.', ',')}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            const statusText = pedido.situacao === 'F' ? 'Finalizado' : 'Pendente';
+            const statusClass = pedido.situacao === 'F' ? 'status-concluido' : 'status-pendente';
+
+            pedidoDiv.innerHTML = `
+                <div class="pedido-header">
+                    <h3>Pedido #${pedido.id_carrinho}</h3>
+                    <span class="status ${statusClass}">${statusText}</span>
+                </div>
+                <div class="pedido-info">
+                    <p><strong>Usuário:</strong> ${pedido.nome_usuario}</p>
+                    <p><strong>Data:</strong> ${pedido.data_criacao}</p>
+                </div>
+                <div class="pedido-itens">
+                    ${itensHtml}
+                </div>
+            `;
+            historicoContainer.appendChild(pedidoDiv);
+        });
+
+    } catch (error) {
+        console.error('Erro ao carregar histórico de compras do administrador:', error);
+        hideNotification(loadingId);
+        showError('Erro', 'Não foi possível carregar o histórico de compras.');
+    }
+
+}
+
+async function carregarPedidosAdm() {
+  const token = sessionStorage.getItem("userToken");
+  const pedidosContainer = document.getElementById("pedidos-admin");
+
+  try {
+    const response = await fetch(`${api.online}/pessoa/pedidos`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Erro ao buscar pedidos.");
+    }
+
+    const pedidos = await response.json();
+    pedidosContainer.innerHTML = "";
+
+    if (pedidos.length === 0) {
+      pedidosContainer.innerHTML = "<p>Nenhum pedido encontrado.</p>";
+      return;
+    }
+
+    pedidos.forEach(pedido => {
+      const pedidoDiv = document.createElement("div");
+      pedidoDiv.classList.add("pedido-admin-item");
+
+      pedidoDiv.innerHTML = `
+        <p><strong>ID:</strong> ${pedido.id_pedido}</p>
+        <p><strong>Número:</strong> ${pedido.numero_pedido}</p>
+        <p><strong>Cliente:</strong> ${pedido.nome_cliente}</p>
+        <p><strong>Valor Total:</strong> R$ ${pedido.valor_total.toFixed(2)}</p>
+        <p><strong>Data:</strong> ${new Date(pedido.data_hora).toLocaleString()}</p>
+        <p><strong>Status:</strong> ${pedido.situacao}</p>
+        <p><strong>Pagamento:</strong> ${pedido.pagamento_situacao}</p>
+        <hr>
+      `;
+
+      pedidosContainer.appendChild(pedidoDiv);
+    });
+
+  } catch (error) {
+    console.error("Erro ao carregar pedidos:", error);
+    pedidosContainer.innerHTML = "<p>Erro ao carregar pedidos.</p>";
+  }
+}
+
 
 
 // Logout
