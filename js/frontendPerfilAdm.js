@@ -157,10 +157,19 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
 
       // 4. Processar os dados do usuário
       const data = await response.json();
-      usuarioLogado = data[0];
+      usuarioLogado = Array.isArray(data) ? data[0] : data;
+      
+      // Verificar se usuarioLogado foi definido corretamente
+      if (!usuarioLogado) {
+        throw new Error("Dados do usuário não encontrados");
+      }
+      
       console.log("Dados do usuário admin carregados:", usuarioLogado);
       preencherDadosPerfil(usuarioLogado);
       await loadAddress();
+      
+      // Configurar campos editáveis após carregar os dados
+      setupEditableFields();
 
       // Carregar configurações do modo noturno
       const darkModeEnabled = localStorage.getItem('darkMode') === 'true';
@@ -286,7 +295,8 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
   });
 
   // Lógica para editar campos de texto (Nome Completo e Telefone)
-  document.querySelectorAll(".info-value.editable").forEach((element) => {
+  function setupEditableFields() {
+    document.querySelectorAll(".info-value.editable").forEach((element) => {
     // Crie uma função nomeada para o event listener
     const handleEditClick = function () {
         const currentValue = this.textContent;
@@ -298,11 +308,13 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
         this.replaceWith(input);
         input.focus();
 
+        const originalId = this.id; // Capturar o ID antes da arrow function
+        
         input.addEventListener("blur", async () => {
             const newValue = input.value.trim();
             const infoItem = document.createElement("div");
             infoItem.classList.add("info-value", "editable");
-            infoItem.id = this.id; // Restaurar o ID original
+            infoItem.id = originalId; // Usar o ID capturado
             infoItem.textContent = newValue || currentValue; // Usar valor antigo se novo estiver vazio
 
             input.replaceWith(infoItem);
@@ -310,12 +322,16 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
             infoItem.addEventListener("click", handleEditClick);
 
             // Atualizar dados no usuárioLogado (não salva no backend aqui, apenas prepara para o botão Salvar)
-            if (infoItem.id === "profileFullName") {
-                usuarioLogado.nome = newValue;
-                console.log("Nome atualizado:", usuarioLogado.nome);
-            } else if (infoItem.id === "profilePhone") {
-                usuarioLogado.telefone = newValue;
-                console.log("Telefone atualizado:", usuarioLogado.telefone);
+            if (usuarioLogado) {
+                if (originalId === "profileFullName") {
+                    usuarioLogado.nome = newValue;
+                    console.log("Nome atualizado:", usuarioLogado.nome);
+                } else if (originalId === "profilePhone") {
+                    usuarioLogado.telefone = newValue;
+                    console.log("Telefone atualizado:", usuarioLogado.telefone);
+                }
+            } else {
+                console.warn("usuarioLogado não está definido ainda");
             }
         });
 
@@ -328,6 +344,8 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
 
     // Adiciona o event listener usando a função nomeada
     element.addEventListener("click", handleEditClick);
+    });
+  }
 });
 
   // Botão Salvar Alterações para Informações Pessoais
@@ -345,8 +363,8 @@ document.getElementById('userSearch')?.addEventListener('input', function () {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          nome: usuarioLogado.nome,
-          telefone: usuarioLogado.telefone,
+          nome: usuarioLogado?.nome || '',
+          telefone: usuarioLogado?.telefone || '',
         }),
       });
 
