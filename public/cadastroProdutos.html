@@ -391,6 +391,216 @@
 
                 <fieldset class="mb-4">
                   <legend class="h5 fw-bold text-success mb-3">
+                    Tamanho e Medidas
+                  </legend>
+
+                  <div class="container-switch mb-3">
+                    <div class="form-check form-switch">
+                      <input
+                        class="form-check-input"
+                        name="tem-tamanho"
+                        type="checkbox"
+                        id="tem-tamanho"
+                      />
+                      <label for="tem-tamanho" class="form-check-label fw-medium"
+                        >Produto possui tamanhos</label
+                      >
+                    </div>
+                    <p class="text-muted small mt-1 mb-0">
+                      Marque se o produto tem variações de tamanho (P, M, G, etc.)
+                    </p>
+                  </div>
+
+                  <div class="d-none" id="secao-tamanhos">
+                    <div class="mb-3">
+                      <label class="form-label fw-medium">Tamanhos Disponíveis</label>
+                      <div class="row g-2">
+                        <div class="col-6 col-md-3">
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="tamanhos[]" value="PP" id="tamanho-pp">
+                            <label class="form-check-label" for="tamanho-pp">PP</label>
+                          </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="tamanhos[]" value="P" id="tamanho-p">
+                            <label class="form-check-label" for="tamanho-p">P</label>
+                          </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="tamanhos[]" value="M" id="tamanho-m">
+                            <label class="form-check-label" for="tamanho-m">M</label>
+                          </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="tamanhos[]" value="G" id="tamanho-g">
+                            <label class="form-check-label" for="tamanho-g">G</label>
+                          </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="tamanhos[]" value="GG" id="tamanho-gg">
+                            <label class="form-check-label" for="tamanho-gg">GG</label>
+                          </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="tamanhos[]" value="XG" id="tamanho-xg">
+                            <label class="form-check-label" for="tamanho-xg">XG</label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                      <input
+                        type="text"
+                        name="tamanhos-personalizados"
+                        class="form-control"
+                        id="tamanhos-personalizados"
+                        placeholder="Digite tamanhos personalizados"
+                        maxlength="200"
+                      />
+                      <label for="tamanhos-personalizados">Tamanhos Personalizados</label>
+                      <div class="form-text">
+                        Exemplo: 36, 38, 40, 42 ou Único. Separe por vírgula.
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="container-switch mb-3">
+                    <div class="form-check form-switch">
+                      <input
+                        class="form-check-input"
+                        name="tem-medidas"
+                        type="checkbox"
+                        id="tem-medidas"
+                      />
+                      <label for="tem-medidas" class="form-check-label fw-medium"
+                        >Produto possui medidas específicas</label
+                      >
+                    </div>
+                    <p class="text-muted small mt-1 mb-0">
+                      Marque se o produto tem medidas específicas importantes para o cliente
+                    </p>
+                  </div>
+
+                  <div class="d-none" id="secao-medidas">
+                    <div class="row g-3 mb-3">
+                      <div class="col-md-4">
+                        <div class="form-floating">
+                          <input
+                            type="number"
+                            name="comprimento"
+                            class="form-control"
+                            id="comprimento"
+                            placeholder="Comprimento"
+                            min="0"
+                            step="0.1"
+                          />
+                          <label for="comprimento">Comprimento (cm)</label>
+                        </div>
+                      </div>
+                      <div class="col-md-4">
+                        <div class="form-floating">
+                          <input
+                            type="number"
+                            name="largura-medida"
+                            class="form-control"
+                            id="largura-medida"
+                            placeholder="Largura"
+                            min="0"
+                            step="0.1"
+                          />
+                          <label for="largura-medida">Largura (cm)</label>
+                        </div>
+                      </div>
+                      <div class="col-md-4">
+                        <div class="form-floating">
+                          <input
+                            type="number"
+                            name="altura-medida"
+                            class="form-control"
+                            id="altura-medida"
+                            placeholder="Altura"
+                            min="0"
+                            step="0.1"
+                          />
+                          <label for="altura-medida">Altura (cm)</label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                      <div class="col-md-6">
+                        <div class="form-floating">
+                          <input
+                            type="number"
+                            name="diametro"
+                            class="form-control"
+                            id="diametro"
+                            placeholder="Diâmetro"
+                            min="0"
+                            step="0.1"
+                          />
+                          <label for="diametro">Diâmetro (cm)</label>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="form-floating">
+                          <input
+                            type="number"
+                            name="capacidade"
+                            class="form-control"
+                            id="capacidade"
+                            placeholder="Capacidade"
+                            min="0"
+                            step="0.1"
+                          />
+                          <label for="capacidade">Capacidade (ml/L)</label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                      <select
+                        name="unidade-medida"
+                        class="form-select"
+                        id="unidade-medida"
+                      >
+                        <option value="" selected>Selecione a unidade</option>
+                        <option value="cm">Centímetros (cm)</option>
+                        <option value="mm">Milímetros (mm)</option>
+                        <option value="m">Metros (m)</option>
+                        <option value="ml">Mililitros (ml)</option>
+                        <option value="l">Litros (L)</option>
+                        <option value="g">Gramas (g)</option>
+                        <option value="kg">Quilogramas (kg)</option>
+                      </select>
+                      <label for="unidade-medida">Unidade de Medida Principal</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                      <textarea
+                        name="observacoes-medidas"
+                        class="form-control"
+                        id="observacoes-medidas"
+                        placeholder="Observações sobre medidas"
+                        maxlength="300"
+                        style="height: 80px"
+                      ></textarea>
+                      <label for="observacoes-medidas">Observações sobre Medidas</label>
+                      <div class="form-text">
+                        Informações adicionais sobre as medidas do produto (máx. 300 caracteres)
+                      </div>
+                    </div>
+                  </div>
+                </fieldset>
+
+                <fieldset class="mb-4">
+                  <legend class="h5 fw-bold text-success mb-3">
                     Preço e Avaliação
                   </legend>
 
