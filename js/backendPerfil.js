@@ -13,23 +13,37 @@ const fs = require('fs');
 
 const app = express();
 let db = new conexao();
-app.use(express.json());
+app.use(express.json({ limit: "100mb" }));
 app.use(cors());
 
 
 const verificarToken = (req, res, next) => {
-    const token = req.headers['authorization'];
-    if (!token) return res.status(401).json({ error: 'Token não fornecido.' });
+  console.log('Middleware verificarToken executado');
 
-    try {
-        const tokenFormatado = token.replace('Bearer ', '');
-        const decoded = jwt.verify(tokenFormatado, process.env.SEGREDO_JWT);
-        req.usuario = decoded;
-        next();
-    } catch (error) {
-        return res.status(403).json({ error: 'Token inválido ou expirado.' });
-    }
+  const token = req.headers['authorization'];
+  if (!token) return res.status(401).json({ error: 'Token não fornecido.' });
+
+  try {
+    const tokenFormatado = token.replace('Bearer ', '');
+    const decoded = jwt.verify(tokenFormatado, process.env.SEGREDO_JWT);
+    
+    // Garantir que os nomes das propriedades batem com o token gerado
+    req.usuario = {
+      userId: decoded.id_pessoa,
+      tipo_usuario: decoded.tipo_usuario, // Agora bate com o token
+      email: decoded.email
+    };
+
+    console.log('Usuário decodificado:', req.usuario); // Adicione este log para debug
+    next();
+  } catch (error) {
+    console.error('Erro na verificação do token:', error);
+    return res.status(403).json({ error: 'Token inválido ou expirado.' });
+  }
 };
+
+
+module.exports = verificarToken;
 
 // Configuração do multer para upload de imagens
 const storage = multer.diskStorage({
@@ -175,15 +189,12 @@ app.post('/login', async (req, res) => {
     }
     
     
-    const token = jwt.sign(
-      { 
-        userId: user.id_pessoa, 
-        email: user.email,
-        tipo_usuario: user.id_tipo_usuario 
-      },
-      process.env.SEGREDO_JWT,
-      { expiresIn: '1h' }
-    );
+   const token = jwt.sign({
+      id_pessoa: user.id_pessoa,
+      tipo_usuario: user.id_tipo_usuario,
+      email: user.email
+    }, process.env.SEGREDO_JWT, { expiresIn: '1h' });
+
 
     console.log('Token JWT gerado:', token);
     
@@ -266,6 +277,7 @@ app.get('/pessoa', async (req, res) => {
 });
 
 
+
 // [4] BUSCAR USUÁRIO POR ID (GET)
 app.get('/pessoa/:id_pessoa', verificarToken, async (req, res) => {
   try {
@@ -277,11 +289,11 @@ app.get('/pessoa/:id_pessoa', verificarToken, async (req, res) => {
       'SELECT id_pessoa, nome, email, telefone, cpf, id_tipo_usuario, situacao, imagem_perfil FROM pessoa WHERE id_pessoa = ?',
       [id]
     );
-    
+
     if (rows.length === 0) {
       return res.status(404).json({ error: 'Usuário não encontrado' });
     }
-    
+
     res.json(rows);
   } catch (err) {
     console.error('Erro detalhado:', err);
@@ -290,28 +302,79 @@ app.get('/pessoa/:id_pessoa', verificarToken, async (req, res) => {
 });
 
 // [5] ATUALIZAR USUÁRIO (PUT)
-app.put("/pessoa/:id_pessoa", verificarToken, async (req, res) => {
-  const { id_pessoa } = req.params;
-  const { nome, telefone } = req.body;
+app.put("/admin/atualizar/:id_pessoa", async (req, res) => {
+  try {
+    const idPessoa = parseInt(req.params.id_pessoa);
+    const { nome, telefone } = req.body;
 
-  if (parseInt(id_pessoa) !== req.usuario.userId) {
-    return res.status(403).json({ error: "Não autorizado a atualizar este perfil" });
+    // Converte undefined em null
+    const values = [
+      nome ?? null,
+      telefone ?? null,
+      idPessoa
+    ];
+
+    const resultado = await db.query(
+      'UPDATE pessoa SET nome = ?, telefone = ? WHERE id_pessoa = ?',
+      values
+    );
+
+    res.json({ message: "Usuário atualizado com sucesso" });
+  } catch (err) {
+    console.error("Erro ao atualizar usuário:", err);
+    res.status(500).json({
+      error: "Erro interno no servidor",
+      details: err.message,
+    });
+  }
+});
+
+// Rota para edição de usuários pelo admin 
+app.put("/admin/editar-usuario/:id_pessoa", async (req, res) => {
+  const idPessoa = parseInt(req.params.id_pessoa);
+  
+  if (isNaN(idPessoa)) {
+    return res.status(400).json({ error: 'ID inválido' });
   }
 
   try {
-    const [result] = await db.query(
-      "UPDATE pessoa SET nome = ?, telefone = ? WHERE id_pessoa = ?",
-      [nome, telefone, id_pessoa]
-    );
+    // Verificar se o usuário a ser editado existe
+    const [userExists] = await db.query(
+  'SELECT id_pessoa FROM pessoa WHERE id_pessoa = ?', 
+  [idPessoa]
+);
     
-    if (result.affectedRows > 0) {
-      res.json({ message: "Pessoa atualizada com sucesso" });
-    } else {
-      res.status(404).json({ error: "Pessoa não encontrada" });
+    if (userExists.length === 0) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
     }
-  } catch (err) {
-    console.error("Erro ao atualizar pessoa:", err);
-    res.status(500).json({ error: "Erro ao atualizar pessoa" });
+
+    // Campos que podem ser atualizados
+    const { situacao } = req.body;
+    const dadosAtualizacao = {};
+
+    if (situacao !== undefined) dadosAtualizacao.situacao = situacao;
+
+    if (Object.keys(dadosAtualizacao).length === 0) {
+      return res.status(400).json({ error: 'Nenhum campo válido fornecido para atualização' });
+    }
+
+    // Atualizar no banco
+    await db.query(
+  'UPDATE pessoa SET situacao =  ? WHERE id_pessoa = ?',
+  [dadosAtualizacao.situacao, idPessoa]
+);
+
+    res.status(200).json({ 
+      message: "Usuário atualizado com sucesso",
+      updated_fields: Object.keys(dadosAtualizacao)
+    });
+
+  } catch (error) {
+    console.error("Erro ao atualizar usuário:", error);
+    res.status(500).json({ 
+      error: "Erro interno do servidor ao atualizar usuário",
+      details: error.message
+    });
   }
 });
 
@@ -323,7 +386,7 @@ app.delete('/pessoa/:id_pessoa', async (req, res) => {
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Usuário não encontrado' });
     }
-    
+
     res.status(204).end();
   } catch (err) {
     res.status(500).json({ error: 'Erro ao deletar usuário' });
@@ -334,54 +397,66 @@ app.delete('/pessoa/:id_pessoa', async (req, res) => {
 app.get('/pessoa/me', verificarToken, async (req, res) => {
   try {
     const userId = req.usuario.userId;
-    
+
     const [rows] = await db.query(
       'SELECT id_pessoa, nome, email, telefone, cpf, situacao, imagem_perfil FROM pessoa WHERE id_pessoa = ?',
       [userId]
     );
-    
+
     if (rows.length === 0) {
       return res.status(404).json({ error: 'Usuário não encontrado' });
     }
-    
+
     res.json(rows[0]);
   } catch (err) {
     console.error('Erro ao buscar usuário:', err);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Erro ao buscar usuário',
-      details: err.message 
+      details: err.message
     });
   }
 });
 
 // [8] ATUALIZAR IMAGEM DE PERFIL (PUT)
 app.put('/pessoa/:id_pessoa/imagem', verificarToken, async (req, res) => {
-    try {
-        const { imagem_perfil } = req.body;
-        const id = parseInt(req.params.id_pessoa);
-        
-        if (isNaN(id) || id <= 0) {
-            return res.status(400).json({ error: 'ID inválido' });
-        }
-        
-        if (id !== req.usuario.userId) {
-            return res.status(403).json({ error: 'Não autorizado a atualizar a imagem deste perfil' });
-        }
+  try {
+    const { imagem_perfil } = req.body;
+    const id = parseInt(req.params.id_pessoa);
 
-        const [result] = await db.query(
-            'UPDATE pessoa SET imagem_perfil = ? WHERE id_pessoa = ?',
-            [imagem_perfil, id]
-        );
-        
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Usuário não encontrado' });
-        }
-        
-        res.json({ message: 'Imagem de perfil atualizada com sucesso' });
-    } catch (err) {
-        console.error('Erro ao atualizar imagem:', err);
-        res.status(500).json({ error: 'Erro ao atualizar imagem de perfil' });
+    console.log("Recebido imagem:", imagem_perfil?.substring(0, 50)); // mostra início do base64
+    console.log("ID da URL:", id, "ID do token:", req.usuario.userId);
+
+    if (isNaN(id) || id <= 0) {
+      return res.status(400).json({ error: 'ID inválido' });
     }
+
+    if (id !== req.usuario.userId) {
+      return res.status(403).json({ error: 'Não autorizado' });
+    }
+
+    console.log("Imagem base64 - tamanho:", imagem_perfil?.length);
+console.log("ID:", id, "Token ID:", req.usuario.userId);
+console.log("Tamanho da base64 recebida:", imagem_perfil?.length);
+
+
+    const result = await db.query(
+      'UPDATE pessoa SET imagem_perfil = ? WHERE id_pessoa = ?',
+      [imagem_perfil, id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+
+    res.json({ message: 'Imagem de perfil atualizada com sucesso' });
+  } catch (err) {
+     console.error('Erro ao atualizar imagem:', err.message);
+  console.error('Stack:', err.stack);
+  res.status(500).json({
+    error: 'Erro ao atualizar imagem de perfil',
+    details: err.message
+  });
+  }
 });
 
 // [9] ROTAS PARA ENDEREÇO

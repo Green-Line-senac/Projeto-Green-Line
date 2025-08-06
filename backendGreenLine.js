@@ -1819,7 +1819,7 @@ app.get("/profile", async (req, res) => {
   }
 });
 
-// [3] LISTAR USUÁRIOS (GET)
+//[3] LISTAR USUÁRIOS (GET)
 app.get("/pessoa", async (req, res) => {
   try {
     let rows;
@@ -1868,29 +1868,83 @@ app.get("/pessoa/:id_pessoa", verificarToken, async (req, res) => {
 });
 
 // [5] ATUALIZAR USUÁRIO (PUT)
-app.put("/pessoa/:id_pessoa", verificarToken, async (req, res) => {
-  const { id_pessoa } = req.params;
-  const { nome, telefone } = req.body;
+// Rota pública: Atualiza nome, telefone, email, situacao e tipo de qualquer usuário sem token
+// Atualização simplificada (sem token, sem validação de tipo)
+app.put("/admin/atualizar/:id_pessoa", async (req, res) => {
+  try {
+    const idPessoa = parseInt(req.params.id_pessoa);
+    const { nome, telefone } = req.body;
 
-  // Verificar se o usuário está atualizando seu próprio perfil
-  if (parseInt(id_pessoa) !== req.usuario.userId) {
-    return res.status(403).json({ error: "Não autorizado a atualizar este perfil" });
+    // Converte undefined em null
+    const values = [
+      nome ?? null,
+      telefone ?? null,
+      idPessoa
+    ];
+
+    const resultado = await db.query(
+      'UPDATE pessoa SET nome = ?, telefone = ? WHERE id_pessoa = ?',
+      values
+    );
+
+    // `resultado` não é um array diretamente — mysql2 retorna um objeto com duas partes
+
+    res.json({ message: "Usuário atualizado com sucesso" });
+  } catch (err) {
+    console.error("Erro ao atualizar usuário:", err);
+    res.status(500).json({
+      error: "Erro interno no servidor",
+      details: err.message,
+    });
+  }
+});
+
+
+app.put("/admin/editar-usuario/:id_pessoa", async (req, res) => {
+  const idPessoa = parseInt(req.params.id_pessoa);
+  
+  if (isNaN(idPessoa)) {
+    return res.status(400).json({ error: 'ID inválido' });
   }
 
   try {
-    const [result] = await db.query(
-      "UPDATE pessoa SET nome = ?, telefone = ? WHERE id_pessoa = ?",
-      [nome, telefone, id_pessoa]
-    );
-
-    if (result.affectedRows > 0) {
-      res.json({ message: "Pessoa atualizada com sucesso" });
-    } else {
-      res.status(404).json({ error: "Pessoa não encontrada" });
+    // Verificar se o usuário a ser editado existe
+   const [userExists] = await db.query(
+  'SELECT id_pessoa FROM pessoa WHERE id_pessoa = ?', 
+  [idPessoa]
+);
+    
+    if (userExists.length === 0) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
     }
-  } catch (err) {
-    console.error("Erro ao atualizar pessoa:", err);
-    res.status(500).json({ error: "Erro ao atualizar pessoa" });
+
+    // Campos que podem ser atualizados
+    const { situacao } = req.body;
+    const dadosAtualizacao = {};
+
+    if (situacao !== undefined) dadosAtualizacao.situacao = situacao;
+
+    if (Object.keys(dadosAtualizacao).length === 0) {
+      return res.status(400).json({ error: 'Nenhum campo válido fornecido para atualização' });
+    }
+
+    // Atualizar no banco
+    await db.query(
+  'UPDATE pessoa SET situacao =  ? WHERE id_pessoa = ?',
+  [dadosAtualizacao.situacao, idPessoa]
+);
+
+    res.status(200).json({ 
+      message: "Usuário atualizado com sucesso",
+      updated_fields: Object.keys(dadosAtualizacao)
+    });
+
+  } catch (error) {
+    console.error("Erro ao atualizar usuário:", error);
+    res.status(500).json({ 
+      error: "Erro interno do servidor ao atualizar usuário",
+      details: error.message
+    });
   }
 });
 
@@ -1911,7 +1965,6 @@ app.delete("/pessoa/:id_pessoa", async (req, res) => {
     res.status(500).json({ error: "Erro ao deletar usuário" });
   }
 });
-
 app.get('/pessoa/pedidos', verificarToken, async (req, res) => {
   try {
     const userId = req.usuario.userId;

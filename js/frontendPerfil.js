@@ -143,9 +143,22 @@ function preencherDadosPerfil(usuario) {
   document.getElementById("profileStatus").textContent =
     usuario[0].situacao === "A" ? "Ativo" : "Pendente/Inativo";
 
-  if (usuario.imagem_perfil) {
-    document.getElementById("profileAvatar").src = usuario[0].imagem_perfil;
-  }
+  document.getElementById("profileAvatar").src = usuario[0].imagem_perfil;
+    
+    const avatar = document.getElementById("profileAvatar");
+    sessionStorage.setItem("avatar", avatar.src);
+
+
+    
+    // Alterar para inputs editáveis
+    document.getElementById("profileFullName").innerHTML = `
+        <input type="text" id="editNome" value="${usuario[0].nome || ''}" class="editable-input">
+    `;
+
+    document.getElementById("profilePhone").innerHTML = `
+        <input type="text" id="editTelefone" value="${usuario[0].telefone || ''}" class="editable-input">
+    `;
+  
 }
 
 // Função para preencher os dados de endereço
@@ -244,86 +257,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   });
 
-// Lógica para editar campos de texto (Nome Completo e Telefone)
-document.querySelectorAll(".info-value.editable").forEach((element) => {
-    // Crie uma função nomeada para o event listener
-    const handleEditClick = function () {
-        const currentValue = this.textContent;
-        const input = document.createElement("input");
-        input.type = "text";
-        input.value = currentValue;
-        input.classList.add("edit-input"); // Adicione uma classe para estilização
-
-        this.replaceWith(input);
-        input.focus();
-
-        input.addEventListener("blur", async () => {
-            const newValue = input.value.trim();
-            const infoItem = document.createElement("div");
-            infoItem.classList.add("info-value", "editable");
-            infoItem.id = this.id; // Restaurar o ID original
-            infoItem.textContent = newValue || currentValue; // Usar valor antigo se novo estiver vazio
-
-            input.replaceWith(infoItem);
-            // Re-adicionar o event listener usando a função nomeada
-            infoItem.addEventListener("click", handleEditClick);
-
-            // Atualizar dados no usuárioLogado (não salva no backend aqui, apenas prepara para o botão Salvar)
-            if (infoItem.id === "profileFullName") {
-                usuarioLogado.nome = newValue;
-                console.log("Nome atualizado:", usuarioLogado.nome);
-            } else if (infoItem.id === "profilePhone") {
-                usuarioLogado.telefone = newValue;
-                console.log("Telefone atualizado:", usuarioLogado.telefone);
-            }
-        });
-
-        input.addEventListener("keypress", function (e) {
-            if (e.key === 'Enter') {
-                input.blur(); // Simula o blur para salvar
-            }
-        });
-    };
-
-    // Adiciona o event listener usando a função nomeada
-    element.addEventListener("click", handleEditClick);
-});
-
-  // Botão Salvar Alterações para Informações Pessoais
-  document.getElementById("savePersonalBtn").addEventListener("click", async () => {
-    try {
-        const token = sessionStorage.getItem("userToken");
-        const idPessoa = sessionStorage.getItem("id_pessoa");
-
-        // Captura os valores mais recentes dos elementos HTML
-        let nomeAtualizado = usuarioLogado.nome;
-        let telefoneAtualizado = usuarioLogado.telefone;
-
-        // Faz a requisição PUT com os dados capturados da tela
-        const response = await fetch(`${api.online}/pessoa/${idPessoa}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-           body: JSON.stringify({
-              // Captura o texto atual dos elementos de nome e telefone
-              nome: nomeAtualizado,
-              telefone: telefoneAtualizado,
-            }),
-        });
-         carregarDadosUsuario();
-        if (!response.ok) {
-            throw new Error("Erro ao salvar informações pessoais");
-        }
-
-        alert("Informações pessoais salvas com sucesso!");
-        carregarDadosUsuario(); // Recarrega para garantir que os dados exibidos estão atualizados
-    } catch (error) {
-        console.error("Erro ao salvar informações pessoais:", error);
-        alert("Erro ao salvar informações pessoais. Por favor, tente novamente.");
-    }
-});
 
   // Lógica para o modal de endereço
   const addressModal = document.getElementById("addressModal");
@@ -542,51 +475,41 @@ document.querySelectorAll(".info-value.editable").forEach((element) => {
   });
 
   // Lógica para upload de imagem de perfil
-  const avatarInput = document.getElementById("avatarInput");
-  avatarInput.addEventListener("change", async (event) => {
+  const avatarInput = document.getElementById('avatarInput');
+  avatarInput.addEventListener('change', async (event) => {
     const file = event.target.files[0];
     if (file) {
       // Validar tamanho do arquivo (máximo 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        showError("Arquivo muito grande", "A imagem deve ter no máximo 5MB");
+        showError('Arquivo muito grande', 'A imagem deve ter no máximo 5MB');
         return;
       }
 
       // Validar tipo do arquivo
-      if (!file.type.startsWith("image/")) {
-        showError(
-          "Formato inválido",
-          "Por favor, selecione apenas arquivos de imagem"
-        );
+      if (!file.type.startsWith('image/')) {
+        showError('Formato inválido', 'Por favor, selecione apenas arquivos de imagem');
         return;
       }
 
-      const loadingId = showLoading(
-        "Atualizando foto...",
-        "Fazendo upload da sua nova imagem de perfil"
-      );
+      const loadingId = showLoading('Atualizando foto...', 'Fazendo upload da sua nova imagem de perfil');
 
       const reader = new FileReader();
       reader.onload = async (e) => {
-        try {
-          // A imagem será salva como base64 no banco de dados.
-          // Em um ambiente de produção, é melhor fazer upload para um serviço de armazenamento de arquivos.
-          await atualizarImagemPerfil(e.target.result);
-          document.getElementById("profileAvatar").src = e.target.result;
-          hideNotification(loadingId);
-          showSuccess(
-            "Foto atualizada!",
-            "Sua imagem de perfil foi atualizada com sucesso"
-          );
-        } catch (error) {
-          console.error("Erro ao atualizar imagem de perfil:", error);
-          hideNotification(loadingId);
-          showError(
-            "Erro ao atualizar foto",
-            "Não foi possível atualizar sua imagem de perfil"
-          );
-        }
-      };
+  try {
+    let base64 = e.target.result;
+    if (!base64.startsWith("data:image")) {
+      base64 = "data:image/png;base64," + base64;
+    }
+    await atualizarImagemPerfil(base64);
+    document.getElementById('profileAvatar').src = base64;
+    hideNotification(loadingId);
+    showSuccess('Foto atualizada!', 'Sua imagem de perfil foi atualizada com sucesso');
+  } catch (error) {
+    console.error("Erro ao atualizar imagem de perfil:", error);
+    hideNotification(loadingId);
+    showError('Erro ao atualizar foto', 'Não foi possível atualizar sua imagem de perfil');
+  }
+};
       reader.readAsDataURL(file);
     }
   });
@@ -815,27 +738,69 @@ function getStatusClass(status) {
   return statusMap[status] || 'status-default';
 }
 
+document.getElementById("savePersonalBtn").addEventListener("click", async () => {
+  const nome = document.getElementById("editNome").value.trim();
+  const telefone = document.getElementById("editTelefone").value.trim();
+  const idPessoa = sessionStorage.getItem("id_pessoa");
+  const token = sessionStorage.getItem("userToken");
+
+  const loadingId = showLoading('Salvando...', 'Atualizando suas informações');
+
+  try {
+    console.log("Enviando dados para atualização:", { nome, telefone });
+    const response = await fetch(`${api.perfil}/admin/atualizar/${idPessoa}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        nome: nome,
+        telefone: telefone
+      })
+    });
+
+    const responseData = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      console.error("Erro na resposta:", response.status, responseData);
+      throw new Error(responseData?.error || `Erro HTTP: ${response.status}`);
+    }
+
+    hideNotification(loadingId);
+    showSuccess('Perfil atualizado! atualize a página', responseData.message);
+
+  } catch (error) {
+    hideNotification(loadingId);
+    console.error("Erro completo:", error);
+    showError('Erro ao salvar', error.message);
+  }
+});
+
 // Função para atualizar imagem de perfil
 async function atualizarImagemPerfil(imageData) {
   try {
     const idPessoa = sessionStorage.getItem("id_pessoa");
-    const response = await fetch(`${api.online}/pessoa/${idPessoa}/imagem`, {
+    const token = sessionStorage.getItem("userToken");
+    console.log("Tamanho da base64 recebida:", imageData?.length);
+
+    const response = await fetch(`${api.perfil}/pessoa/${idPessoa}/imagem`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
       body: JSON.stringify({ imagem_perfil: imageData }),
     });
 
     if (!response.ok) {
-      throw new Error("Erro ao atualizar imagem");
+      const errText = await response.text();
+      throw new Error("Erro ao atualizar imagem: " + errText);
     }
   } catch (error) {
     console.error("Erro:", error);
     throw error;
   }
 }
-
 // Logout
 function logout() {
   try {
