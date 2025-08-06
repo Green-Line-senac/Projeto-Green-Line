@@ -62,7 +62,7 @@ async function loadCarouselImages() {
       button.addEventListener("click", async (e) => {
         const imageName = e.target.dataset.imageName;
         try {
-          const deleteResponse = await fetch(`${api.perfil}/carousel-image/${imageName}`, {
+          const deleteResponse = await fetch(`${api.online}/carousel-image/${imageName}`, {
             method: "DELETE"
           });
           if (deleteResponse.ok) {
@@ -140,7 +140,7 @@ async function carregarDadosUsuario() {
     await loadAddress();
 
     // Configurar campos editáveis após carregar os dados
-    setupEditableFields();
+    //setupEditableFields();
 
     // Carregar configurações do modo noturno
     const darkModeEnabled = localStorage.getItem('darkMode') === 'true';
@@ -588,7 +588,7 @@ function loadUsersList() {
     }
 
     try {
-      const response = await fetch(`${api.perfil}/pessoa/${id}`, {
+      const response = await fetch(`${api.online}/pessoa/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -626,7 +626,7 @@ function loadUsersList() {
     };
 
     try {
-      const response = await fetch(`${api.perfil}/admin/editar-usuario/${id}`, {
+      const response = await fetch(`${api.online}/admin/editar-usuario/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json"
@@ -678,7 +678,7 @@ document.getElementById("savePersonalBtn").addEventListener("click", async () =>
 
   try {
     console.log("Enviando dados para atualização:", { nome, telefone });
-    const response = await fetch(`${api.perfil}/admin/atualizar/${idPessoa}`, {
+    const response = await fetch(`${api.online}/admin/atualizar/${idPessoa}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -712,7 +712,7 @@ async function atualizarImagemPerfil(imageData) {
     const token = sessionStorage.getItem("userToken");
     console.log("Tamanho da base64 recebida:", imageData?.length);
 
-    const response = await fetch(`${api.perfil}/pessoa/${idPessoa}/imagem`, {
+    const response = await fetch(`${api.online}/pessoa/${idPessoa}/imagem`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -767,7 +767,7 @@ async function carregarHistoricoComprasAdmin() {
     }
 
     const response = await fetchWithFallback(
-      `${api.perfil}/admin/historico-compras`,
+      `${api.online}/admin/historico-compras`,
       `${api.online}/admin/historico-compras`, {
       headers: {
         'Authorization': `Bearer ${token}`
