@@ -20,7 +20,7 @@ body {
   height: 400px;
   /* Altura maior para telas grandes */
   width: 100%;
-  object-fit: cover;
+  object-fit: fill;
   object-position: center;
   transition: none;
   /* Remove transições da imagem para evitar conflitos */
