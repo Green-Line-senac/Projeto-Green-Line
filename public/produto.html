@@ -219,6 +219,35 @@
                 <!-- Características via JS -->
               </ul>
             </div>
+
+            <!-- Seleção de Tamanho/Medidas -->
+            <div class="produto-opcoes mb-3" id="produto-opcoes" style="display: none;">
+              <div class="mb-3">
+                <label class="form-label fw-bold">Tamanho:</label>
+                <div class="tamanhos-container" id="tamanhos-container">
+                  <!-- Tamanhos serão carregados dinamicamente -->
+                </div>
+              </div>
+              
+              <div class="mb-3" id="medidas-section" style="display: none;">
+                <label class="form-label fw-bold">Medidas:</label>
+                <div class="medidas-info" id="medidas-info">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <small class="text-muted">
+                        <strong>Dimensões:</strong> <span id="produto-dimensoes">-</span>
+                      </small>
+                    </div>
+                    <div class="col-md-6">
+                      <small class="text-muted">
+                        <strong>Peso:</strong> <span id="produto-peso">-</span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="bloco-compra p-3 mb-3">
               <div class="mb-2">
                 <label for="quantidade" class="form-label mb-0"
@@ -277,7 +306,12 @@
         </div>
         <!-- Avaliações -->
         <div class="bloco-avaliacao mt-4 p-4 rounded border">
-          <h2 class="fs-5 fw-bold mb-3">Avaliações dos Clientes:</h2>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="fs-5 fw-bold mb-0">Avaliações dos Clientes:</h2>
+            <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalAvaliacao">
+              <i class="fas fa-star me-1"></i>Avaliar Produto
+            </button>
+          </div>
           <div class="d-flex align-items-center gap-3 mb-2">
             <span class="fs-2 fw-bold" id="produto-media-avaliacao">0.0</span>
             <span
@@ -290,6 +324,39 @@
           </div>
           <div id="produto-avaliacoes">
             <!-- Avaliações via JS -->
+          </div>
+        </div>
+
+        <!-- Modal de Avaliação -->
+        <div class="modal fade" id="modalAvaliacao" tabindex="-1" aria-labelledby="modalAvaliacaoLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="modalAvaliacaoLabel">Avaliar Produto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label class="form-label">Sua avaliação:</label>
+                  <div id="avaliacao-media" class="mb-2">Carregando...</div>
+                  <div id="avaliacao-estrelas" class="mb-3">
+                    <!-- Estrelas clicáveis serão adicionadas via JS -->
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="avaliacao-comentario" class="form-label">Comentário (opcional):</label>
+                  <textarea class="form-control" id="avaliacao-comentario" rows="3" placeholder="Compartilhe sua experiência com este produto..."></textarea>
+                </div>
+                <div id="avaliacao-feedback" class="mb-2"></div>
+                <div id="avaliacoes-recentes">
+                  <!-- Avaliações recentes serão carregadas via JS -->
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnEnviarAvaliacao" style="display: none;">Enviar Avaliação</button>
+              </div>
+            </div>
           </div>
         </div>
       </main>

@@ -332,4 +332,222 @@
   #btn-voltar-produtos {
     display: none;
   }
-} 
+} /
+* Estilos para seleção de tamanho e medidas */
+.produto-opcoes {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid #e9ecef;
+}
+
+.tamanhos-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.tamanho-opcao {
+    display: inline-block;
+    padding: 8px 16px;
+    border: 2px solid #dee2e6;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    min-width: 50px;
+    text-align: center;
+    user-select: none;
+}
+
+.tamanho-opcao:hover {
+    border-color: #28a745;
+    background: #f8fff9;
+}
+
+.tamanho-opcao.selected {
+    border-color: #28a745;
+    background: #28a745;
+    color: white;
+}
+
+.tamanho-opcao.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f8f9fa;
+}
+
+.tamanho-opcao.disabled:hover {
+    border-color: #dee2e6;
+    background: #f8f9fa;
+}
+
+.medidas-info {
+    background: white;
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+}
+
+.medidas-info .row {
+    margin: 0;
+}
+
+.medidas-info .col-md-6 {
+    padding: 5px 10px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .tamanhos-container {
+        justify-content: center;
+    }
+    
+    .tamanho-opcao {
+        min-width: 45px;
+        padding: 6px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .medidas-info .col-md-6 {
+        text-align: center;
+        margin-bottom: 10px;
+    }
+}
+
+/* Indicador de tamanho obrigatório */
+.tamanho-required {
+    border: 2px solid #dc3545 !important;
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* Tooltip para informações de medidas */
+.medidas-tooltip {
+    position: relative;
+    cursor: help;
+}
+
+.medidas-tooltip:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    z-index: 1000;
+}
+/
+* Estilos para o modal de avaliação */
+#modalAvaliacao .modal-content {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+#modalAvaliacao .modal-header {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border-radius: 12px 12px 0 0;
+    border-bottom: none;
+}
+
+#modalAvaliacao .modal-title {
+    font-weight: 600;
+}
+
+#modalAvaliacao .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+#avaliacao-estrelas {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    margin: 15px 0;
+}
+
+#avaliacao-estrelas span {
+    font-size: 2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+#avaliacao-estrelas span:hover {
+    transform: scale(1.1);
+}
+
+#avaliacao-comentario {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    transition: border-color 0.3s ease;
+}
+
+#avaliacao-comentario:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+#btnEnviarAvaliacao {
+    background: #28a745;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+#btnEnviarAvaliacao:hover {
+    background: #218838;
+    transform: translateY(-1px);
+}
+
+#btnEnviarAvaliacao:disabled {
+    opacity: 0.6;
+    transform: none;
+}
+
+#avaliacoes-recentes {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 15px;
+}
+
+#avaliacoes-recentes .border {
+    border-color: #e9ecef !important;
+    transition: border-color 0.3s ease;
+}
+
+#avaliacoes-recentes .border:hover {
+    border-color: #28a745 !important;
+}
+
+/* Animação para feedback */
+#avaliacao-feedback {
+    min-height: 20px;
+    transition: all 0.3s ease;
+}
+
+/* Responsividade do modal */
+@media (max-width: 576px) {
+    #modalAvaliacao .modal-dialog {
+        margin: 10px;
+    }
+    
+    #avaliacao-estrelas span {
+        font-size: 1.5rem;
+    }
+}

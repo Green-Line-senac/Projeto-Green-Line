@@ -31,25 +31,149 @@ main {
   margin: 0.25rem;
 }
 
-/* Categories */
+/* Categories -(3 por página) */
 .largura-card {
   width: 100%;
-  max-width: 18rem;
-  margin: 0 auto 1rem;
+  max-width: 22rem;
+  margin: 0 auto 1.5rem;
+  flex: 1 1 calc(33.333% - 1rem);
+  min-width: 280px;
 }
 
 .categoria {
-  min-height: 380px;
-  transition: transform 0.3s;
+  min-height: 420px;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+}
+
+.categoria .card {
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  height: 100%;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  position: relative;
 }
 
 .categoria:hover {
-  transform: translateY(-5px);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 15px 35px rgba(46, 139, 87, 0.2);
 }
 
-.card-img-top {
-  height: 120px;
-  object-fit: cover;
+.categoria:hover .card {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.categoria .card-img-top {
+  height: 180px;
+  object-fit: contain;
+  transition: transform 0.4s ease;
+  border-radius: 0;
+  background: #f8f9fa;
+  padding: 10px;
+}
+
+.categoria:hover .card-img-top {
+  transform: scale(1.05);
+}
+
+.categoria .card-body {
+  padding: 1.5rem;
+  position: relative;
+  background: white;
+  border-radius: 0 0 16px 16px;
+}
+
+.categoria .card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+  position: relative;
+}
+
+.categoria .card-title::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--green-primary), var(--green-light));
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.categoria:hover .card-title::after {
+  width: 60px;
+}
+
+.categoria .card-text {
+  color: #6c757d;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Efeito de overlay no hover */
+.categoria::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(46, 139, 87, 0.1), rgba(60, 179, 113, 0.1));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 16px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.categoria:hover::before {
+  opacity: 1;
+}
+
+/* Badge de categoria */
+.categoria .card-body::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  right: 20px;
+  width: 20px;
+  height: 20px;
+  background: var(--green-primary);
+  border-radius: 50%;
+  opacity: 0;
+  transition: all 0.3s ease;
+  transform: scale(0);
+}
+
+.categoria:hover .card-body::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Link styling */
+.categoria a {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  height: 100%;
+}
+
+.categoria a:hover {
+  color: inherit;
+  text-decoration: none;
 }
 
 /* Modal */
@@ -92,28 +216,81 @@ footer {
   }
 
   .categoria {
-    min-height: 320px;
+    min-height: 350px;
   }
 
-  .card-img-top {
-    height: 100px;
+  .categoria .card-img-top {
+    height: 140px;
+    object-fit: contain;
+    background: #f8f9fa;
+    padding: 8px;
   }
 
-  .carousel-control-prev,
-  .carousel-control-next {
-    width: 24px;
-    height: 24px;
+  .categoria .card-body {
+    padding: 1rem;
+  }
+
+  .categoria .card-title {
+    font-size: 1.1rem;
+  }
+
+  .categoria .card-text {
+    font-size: 0.85rem;
+    -webkit-line-clamp: 3;
+  }
+
+  #productCarousel {
+    padding: 0 40px;
+  }
+
+  #productCarousel .carousel-control-prev,
+  #productCarousel .carousel-control-next {
+    width: 40px;
+    height: 40px;
+  }
+
+  #productCarousel .carousel-control-prev {
+    left: 5px;
+  }
+
+  #productCarousel .carousel-control-next {
+    right: 5px;
   }
 }
 
 @media (min-width: 351px) and (max-width: 767px) {
   .largura-card {
-    width: 45%;
-    min-width: 160px;
+    width: 100%;
+    min-width: 200px;
+    max-width: 24rem;
+  }
+
+  .categoria {
+    min-height: 380px;
+  }
+
+  .categoria .card-img-top {
+    height: 160px;
+    object-fit: contain;
+    background: #f8f9fa;
+    padding: 10px;
+  }
+
+  .categoria .card-title {
+    font-size: 1.2rem;
+  }
+
+  #productCarousel {
+    padding: 0 50px;
+  }
+
+  /* Manter 3 categorias em linha em tablets pequenos */
+  #productCarousel .carousel-item .categoria {
+    min-width: 180px !important;
   }
 }
 
-@media (min-width: 768px) {
+@media (min-width: 768px) and (max-width: 991px) {
   #comunidade {
     padding: 3rem 0;
   }
@@ -121,38 +298,341 @@ footer {
   .btn-tamanho-fixo {
     width: 140px;
   }
+
+  .largura-card {
+    max-width: 20rem;
+    flex: 0 0 30%;
+  }
+
+  .categoria {
+    min-height: 400px;
+  }
+
+  .categoria .card-img-top {
+    height: 170px;
+    object-fit: contain;
+    background: #f8f9fa;
+    padding: 10px;
+  }
+
+  /* Manter 3 categorias em linha em tablets */
 }
 
-/* Ajuste das setas do carrossel de categorias */
+@media (min-width: 992px) {
+  #comunidade {
+    padding: 3rem 0;
+  }
+
+  .btn-tamanho-fixo {
+    width: 140px;
+  }
+
+  .largura-card {
+    max-width: 22rem;
+    flex: 0 0 30%;
+  }
+
+  .categoria {
+    min-height: 420px;
+  }
+
+  .categoria .card-img-top {
+    height: 180px;
+    object-fit: contain;
+    background: #f8f9fa;
+    padding: 10px;
+  }
+
+  .categoria:hover {
+    transform: translateY(-10px) scale(1.03);
+  }
+
+  /* Layout otimizado para desktop */
+  #productCarousel .carousel-item .d-flex {
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    gap: 2rem !important;
+  }
+}
+
+/* Efeitos especiais e melhorias */
+.categoria .card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(46, 139, 87, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  border-radius: 16px;
+}
+
+.categoria:hover .card::after {
+  opacity: 1;
+}
+
+/* Efeito de brilho no hover */
+.categoria .card-img-top::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.6s ease;
+}
+
+.categoria:hover .card-img-top::after {
+  left: 100%;
+}
+
+.categoria .card-img-top {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Título da seção de categorias */
+.h5.text-start.my-3.mx-3.mx-md-5.fw-bold {
+  position: relative;
+  color: #2c3e50;
+  font-size: 1.75rem;
+  margin-bottom: 2rem !important;
+}
+
+.h5.text-start.my-3.mx-3.mx-md-5.fw-bold::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--green-primary), var(--green-light));
+  border-radius: 2px;
+}
+
+/* Melhorias no container do carrossel */
+#productCarousel .carousel-inner {
+  padding: 10px 0;
+}
+
+/* Sombra suave no container */
+.container.px-0.px-md-3 {
+  position: relative;
+}
+
+.container.px-0.px-md-3::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(46, 139, 87, 0.1), transparent);
+  border-radius: 1px;
+}
+
+/* Animações suaves para transições */
+@media (prefers-reduced-motion: no-preference) {
+  .categoria,
+  .categoria .card,
+  .categoria .card-img-top,
+  .categoria .card-title::after,
+  .categoria .card::after,
+  .categoria .card-img-top::after,
+  #productCarousel .carousel-control-prev,
+  #productCarousel .carousel-control-next {
+    transition-duration: 0.4s;
+  }
+
+  /* Animação de entrada para os cards */
+  .categoria {
+    animation: fadeInUp 0.6s ease-out;
+  }
+
+  .categoria:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+
+  .categoria:nth-child(3) {
+    animation-delay: 0.2s;
+  }
+
+  .categoria:nth-child(4) {
+    animation-delay: 0.3s;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .categoria,
+  .categoria .card,
+  .categoria .card-img-top,
+  .categoria .card-title::after,
+  .categoria .card::after,
+  .categoria .card-img-top::after,
+  #productCarousel .carousel-control-prev,
+  #productCarousel .carousel-control-next {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* Carrossel de Categorias - Design Moderno */
+#productCarousel {
+  position: relative;
+  padding: 0 60px;
+  margin: 2rem 0;
+}
+
 #productCarousel .carousel-control-prev,
 #productCarousel .carousel-control-next {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   top: 50%;
   transform: translateY(-50%);
-  opacity: 0.8;
-  z-index: 2;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  opacity: 0.9;
+  z-index: 10;
+  transition: all 0.3s ease;
+  border: 2px solid #f8f9fa;
+}
+
+#productCarousel .carousel-control-prev:hover,
+#productCarousel .carousel-control-next:hover {
+  opacity: 1;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 20px rgba(46, 139, 87, 0.2);
+  border-color: var(--green-primary);
 }
 
 #productCarousel .carousel-control-prev {
-  left: -30px; /* Afasta a seta da esquerda dos cards */
+  left: 10px;
 }
 
 #productCarousel .carousel-control-next {
-  right: -30px; /* Afasta a seta da direita dos cards */
+  right: 10px;
 }
 
 #productCarousel .carousel-control-prev-icon,
 #productCarousel .carousel-control-next-icon {
-  width: 32px;
-  height: 32px;
-  filter: invert(41%) sepia(94%) saturate(355%) hue-rotate(83deg) brightness(90%) contrast(90%);
-  background-color: transparent !important;
+  width: 20px;
+  height: 20px;
+  background-image: none;
+  position: relative;
 }
 
-/* Ajuste do espaçamento dos cards dentro do carrossel */
+#productCarousel .carousel-control-prev-icon::before,
+#productCarousel .carousel-control-next-icon::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  border-top: 2px solid var(--green-primary);
+  border-right: 2px solid var(--green-primary);
+  transition: border-color 0.3s ease;
+}
+
+#productCarousel .carousel-control-prev-icon::before {
+  transform: translate(-50%, -50%) rotate(-135deg);
+}
+
+#productCarousel .carousel-control-next-icon::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+#productCarousel .carousel-control-prev:hover .carousel-control-prev-icon::before,
+#productCarousel .carousel-control-next:hover .carousel-control-next-icon::before {
+  border-color: var(--green-dark);
+}
+
+/* Layout forçado para 3 categorias em linha */
+#productCarousel .carousel-item .d-flex {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  justify-content: space-between !important;
+  align-items: stretch !important;
+  gap: 1rem;
+  padding: 20px 0;
+}
+
 #productCarousel .carousel-item .categoria {
-  margin-left: 10px;
-  margin-right: 10px;
+  flex: 1 1 calc(33.333% - 0.67rem) !important;
+  max-width: calc(33.333% - 0.67rem) !important;
+  min-width: 250px !important;
+  margin: 0 !important;
+}
+
+/* Garantir que sempre caibam 3 em linha */
+@media (max-width: 767px) {
+  #productCarousel .carousel-item .categoria {
+    min-width: 200px !important;
+  }
+  
+  #productCarousel .carousel-item .d-flex {
+    gap: 0.5rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  #productCarousel .carousel-item .categoria {
+    min-width: 150px !important;
+  }
+  
+  #productCarousel .carousel-item .d-flex {
+    gap: 0.25rem !important;
+  }
+  
+  .categoria .card-body {
+    padding: 1rem !important;
+  }
+  
+  .categoria .card-title {
+    font-size: 1rem !important;
+  }
+  
+  .categoria .card-text {
+    font-size: 0.8rem !important;
+    -webkit-line-clamp: 2 !important;
+  }
+}
+
+/* Indicadores do carrossel (se necessário) */
+#productCarousel .carousel-indicators {
+  bottom: -40px;
+}
+
+#productCarousel .carousel-indicators button {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #dee2e6;
+  border: none;
+  margin: 0 4px;
+  transition: all 0.3s ease;
+}
+
+#productCarousel .carousel-indicators button.active {
+  background-color: var(--green-primary);
+  transform: scale(1.2);
 }
 

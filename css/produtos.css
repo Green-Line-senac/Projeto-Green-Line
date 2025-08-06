@@ -11,6 +11,33 @@ body {
     margin-top: 100px !important; /* Adiciona uma margem superior de 100px, com prioridade devido ao uso de !important */
 }
 
+/* Espaçamento entre carrossel e conteúdo principal */
+.produtos-main {
+    margin-top: 3rem; /* Adiciona espaço entre o carrossel e os filtros/busca */
+}
+
+.produtos-content {
+    padding-top: 2rem; /* Padding adicional para mais respiração */
+    padding-bottom: 2rem; /* Padding inferior para equilibrar */
+}
+
+/* Espaçamento adicional para a seção de filtros */
+.filter-container {
+    margin-top: 1rem; /* Espaço extra acima dos filtros */
+    padding-right: 1rem; /* Espaço à direita dos filtros */
+}
+
+/* Espaçamento para a barra de busca */
+.search-enhanced {
+    margin-top: 1rem; /* Espaço extra acima da barra de busca */
+    margin-bottom: 1.5rem; /* Espaço extra abaixo da barra de busca */
+}
+
+/* Espaçamento entre seções */
+.row {
+    margin-bottom: 1rem; /* Espaço entre as linhas */
+}
+
 /* Estilo para imagens dentro do carrossel */
 #carouselExampleSlidesOnly .carousel-inner img {
     height: 200px; /* Define uma altura fixa para as imagens */
@@ -48,6 +75,91 @@ body {
     color: #6c757d; /* Cor do texto do item desativado */
     background-color: transparent; /* Cor de fundo do item desativado */
     border-color: #dee2e6; /* Borda do item desativado */
+}
+
+/* Estilos específicos para a paginação com setas */
+.pagination {
+    justify-content: center;
+    gap: 0.25rem;
+    flex-wrap: nowrap;
+}
+
+.pagination .page-item .page-link {
+    border-radius: 0.375rem;
+    min-width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+    border: 1px solid #198754;
+}
+
+.pagination .page-item:first-child .page-link,
+.pagination .page-item:last-child .page-link {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.pagination .page-item.disabled .page-link {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination .page-item.disabled .page-link:hover {
+    background-color: transparent;
+    color: #6c757d;
+}
+
+/* Responsividade para dispositivos móveis */
+@media (max-width: 576px) {
+    .pagination .page-item .page-link {
+        min-width: 35px;
+        height: 35px;
+        font-size: 0.875rem;
+    }
+    
+    .pagination .page-item:first-child .page-link,
+    .pagination .page-item:last-child .page-link {
+        font-size: 1rem;
+    }
+    
+    #info-pagina {
+        font-size: 0.75rem !important;
+        text-align: center !important;
+    }
+    
+    /* Ajustar espaçamento em dispositivos móveis */
+    .produtos-main {
+        margin-top: 2rem;
+    }
+    
+    .produtos-content {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+    
+    .filter-container,
+    .search-enhanced {
+        margin-top: 0.5rem;
+    }
+    
+    .filter-container {
+        padding-right: 0.5rem;
+    }
+}
+
+/* Responsividade para tablets */
+@media (min-width: 577px) and (max-width: 992px) {
+    .produtos-main {
+        margin-top: 2.5rem;
+    }
+    
+    .produtos-content {
+        padding-top: 1.5rem;
+        padding-bottom: 1.5rem;
+    }
 }
 
 .col-12.filter-container {

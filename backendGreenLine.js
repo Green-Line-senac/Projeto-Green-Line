@@ -231,7 +231,7 @@ app.post("/pedidos", async (req, res) => {
 });
 
 app.post("/carrinho", async (req, res) => {
-  let { id_pessoa, id_produto, quantidade } = req.body;
+  let { id_pessoa, id_produto, quantidade, tamanho } = req.body;
 
   if (!id_pessoa || !id_produto || !quantidade) {
     return res.status(400).json({
@@ -272,8 +272,8 @@ app.post("/carrinho", async (req, res) => {
     }
 
     await db.query(
-      "INSERT INTO carrinho_itens (id_carrinho, id_produto, quantidade) VALUES (?, ?, ?)",
-      [id_carrinho, id_produto, quantidade]
+      "INSERT INTO carrinho_itens (id_carrinho, id_produto, quantidade, tamanho) VALUES (?, ?, ?, ?)",
+      [id_carrinho, id_produto, quantidade, tamanho || null]
     );
 
     res.status(201).json({
@@ -653,8 +653,11 @@ app.post("/cadastro-produto", async (req, res) => {
                 produto, descricao, descricao_curta, preco, 
                 preco_promocional, promocao, marca, avaliacao, 
                 quantidade_avaliacoes, estoque, parcelas_permitidas, 
-                peso_kg, dimensoes, ativo, imagem_1, imagem_2, categoria
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                peso_kg, dimensoes, ativo, imagem_1, imagem_2, categoria,
+                tem_tamanho, tamanhos, tem_medidas, comprimento, 
+                largura_medida, altura_medida, diametro, capacidade, 
+                unidade_medida, observacoes_medidas
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
     const result = await db.query(sql, [
@@ -666,10 +669,10 @@ app.post("/cadastro-produto", async (req, res) => {
       outrosDados.promocao ? 1 : 0,
       outrosDados.marca || "",
       parseInt(outrosDados.avaliacao) || 0,
-      parseInt(outrosDados.quantidade_avaliacao) || 0,
+      parseInt(outrosDados.quantidade_avaliacoes) || 0,
       parseInt(outrosDados.estoque) || 0,
-      parseInt(outrosDados.parcelas) || 0,
-      parseFloat(outrosDados.peso) || 0,
+      parseInt(outrosDados.parcelas_permitidas) || 1,
+      parseFloat(outrosDados.peso_kg) || 0,
       outrosDados.dimensoes || "0x0x0",
       outrosDados.ativo ? 1 : 0,
       imagem_1 ||
@@ -677,6 +680,17 @@ app.post("/cadastro-produto", async (req, res) => {
       imagem_2 ||
       "https://www.malhariapradense.com.br/wp-content/uploads/2017/08/produto-sem-imagem.png",
       outrosDados.categoria,
+      // Novos campos de tamanho e medidas
+      outrosDados.tem_tamanho ? 1 : 0,
+      outrosDados.tamanhos || null,
+      outrosDados.tem_medidas ? 1 : 0,
+      outrosDados.comprimento ? parseFloat(outrosDados.comprimento) : null,
+      outrosDados.largura_medida ? parseFloat(outrosDados.largura_medida) : null,
+      outrosDados.altura_medida ? parseFloat(outrosDados.altura_medida) : null,
+      outrosDados.diametro ? parseFloat(outrosDados.diametro) : null,
+      outrosDados.capacidade ? parseFloat(outrosDados.capacidade) : null,
+      outrosDados.unidade_medida || null,
+      outrosDados.observacoes_medidas || null
     ]);
 
     res.status(201).json({
@@ -685,6 +699,7 @@ app.post("/cadastro-produto", async (req, res) => {
       mensagem: "Produto cadastrado com sucesso",
     });
   } catch (error) {
+    console.error("Erro ao cadastrar produto:", error);
     res.status(500).json({
       error: "Erro interno no servidor",
       detalhes:
@@ -1554,7 +1569,7 @@ app.get("/avaliacoes", async (req, res) => {
   }
   try {
     const avaliacoes = await db.query(
-      "SELECT id_pessoa, nota, comentario, data FROM avaliacoes WHERE id_produto = ? ORDER BY data DESC",
+      "SELECT a.id_pessoa, a.nota, a.comentario, a.data, p.nome FROM avaliacoes a LEFT JOIN pessoa p ON a.id_pessoa = p.id_pessoa WHERE a.id_produto = ? ORDER BY a.data DESC",
       [id_produto]
     );
     // Calcular média e total
@@ -2009,7 +2024,8 @@ app.get('/pessoa/:id_pessoa/pedidos', verificarToken, async (req, res) => {
             return res.status(403).json({ error: 'Acesso negado. Você não tem permissão para visualizar este histórico de pedidos.' });
         }
 
-        const [pedidos] = await db.query(
+        // Buscar pedidos do usuário
+        const pedidos = await db.query(
             `SELECT
                 p.id_pedido,
                 p.numero_pedido,
@@ -2023,7 +2039,30 @@ app.get('/pessoa/:id_pessoa/pedidos', verificarToken, async (req, res) => {
             [id_pessoa]
         );
 
-        res.json(pedidos);
+        // Para cada pedido, buscar os produtos
+        const pedidosComProdutos = await Promise.all(
+            pedidos.map(async (pedido) => {
+                const produtos = await db.query(
+                    `SELECT
+                        pp.id_produto,
+                        pp.nome_produto as nome,
+                        pp.quantidade,
+                        pp.preco_unitario,
+                        p.imagem_1 as imagem
+                    FROM pedido_produto pp
+                    LEFT JOIN produto p ON pp.id_produto = p.id_produto
+                    WHERE pp.id_pedido = ?`,
+                    [pedido.id_pedido]
+                );
+
+                return {
+                    ...pedido,
+                    produtos: produtos || []
+                };
+            })
+        );
+
+        res.json(pedidosComProdutos);
     } catch (err) {
         console.error('Erro ao buscar pedidos do usuário:', err);
         res.status(500).json({ error: 'Erro ao buscar histórico de pedidos.' });

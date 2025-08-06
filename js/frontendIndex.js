@@ -9,6 +9,25 @@ const config = {
 // Inicialização
 document.addEventListener("DOMContentLoaded", inicializarApp);
 
+// Listener para detectar atualizações de produtos e mudanças de login
+window.addEventListener('storage', (e) => {
+  if (e.key === 'produtoAtualizado') {
+    const dados = JSON.parse(e.newValue);
+    console.log('Produto atualizado detectado no index:', dados);
+    // Recarregar produtos para refletir nova avaliação
+    carregarProdutosPromocao();
+  }
+  
+  // Detectar mudanças no status de login
+  if (e.key === 'id_pessoa' || e.key === 'userToken' || e.key === 'usuario') {
+    console.log('Mudança no status de login detectada');
+    // Atualizar estado local
+    estado.id_pessoa = sessionStorage.getItem('id_pessoa');
+    // Controlar visibilidade da seção de comunidade
+    controlarSecaoComunidade();
+  }
+});
+
 // Cache de elementos DOM
 const elementos = {
   carrosselImagem: document.getElementById("carrosel-imagem"),
@@ -36,6 +55,9 @@ async function inicializarApp() {
   try {
     estado.carregando = true;
     await Promise.all([carregarProdutosPromocao()]);
+    
+    // Controlar visibilidade da seção de comunidade
+    controlarSecaoComunidade();
   } catch (erro) {
     console.error("Erro na inicialização:", erro);
     mostrarFeedback("Opa, algo deu errado! Tente recarregar.", "danger");
@@ -138,8 +160,8 @@ function criarCardProduto(produto) {
       <div class="card-body">
         <h6 class="card-title">${escapeHtml(produto.nome)}</h6>
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <span class="text-warning">${gerarEstrelas(Number(produto.avaliacao))}</span>
-          <small class="text-muted">${produto.numAvaliacoes} av.</small>
+          <span class="text-warning">${gerarEstrelas(produto.avaliacao)}</span>
+          <small class="text-muted">${produto.numAvaliacoes || 0} av.</small>
         </div>
         <p class="card-text text-muted small">${escapeHtml(
       produto.descricao_curta.substring(0, 60)
@@ -159,11 +181,59 @@ function criarCardProduto(produto) {
       </div>
     </div>
   `;
-  // Ao clicar no card, redireciona para a página de detalhes do produto
+  // Ao clicar no card, salva o produto e redireciona para a página de detalhes
   card.addEventListener('click', () => {
+    // Salvar produto no sessionStorage para a página de detalhes
+    const produtoDetalhe = {
+      id_produto: produto.id_produto,
+      produto: produto.nome,
+      nome: produto.nome,
+      imagem_1: produto.imagem_1,
+      imagem_2: produto.imagem_2,
+      imagem_3: produto.imagem_3,
+      preco: produto.preco,
+      preco_promocional: produto.preco_promocional,
+      promocao: produto.promocao,
+      avaliacao: produto.avaliacao,
+      numAvaliacoes: produto.numAvaliacoes,
+      estoque: produto.estoque,
+      descricao: produto.descricao,
+      descricao_curta: produto.descricao_curta,
+      categoria: produto.categoria,
+      marca: produto.marca
+    };
+    sessionStorage.setItem('produtoSelecionado', JSON.stringify(produtoDetalhe));
     window.location.href = `${caminho}/produto.html?id=${produto.id_produto}`;
   });
   return card;
+}
+
+// ==================== FUNÇÕES DE CONTROLE DE INTERFACE ====================
+
+function controlarSecaoComunidade() {
+  const secaoComunidade = document.getElementById('comunidade');
+  
+  if (!secaoComunidade) {
+    console.warn('Seção de comunidade não encontrada');
+    return;
+  }
+
+  // Verificar se o usuário está logado
+  const id_pessoa = sessionStorage.getItem('id_pessoa');
+  const userToken = sessionStorage.getItem('userToken');
+  const usuario = sessionStorage.getItem('usuario');
+  
+  const usuarioLogado = id_pessoa && userToken && usuario;
+  
+  if (usuarioLogado) {
+    // Usuário logado: esconder seção de comunidade
+    secaoComunidade.style.display = 'none';
+    console.log('Usuário logado detectado - seção de comunidade ocultada');
+  } else {
+    // Usuário não logado: mostrar seção de comunidade
+    secaoComunidade.style.display = 'block';
+    console.log('Usuário não logado - seção de comunidade exibida');
+  }
 }
 
 // ==================== FUNÇÕES AUXILIARES ====================
@@ -171,8 +241,12 @@ function criarCardProduto(produto) {
 function sanitizarProduto(produto) {
   const precoProcessado = typeof produto.preco === 'string' ? parseFloat(produto.preco.replace(',', '.')) : Number(produto.preco) || 0;
   const precoPromocionalProcessado = typeof produto.preco_promocional === 'string' ? parseFloat(produto.preco_promocional.replace(',', '.')) : Number(produto.preco_promocional) || 0;
+  
+  // Garantir que avaliação seja um número válido
+  const avaliacaoProcessada = Number(produto.avaliacao) || 0;
+  const numAvaliacoesProcessado = Number(produto.numAvaliacoes) || 0;
 
-  console.log('Sanitizando produto:', produto.nome || produto.produto, 'Preço original:', produto.preco, 'Preço processado:', precoProcessado);
+  console.log('Sanitizando produto:', produto.nome || produto.produto, 'Avaliação:', avaliacaoProcessada, 'Num avaliações:', numAvaliacoesProcessado);
 
   return {
     ...produto,
@@ -180,8 +254,8 @@ function sanitizarProduto(produto) {
     preco: precoProcessado,
     preco_promocional: precoPromocionalProcessado,
     promocao: Boolean(produto.promocao),
-    avaliacao: Number(produto.avaliacao) || 0,
-    numAvaliacoes: Number(produto.numAvaliacoes) || 0,
+    avaliacao: avaliacaoProcessada,
+    numAvaliacoes: numAvaliacoesProcessado,
     estoque: Number(produto.estoque),
     nome: produto.produto || produto.nome || "Produto sem nome",
     descricao: produto.descricao || "Sem descrição",
@@ -201,9 +275,10 @@ function escapeHtml(str) {
 }
 
 function gerarEstrelas(nota) {
-  if (!nota) return "☆☆☆☆☆";
-  const estrelasCheias = Math.round(nota);
-  return "★".repeat(estrelasCheias) + "☆".repeat(5 - estrelasCheias);
+  const notaNum = Number(nota) || 0;
+  if (notaNum <= 0) return "☆☆☆☆☆";
+  const estrelasCheias = Math.round(notaNum);
+  return "★".repeat(Math.min(estrelasCheias, 5)) + "☆".repeat(Math.max(5 - estrelasCheias, 0));
 }
 
 function mostrarLoader() {
@@ -245,6 +320,18 @@ function mostrarFeedback(mensagem, tipo = "success") {
 // ==================== EVENT LISTENERS ====================
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Verificar periodicamente mudanças no status de login (para mesma aba)
+  let ultimoStatusLogin = sessionStorage.getItem('id_pessoa');
+  setInterval(() => {
+    const statusAtual = sessionStorage.getItem('id_pessoa');
+    if (statusAtual !== ultimoStatusLogin) {
+      console.log('Mudança no status de login detectada (mesma aba)');
+      ultimoStatusLogin = statusAtual;
+      estado.id_pessoa = statusAtual;
+      controlarSecaoComunidade();
+    }
+  }, 1000); // Verificar a cada segundo
+
   // Controle de quantidade
   document
     .querySelectorAll('[data-action="increase"]')
