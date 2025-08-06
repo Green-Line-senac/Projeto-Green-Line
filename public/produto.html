@@ -219,6 +219,35 @@
                 <!-- Características via JS -->
               </ul>
             </div>
+
+            <!-- Seleção de Tamanho/Medidas -->
+            <div class="produto-opcoes mb-3" id="produto-opcoes" style="display: none;">
+              <div class="mb-3">
+                <label class="form-label fw-bold">Tamanho:</label>
+                <div class="tamanhos-container" id="tamanhos-container">
+                  <!-- Tamanhos serão carregados dinamicamente -->
+                </div>
+              </div>
+              
+              <div class="mb-3" id="medidas-section" style="display: none;">
+                <label class="form-label fw-bold">Medidas:</label>
+                <div class="medidas-info" id="medidas-info">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <small class="text-muted">
+                        <strong>Dimensões:</strong> <span id="produto-dimensoes">-</span>
+                      </small>
+                    </div>
+                    <div class="col-md-6">
+                      <small class="text-muted">
+                        <strong>Peso:</strong> <span id="produto-peso">-</span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="bloco-compra p-3 mb-3">
               <div class="mb-2">
                 <label for="quantidade" class="form-label mb-0"

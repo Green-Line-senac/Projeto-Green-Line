@@ -773,6 +773,29 @@ function displayPedidos(pedidos) {
     const pagamento = pedido.pagamento_situacao || 'Não informado';
     const valorTotal = formatCurrency(pedido.valor_total);
 
+    // Renderizar produtos do pedido
+    const produtosHtml = pedido.produtos && pedido.produtos.length > 0 
+      ? pedido.produtos.map(produto => `
+          <div class="produto-item">
+            <div class="produto-info">
+              <img src="${produto.imagem || '../img/imagem-nao-disponivel.png'}" 
+                   alt="${produto.nome}" class="produto-thumb" 
+                   onerror="this.src='../img/imagem-nao-disponivel.png'">
+              <div class="produto-detalhes">
+                <h4>${produto.nome}</h4>
+                <p>Quantidade: ${produto.quantidade}</p>
+                <p>Preço: ${formatCurrency(produto.preco_unitario)}</p>
+              </div>
+            </div>
+            <div class="produto-acoes">
+              <button class="btn-avaliar" onclick="abrirModalAvaliacao('${produto.id_produto}', '${produto.nome}', '${numeroPedido}')">
+                <i class="fas fa-star"></i> Avaliar
+              </button>
+            </div>
+          </div>
+        `).join('')
+      : '<p class="no-products">Produtos não disponíveis</p>';
+
     card.innerHTML = `
       <div class="purchase-header">
         <h3>Pedido #${numeroPedido}</h3>
@@ -782,6 +805,10 @@ function displayPedidos(pedidos) {
         <p><strong>Data:</strong> ${dataPedido}</p>
         <p><strong>Pagamento:</strong> ${pagamento}</p>
         <p class="purchase-total"><strong>Total:</strong> ${valorTotal}</p>
+      </div>
+      <div class="purchase-products">
+        <h4>Produtos:</h4>
+        ${produtosHtml}
       </div>
     `;
     
@@ -859,3 +886,169 @@ function logout() {
     alert("Erro ao fazer logout.");
   }
 }
+
+// ==================== SISTEMA DE AVALIAÇÃO ====================
+
+let avaliacaoAtual = {
+  idProduto: null,
+  nomeProduto: '',
+  numeroPedido: '',
+  nota: 0
+};
+
+// Função para abrir o modal de avaliação
+function abrirModalAvaliacao(idProduto, nomeProduto, numeroPedido) {
+  avaliacaoAtual = {
+    idProduto: idProduto,
+    nomeProduto: nomeProduto,
+    numeroPedido: numeroPedido,
+    nota: 0
+  };
+
+  // Preencher informações do produto
+  document.getElementById('avaliacaoProdutoNome').textContent = nomeProduto;
+  document.getElementById('avaliacaoPedidoNumero').textContent = `Pedido: ${numeroPedido}`;
+  
+  // Resetar formulário
+  document.getElementById('notaAvaliacao').value = '';
+  document.getElementById('comentarioAvaliacao').value = '';
+  resetarEstrelas();
+  
+  // Mostrar modal
+  document.getElementById('avaliacaoModal').classList.remove('hidden');
+}
+
+// Função para fechar o modal de avaliação
+function fecharModalAvaliacao() {
+  document.getElementById('avaliacaoModal').classList.add('hidden');
+  avaliacaoAtual = { idProduto: null, nomeProduto: '', numeroPedido: '', nota: 0 };
+}
+
+// Função para resetar as estrelas
+function resetarEstrelas() {
+  const stars = document.querySelectorAll('.star');
+  stars.forEach(star => {
+    star.classList.remove('active', 'hover');
+  });
+}
+
+// Função para definir a avaliação por estrelas
+function definirAvaliacao(nota) {
+  avaliacaoAtual.nota = nota;
+  document.getElementById('notaAvaliacao').value = nota;
+  
+  const stars = document.querySelectorAll('.star');
+  stars.forEach((star, index) => {
+    if (index < nota) {
+      star.classList.add('active');
+      star.classList.remove('hover');
+    } else {
+      star.classList.remove('active', 'hover');
+    }
+  });
+}
+
+// Event listeners para as estrelas
+document.addEventListener('DOMContentLoaded', function() {
+  const stars = document.querySelectorAll('.star');
+  
+  stars.forEach((star, index) => {
+    // Hover effect
+    star.addEventListener('mouseenter', function() {
+      stars.forEach((s, i) => {
+        if (i <= index) {
+          s.classList.add('hover');
+        } else {
+          s.classList.remove('hover');
+        }
+      });
+    });
+    
+    // Click para selecionar
+    star.addEventListener('click', function() {
+      const rating = parseInt(star.getAttribute('data-rating'));
+      definirAvaliacao(rating);
+    });
+  });
+  
+  // Remover hover quando sair da área das estrelas
+  document.querySelector('.rating-stars').addEventListener('mouseleave', function() {
+    stars.forEach(star => star.classList.remove('hover'));
+  });
+});
+
+// Função para enviar avaliação
+async function enviarAvaliacao(event) {
+  event.preventDefault();
+  
+  const nota = parseInt(document.getElementById('notaAvaliacao').value);
+  const comentario = document.getElementById('comentarioAvaliacao').value.trim();
+  const idPessoa = sessionStorage.getItem('id_pessoa');
+  
+  if (!nota || nota < 1 || nota > 5) {
+    showError('Avaliação inválida', 'Por favor, selecione uma nota de 1 a 5 estrelas');
+    return;
+  }
+  
+  if (!idPessoa) {
+    showError('Erro de autenticação', 'Faça login novamente para avaliar');
+    return;
+  }
+  
+  const loadingId = showLoading('Enviando avaliação...', 'Registrando sua opinião sobre o produto');
+  
+  try {
+    const response = await fetch(`${api.online}/avaliacoes`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id_produto: avaliacaoAtual.idProduto,
+        id_pessoa: idPessoa,
+        nota: nota,
+        comentario: comentario || null
+      })
+    });
+    
+    hideNotification(loadingId);
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.mensagem || 'Erro ao enviar avaliação');
+    }
+    
+    const result = await response.json();
+    
+    if (result.sucesso) {
+      showSuccess('Avaliação enviada!', 'Obrigado por avaliar nosso produto');
+      fecharModalAvaliacao();
+      
+      // Atualizar o botão para mostrar que já foi avaliado
+      const botaoAvaliar = document.querySelector(`button[onclick*="${avaliacaoAtual.idProduto}"]`);
+      if (botaoAvaliar) {
+        botaoAvaliar.innerHTML = '<i class="fas fa-check"></i> Avaliado';
+        botaoAvaliar.disabled = true;
+      }
+    } else {
+      throw new Error(result.mensagem || 'Erro ao processar avaliação');
+    }
+    
+  } catch (error) {
+    hideNotification(loadingId);
+    console.error('Erro ao enviar avaliação:', error);
+    showError('Erro ao avaliar', error.message || 'Não foi possível enviar sua avaliação');
+  }
+}
+
+// Event listener para o formulário de avaliação
+document.addEventListener('DOMContentLoaded', function() {
+  const avaliacaoForm = document.getElementById('avaliacaoForm');
+  if (avaliacaoForm) {
+    avaliacaoForm.addEventListener('submit', enviarAvaliacao);
+  }
+});
+
+// Tornar funções globais para uso no HTML
+window.abrirModalAvaliacao = abrirModalAvaliacao;
+window.fecharModalAvaliacao = fecharModalAvaliacao;

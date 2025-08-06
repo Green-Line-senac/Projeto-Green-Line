@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (produtoObj && String(produtoObj.id_produto) === String(id)) {
         produto = produtoObj;
       }
-    } catch (e) {}
+    } catch (e) { }
   }
 
   // Se não achou, busca do backend
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const res = await fetch(`https://green-line-web.onrender.com/produto?id=${id}`);
       const produtos = await res.json();
       produto = Array.isArray(produtos) ? produtos.find(p => p.id_produto == id) : produtos;
-    } catch (e) {}
+    } catch (e) { }
   }
 
   if (!produto) {
@@ -41,10 +41,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   preencherCamposProduto(produto);
 });
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   const btnVoltar = document.getElementById('btn-voltar-produtos');
   if (btnVoltar) {
-    btnVoltar.addEventListener('click', function() {
+    btnVoltar.addEventListener('click', function () {
       window.history.back();
     });
   }
@@ -53,13 +53,13 @@ document.addEventListener('DOMContentLoaded', function() {
 function formatarPrecoBR(valor) {
   // Garantir que o valor seja um número
   const numeroValor = typeof valor === 'string' ? parseFloat(valor.replace(',', '.')) : Number(valor);
-  
+
   // Verificar se é um número válido
   if (isNaN(numeroValor)) {
     console.warn('Valor inválido para formatação:', valor);
     return 'R$ 0,00';
   }
-  
+
   return numeroValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
@@ -79,7 +79,7 @@ function preencherCamposProduto(produto) {
       thumb.className = 'produto-thumb rounded';
       thumb.width = 56;
       thumb.height = 56;
-      thumb.alt = 'Miniatura ' + (idx+1);
+      thumb.alt = 'Miniatura ' + (idx + 1);
       thumb.style.cursor = 'pointer';
       thumb.onclick = () => { if (imgEl) imgEl.src = img; };
       thumbsEl.appendChild(thumb);
@@ -124,12 +124,15 @@ function preencherCamposProduto(produto) {
   const parcEl = document.getElementById('produto-parcelamento');
   if (parcEl) {
     const valor = emPromocao ? produto.preco_promocional : produto.preco;
-    parcEl.textContent = `ou 12x de ${formatarPrecoBR(valor/12)} sem juros`;
+    parcEl.textContent = `ou 12x de ${formatarPrecoBR(valor / 12)} sem juros`;
   }
 
   // Descrição
   const descEl = document.getElementById('produto-descricao');
   if (descEl) descEl.textContent = produto.descricao || 'Sem descrição.';
+
+  // Tamanhos e Medidas
+  carregarTamanhosEMedidas(produto);
 
   // Características (exemplo: separa por quebra de linha ou vírgula)
   const caracEl = document.getElementById('produto-caracteristicas');
@@ -192,9 +195,9 @@ function preencherCamposProduto(produto) {
   }
   // Texto de máximo
   const maxTextEl = qtdEl ? qtdEl.closest('.mb-2').querySelector('small.text-muted') : null;
-if (maxTextEl) {
-  maxTextEl.textContent = `Máximo ${maxEstoque} unidade${maxEstoque > 1 ? 's' : ''} por pedido`;
-}
+  if (maxTextEl) {
+    maxTextEl.textContent = `Máximo ${maxEstoque} unidade${maxEstoque > 1 ? 's' : ''} por pedido`;
+  }
 
 
   // Botões de quantidade (declarar antes de atualizarTotal)
@@ -216,8 +219,8 @@ if (maxTextEl) {
     qtdEl.oninput = atualizarTotal;
     atualizarTotal();
   }
-  if (btnMenos && qtdEl) btnMenos.onclick = () => { qtdEl.value = Math.max(1, Number(qtdEl.value)-1); atualizarTotal(); };
-  if (btnMais && qtdEl) btnMais.onclick = () => { qtdEl.value = Math.min(maxEstoque, Number(qtdEl.value)+1); atualizarTotal(); };
+  if (btnMenos && qtdEl) btnMenos.onclick = () => { qtdEl.value = Math.max(1, Number(qtdEl.value) - 1); atualizarTotal(); };
+  if (btnMais && qtdEl) btnMais.onclick = () => { qtdEl.value = Math.min(maxEstoque, Number(qtdEl.value) + 1); atualizarTotal(); };
 
   // Garantir alinhamento visual do campo de quantidade
   const inputGroup = qtdEl ? qtdEl.closest('.input-group') : null;
@@ -252,36 +255,55 @@ if (maxTextEl) {
   } else {
     if (btnComprar && qtdEl && produto) {
       btnComprar.onclick = () => {
-        const id_pessoa = sessionStorage.getItem('id_pessoa');
-        if (!id_pessoa) {
-          showAlert('Por favor, faça login ou cadastro para continuar sua compra.',"danger");
+        // Validar seleção de tamanho primeiro
+        if (!validarSelecaoTamanho()) {
+          showAlert('Por favor, selecione um tamanho antes de comprar.', 'warning');
           return;
         }
-    
+
+        const id_pessoa = sessionStorage.getItem('id_pessoa');
+        if (!id_pessoa) {
+          showAlert('Por favor, faça login ou cadastro para continuar sua compra.', "danger");
+          return;
+        }
+
         const quantidade = Math.max(1, Math.min(Number(qtdEl.value) || 1, maxEstoque));
         const preco_final = emPromocao ? produto.preco_promocional : produto.preco;
         const subtotal = Number((preco_final * quantidade).toFixed(2));
-    
+
+        // Obter dados do produto com tamanho
+        const dadosProduto = obterDadosProdutoComTamanho();
+
         const dadosCompra = {
           nome_produto: produto.nome || produto.produto || 'Produto',
           preco_final,
           quantidade,
           subtotal,
           id_produto: produto.id_produto || null,
+          tamanho: dadosProduto.tamanho || null,
           data: new Date().toISOString(),
         };
-    
+
         sessionStorage.setItem('dadosCompra', JSON.stringify(dadosCompra));
         window.location.href = 'vendas.html';
       };
     }
     if (btnCarrinho && qtdEl) btnCarrinho.onclick = () => {
+      // Validar seleção de tamanho primeiro
+      if (!validarSelecaoTamanho()) {
+        showAlert('Por favor, selecione um tamanho antes de adicionar ao carrinho.', 'warning');
+        return;
+      }
+
       const quantidade = Math.max(1, Math.min(Number(qtdEl.value) || 1, maxEstoque));
       const id_pessoa = sessionStorage.getItem('id_pessoa');
       if (!id_pessoa) {
-        showAlert('Por favor, faça login ou cadastro para adicionar ao carrinho.',"danger");
+        showAlert('Por favor, faça login ou cadastro para adicionar ao carrinho.', "danger");
         return;
       }
+
+      // Obter dados do produto com tamanho
+      const dadosProduto = obterDadosProdutoComTamanho();
 
       fetch('https://green-line-web.onrender.com/carrinho', {
         method: 'POST',
@@ -289,19 +311,21 @@ if (maxTextEl) {
         body: JSON.stringify({
           id_pessoa: Number(id_pessoa),
           id_produto: produto.id_produto,
-          quantidade
+          quantidade,
+          tamanho: dadosProduto.tamanho || null
         })
       })
         .then(res => res.json())
         .then(resposta => {
           if (resposta.codigo === 1 || resposta.mensagem === 'ITEM_DUPLICADO') {
-            showAlert('Este item já está no seu carrinho',"warning");
+            showAlert('Este item já está no seu carrinho', "warning");
           } else if (resposta.sucesso) {
             sessionStorage.setItem('carrinho', (Number(sessionStorage.getItem('carrinho') || 0) + 1));
             const badgeCarrinho = document.getElementById('badge-carrinho');
             if (badgeCarrinho) {
-              badgeCarrinho.textContent = (Number(badgeCarrinho.textContent) || 0) + quantidade;}
-            showAlert('Item adicionado ao carrinho com sucesso!',"success");
+              badgeCarrinho.textContent = (Number(badgeCarrinho.textContent) || 0) + quantidade;
+            }
+            showAlert('Item adicionado ao carrinho com sucesso!', "success");
           } else {
             showAlert('❌ Falha ao adicionar item ao carrinho');
           }
@@ -315,7 +339,7 @@ if (maxTextEl) {
 
 function gerarEstrelas(nota) {
   const n = Math.round(Number(nota) || 0);
-  return '<i class="fas fa-star text-warning"></i>'.repeat(n) + '<i class="far fa-star text-warning"></i>'.repeat(5-n);
+  return '<i class="fas fa-star text-warning"></i>'.repeat(n) + '<i class="far fa-star text-warning"></i>'.repeat(5 - n);
 }
 
 function renderEstrelas(nota) {
@@ -436,7 +460,7 @@ async function carregarAvaliacoes(id_produto) {
           comentarioUsuario = minhaAvaliacao.comentario || '';
           // Preenche estrelas e comentário
           setTimeout(() => {
-            for (let j = 1; j <= 5; j++) estrelasEl.children[j-1].style.color = j <= notaSelecionada ? '#FFD600' : '#ccc';
+            for (let j = 1; j <= 5; j++) estrelasEl.children[j - 1].style.color = j <= notaSelecionada ? '#FFD600' : '#ccc';
             comentarioEl.value = comentarioUsuario;
             btnEnviar.style.display = '';
             btnEnviar.textContent = 'Editar Avaliação';
@@ -465,14 +489,14 @@ async function carregarAvaliacoes(id_produto) {
       star.style.cursor = 'pointer';
       star.style.color = '#ccc';
       star.onmouseover = () => {
-        for (let j = 1; j <= 5; j++) estrelasEl.children[j-1].style.color = j <= i ? '#FFD600' : '#ccc';
+        for (let j = 1; j <= 5; j++) estrelasEl.children[j - 1].style.color = j <= i ? '#FFD600' : '#ccc';
       };
       star.onmouseout = () => {
-        for (let j = 1; j <= 5; j++) estrelasEl.children[j-1].style.color = j <= notaSelecionada ? '#FFD600' : '#ccc';
+        for (let j = 1; j <= 5; j++) estrelasEl.children[j - 1].style.color = j <= notaSelecionada ? '#FFD600' : '#ccc';
       };
       star.onclick = () => {
         notaSelecionada = i;
-        for (let j = 1; j <= 5; j++) estrelasEl.children[j-1].style.color = j <= i ? '#FFD600' : '#ccc';
+        for (let j = 1; j <= 5; j++) estrelasEl.children[j - 1].style.color = j <= i ? '#FFD600' : '#ccc';
         btnEnviar.style.display = '';
         btnEnviar.textContent = jaAvaliou ? 'Editar Avaliação' : 'Enviar Avaliação';
         feedbackEl.textContent = '';
@@ -481,51 +505,51 @@ async function carregarAvaliacoes(id_produto) {
     }
     // Modifique a função de envio de avaliação para:
     console.log('Usuário logado, permitindo avaliação');
-btnEnviar.onclick = async () => {
-  if (!notaSelecionada) {
-    feedbackEl.textContent = 'Selecione uma nota!';
-    feedbackEl.className = 'text-danger small mt-1';
-    return;
-  }
-
-  btnEnviar.disabled = true;
-  feedbackEl.textContent = jaAvaliou ? 'Editando avaliação...' : 'Enviando avaliação...';
-  feedbackEl.className = 'text-muted small mt-1';
-
-    try {
-      const response = await fetch('https://green-line-web.onrender.com/avaliacoes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id_produto: id_produto,
-          id_pessoa: Number(id_pessoa),
-          nota: notaSelecionada,
-          comentario: comentarioEl.value.trim()
-        })
-      });
-
-      // Verifica se a resposta é JSON//
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        const text = await response.text();
-        throw new Error(`Resposta inválida: ${text.substring(0, 100)}...`);
+    btnEnviar.onclick = async () => {
+      if (!notaSelecionada) {
+        feedbackEl.textContent = 'Selecione uma nota!';
+        feedbackEl.className = 'text-danger small mt-1';
+        return;
       }
-  
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.mensagem || 'Erro no servidor');
+
+      btnEnviar.disabled = true;
+      feedbackEl.textContent = jaAvaliou ? 'Editando avaliação...' : 'Enviando avaliação...';
+      feedbackEl.className = 'text-muted small mt-1';
+
+      try {
+        const response = await fetch('https://green-line-web.onrender.com/avaliacoes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id_produto: id_produto,
+            id_pessoa: Number(id_pessoa),
+            nota: notaSelecionada,
+            comentario: comentarioEl.value.trim()
+          })
+        });
+
+        // Verifica se a resposta é JSON//
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await response.text();
+          throw new Error(`Resposta inválida: ${text.substring(0, 100)}...`);
+        }
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.mensagem || 'Erro no servidor');
+        }
+
+        // Sucesso
+        feedbackEl.textContent = 'Avaliação enviada!';
+
+      } catch (error) {
+        console.error('Erro na avaliação:', error);
+        feedbackEl.textContent = error.message;
+        feedbackEl.className = 'text-danger small mt-1';
       }
-  
-      // Sucesso
-      feedbackEl.textContent = 'Avaliação enviada!';
-      
-    } catch (error) {
-      console.error('Erro na avaliação:', error);
-      feedbackEl.textContent = error.message;
-      feedbackEl.className = 'text-danger small mt-1';
-    }
-};
+    };
   } else {
     estrelasEl.innerHTML = '<span class="text-muted">Faça login para avaliar</span>';
     comentarioEl.disabled = true;
@@ -546,4 +570,150 @@ export function showAlert(msg, type = 'danger') {
   `;
   document.body.appendChild(alertDiv);
   setTimeout(() => { if (alertDiv) alertDiv.remove(); }, 5000);
-} 
+} // ==
+
+
+let tamanhoSelecionado = null;
+const tamanhosDisponiveis = ['PP', 'P', 'M', 'G', 'GG', 'XG', 'XXG'];
+
+// Função para carregar tamanhos e medidas
+function carregarTamanhosEMedidas(produto) {
+  const opcoesContainer = document.getElementById('produto-opcoes');
+  const tamanhosContainer = document.getElementById('tamanhos-container');
+  const medidasSection = document.getElementById('medidas-section');
+  const dimensoesEl = document.getElementById('produto-dimensoes');
+  const pesoEl = document.getElementById('produto-peso');
+
+  // Verificar se o produto tem informações de tamanho/medidas
+  const temTamanhos = produto.categoria && (
+    produto.categoria.toLowerCase().includes('roupa') ||
+    produto.categoria.toLowerCase().includes('vestuário') ||
+    produto.categoria.toLowerCase().includes('moda') ||
+    produto.categoria.toLowerCase().includes('calçado') ||
+    produto.categoria.toLowerCase().includes('acessório')
+  );
+
+  // Usar as colunas corretas: peso_kg e dimensoes
+  const temMedidas = produto.peso_kg || produto.dimensoes;
+
+  if (temTamanhos || temMedidas) {
+    opcoesContainer.style.display = 'block';
+
+    // Carregar tamanhos se aplicável
+    if (temTamanhos) {
+      carregarTamanhos(tamanhosContainer);
+    } else {
+      tamanhosContainer.parentElement.style.display = 'none';
+    }
+
+    // Carregar medidas se disponíveis
+    if (temMedidas) {
+      medidasSection.style.display = 'block';
+
+      if (dimensoesEl && produto.dimensoes) {
+        dimensoesEl.textContent = formatarDimensoes(produto.dimensoes);
+      }
+
+      if (pesoEl && produto.peso_kg) {
+        pesoEl.textContent = formatarPeso(produto.peso_kg);
+      }
+    }
+  }
+}
+
+// Função para carregar opções de tamanho
+function carregarTamanhos(container) {
+  container.innerHTML = '';
+
+  tamanhosDisponiveis.forEach(tamanho => {
+    const opcao = document.createElement('div');
+    opcao.className = 'tamanho-opcao';
+    opcao.textContent = tamanho;
+    opcao.setAttribute('data-tamanho', tamanho);
+
+    // Event listener para seleção
+    opcao.addEventListener('click', function () {
+      selecionarTamanho(tamanho, opcao);
+    });
+
+    container.appendChild(opcao);
+  });
+}
+
+// Função para selecionar tamanho
+function selecionarTamanho(tamanho, elemento) {
+  // Remove seleção anterior
+  document.querySelectorAll('.tamanho-opcao').forEach(opcao => {
+    opcao.classList.remove('selected');
+  });
+
+  // Adiciona seleção atual
+  elemento.classList.add('selected');
+  tamanhoSelecionado = tamanho;
+
+  console.log('Tamanho selecionado:', tamanho);
+}
+
+// Função para formatar dimensões
+function formatarDimensoes(dimensoes) {
+  if (!dimensoes || dimensoes === '0x0x0') {
+    return 'Não informado';
+  }
+
+  // Assumindo formato "LxAxP" (Largura x Altura x Profundidade)
+  const partes = dimensoes.split('x');
+  if (partes.length === 3) {
+    return `${partes[0]}cm × ${partes[1]}cm × ${partes[2]}cm`;
+  }
+
+  return dimensoes;
+}
+
+// Função para formatar peso
+function formatarPeso(peso) {
+  if (!peso || peso === 0) {
+    return 'Não informado';
+  }
+
+  const pesoNum = parseFloat(peso);
+  if (pesoNum < 1) {
+    return `${(pesoNum * 1000).toFixed(0)}g`;
+  } else {
+    return `${pesoNum.toFixed(2)}kg`;
+  }
+}
+
+// Função para validar seleção de tamanho (chamada antes de adicionar ao carrinho)
+function validarSelecaoTamanho() {
+  const opcoesContainer = document.getElementById('produto-opcoes');
+  const tamanhosContainer = document.getElementById('tamanhos-container');
+
+  // Se a seção de tamanhos está visível e há opções
+  if (opcoesContainer.style.display !== 'none' &&
+    tamanhosContainer.children.length > 0 &&
+    tamanhosContainer.parentElement.style.display !== 'none') {
+
+    if (!tamanhoSelecionado) {
+      // Destacar que é obrigatório selecionar tamanho
+      tamanhosContainer.classList.add('tamanho-required');
+
+      // Remover destaque após 2 segundos
+      setTimeout(() => {
+        tamanhosContainer.classList.remove('tamanho-required');
+      }, 2000);
+
+      return false;
+    }
+  }
+
+  return true;
+}
+
+// Função para obter dados do produto com tamanho selecionado
+function obterDadosProdutoComTamanho() {
+  const dadosBase = {
+    tamanho: tamanhoSelecionado
+  };
+
+  return dadosBase;
+}

@@ -231,7 +231,7 @@ app.post("/pedidos", async (req, res) => {
 });
 
 app.post("/carrinho", async (req, res) => {
-  let { id_pessoa, id_produto, quantidade } = req.body;
+  let { id_pessoa, id_produto, quantidade, tamanho } = req.body;
 
   if (!id_pessoa || !id_produto || !quantidade) {
     return res.status(400).json({
@@ -272,8 +272,8 @@ app.post("/carrinho", async (req, res) => {
     }
 
     await db.query(
-      "INSERT INTO carrinho_itens (id_carrinho, id_produto, quantidade) VALUES (?, ?, ?)",
-      [id_carrinho, id_produto, quantidade]
+      "INSERT INTO carrinho_itens (id_carrinho, id_produto, quantidade, tamanho) VALUES (?, ?, ?, ?)",
+      [id_carrinho, id_produto, quantidade, tamanho || null]
     );
 
     res.status(201).json({
@@ -1956,7 +1956,8 @@ app.get('/pessoa/:id_pessoa/pedidos', verificarToken, async (req, res) => {
             return res.status(403).json({ error: 'Acesso negado. Você não tem permissão para visualizar este histórico de pedidos.' });
         }
 
-        const [pedidos] = await db.query(
+        // Buscar pedidos do usuário
+        const pedidos = await db.query(
             `SELECT
                 p.id_pedido,
                 p.numero_pedido,
@@ -1970,7 +1971,30 @@ app.get('/pessoa/:id_pessoa/pedidos', verificarToken, async (req, res) => {
             [id_pessoa]
         );
 
-        res.json(pedidos);
+        // Para cada pedido, buscar os produtos
+        const pedidosComProdutos = await Promise.all(
+            pedidos.map(async (pedido) => {
+                const produtos = await db.query(
+                    `SELECT
+                        pp.id_produto,
+                        pp.nome_produto as nome,
+                        pp.quantidade,
+                        pp.preco_unitario,
+                        p.imagem_1 as imagem
+                    FROM pedido_produto pp
+                    LEFT JOIN produto p ON pp.id_produto = p.id_produto
+                    WHERE pp.id_pedido = ?`,
+                    [pedido.id_pedido]
+                );
+
+                return {
+                    ...pedido,
+                    produtos: produtos || []
+                };
+            })
+        );
+
+        res.json(pedidosComProdutos);
     } catch (err) {
         console.error('Erro ao buscar pedidos do usuário:', err);
         res.status(500).json({ error: 'Erro ao buscar histórico de pedidos.' });

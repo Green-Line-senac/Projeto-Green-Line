@@ -1030,4 +1030,164 @@ body.dark-mode .item-name {
         flex-direction: column;
         gap: 0.5rem;
     }
+}/*
+ Estilos para produtos no histórico */
+.purchase-products {
+    margin-top: 15px;
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+}
+
+.purchase-products h4 {
+    margin-bottom: 10px;
+    color: var(--text-color);
+    font-size: 1rem;
+}
+
+.produto-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    background: #fafafa;
+}
+
+.produto-info {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.produto-thumb {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 5px;
+    margin-right: 15px;
+}
+
+.produto-detalhes h4 {
+    margin: 0 0 5px 0;
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+.produto-detalhes p {
+    margin: 2px 0;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.produto-acoes {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-avaliar {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background-color 0.3s;
+}
+
+.btn-avaliar:hover {
+    background: #45a049;
+}
+
+.btn-avaliar:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+/* Modal de Avaliação */
+#avaliacaoModal .modal-content {
+    max-width: 500px;
+}
+
+.avaliacao-produto-info {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.avaliacao-produto-info h4 {
+    margin: 0 0 5px 0;
+    color: var(--text-color);
+}
+
+.avaliacao-produto-info p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Sistema de Estrelas */
+.rating-stars {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin: 10px 0;
+}
+
+.star {
+    font-size: 2rem;
+    color: #ddd;
+    cursor: pointer;
+    transition: color 0.2s;
+    user-select: none;
+}
+
+.star:hover,
+.star.active {
+    color: #ffd700;
+}
+
+.star.hover {
+    color: #ffed4e;
+}
+
+/* Textarea para comentário */
+#comentarioAvaliacao {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-family: inherit;
+    resize: vertical;
+}
+
+/* Responsividade para produtos */
+@media (max-width: 768px) {
+    .produto-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .produto-info {
+        width: 100%;
+    }
+    
+    .produto-acoes {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    .rating-stars {
+        gap: 3px;
+    }
+    
+    .star {
+        font-size: 1.5rem;
+    }
 }

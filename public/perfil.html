@@ -225,6 +225,53 @@
                     <input type="text" id="cidade" name="cidade" required>
                 </div>
                 <div class="form-group">
+                    <label for="uf">Estado</label>
+                    <input type="text" id="uf" name="uf" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="fecharModalEndereco()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Endereço</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Avaliação -->
+    <div id="avaliacaoModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal" onclick="fecharModalAvaliacao()">&times;</span>
+            <h3>Avaliar Produto</h3>
+            <div class="avaliacao-produto-info">
+                <h4 id="avaliacaoProdutoNome">Nome do Produto</h4>
+                <p id="avaliacaoPedidoNumero">Pedido: #123456</p>
+            </div>
+            <form id="avaliacaoForm">
+                <div class="form-group">
+                    <label>Sua avaliação:</label>
+                    <div class="rating-stars">
+                        <span class="star" data-rating="1">★</span>
+                        <span class="star" data-rating="2">★</span>
+                        <span class="star" data-rating="3">★</span>
+                        <span class="star" data-rating="4">★</span>
+                        <span class="star" data-rating="5">★</span>
+                    </div>
+                    <input type="hidden" id="notaAvaliacao" name="nota" required>
+                </div>
+                <div class="form-group">
+                    <label for="comentarioAvaliacao">Comentário (opcional):</label>
+                    <textarea id="comentarioAvaliacao" name="comentario" rows="4" 
+                              placeholder="Conte sua experiência com este produto..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="fecharModalAvaliacao()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Enviar Avaliação</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
                     <label for="uf">UF</label>
                     <input type="text" id="uf" name="uf" required maxlength="2">
                 </div>
