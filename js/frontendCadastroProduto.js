@@ -166,6 +166,24 @@
         return;
       }
 
+     // Coletar tamanhos personalizados ou pré-definidos
+let tamanhosSelecionados = [];
+
+const tamanhosPersonalizados = document.getElementById("tamanhos-personalizados").value.trim();
+
+if (tamanhosPersonalizados !== "") {
+  // Se houver tamanhos personalizados, ignora os checkboxes
+  tamanhosSelecionados = tamanhosPersonalizados
+    .split(',')
+    .map(t => t.trim())
+    .filter(t => t !== "");
+} else {
+  // Caso contrário, usa os tamanhos dos checkboxes
+  document.querySelectorAll('input[name="tamanhos[]"]:checked').forEach(checkbox => {
+    tamanhosSelecionados.push(checkbox.value);
+  });
+}
+
      // Preparar dados para envio
 const dados = {
   nome: document.getElementById("nome-produto").value,
@@ -186,7 +204,18 @@ const dados = {
   ativo: document.getElementById("produto-ativo").checked,
   imagem_1: urlsImagem[0] || "https://www.malhariapradense.com.br/wp-content/uploads/2017/08/produto-sem-imagem.png",
   imagem_2: urlsImagem[1] || "Nenhuma",
-  categoria: document.getElementById("categoria").value
+  categoria: document.getElementById("categoria").value,
+  // Dados de tamanho e medidas
+  tem_tamanho: document.getElementById("tem-tamanho").checked,
+  tamanhos: tamanhosSelecionados.length > 0 ? tamanhosSelecionados.join(',') : null,
+  tem_medidas: document.getElementById("tem-medidas").checked,
+  comprimento: document.getElementById("comprimento").value || null,
+  largura_medida: document.getElementById("largura-medida").value || null,
+  altura_medida: document.getElementById("altura-medida").value || null,
+  diametro: document.getElementById("diametro").value || null,
+  capacidade: document.getElementById("capacidade").value || null,
+  unidade_medida: document.getElementById("unidade-medida").value || null,
+  observacoes_medidas: document.getElementById("observacoes-medidas").value || null
 };
 
       const response = await fetch(`${api.online}/cadastro-produto`, {
@@ -235,6 +264,43 @@ const dados = {
   ).forEach((elemento) => {
     elemento.addEventListener("input", atualizarPreVisualizacao);
     elemento.addEventListener("change", atualizarPreVisualizacao);
+  });
+
+  // Controle das seções de tamanho e medidas
+  const temTamanho = document.getElementById("tem-tamanho");
+  const secaoTamanhos = document.getElementById("secao-tamanhos");
+  const temMedidas = document.getElementById("tem-medidas");
+  const secaoMedidas = document.getElementById("secao-medidas");
+
+  // Toggle da seção de tamanhos
+  temTamanho.addEventListener("change", function() {
+    if (this.checked) {
+      secaoTamanhos.classList.remove("d-none");
+    } else {
+      secaoTamanhos.classList.add("d-none");
+      // Limpa os checkboxes de tamanho quando oculta a seção
+      document.querySelectorAll('input[name="tamanhos[]"]').forEach(checkbox => {
+        checkbox.checked = false;
+      });
+      document.getElementById("tamanhos-personalizados").value = "";
+    }
+  });
+
+  // Toggle da seção de medidas
+  temMedidas.addEventListener("change", function() {
+    if (this.checked) {
+      secaoMedidas.classList.remove("d-none");
+    } else {
+      secaoMedidas.classList.add("d-none");
+      // Limpa os campos de medidas quando oculta a seção
+      document.querySelectorAll('#secao-medidas input, #secao-medidas select, #secao-medidas textarea').forEach(field => {
+        if (field.type === 'checkbox') {
+          field.checked = false;
+        } else {
+          field.value = "";
+        }
+      });
+    }
   });
 
   // Inicializa a pré-visualização
