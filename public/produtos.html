@@ -179,9 +179,9 @@
   </header>
 
   <!-- Conteúdo principal da página de produtos -->
-  <main class="container-fluid px-3" role="main">
-    </div>
-    <div class="row">
+  <main class="container-fluid px-3 produtos-main" role="main">
+    <div class="produtos-content">
+      <div class="row">
       <!-- Seção de Filtros - Permite refinar a busca por produtos -->
       <div class="col-12 col-md-2 mb-4 filter-container">
         <section aria-labelledby="filtros-heading" class="w-full">
@@ -296,9 +296,10 @@
           <!-- Paginação -->
           <div class="col-12 col-md-4 d-flex justify-content-end flex-wrap mt-3 mt-md-0">
             <nav aria-label="Navegação entre páginas de produtos">
-              <h6 class="mb-1">Páginas:</h6>
-              <ul class="pagination pagination-sm mb-0"></ul>
-              <div id="conteudo-pagina" aria-live="polite"></div>
+              <div class="d-flex flex-column align-items-end">
+                <div id="info-pagina" class="small text-muted mb-2" aria-live="polite"></div>
+                <ul class="pagination pagination-sm mb-0"></ul>
+              </div>
             </nav>
           </div>
         </div>
@@ -309,6 +310,7 @@
           <!-- Os cards serão adicionados aqui dinamicamente pelo JavaScript -->
         </div>
       </div>
+    </div>
     </div>
   </main>
   <!-- Modal de Detalhes do Produto -->
