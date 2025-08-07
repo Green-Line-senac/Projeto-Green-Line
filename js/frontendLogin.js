@@ -176,6 +176,7 @@ async function tratarLoginBemSucedido(dados) {
     // Armazenar dados do usuário de forma segura
     armazenarDadosUsuario(dados);
     console.log("Dados do usuário armazenados com sucesso:", dados.user.id_pessoa + " " + dados.user.email);
+    console.log("TIPO DE USUÁRIO VINDO DO BACKEND:", dados.user.tipo_usuario);
     console.log("Usuário logado:", usuario);
     mostrarMensagem("Login realizado com sucesso!", "success");
     // Redirecionar conforme tipo de usuário
@@ -196,7 +197,7 @@ function armazenarDadosUsuario(dados) {
     sessionStorage.setItem("id_pessoa", dados.user.id_pessoa);
     sessionStorage.setItem("userEmail", dados.user.email);
     sessionStorage.setItem("email", dados.user.email); // Garantir compatibilidade com o restante do sistema
-    sessionStorage.setItem("userType", dados.user.tipo_usuario);
+    sessionStorage.setItem("userType", dados.user.id_tipo_usuario);
     sessionStorage.setItem("isAdmin", dados.user.isAdmin);
     sessionStorage.setItem("carrinho", dados.user.carrinho || 0);
 

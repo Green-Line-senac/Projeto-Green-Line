@@ -24,6 +24,8 @@ async function carregarDadosUsuario() {
     // 1. Verificar se o usuário está autenticado
     const token = sessionStorage.getItem("userToken");
     const idPessoa = sessionStorage.getItem("id_pessoa"); // Ou 'id_pessoa' dependendo do que você usa
+    const userType = sessionStorage.getItem('id_tipo_usuario');
+    console.log(userType);
 
     if (!token || !idPessoa) {
       console.error("Usuário não autenticado - redirecionando para login");
@@ -127,7 +129,7 @@ async function loadAddress() {
 
 // Função para preencher os dados do perfil na página
 function preencherDadosPerfil(usuario) {
-  
+
   document.getElementById("profileName").textContent =
     usuario[0].nome || "Nome do Usuário";
   document.getElementById("profileEmail").textContent =
@@ -145,48 +147,62 @@ function preencherDadosPerfil(usuario) {
 
 
   document.getElementById("profileAvatar").src = usuario[0].imagem_perfil;
-    
-    const avatar = document.getElementById("profileAvatar");
-    sessionStorage.setItem("avatar", avatar.src);
+
+  const avatar = document.getElementById("profileAvatar");
+  sessionStorage.setItem("avatar", avatar.src);
 
 
-    
-    // Alterar para inputs editáveis
-    document.getElementById("profileFullName").innerHTML = `
+
+  // Alterar para inputs editáveis
+  document.getElementById("profileFullName").innerHTML = `
         <input type="text" id="editNome" value="${usuario[0].nome || ''}" class="editable-input">
     `;
 
-    document.getElementById("profilePhone").innerHTML = `
+  document.getElementById("profilePhone").innerHTML = `
         <input type="text" id="editTelefone" value="${usuario[0].telefone || ''}" class="editable-input">
     `;
-  
+
 }
 
 // Função para preencher os dados de endereço
 function preencherEndereco(endereco) {
   if (Array.isArray(endereco)) endereco = endereco[0];
-  // Salva o endereço no sessionStorage para uso em outras páginas
+
+  // Verificação: se não houver campo "endereco", não monta a interface
+  if (!endereco || !endereco.endereco) {
+    document.getElementById("addressContent").innerHTML =
+      "<p>Nenhum endereço cadastrado.</p>";
+    return;
+  }
+
   sessionStorage.setItem("enderecoUsuario", JSON.stringify(endereco));
+
   const addressContent = document.getElementById("addressContent");
   addressContent.innerHTML = `
-        <p>${endereco.endereco},${
-    endereco.complemento ? " - " + endereco.complemento : ""
-  }</p>
-        <p>${endereco.cidade} - ${endereco.uf}, ${endereco.cep}</p>
-        <p>${endereco.bairro || ""}</p>
-    `;
+    <p>${endereco.endereco}${endereco.complemento ? " - " + endereco.complemento : ""}</p>
+    <p>${endereco.cidade || ""} - ${endereco.uf || ""}${endereco.cep ? ", " + endereco.cep : ""}</p>
+    <p>${endereco.bairro || ""}</p>
+  `;
 
-  // Pré‑preencher modal
-  document.getElementById("cep").value = endereco.cep || "";
-  document.getElementById("endereco").value = endereco.endereco || "";
-  document.getElementById("complemento").value = endereco.complemento || "";
-  document.getElementById("cidade").value = endereco.cidade || "";
-  document.getElementById("uf").value = endereco.uf || "";
-  document.getElementById("bairro").value = endereco.bairro || "";
+  // Pré-preencher o formulário
+  const setVal = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val || "";
+  };
 
-  // Guarde o id_endereco para PUT depois
-  addressForm.dataset.idEndereco = endereco.id_endereco;
+  setVal("cep", endereco.cep);
+  setVal("endereco", endereco.endereco);
+  setVal("complemento", endereco.complemento);
+  setVal("cidade", endereco.cidade);
+  setVal("uf", endereco.uf);
+  setVal("bairro", endereco.bairro);
+
+  const addressForm = document.getElementById("addressForm");
+  if (addressForm) {
+    addressForm.dataset.idEndereco = endereco.id_endereco;
+  }
 }
+
 
 // Funções para mostrar/esconder seções
 function showSection(sectionId) {
@@ -436,31 +452,35 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   confirmDeleteBtn.addEventListener("click", async () => {
-    const loadingId = showLoading(
-      "Excluindo conta...",
-      "Processando exclusão da sua conta"
-    );
+    const loadingId = showLoading('Excluindo conta...', 'Processando exclusão da sua conta');
 
     try {
-      const token = sessionStorage.getItem("userToken");
       const idPessoa = sessionStorage.getItem("id_pessoa");
+      const token = sessionStorage.getItem("userToken");
 
-      const response = await fetch(`${api.online}/pessoa/${idPessoa}`, {
-        method: "DELETE",
+      const response = await fetch(`${api.perfil}/admin/editar-usuario/${idPessoa}`, {
+        method: "PUT",
         headers: {
-          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
         },
+        body: JSON.stringify({ situacao: 'I' }),
       });
 
+
       if (!response.ok) {
-        throw new Error("Erro ao deletar conta");
+        const errorData = await response.json();
+        if (response.status === 409) {
+          alert(errorData.error);  // <- Mostra motivo do bloqueio de exclusão
+        } else {
+          throw new Error(errorData.error || "Exclusão não permitida");
+        }
+        return;
       }
 
+
       hideNotification(loadingId);
-      showSuccess(
-        "Conta excluída!",
-        "Sua conta foi excluída com sucesso. Você será redirecionado."
-      );
+      showSuccess('Conta excluída!', 'Sua conta foi excluída com sucesso. Você será redirecionado.');
 
       setTimeout(() => {
         logout(); // Desloga o usuário após a exclusão da conta
@@ -468,10 +488,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (error) {
       console.error("Erro ao deletar conta:", error);
       hideNotification(loadingId);
-      showError(
-        "Erro ao excluir conta",
-        "Não foi possível excluir sua conta. Tente novamente."
-      );
+      showError('Erro ao excluir conta', 'Não foi possível excluir sua conta. Tente novamente.');
     }
   });
 
@@ -496,68 +513,70 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const reader = new FileReader();
       reader.onload = async (e) => {
-  try {
-    let base64 = e.target.result;
-    if (!base64.startsWith("data:image")) {
-      base64 = "data:image/png;base64," + base64;
-    }
-    await atualizarImagemPerfil(base64);
-    document.getElementById('profileAvatar').src = base64;
-    hideNotification(loadingId);
-    showSuccess('Foto atualizada!', 'Sua imagem de perfil foi atualizada com sucesso');
-  } catch (error) {
-    console.error("Erro ao atualizar imagem de perfil:", error);
-    hideNotification(loadingId);
-    showError('Erro ao atualizar foto', 'Não foi possível atualizar sua imagem de perfil');
-  }
-};
+        try {
+          let base64 = e.target.result;
+          if (!base64.startsWith("data:image")) {
+            base64 = "data:image/png;base64," + base64;
+          }
+          await atualizarImagemPerfil(base64);
+          document.getElementById('profileAvatar').src = base64;
+          hideNotification(loadingId);
+          showSuccess('Foto atualizada!', 'Sua imagem de perfil foi atualizada com sucesso');
+        } catch (error) {
+          console.error("Erro ao atualizar imagem de perfil:", error);
+          hideNotification(loadingId);
+          showError('Erro ao atualizar foto', 'Não foi possível atualizar sua imagem de perfil');
+        }
+      };
       reader.readAsDataURL(file);
     }
   });
 
- 
-// Event listener
- // Configura os filtros
+
+  // Event listener
+  // Configura os filtros
   configurarFiltros();
-  
+
   // Quando clicar no histórico de compras
   document.querySelector('[data-section="purchase-history"]').addEventListener('click', async (e) => {
     e.preventDefault();
     document.querySelectorAll('.main-content > div').forEach(sec => sec.classList.add('hidden'));
     document.getElementById('saved-section').classList.remove('hidden');
-    
+
     // Mostrar loading enquanto carrega
     const container = document.getElementById('savedProductsContent');
     container.innerHTML = '<div class="loading-placeholder"><p>Carregando histórico de compras...</p></div>';
-    
+    console.log("ativo");
+
     await loadUserPedidos();
   });
   function configurarFiltros() {
-  document.getElementById('searchPurchases').addEventListener('input', aplicarFiltros);
-  document.getElementById('statusFilter').addEventListener('change', aplicarFiltros);
-  document.getElementById('periodFilter').addEventListener('change', aplicarFiltros);
-  document.getElementById('refreshPurchases').addEventListener('click', () => {
-    document.getElementById('searchPurchases').value = '';
-    document.getElementById('statusFilter').value = '';
-    document.getElementById('periodFilter').value = '';
-    aplicarFiltros();
-  });
-}
+    document.getElementById('searchPurchases').addEventListener('input', aplicarFiltros);
+    document.getElementById('statusFilter').addEventListener('change', aplicarFiltros);
+    document.getElementById('periodFilter').addEventListener('change', aplicarFiltros);
+    document.getElementById('refreshPurchases').addEventListener('click', () => {
+      document.getElementById('searchPurchases').value = '';
+      document.getElementById('statusFilter').value = '';
+      document.getElementById('periodFilter').value = '';
+      aplicarFiltros();
+    });
+  }
 
- const logoutBtn = document.getElementById("logoutBtn");
-    if (logoutBtn) {
-        logoutBtn.addEventListener("click", logout);
-    }
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", logout);
+  }
 
 });
 
+// Variável global para armazenar todos os pedidos
 // Variável global para armazenar todos os pedidos
 let todosPedidos = [];
 
 async function loadUserPedidos() {
   const token = sessionStorage.getItem('userToken');
   const idPessoa = sessionStorage.getItem('id_pessoa');
-  
+
   if (!token || !idPessoa) {
     showError("Acesso negado", "Faça login para ver seu histórico.");
     return;
@@ -566,33 +585,36 @@ async function loadUserPedidos() {
   let loadingId;
   try {
     loadingId = showLoading("Carregando pedidos...", "Buscando seu histórico de compras");
-    
-    const response = await fetch(`${api.online}/pessoa/${idPessoa}/pedidos`, {
+
+    console.log(`Fazendo requisição para: ${api.perfil}/pessoa/${idPessoa}/pedidos`);
+    const response = await fetch(`${api.perfil}/pessoa/${idPessoa}/pedidos`, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       }
     });
 
+    console.log('Resposta recebida:', response);
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `Erro ${response.status}`);
+      throw new Error(errorData.error || `Erro ${response.status}`);
     }
 
     const data = await response.json();
     console.log('Dados recebidos:', data);
-    
+
     // Armazena todos os pedidos para filtragem
-    todosPedidos = normalizePedidosData(data);
-    
+    todosPedidos = data; // Já vem no formato correto da API
+
     // Aplica os filtros iniciais
     aplicarFiltros();
-    
+
   } catch (err) {
     console.error("Erro ao carregar pedidos:", err);
-    document.getElementById('savedProductsContent').innerHTML = 
+    document.getElementById('savedProductsContent').innerHTML =
       `<div class="error-message">
-        <p style= "margin-bottom:20px">Não possui histórico de compras.</p>
+        <p style="margin-bottom:20px">${err.message || 'Erro ao carregar histórico de compras'}</p>
         <a href="${basePath}/produtos.html" class="btn btn-primary">Ir para a loja</a>
       </div>`;
   } finally {
@@ -600,50 +622,54 @@ async function loadUserPedidos() {
   }
 }
 
-// Função para aplicar os filtros
 function aplicarFiltros() {
   const termoBusca = document.getElementById('searchPurchases').value.toLowerCase();
   const statusFiltro = document.getElementById('statusFilter').value;
   const periodoFiltro = document.getElementById('periodFilter').value;
-  
+
   // Filtra os pedidos
   let pedidosFiltrados = todosPedidos.filter(pedido => {
     // Filtro por termo de busca
-    const matchTermo = termoBusca === '' || 
+    const matchTermo = termoBusca === '' ||
       (pedido.numero_pedido && pedido.numero_pedido.toLowerCase().includes(termoBusca)) ||
-      (pedido.produtos && pedido.produtos.some(p => p.nome.toLowerCase().includes(termoBusca)));
-    
+      (pedido.produtos && pedido.produtos.some(p =>
+        p.nome_produto && p.nome_produto.toLowerCase().includes(termoBusca)));
+
     // Filtro por status
-    const matchStatus = statusFiltro === '' || 
+    const matchStatus = statusFiltro === '' ||
       (pedido.situacao && pedido.situacao.toLowerCase() === statusFiltro.toLowerCase());
-    
+
     // Filtro por período
     let matchPeriodo = true;
-    if (periodoFiltro !== '') {
+    if (periodoFiltro !== '' && pedido.data_hora) {
       const dias = parseInt(periodoFiltro);
       const dataLimite = new Date();
       dataLimite.setDate(dataLimite.getDate() - dias);
-      
-      matchPeriodo = pedido.data_hora && new Date(pedido.data_hora) >= dataLimite;
+      const dataPedido = new Date(pedido.data_hora);
+
+      matchPeriodo = dataPedido >= dataLimite;
     }
-    
+
     return matchTermo && matchStatus && matchPeriodo;
   });
 
   // Atualiza as estatísticas
   atualizarEstatisticas(pedidosFiltrados);
-  
+
   // Exibe os pedidos filtrados
   displayPedidos(pedidosFiltrados);
 }
 
-// Função para atualizar as estatísticas
 function atualizarEstatisticas(pedidos) {
   const totalPedidos = pedidos.length;
   const totalGasto = pedidos.reduce((sum, pedido) => sum + (pedido.valor_total || 0), 0);
   const ticketMedio = totalPedidos > 0 ? totalGasto / totalPedidos : 0;
-  const ultimaCompra = pedidos.length > 0 
-    ? new Date(pedidos[0].data_hora).toLocaleDateString('pt-BR') 
+  const ultimaCompra = pedidos.length > 0 && pedidos[0].data_hora
+    ? new Date(pedidos[0].data_hora).toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    })
     : '-';
 
   document.getElementById('totalPurchases').textContent = totalPedidos;
@@ -652,27 +678,17 @@ function atualizarEstatisticas(pedidos) {
   document.getElementById('lastPurchase').textContent = ultimaCompra;
 }
 
-// Função auxiliar para normalizar os dados dos pedidos
-function normalizePedidosData(data) {
-  if (Array.isArray(data)) {
-    return data;
-  }
-  if (data && typeof data === 'object' && data.id_pedido) {
-    return [data]; // Transforma objeto único em array
-  }
-  if (data && data.pedidos && Array.isArray(data.pedidos)) {
-    return data.pedidos;
-  }
-  return []; // Retorna array vazio se não reconhecer o formato
-}
-
-// Função auxiliar para exibir os pedidos na interface
 function displayPedidos(pedidos) {
   const container = document.getElementById('savedProductsContent');
   container.innerHTML = '';
 
-  if (pedidos.length === 0) {
-    container.innerHTML = '<p class="no-orders">Nenhum pedido encontrado.</p>';
+  if (!pedidos || pedidos.length === 0) {
+    container.innerHTML = `
+      <div class="no-orders">
+        <p style="margin-top: 20px";>Nenhum pedido encontrado.</p>
+        <a href="${basePath}/produtos.html" class="btn btn-primary">Ir para a loja</a>
+      </div>
+    `;
     return;
   }
 
@@ -687,32 +703,39 @@ function displayPedidos(pedidos) {
   pedidos.forEach(pedido => {
     const card = document.createElement('div');
     card.className = 'purchase-card';
-    
+
     // Formata os dados do pedido
     const numeroPedido = pedido.numero_pedido || 'N/A';
-    const dataPedido = pedido.data_hora 
-      ? new Date(pedido.data_hora).toLocaleDateString('pt-BR') 
+    const dataPedido = pedido.data_hora
+      ? new Date(pedido.data_hora).toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
       : 'Não informada';
-    const situacao = pedido.situacao || 'Não informada';
+    const situacao = getStatusDisplay(pedido.situacao || 'Não informada');
     const pagamento = pedido.pagamento_situacao || 'Não informado';
-    const valorTotal = formatCurrency(pedido.valor_total);
+    const valorTotal = formatCurrency(pedido.valor_total || 0);
 
     // Renderizar produtos do pedido
-    const produtosHtml = pedido.produtos && pedido.produtos.length > 0 
+    const produtosHtml = pedido.produtos && pedido.produtos.length > 0
       ? pedido.produtos.map(produto => `
           <div class="produto-item">
             <div class="produto-info">
-              <img src="${produto.imagem || '../img/imagem-nao-disponivel.png'}" 
-                   alt="${produto.nome}" class="produto-thumb" 
+              <img src="${produto.imagem_1 || '../img/imagem-nao-disponivel.png'}" 
+                   alt="${produto.nome_produto}" class="produto-thumb" 
                    onerror="this.src='../img/imagem-nao-disponivel.png'">
               <div class="produto-detalhes">
-                <h4>${produto.nome}</h4>
-                <p>Quantidade: ${produto.quantidade}</p>
-                <p>Preço: ${formatCurrency(produto.preco_unitario)}</p>
+                <h4>${produto.nome_produto || 'Produto sem nome'}</h4>
+                <p>Quantidade: ${produto.quantidade || 1}</p>
+                <p>Preço unitário: ${formatCurrency(produto.preco_unitario || 0)}</p>
+                <p>Subtotal: ${formatCurrency((produto.quantidade || 1) * (produto.preco_unitario || 0))}</p>
               </div>
             </div>
             <div class="produto-acoes">
-              <button class="btn-avaliar" onclick="abrirModalAvaliacao('${produto.id_produto}', '${produto.nome}', '${numeroPedido}')">
+              <button class="btn-avaliar" onclick="abrirModalAvaliacao('${produto.id_produto}', '${produto.nome_produto}', '${numeroPedido}')">
                 <i class="fas fa-star"></i> Avaliar
               </button>
             </div>
@@ -735,36 +758,42 @@ function displayPedidos(pedidos) {
         ${produtosHtml}
       </div>
     `;
-    
+
     container.appendChild(card);
   });
 }
 
-// Função para formatar valores monetários
-function formatCurrency(value) {
-  try {
-    const numericValue = parseFloat(value || 0);
-    return 'R$ ' + numericValue.toLocaleString('pt-BR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-  } catch (e) {
-    console.error('Erro ao formatar valor:', e);
-    return 'R$ 0,00';
-  }
+// Funções auxiliares
+function getStatusDisplay(status) {
+  const statusMap = {
+    'P': 'Pendente',
+    'C': 'Confirmado',
+    'E': 'Enviado',
+    'D': 'Entregue',
+    'X': 'Cancelado'
+  };
+  return statusMap[status] || status;
 }
 
-// Função para determinar classe CSS baseada no status
 function getStatusClass(status) {
   const statusMap = {
     'Pendente': 'status-pending',
     'Confirmado': 'status-confirmed',
-    'Cancelado': 'status-cancelled',
     'Enviado': 'status-shipped',
-    'Entregue': 'status-delivered'
+    'Entregue': 'status-delivered',
+    'Cancelado': 'status-cancelled'
   };
   return statusMap[status] || 'status-default';
 }
+
+function formatCurrency(value) {
+  const numericValue = parseFloat(value || 0);
+  return numericValue.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  });
+}
+
 
 document.getElementById("savePersonalBtn").addEventListener("click", async () => {
   const nome = document.getElementById("editNome").value.trim();
@@ -874,12 +903,12 @@ function abrirModalAvaliacao(idProduto, nomeProduto, numeroPedido) {
   // Preencher informações do produto
   document.getElementById('avaliacaoProdutoNome').textContent = nomeProduto;
   document.getElementById('avaliacaoPedidoNumero').textContent = `Pedido: ${numeroPedido}`;
-  
+
   // Resetar formulário
   document.getElementById('notaAvaliacao').value = '';
   document.getElementById('comentarioAvaliacao').value = '';
   resetarEstrelas();
-  
+
   // Mostrar modal
   document.getElementById('avaliacaoModal').classList.remove('hidden');
 }
@@ -902,7 +931,7 @@ function resetarEstrelas() {
 function definirAvaliacao(nota) {
   avaliacaoAtual.nota = nota;
   document.getElementById('notaAvaliacao').value = nota;
-  
+
   const stars = document.querySelectorAll('.star');
   stars.forEach((star, index) => {
     if (index < nota) {
@@ -915,12 +944,12 @@ function definirAvaliacao(nota) {
 }
 
 // Event listeners para as estrelas
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   const stars = document.querySelectorAll('.star');
-  
+
   stars.forEach((star, index) => {
     // Hover effect
-    star.addEventListener('mouseenter', function() {
+    star.addEventListener('mouseenter', function () {
       stars.forEach((s, i) => {
         if (i <= index) {
           s.classList.add('hover');
@@ -929,16 +958,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       });
     });
-    
+
     // Click para selecionar
-    star.addEventListener('click', function() {
+    star.addEventListener('click', function () {
       const rating = parseInt(star.getAttribute('data-rating'));
       definirAvaliacao(rating);
     });
   });
-  
+
   // Remover hover quando sair da área das estrelas
-  document.querySelector('.rating-stars').addEventListener('mouseleave', function() {
+  document.querySelector('.rating-stars').addEventListener('mouseleave', function () {
     stars.forEach(star => star.classList.remove('hover'));
   });
 });
@@ -946,23 +975,23 @@ document.addEventListener('DOMContentLoaded', function() {
 // Função para enviar avaliação
 async function enviarAvaliacao(event) {
   event.preventDefault();
-  
+
   const nota = parseInt(document.getElementById('notaAvaliacao').value);
   const comentario = document.getElementById('comentarioAvaliacao').value.trim();
   const idPessoa = sessionStorage.getItem('id_pessoa');
-  
+
   if (!nota || nota < 1 || nota > 5) {
     showError('Avaliação inválida', 'Por favor, selecione uma nota de 1 a 5 estrelas');
     return;
   }
-  
+
   if (!idPessoa) {
     showError('Erro de autenticação', 'Faça login novamente para avaliar');
     return;
   }
-  
+
   const loadingId = showLoading('Enviando avaliação...', 'Registrando sua opinião sobre o produto');
-  
+
   try {
     const response = await fetch(`${api.online}/avaliacoes`, {
       method: 'POST',
@@ -976,20 +1005,20 @@ async function enviarAvaliacao(event) {
         comentario: comentario || null
       })
     });
-    
+
     hideNotification(loadingId);
-    
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.mensagem || 'Erro ao enviar avaliação');
     }
-    
+
     const result = await response.json();
-    
+
     if (result.sucesso) {
       showSuccess('Avaliação enviada!', 'Obrigado por avaliar nosso produto');
       fecharModalAvaliacao();
-      
+
       // Atualizar o botão para mostrar que já foi avaliado
       const botaoAvaliar = document.querySelector(`button[onclick*="${avaliacaoAtual.idProduto}"]`);
       if (botaoAvaliar) {
@@ -999,7 +1028,7 @@ async function enviarAvaliacao(event) {
     } else {
       throw new Error(result.mensagem || 'Erro ao processar avaliação');
     }
-    
+
   } catch (error) {
     hideNotification(loadingId);
     console.error('Erro ao enviar avaliação:', error);
@@ -1008,7 +1037,7 @@ async function enviarAvaliacao(event) {
 }
 
 // Event listener para o formulário de avaliação
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   const avaliacaoForm = document.getElementById('avaliacaoForm');
   if (avaliacaoForm) {
     avaliacaoForm.addEventListener('submit', enviarAvaliacao);

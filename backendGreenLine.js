@@ -1965,21 +1965,58 @@ app.put("/admin/editar-usuario/:id_pessoa", async (req, res) => {
 
 
 // [6] DELETAR USUÁRIO (DELETE)
-app.delete("/pessoa/:id_pessoa", async (req, res) => {
+app.delete('/pessoa/:id_pessoa', verificarToken, async (req, res) => {
+  const id = parseInt(req.params.id_pessoa);
+  const userId = req.usuario.userId;
+  const tipoUsuario = req.usuario.tipo_usuario;
+
   try {
-    const [result] = await db.query("DELETE FROM pessoa WHERE id_pessoa = ?", [
-      req.params.id_pessoa,
-    ]);
+    if (userId !== id && tipoUsuario !== 1) {
+      return res.status(403).json({ error: 'Apenas administradores podem excluir outras contas.' });
+    }
+
+    const [result] = await db.query('DELETE FROM pessoa WHERE id_pessoa = ?', [id]);
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Usuário não encontrado" });
+      return res.status(404).json({ error: 'Usuário não encontrado' });
     }
 
     res.status(204).end();
   } catch (err) {
-    res.status(500).json({ error: "Erro ao deletar usuário" });
+    if (err.code === 'ER_ROW_IS_REFERENCED_2') {
+      return res.status(409).json({
+        error: 'Não é possível excluir este usuário porque há registros associados (ex: pedidos ou carrinhos).'
+      });
+    }
+
+    console.error('Erro ao deletar usuário:', err);
+    res.status(500).json({ error: 'Erro interno ao deletar usuário' });
   }
 });
+
+// Substituir o DELETE por isso:
+app.put('/pessoa/inativar/:id_pessoa', verificarToken, async (req, res) => {
+  const id = parseInt(req.params.id_pessoa);
+
+  try {
+    // Apenas o próprio usuário ou um administrador pode inativar
+    if (req.usuario.userId !== id && req.usuario.tipo_usuario !== 1) {
+      return res.status(403).json({ error: 'Não autorizado a inativar esta conta.' });
+    }
+
+    await db.query(
+      'UPDATE pessoa SET situacao = ? WHERE id_pessoa = ?',
+      ['I', id]
+    );
+
+    res.json({ message: 'Conta inativada com sucesso.' });
+  } catch (err) {
+    console.error('Erro ao inativar conta:', err);
+    res.status(500).json({ error: 'Erro interno ao inativar conta.' });
+  }
+});
+
+
 app.get('/pessoa/pedidos', verificarToken, async (req, res) => {
   try {
     const userId = req.usuario.userId;
@@ -2015,17 +2052,24 @@ app.get('/pessoa/pedidos', verificarToken, async (req, res) => {
 });
 
 
+// [Atualizar esta rota]
 app.get('/pessoa/:id_pessoa/pedidos', verificarToken, async (req, res) => {
-    try {
-        const { id_pessoa } = req.params;
-        
-        // Proteção: Garante que o usuário só possa ver os próprios pedidos
-        if (parseInt(id_pessoa) !== req.usuario.userId) {
-            return res.status(403).json({ error: 'Acesso negado. Você não tem permissão para visualizar este histórico de pedidos.' });
-        }
+    const { id_pessoa } = req.params;
+    
+    console.log(`Iniciando busca de pedidos para usuário ${id_pessoa}`);
 
-        // Buscar pedidos do usuário
-        const pedidos = await db.query(
+    // Verificação de autorização
+    if (parseInt(id_pessoa) !== req.usuario.userId) {
+        return res.status(403).json({ 
+            error: 'Acesso negado. Você não tem permissão para visualizar este histórico de pedidos.' 
+        });
+    }
+
+    try {
+        console.log('Buscando pedidos do usuário...');
+        
+        // Modificação 1: Garantir que sempre retorne um array
+        const [rows] = await db.query(
             `SELECT
                 p.id_pedido,
                 p.numero_pedido,
@@ -2039,33 +2083,49 @@ app.get('/pessoa/:id_pessoa/pedidos', verificarToken, async (req, res) => {
             [id_pessoa]
         );
 
-        // Para cada pedido, buscar os produtos
-        const pedidosComProdutos = await Promise.all(
-            pedidos.map(async (pedido) => {
-                const produtos = await db.query(
-                    `SELECT
+        // Normalizar para array
+        const pedidos = Array.isArray(rows) ? rows : [rows].filter(Boolean);
+        
+        console.log(`Encontrados ${pedidos.length} pedidos`);
+
+        // Buscar produtos para cada pedido
+        for (let pedido of pedidos) {
+            try {
+                console.log(`Buscando produtos para pedido ${pedido.id_pedido}`);
+                const [produtosRows] = await db.query(
+                    `SELECT 
                         pp.id_produto,
-                        pp.nome_produto as nome,
+                        pp.nome_produto,
                         pp.quantidade,
                         pp.preco_unitario,
-                        p.imagem_1 as imagem
+                        pr.imagem_1
                     FROM pedido_produto pp
-                    LEFT JOIN produto p ON pp.id_produto = p.id_produto
+                    LEFT JOIN produto pr ON pp.id_produto = pr.id_produto
                     WHERE pp.id_pedido = ?`,
                     [pedido.id_pedido]
                 );
+                
+                // Normalizar produtos para array
+                pedido.produtos = Array.isArray(produtosRows) ? produtosRows : [produtosRows].filter(Boolean);
+                
+                console.log(`Adicionados ${pedido.produtos.length} produtos ao pedido ${pedido.id_pedido}`);
+            } catch (err) {
+                console.error(`Erro ao buscar produtos para pedido ${pedido.id_pedido}:`, err);
+                pedido.produtos = [];
+            }
+        }
 
-                return {
-                    ...pedido,
-                    produtos: produtos || []
-                };
-            })
-        );
-
-        res.json(pedidosComProdutos);
+        console.log('Retornando pedidos com sucesso');
+        res.json(pedidos);
     } catch (err) {
-        console.error('Erro ao buscar pedidos do usuário:', err);
-        res.status(500).json({ error: 'Erro ao buscar histórico de pedidos.' });
+        console.error('Erro completo ao buscar pedidos:', {
+            message: err.message,
+            stack: err.stack
+        });
+        res.status(500).json({ 
+            error: 'Erro ao buscar histórico de pedidos.',
+            details: process.env.NODE_ENV === 'development' ? err.message : null
+        });
     }
 });
 

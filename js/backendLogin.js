@@ -116,10 +116,13 @@ app.post('/verificarConta', async (req, res) => {
         token,
         user: {
             id_pessoa,
+            nome,
             email,
-            isAdmin
+            isAdmin,
+            tipo_usuario: id_tipo_usuario 
         }
         });
+        
 
     } catch (error) {
         console.error("Erro ao verificar conta:", error);

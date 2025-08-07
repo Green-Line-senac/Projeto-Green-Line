@@ -138,9 +138,7 @@ async function carregarDadosUsuario() {
     console.log("Dados do usuário admin carregados:", usuarioLogado);
     preencherDadosPerfil(usuarioLogado);
     await loadAddress();
-
-    // Configurar campos editáveis após carregar os dados
-    setupEditableFields();
+  
 
     // Carregar configurações do modo noturno
     const darkModeEnabled = localStorage.getItem('darkMode') === 'true';
@@ -221,32 +219,42 @@ async function loadAddress() {
 // Move preencherEndereco to global scope
 function preencherEndereco(endereco) {
   if (Array.isArray(endereco)) endereco = endereco[0];
-  if (!endereco) return;
 
-  // Salva o endereço no sessionStorage para uso em outras páginas
+  // Verificação: se não houver campo "endereco", não monta a interface
+  if (!endereco || !endereco.endereco) {
+    document.getElementById("addressContent").innerHTML =
+      "<p>Nenhum endereço cadastrado.</p>";
+    return;
+  }
+
   sessionStorage.setItem("enderecoUsuario", JSON.stringify(endereco));
 
   const addressContent = document.getElementById("addressContent");
   addressContent.innerHTML = `
-      <p>${endereco.endereco},${endereco.complemento ? ' - ' + endereco.complemento : ''}</p>
-      <p>${endereco.cidade} - ${endereco.uf}, ${endereco.cep}</p>
-      <p>${endereco.bairro || ''}</p>
-    `;
+    <p>${endereco.endereco}${endereco.complemento ? " - " + endereco.complemento : ""}</p>
+    <p>${endereco.cidade || ""} - ${endereco.uf || ""}${endereco.cep ? ", " + endereco.cep : ""}</p>
+    <p>${endereco.bairro || ""}</p>
+  `;
 
-  // Pré-preencher modal
-  document.getElementById("cep").value = endereco.cep || "";
-  document.getElementById("endereco").value = endereco.endereco || "";
-  document.getElementById("complemento").value = endereco.complemento || "";
-  document.getElementById("cidade").value = endereco.cidade || "";
-  document.getElementById("uf").value = endereco.uf || "";
-  document.getElementById("bairro").value = endereco.bairro || "";
+  // Pré-preencher o formulário
+  const setVal = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val || "";
+  };
 
-  // Guarde o id_endereco para PUT depois
+  setVal("cep", endereco.cep);
+  setVal("endereco", endereco.endereco);
+  setVal("complemento", endereco.complemento);
+  setVal("cidade", endereco.cidade);
+  setVal("uf", endereco.uf);
+  setVal("bairro", endereco.bairro);
+
   const addressForm = document.getElementById("addressForm");
   if (addressForm) {
     addressForm.dataset.idEndereco = endereco.id_endereco;
   }
 }
+
 
 document.addEventListener('DOMContentLoaded', async function () {
   const isAdmin = sessionStorage.getItem('isAdmin') === 'true';
@@ -504,20 +512,29 @@ confirmDeleteBtn.addEventListener("click", async () => {
   const loadingId = showLoading('Excluindo conta...', 'Processando exclusão da sua conta');
 
     try {
-      const token = sessionStorage.getItem("userToken");
-      const id = document.getElementById("userId").value;
+      const idPessoa = sessionStorage.getItem("id_pessoa");
+const token = sessionStorage.getItem("userToken");
+
+const response = await fetch(`${api.perfil}/admin/editar-usuario/${idPessoa}`, {
+  method: "PUT",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${token}`,
+  },
+  body: JSON.stringify({ situacao: 'I' }),
+});
 
 
-    const response = await fetch(`${api.online}/pessoa/${idPessoa}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+   if (!response.ok) {
+  const errorData = await response.json();
+  if (response.status === 409) {
+    alert(errorData.error);  // <- Mostra motivo do bloqueio de exclusão
+  } else {
+    throw new Error(errorData.error || "Exclusão não permitida");
+  }
+  return;
+}
 
-    if (!response.ok) {
-      throw new Error("Erro ao deletar conta");
-    }
 
     hideNotification(loadingId);
     showSuccess('Conta excluída!', 'Sua conta foi excluída com sucesso. Você será redirecionado.');
@@ -579,34 +596,36 @@ function loadUsersList() {
   }
 
   document.getElementById("deleteUserBtn")?.addEventListener("click", async () => {
-    const id = document.getElementById("userId").value;
-    const token = sessionStorage.getItem("userToken");
+  const id = document.getElementById("userId").value;
+  const token = sessionStorage.getItem("userToken");
 
-    // Confirmação para evitar exclusões acidentais
-    if (!confirm("Tem certeza que deseja deletar este usuário? Esta ação é irreversível.")) {
-      return;
+  if (!confirm("Tem certeza que deseja deletar este usuário? Esta ação é irreversível.")) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`${api.perfil}/admin/editar-usuario/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify({ situacao: 'I' }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Erro ao deletar usuário");
     }
 
-    try {
-      const response = await fetch(`${api.perfil}/pessoa/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    alert("Usuário deletado com sucesso!");
+    document.getElementById("userManagementModal").classList.add("hidden");
+    loadUsersList(); // Recarrega a lista de usuários
+  } catch (error) {
+    console.error("Erro ao deletar usuário:", error);
+    alert("Erro ao deletar usuário. Por favor, tente novamente.");
+  }
+});
 
-      if (!response.ok) {
-        throw new Error("Erro ao deletar usuário");
-      }
-
-      alert("Usuário deletado com sucesso!");
-      document.getElementById("userManagementModal").classList.add("hidden");
-      loadUsersList(); // Recarrega a lista de usuários
-    } catch (error) {
-      console.error("Erro ao deletar usuário:", error);
-      alert("Erro ao deletar usuário. Por favor, tente novamente.");
-    }
-  });
 
   document.getElementById("cancelUserEditBtn")?.addEventListener("click", () => {
     document.getElementById("userManagementModal").classList.add("hidden");
@@ -749,8 +768,7 @@ if (historicoBtn && historicoSection && historicoContainer) {
     });
     historicoSection.classList.remove('hidden');
 
-    // Chame a função para carregar o histórico de compras
-    carregarHistoricoComprasAdmin();
+    
   });
 }
 
@@ -828,55 +846,6 @@ async function carregarHistoricoComprasAdmin() {
   }
 
 }
-
-async function carregarPedidosAdm() {
-  const token = sessionStorage.getItem("userToken");
-  const pedidosContainer = document.getElementById("pedidos-admin");
-
-  try {
-    const response = await fetch(`${api.online}/pessoa/pedidos`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Erro ao buscar pedidos.");
-    }
-
-    const pedidos = await response.json();
-    pedidosContainer.innerHTML = "";
-
-    if (pedidos.length === 0) {
-      pedidosContainer.innerHTML = "<p>Nenhum pedido encontrado.</p>";
-      return;
-    }
-
-    pedidos.forEach(pedido => {
-      const pedidoDiv = document.createElement("div");
-      pedidoDiv.classList.add("pedido-admin-item");
-
-      pedidoDiv.innerHTML = `
-        <p><strong>ID:</strong> ${pedido.id_pedido}</p>
-        <p><strong>Número:</strong> ${pedido.numero_pedido}</p>
-        <p><strong>Cliente:</strong> ${pedido.nome_cliente}</p>
-        <p><strong>Valor Total:</strong> R$ ${pedido.valor_total.toFixed(2)}</p>
-        <p><strong>Data:</strong> ${new Date(pedido.data_hora).toLocaleString()}</p>
-        <p><strong>Status:</strong> ${pedido.situacao}</p>
-        <p><strong>Pagamento:</strong> ${pedido.pagamento_situacao}</p>
-        <hr>
-      `;
-
-      pedidosContainer.appendChild(pedidoDiv);
-    });
-
-  } catch (error) {
-    console.error("Erro ao carregar pedidos:", error);
-    pedidosContainer.innerHTML = "<p>Erro ao carregar pedidos.</p>";
-  }
-}
-
-
 
 // Logout
 function logout() {
