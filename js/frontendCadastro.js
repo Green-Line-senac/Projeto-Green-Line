@@ -21,7 +21,7 @@ formularioCadastro.addEventListener("submit", async function (e) {
   const originalText = btEnviar.innerHTML;
 
   try {
-    // Limpar mensagens anteriores
+    // Limpar mensagens anteriores e mostrar loading
     if (window.authModern) {
       window.authModern.hideMessage();
       window.authModern.hideAllValidationMessages();

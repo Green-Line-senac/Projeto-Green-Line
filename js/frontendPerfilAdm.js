@@ -879,7 +879,6 @@ async function carregarPedidosAdm() {
 
   } catch (error) {
     console.error("Erro ao carregar pedidos:", error);
-    pedidosContainer.innerHTML = "<p>Erro ao carregar pedidos.</p>";
   }
 }
 

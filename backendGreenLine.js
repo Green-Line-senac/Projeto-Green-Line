@@ -357,11 +357,11 @@ app.post("/enviar-email", async (req, res) => {
 
   try {
     console.log("Tentando enviar email...", { email, tipo, assunto });
-    
+
     if (!funcoesUteis || typeof funcoesUteis.enviarEmail !== 'function') {
       throw new Error("Função enviarEmail não está disponível");
     }
-    
+
     await funcoesUteis.enviarEmail(email, assunto, tipo, pedido);
 
     console.log("Email enviado com sucesso");
@@ -1963,17 +1963,17 @@ app.get('/pessoa/pedidos', verificarToken, async (req, res) => {
 
 
 app.get('/pessoa/:id_pessoa/pedidos', verificarToken, async (req, res) => {
-    try {
-        const { id_pessoa } = req.params;
-        
-        // Proteção: Garante que o usuário só possa ver os próprios pedidos
-        if (parseInt(id_pessoa) !== req.usuario.userId) {
-            return res.status(403).json({ error: 'Acesso negado. Você não tem permissão para visualizar este histórico de pedidos.' });
-        }
+  try {
+    const { id_pessoa } = req.params;
 
-        // Buscar pedidos do usuário
-        const pedidos = await db.query(
-            `SELECT
+    // Proteção: Garante que o usuário só possa ver os próprios pedidos
+    if (parseInt(id_pessoa) !== req.usuario.userId) {
+      return res.status(403).json({ error: 'Acesso negado. Você não tem permissão para visualizar este histórico de pedidos.' });
+    }
+
+    // Buscar pedidos do usuário
+    const pedidos = await db.query(
+      `SELECT
                 p.id_pedido,
                 p.numero_pedido,
                 p.data_hora,
@@ -1983,14 +1983,14 @@ app.get('/pessoa/:id_pessoa/pedidos', verificarToken, async (req, res) => {
             FROM pedidos p
             WHERE p.id_pessoa = ?
             ORDER BY p.data_hora DESC`,
-            [id_pessoa]
-        );
+      [id_pessoa]
+    );
 
-        // Para cada pedido, buscar os produtos
-        const pedidosComProdutos = await Promise.all(
-            pedidos.map(async (pedido) => {
-                const produtos = await db.query(
-                    `SELECT
+    // Para cada pedido, buscar os produtos
+    const pedidosComProdutos = await Promise.all(
+      pedidos.map(async (pedido) => {
+        const produtos = await db.query(
+          `SELECT
                         pp.id_produto,
                         pp.nome_produto as nome,
                         pp.quantidade,
@@ -1999,28 +1999,28 @@ app.get('/pessoa/:id_pessoa/pedidos', verificarToken, async (req, res) => {
                     FROM pedido_produto pp
                     LEFT JOIN produto p ON pp.id_produto = p.id_produto
                     WHERE pp.id_pedido = ?`,
-                    [pedido.id_pedido]
-                );
-
-                return {
-                    ...pedido,
-                    produtos: produtos || []
-                };
-            })
+          [pedido.id_pedido]
         );
 
-        res.json(pedidosComProdutos);
-    } catch (err) {
-        console.error('Erro ao buscar pedidos do usuário:', err);
-        res.status(500).json({ error: 'Erro ao buscar histórico de pedidos.' });
-    }
+        return {
+          ...pedido,
+          produtos: produtos || []
+        };
+      })
+    );
+
+    res.json(pedidosComProdutos);
+  } catch (err) {
+    console.error('Erro ao buscar pedidos do usuário:', err);
+    res.status(500).json({ error: 'Erro ao buscar histórico de pedidos.' });
+  }
 });
 
 // Rota para o histórico de compras para o administrador
 app.get("/admin/historico-compras", async (req, res) => {
-    try {
-        const todosPedidos = await db.query(
-            `SELECT 
+  try {
+    const todosPedidos = await db.query(
+      `SELECT 
                 c.id_carrinho,
                 c.situacao,
                 DATE_FORMAT(c.data_hora, '%d/%m/%Y %H:%i') as data_criacao,
@@ -2035,41 +2035,41 @@ app.get("/admin/historico-compras", async (req, res) => {
             JOIN produto p ON ci.id_produto = p.id_produto
             JOIN pessoa pe ON c.id_pessoa = pe.id_pessoa
             ORDER BY c.data_hora DESC;`
-        );
-    
-        const pedidosAgrupados = todosPedidos.reduce((acc, item) => {
-            const pedidoExistente = acc.find(p => p.id_carrinho === item.id_carrinho);
-            if (pedidoExistente) {
-                pedidoExistente.itens.push({
-                    nome_produto: item.nome_produto,
-                    quantidade: item.quantidade,
-                    // Garante que 'preco' é um número
-                    preco: parseFloat(item.preco), 
-                    imagem_principal: item.imagem_principal,
-                });
-            } else {
-                acc.push({
-                    id_carrinho: item.id_carrinho,
-                    nome_usuario: item.nome_usuario,
-                    data_criacao: item.data_criacao,
-                    situacao: item.situacao,
-                    itens: [{
-                        nome_produto: item.nome_produto,
-                        quantidade: item.quantidade,
-                        // Garante que 'preco' é um número
-                        preco: parseFloat(item.preco), 
-                        imagem_principal: item.imagem_principal,
-                    }]
-                });
-            }
-            return acc;
-        }, []);
-    
-        res.status(200).json(pedidosAgrupados);
-    } catch (erro) {
-        console.error("Erro ao buscar todos os históricos de compras:", erro);
-        res.status(500).json({ mensagem: "Erro interno no servidor." });
-    }
+    );
+
+    const pedidosAgrupados = todosPedidos.reduce((acc, item) => {
+      const pedidoExistente = acc.find(p => p.id_carrinho === item.id_carrinho);
+      if (pedidoExistente) {
+        pedidoExistente.itens.push({
+          nome_produto: item.nome_produto,
+          quantidade: item.quantidade,
+          // Garante que 'preco' é um número
+          preco: parseFloat(item.preco),
+          imagem_principal: item.imagem_principal,
+        });
+      } else {
+        acc.push({
+          id_carrinho: item.id_carrinho,
+          nome_usuario: item.nome_usuario,
+          data_criacao: item.data_criacao,
+          situacao: item.situacao,
+          itens: [{
+            nome_produto: item.nome_produto,
+            quantidade: item.quantidade,
+            // Garante que 'preco' é um número
+            preco: parseFloat(item.preco),
+            imagem_principal: item.imagem_principal,
+          }]
+        });
+      }
+      return acc;
+    }, []);
+
+    res.status(200).json(pedidosAgrupados);
+  } catch (erro) {
+    console.error("Erro ao buscar todos os históricos de compras:", erro);
+    res.status(500).json({ mensagem: "Erro interno no servidor." });
+  }
 });
 
 app.get('/admin/pedidos-finalizados', verificarToken, async (req, res) => {
@@ -2136,16 +2136,16 @@ app.get('/admin/pedidos-finalizados', verificarToken, async (req, res) => {
 
 // Rota para pedidos reais (tabela pedidos + pedido_produto) para admin
 app.get("/admin/pedidos", verificarToken, async (req, res) => {
-    try {
-        const { userId } = req.usuario;
+  try {
+    const { userId } = req.usuario;
 
-        // Verifica se é admin
-        const [adminRows] = await db.query('SELECT id_tipo_usuario FROM pessoa WHERE id_pessoa = ?', [userId]);
-        if (!adminRows.length || adminRows[0].id_tipo_usuario !== 1) {
-            return res.status(403).json({ error: "Apenas administradores têm acesso." });
-        }
+    // Verifica se é admin
+    const [adminRows] = await db.query('SELECT id_tipo_usuario FROM pessoa WHERE id_pessoa = ?', [userId]);
+    if (!adminRows.length || adminRows[0].id_tipo_usuario !== 1) {
+      return res.status(403).json({ error: "Apenas administradores têm acesso." });
+    }
 
-        const [pedidosComProdutos] = await db.query(`
+    const [pedidosComProdutos] = await db.query(`
             SELECT 
                 p.id_pedido,
                 p.numero_pedido,
@@ -2165,40 +2165,40 @@ app.get("/admin/pedidos", verificarToken, async (req, res) => {
             ORDER BY p.data_hora DESC
         `);
 
-        // Agrupar por pedido
-        const agrupado = pedidosComProdutos.reduce((acc, item) => {
-            const existente = acc.find(p => p.id_pedido === item.id_pedido);
-            const produto = {
-                nome_produto: item.nome_produto,
-                imagem_produto: item.imagem_produto,
-                quantidade: item.quantidade,
-                preco_unitario: parseFloat(item.preco_unitario)
-            };
+    // Agrupar por pedido
+    const agrupado = pedidosComProdutos.reduce((acc, item) => {
+      const existente = acc.find(p => p.id_pedido === item.id_pedido);
+      const produto = {
+        nome_produto: item.nome_produto,
+        imagem_produto: item.imagem_produto,
+        quantidade: item.quantidade,
+        preco_unitario: parseFloat(item.preco_unitario)
+      };
 
-            if (existente) {
-                existente.produtos.push(produto);
-            } else {
-                acc.push({
-                    id_pedido: item.id_pedido,
-                    numero_pedido: item.numero_pedido,
-                    data_pedido: item.data_hora,
-                    situacao: item.situacao,
-                    pagamento_situacao: item.pagamento_situacao,
-                    valor_total: item.valor_total,
-                    nome_cliente: item.nome_cliente,
-                    produtos: [produto]
-                });
-            }
+      if (existente) {
+        existente.produtos.push(produto);
+      } else {
+        acc.push({
+          id_pedido: item.id_pedido,
+          numero_pedido: item.numero_pedido,
+          data_pedido: item.data_hora,
+          situacao: item.situacao,
+          pagamento_situacao: item.pagamento_situacao,
+          valor_total: item.valor_total,
+          nome_cliente: item.nome_cliente,
+          produtos: [produto]
+        });
+      }
 
-            return acc;
-        }, []);
+      return acc;
+    }, []);
 
-        res.status(200).json(agrupado);
+    res.status(200).json(agrupado);
 
-    } catch (erro) {
-        console.error("Erro ao buscar pedidos do admin:", erro);
-        res.status(500).json({ mensagem: "Erro interno ao buscar pedidos." });
-    }
+  } catch (erro) {
+    console.error("Erro ao buscar pedidos do admin:", erro);
+    res.status(500).json({ mensagem: "Erro interno ao buscar pedidos." });
+  }
 });
 
 // [7] OBTER DADOS DO USUÁRIO LOGADO (GET)
@@ -2384,68 +2384,68 @@ app.put("/pessoa/:id_pessoa/tipo", async (req, res) => {
 
 // Rota para obter imagens do carrossel
 app.get('/carousel-images', (req, res) => {
-    try {
-        const carouselData = JSON.parse(fs.readFileSync(path.join(__dirname, 'carousel-index.json'), 'utf8'));
-        res.json(carouselData);
-    } catch (err) {
-        console.error('Erro ao carregar imagens do carrossel:', err);
-        res.status(500).json({ error: 'Erro ao carregar imagens do carrossel' });
-    }
+  try {
+    const carouselData = JSON.parse(fs.readFileSync(path.join(__dirname, 'carousel-index.json'), 'utf8'));
+    res.json(carouselData);
+  } catch (err) {
+    console.error('Erro ao carregar imagens do carrossel:', err);
+    res.status(500).json({ error: 'Erro ao carregar imagens do carrossel' });
+  }
 });
 
 // Rota para deletar imagem do carrossel (Método DELETE)
 app.delete('/carousel-image/:imageName', (req, res) => {
-    const { imageName } = req.params;
-    const jsonPath = path.join(__dirname, 'carousel-index.json');
-    const imagePath = path.join(__dirname, '..', 'img', 'index_carousel', imageName);
-    
-    try {
-        // Ler o JSON
-        const carouselData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
-        
-        // Filtrar a imagem a ser deletada
-        const updatedData = carouselData.filter(img => path.basename(img.nomeImagem) !== imageName);
-        
-        // Salvar o JSON atualizado
-        fs.writeFileSync(jsonPath, JSON.stringify(updatedData, null, 2));
-        
-        // Deletar o arquivo de imagem
-        if (fs.existsSync(imagePath)) {
-            fs.unlinkSync(imagePath);
-        }
-        
-        res.json({ success: true, message: 'Imagem removida com sucesso' });
-    } catch (err) {
-        console.error('Erro ao remover imagem do carrossel:', err);
-        res.status(500).json({ success: false, message: 'Erro ao remover imagem' });
+  const { imageName } = req.params;
+  const jsonPath = path.join(__dirname, 'carousel-index.json');
+  const imagePath = path.join(__dirname, '..', 'img', 'index_carousel', imageName);
+
+  try {
+    // Ler o JSON
+    const carouselData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+
+    // Filtrar a imagem a ser deletada
+    const updatedData = carouselData.filter(img => path.basename(img.nomeImagem) !== imageName);
+
+    // Salvar o JSON atualizado
+    fs.writeFileSync(jsonPath, JSON.stringify(updatedData, null, 2));
+
+    // Deletar o arquivo de imagem
+    if (fs.existsSync(imagePath)) {
+      fs.unlinkSync(imagePath);
     }
+
+    res.json({ success: true, message: 'Imagem removida com sucesso' });
+  } catch (err) {
+    console.error('Erro ao remover imagem do carrossel:', err);
+    res.status(500).json({ success: false, message: 'Erro ao remover imagem' });
+  }
 });
 
 // Rota para upload de novas imagens do carrossel
 app.post('/upload-carousel-images', upload.array('carouselImages'), (req, res) => {
-    try {
-        const files = req.files;
-        if (!files || files.length === 0) {
-            return res.status(400).json({ success: false, message: 'Nenhuma imagem enviada' });
-        }
-        
-        const jsonPath = path.join(__dirname, 'carousel-index.json');
-        const carouselData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
-        
-        files.forEach(file => {
-            const newImage = {
-                nomeImagem: path.join('..', 'img', 'index_carousel', path.basename(file.filename))
-            };
-            carouselData.push(newImage);
-        });
-        
-        fs.writeFileSync(jsonPath, JSON.stringify(carouselData, null, 2));
-        
-        res.json({ success: true, message: 'Imagens adicionadas com sucesso' });
-    } catch (err) {
-        console.error('Erro ao adicionar imagens ao carrossel:', err);
-        res.status(500).json({ success: false, message: 'Erro ao adicionar imagens' });
+  try {
+    const files = req.files;
+    if (!files || files.length === 0) {
+      return res.status(400).json({ success: false, message: 'Nenhuma imagem enviada' });
     }
+
+    const jsonPath = path.join(__dirname, 'carousel-index.json');
+    const carouselData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+
+    files.forEach(file => {
+      const newImage = {
+        nomeImagem: path.join('..', 'img', 'index_carousel', path.basename(file.filename))
+      };
+      carouselData.push(newImage);
+    });
+
+    fs.writeFileSync(jsonPath, JSON.stringify(carouselData, null, 2));
+
+    res.json({ success: true, message: 'Imagens adicionadas com sucesso' });
+  } catch (err) {
+    console.error('Erro ao adicionar imagens ao carrossel:', err);
+    res.status(500).json({ success: false, message: 'Erro ao adicionar imagens' });
+  }
 });
 
 // ==================== ROTA DE TESTE ====================
@@ -2598,7 +2598,7 @@ app.post("/contato", async (req, res) => {
     // Enviar email de notificação para a empresa
     try {
       const funcoesUteis = new funcoes();
-      
+
       // Email para a empresa
       await funcoesUteis.enviarEmail(
         "greenline.ecologic@gmail.com",
@@ -2648,20 +2648,20 @@ app.post("/contato", async (req, res) => {
 app.post("/teste-email", async (req, res) => {
   try {
     console.log("🧪 INICIANDO TESTE DE EMAIL");
-    
+
     const funcoesUteis = new funcoes();
-    
+
     await funcoesUteis.enviarEmail(
       "gabreel47@gmail.com",
       "Teste de Email - GreenLine",
       "teste-verificacao"
     );
-    
+
     return res.status(200).json({
       conclusao: 2,
       mensagem: "Email de teste enviado com sucesso!"
     });
-    
+
   } catch (erro) {
     console.error("❌ ERRO NO TESTE DE EMAIL:", erro);
     return res.status(500).json({
