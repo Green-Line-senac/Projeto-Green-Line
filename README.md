@@ -126,8 +126,15 @@ O Green Line é ideal para quem:
 | Protótipo (Figma)          | ✅ Concluído |
 | Desenvolvimento Web        | ✅ Concluído |
 | Desenvolvimento Desktop    | ✅ Concluído |
-| Testes                     | 🔜 Em breve |
-| Documentação Final         | 🔜 Em breve |
+| Testes                     | ✅ Concluído |
+| Documentação Final         | ✅ Concluído |
+
+---
+## 📚 Documentação Completa
+
+A documentação técnica detalhada do projeto está disponível no link abaixo:
+
+🔗 [Acessar Documentação Completa](https://edusenac-my.sharepoint.com/:w:/g/personal/kaua33500476_edu_df_senac_br/EQ-2f89SW-VIpBzrJR-nPx4Biw1cXrsi_9qL4WR1wCd98g?e=EM9xRS)
 
 ---
 
