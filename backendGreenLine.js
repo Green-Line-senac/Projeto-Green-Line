@@ -1588,19 +1588,32 @@ app.get("/avaliacoes", async (req, res) => {
 
 /*BACKEND PERFIL */
 const verificarToken = (req, res, next) => {
-  const token = req.headers["authorization"];
-  if (!token) return res.status(401).json({ error: "Token não fornecido." });
+  console.log('Middleware verificarToken executado');
+
+  const token = req.headers['authorization'];
+  if (!token) return res.status(401).json({ error: 'Token não fornecido.' });
 
   try {
-    const tokenFormatado = token.replace("Bearer ", "");
+    const tokenFormatado = token.replace('Bearer ', '');
     const decoded = jwt.verify(tokenFormatado, process.env.SEGREDO_JWT);
-    req.usuario = decoded;
+    
+    // Garantir que os nomes das propriedades batem com o token gerado
+    req.usuario = {
+      userId: decoded.id_pessoa,
+      tipo_usuario: decoded.tipo_usuario, // Agora bate com o token
+      email: decoded.email
+    };
+
+    console.log('Usuário decodificado:', req.usuario); // Adicione este log para debug
     next();
   } catch (error) {
-    return res.status(403).json({ error: "Token inválido ou expirado." });
+    console.error('Erro na verificação do token:', error);
+    return res.status(403).json({ error: 'Token inválido ou expirado.' });
   }
 };
 
+
+module.exports = verificarToken;
 // Configuração do multer para upload de imagens
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
