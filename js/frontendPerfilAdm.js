@@ -35,7 +35,7 @@ async function loadCarouselImages() {
   container.innerHTML = "Carregando imagens...";
 
   try {
-    const response = await fetch(`${api.perfil}/carousel-images`);
+    const response = await fetch(`${api.online}/carousel-images`);
     if (!response.ok) {
       throw new Error("Erro ao buscar imagens do carrossel");
     }
@@ -515,7 +515,7 @@ confirmDeleteBtn.addEventListener("click", async () => {
       const idPessoa = sessionStorage.getItem("id_pessoa");
 const token = sessionStorage.getItem("userToken");
 
-const response = await fetch(`${api.perfil}/admin/editar-usuario/${idPessoa}`, {
+const response = await fetch(`${api.online}/admin/editar-usuario/${idPessoa}`, {
   method: "PUT",
   headers: {
     "Content-Type": "application/json",

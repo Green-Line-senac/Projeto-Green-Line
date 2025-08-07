@@ -458,7 +458,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const idPessoa = sessionStorage.getItem("id_pessoa");
       const token = sessionStorage.getItem("userToken");
 
-      const response = await fetch(`${api.perfil}/admin/editar-usuario/${idPessoa}`, {
+      const response = await fetch(`${api.online}/admin/editar-usuario/${idPessoa}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -586,8 +586,8 @@ async function loadUserPedidos() {
   try {
     loadingId = showLoading("Carregando pedidos...", "Buscando seu histórico de compras");
 
-    console.log(`Fazendo requisição para: ${api.perfil}/pessoa/${idPessoa}/pedidos`);
-    const response = await fetch(`${api.perfil}/pessoa/${idPessoa}/pedidos`, {
+    console.log(`Fazendo requisição para: ${api.online}/pessoa/${idPessoa}/pedidos`);
+    const response = await fetch(`${api.online}/pessoa/${idPessoa}/pedidos`, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
