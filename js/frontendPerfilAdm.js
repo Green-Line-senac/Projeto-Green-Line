@@ -62,7 +62,7 @@ async function loadCarouselImages() {
       button.addEventListener("click", async (e) => {
         const imageName = e.target.dataset.imageName;
         try {
-          const deleteResponse = await fetch(`${api.perfil}/carousel-image/${imageName}`, {
+          const deleteResponse = await fetch(`${api.online}/carousel-image/${imageName}`, {
             method: "DELETE"
           });
           if (deleteResponse.ok) {
@@ -140,7 +140,7 @@ async function carregarDadosUsuario() {
     await loadAddress();
 
     // Configurar campos editáveis após carregar os dados
-    setupEditableFields();
+    //setupEditableFields();
 
     // Carregar configurações do modo noturno
     const darkModeEnabled = localStorage.getItem('darkMode') === 'true';
@@ -157,20 +157,31 @@ async function carregarDadosUsuario() {
   }
 }
 
-// Move preencherDadosPerfil to global scope
-function preencherDadosPerfil(user) {
-  document.getElementById("profileName").textContent = user.nome || "Nome";
-  document.getElementById("profileEmail").textContent = user.email || "email@exemplo.com";
-  document.getElementById("profileEmailContent").textContent = user.email || "email@exemplo.com";
-  document.getElementById("profileFullName").textContent = user.nome || "Nome Completo";
-  document.getElementById("profilePhone").textContent = user.telefone || "Não informado";
-  document.getElementById("profileCpf").textContent = user.cpf || "Não informado";
-  document.getElementById("profileStatus").textContent = user.situacao === 'A' ? 'Ativo' : 'Pendente/Inativo';
+   function preencherDadosPerfil(user) {
 
-  if (user.imagem_perfil) {
+    document.getElementById("profileName").textContent = user.nome || "Nome";
+    document.getElementById("profileEmail").textContent = user.email || "email@exemplo.com";
+    document.getElementById("profileEmailContent").textContent = user.email || "email@exemplo.com";
+    document.getElementById("profileFullName").textContent = user.nome || "Nome Completo";
+    document.getElementById("profilePhone").textContent = user.telefone || "Não informado";
+    document.getElementById("profileCpf").textContent = user.cpf || "Não informado";
+    document.getElementById("profileStatus").textContent = user.situacao === 'A' ? 'Ativo' : 'Pendente/Inativo';
+
     document.getElementById("profileAvatar").src = user.imagem_perfil;
+    
+    const avatar = document.getElementById("profileAvatar");
+    sessionStorage.setItem("avatar", avatar.src);
+  
+
+    // Alterar para inputs editáveis
+    document.getElementById("profileFullName").innerHTML = `
+        <input type="text" id="editNome" value="${user.nome || ''}" class="editable-input">
+    `;
+
+    document.getElementById("profilePhone").innerHTML = `
+        <input type="text" id="editTelefone" value="${user.telefone || ''}" class="editable-input">
+    `;
   }
-}
 
 // Move loadAddress to global scope
 async function loadAddress() {
@@ -296,101 +307,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     localStorage.setItem('darkMode', isChecked ? 'true' : 'false');
   });
 
-  carregarDadosUsuario();
-  document.querySelector(".nav-item.active")?.click(); // ativar seção inicial
-
-  const logoutBtn = document.getElementById("logoutBtn");
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", logout);
-  }
-});
-
-// Move setupEditableFields to global scope
-function setupEditableFields() {
-  document.querySelectorAll(".info-value.editable").forEach((element) => {
-    // Crie uma função nomeada para o event listener
-    const handleEditClick = function () {
-      const currentValue = this.textContent;
-      const input = document.createElement("input");
-      input.type = "text";
-      input.value = currentValue;
-      input.classList.add("edit-input"); // Adicione uma classe para estilização
-
-      this.replaceWith(input);
-      input.focus();
-
-      const originalId = this.id; // Capturar o ID antes da arrow function
-
-      input.addEventListener("blur", async () => {
-        const newValue = input.value.trim();
-        const infoItem = document.createElement("div");
-        infoItem.classList.add("info-value", "editable");
-        infoItem.id = originalId; // Usar o ID capturado
-        infoItem.textContent = newValue || currentValue; // Usar valor antigo se novo estiver vazio
-
-        input.replaceWith(infoItem);
-        // Re-adicionar o event listener usando a função nomeada
-        infoItem.addEventListener("click", handleEditClick);
-
-        // Atualizar dados no usuárioLogado (não salva no backend aqui, apenas prepara para o botão Salvar)
-        if (usuarioLogado) {
-          if (originalId === "profileFullName") {
-            usuarioLogado.nome = newValue;
-            console.log("Nome atualizado:", usuarioLogado.nome);
-          } else if (originalId === "profilePhone") {
-            usuarioLogado.telefone = newValue;
-            console.log("Telefone atualizado:", usuarioLogado.telefone);
-          }
-        } else {
-          console.warn("usuarioLogado não está definido ainda");
-        }
-      });
-
-      input.addEventListener("keypress", function (e) {
-        if (e.key === 'Enter') {
-          input.blur(); // Simula o blur para salvar
-        }
-      });
-    };
-
-    // Adiciona o event listener usando a função nomeada
-    element.addEventListener("click", handleEditClick);
-  });
-}
-
-// Botão Salvar Alterações para Informações Pessoais
-document.getElementById("savePersonalBtn").addEventListener("click", async () => {
-  const loadingId = showLoading('Salvando alterações...', 'Atualizando suas informações');
-
-  try {
-    const token = sessionStorage.getItem("userToken");
-    const idPessoa = sessionStorage.getItem("id_pessoa");
-
-    const response = await fetch(`${api.online}/pessoa/${idPessoa}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        nome: usuarioLogado?.nome || '',
-        telefone: usuarioLogado?.telefone || '',
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Erro ao salvar informações pessoais");
-    }
-
-    hideNotification(loadingId);
-    showSuccess('Informações salvas!', 'Suas informações pessoais foram atualizadas com sucesso');
-    carregarDadosUsuario(); // Recarrega para garantir que os dados exibidos estão atualizados
-  } catch (error) {
-    console.error("Erro ao salvar informações pessoais:", error);
-    hideNotification(loadingId);
-    showError('Erro ao salvar', 'Não foi possível salvar suas informações. Tente novamente.');
-  }
-});
 
 // Lógica para o modal de endereço
 const addressModal = document.getElementById("addressModal");
@@ -518,16 +434,16 @@ if (cepInput) {
   });
 }
 
-// Lógica para upload de imagem de perfil
-const avatarInput = document.getElementById('avatarInput');
-avatarInput.addEventListener('change', async (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    // Validar tamanho do arquivo (máximo 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      showError('Arquivo muito grande', 'A imagem deve ter no máximo 5MB');
-      return;
-    }
+ // Lógica para upload de imagem de perfil
+  const avatarInput = document.getElementById('avatarInput');
+  avatarInput.addEventListener('change', async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Validar tamanho do arquivo (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        showError('Arquivo muito grande', 'A imagem deve ter no máximo 5MB');
+        return;
+      }
 
     // Validar tipo do arquivo
     if (!file.type.startsWith('image/')) {
@@ -537,31 +453,34 @@ avatarInput.addEventListener('change', async (event) => {
 
     const loadingId = showLoading('Atualizando foto...', 'Fazendo upload da sua nova imagem de perfil');
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      try {
-        // A imagem será salva como base64 no banco de dados.
-        // Em um ambiente de produção, é melhor fazer upload para um serviço de armazenamento de arquivos.
-        await atualizarImagemPerfil(e.target.result);
-        document.getElementById('profileAvatar').src = e.target.result;
-        hideNotification(loadingId);
-        showSuccess('Foto atualizada!', 'Sua imagem de perfil foi atualizada com sucesso');
-      } catch (error) {
-        console.error("Erro ao atualizar imagem de perfil:", error);
-        hideNotification(loadingId);
-        showError('Erro ao atualizar foto', 'Não foi possível atualizar sua imagem de perfil');
-      }
-    };
-    reader.readAsDataURL(file);
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+  try {
+    let base64 = e.target.result;
+    if (!base64.startsWith("data:image")) {
+      base64 = "data:image/png;base64," + base64;
+    }
+    await atualizarImagemPerfil(base64);
+    document.getElementById('profileAvatar').src = base64;
+    hideNotification(loadingId);
+    showSuccess('Foto atualizada!', 'Sua imagem de perfil foi atualizada com sucesso');
+  } catch (error) {
+    console.error("Erro ao atualizar imagem de perfil:", error);
+    hideNotification(loadingId);
+    showError('Erro ao atualizar foto', 'Não foi possível atualizar sua imagem de perfil');
   }
-});
+};
+      reader.readAsDataURL(file);
+    }
+  });
 
-// Lógica para o modal de exclusão de conta
-const deleteModal = document.getElementById("deleteModal");
-const deleteAccountBtn = document.getElementById("deleteAccountBtn");
-const closeDeleteModal = deleteModal.querySelector(".close-modal");
-const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
-const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+ 
+  // Lógica para o modal de exclusão de conta
+  const deleteModal = document.getElementById("deleteModal");
+  const deleteAccountBtn = document.getElementById("deleteAccountBtn");
+  const closeDeleteModal = deleteModal.querySelector(".close-modal");
+  const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
+  const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
 
 deleteAccountBtn.addEventListener("click", () => {
   deleteModal.classList.remove("hidden");
@@ -584,9 +503,10 @@ window.addEventListener("click", (event) => {
 confirmDeleteBtn.addEventListener("click", async () => {
   const loadingId = showLoading('Excluindo conta...', 'Processando exclusão da sua conta');
 
-  try {
-    const token = sessionStorage.getItem("userToken");
-    const idPessoa = sessionStorage.getItem("id_pessoa");
+    try {
+      const token = sessionStorage.getItem("userToken");
+      const id = document.getElementById("userId").value;
+
 
     const response = await fetch(`${api.online}/pessoa/${idPessoa}`, {
       method: "DELETE",
@@ -639,106 +559,179 @@ function loadUsersList() {
     });
 }
 
-function openUserEditModal(id) {
-  const token = sessionStorage.getItem("userToken");
-  fetch(`${api.online}/pessoa/${id}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  })
-    .then(res => res.json())
-    .then(data => {
-      const u = data[0];
-      document.getElementById("userId").value = u.id_pessoa;
-      document.getElementById("userName").value = u.nome;
-      document.getElementById("userEmail").value = u.email;
-      document.getElementById("userPhone").value = u.telefone;
-      document.getElementById("userStatus").value = u.situacao;
-      document.getElementById("userType").value = u.id_tipo_usuario;
-      document.getElementById("userManagementModal").classList.remove("hidden");
+  function openUserEditModal(id) {
+    const token = sessionStorage.getItem("userToken");
+    fetch(`${api.online}/pessoa/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        const u = data[0];
+        document.getElementById("userId").value = u.id_pessoa;
+        document.getElementById("userName").value = u.nome;
+        document.getElementById("userEmail").value = u.email;
+        document.getElementById("userPhone").value = u.telefone;
+        document.getElementById("userStatus").value = u.situacao;
+        document.getElementById("userType").value = u.id_tipo_usuario;
+        document.getElementById("userManagementModal").classList.remove("hidden");
 
-    });
-}
-
-document.getElementById("deleteUserBtn")?.addEventListener("click", async () => {
-  const id = document.getElementById("userId").value;
-  const token = sessionStorage.getItem("userToken");
-
-  // Confirmação para evitar exclusões acidentais
-  if (!confirm("Tem certeza que deseja deletar este usuário? Esta ação é irreversível.")) {
-    return;
+      });
   }
 
-  try {
-    const response = await fetch(`${api.online}/pessoa/${id}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+  document.getElementById("deleteUserBtn")?.addEventListener("click", async () => {
+    const id = document.getElementById("userId").value;
+    const token = sessionStorage.getItem("userToken");
 
-    if (!response.ok) {
-      throw new Error("Erro ao deletar usuário");
+    // Confirmação para evitar exclusões acidentais
+    if (!confirm("Tem certeza que deseja deletar este usuário? Esta ação é irreversível.")) {
+      return;
     }
 
-    alert("Usuário deletado com sucesso!");
+    try {
+      const response = await fetch(`${api.online}/pessoa/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao deletar usuário");
+      }
+
+      alert("Usuário deletado com sucesso!");
+      document.getElementById("userManagementModal").classList.add("hidden");
+      loadUsersList(); // Recarrega a lista de usuários
+    } catch (error) {
+      console.error("Erro ao deletar usuário:", error);
+      alert("Erro ao deletar usuário. Por favor, tente novamente.");
+    }
+  });
+
+  document.getElementById("cancelUserEditBtn")?.addEventListener("click", () => {
     document.getElementById("userManagementModal").classList.add("hidden");
-    loadUsersList(); // Recarrega a lista de usuários
-  } catch (error) {
-    console.error("Erro ao deletar usuário:", error);
-    alert("Erro ao deletar usuário. Por favor, tente novamente.");
+  });
+  document.getElementById("close-modal")?.addEventListener("click", () => {
+    document.getElementById("userManagementModal").classList.add("hidden");
+  });
+
+
+
+ document.getElementById("userManagementForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const id = document.getElementById("userId").value;
+    const userData = {
+      situacao: document.getElementById("userStatus").value,
+
+    };
+
+    try {
+      const response = await fetch(`${api.online}/admin/editar-usuario/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(userData)
+      });
+
+      if (!response.ok) {
+        let errorText = await response.text();
+        let errorMessage;
+        try {
+          const json = JSON.parse(errorText);
+          errorMessage = json.error || "Erro ao atualizar usuário";
+        } catch {
+          errorMessage = errorText || "Erro ao atualizar usuário";
+        }
+        throw new Error(errorMessage);
+      }
+
+      showSuccess('Usuário atualizado!', 'As informações do usuário foram salvas com sucesso');
+      document.getElementById("userManagementModal").classList.add("hidden");
+      loadUsersList();
+    } catch (error) {
+      showError('Erro ao salvar', error.message || 'Não foi possível atualizar o usuário');
+      console.error("Detalhes do erro:", error);
+    }
+  });
+
+
+
+  carregarDadosUsuario();
+  document.querySelector(".nav-item.active")?.click(); // ativar seção inicial
+
+
+
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", logout);
   }
 });
 
-document.getElementById("cancelUserEditBtn")?.addEventListener("click", () => {
-  document.getElementById("userManagementModal").classList.add("hidden");
-});
-
-
-document.getElementById("userManagementForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
+document.getElementById("savePersonalBtn").addEventListener("click", async () => {
+  const nome = document.getElementById("editNome").value.trim();
+  const telefone = document.getElementById("editTelefone").value.trim();
+  const idPessoa = sessionStorage.getItem("id_pessoa");
   const token = sessionStorage.getItem("userToken");
-  const id = document.getElementById("userId").value;
-  const userData = {
-    nome: document.getElementById("userName").value,
-    email: document.getElementById("userEmail").value,
-    telefone: document.getElementById("userPhone").value,
-    situacao: document.getElementById("userStatus").value,
-    id_tipo_usuario: document.getElementById("userType").value,
-  };
 
-  await fetch(`${api.online}/pessoa/${id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(userData),
-  });
+  const loadingId = showLoading('Salvando...', 'Atualizando suas informações');
 
-  alert("Usuário atualizado.");
-  document.getElementById("userManagementModal").classList.add("hidden");
-  loadUsersList();
+  try {
+    console.log("Enviando dados para atualização:", { nome, telefone });
+    const response = await fetch(`${api.online}/admin/atualizar/${idPessoa}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        nome: nome,
+        telefone: telefone
+      })
+    });
+
+    const responseData = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      console.error("Erro na resposta:", response.status, responseData);
+      throw new Error(responseData?.error || `Erro HTTP: ${response.status}`);
+    }
+
+    hideNotification(loadingId);
+    showSuccess('Perfil atualizado! atualize a página', responseData.message);
+
+  } catch (error) {
+    hideNotification(loadingId);
+    console.error("Erro completo:", error);
+    showError('Erro ao salvar', error.message);
+  }
 });
-
 // Função para atualizar imagem de perfil
 async function atualizarImagemPerfil(imageData) {
   try {
     const idPessoa = sessionStorage.getItem("id_pessoa");
+    const token = sessionStorage.getItem("userToken");
+    console.log("Tamanho da base64 recebida:", imageData?.length);
+
     const response = await fetch(`${api.online}/pessoa/${idPessoa}/imagem`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
       body: JSON.stringify({ imagem_perfil: imageData }),
     });
 
     if (!response.ok) {
-      throw new Error("Erro ao atualizar imagem");
+      const errText = await response.text();
+      throw new Error("Erro ao atualizar imagem: " + errText);
     }
   } catch (error) {
     console.error("Erro:", error);
     throw error;
   }
 }
+
+
 
 // Variável global para armazenar todos os pedidos
 // Localize o botão do histórico de compras e a seção de conteúdo do histórico
@@ -774,7 +767,7 @@ async function carregarHistoricoComprasAdmin() {
     }
 
     const response = await fetchWithFallback(
-      `${api.perfil}/admin/historico-compras`,
+      `${api.online}/admin/historico-compras`,
       `${api.online}/admin/historico-compras`, {
       headers: {
         'Authorization': `Bearer ${token}`
