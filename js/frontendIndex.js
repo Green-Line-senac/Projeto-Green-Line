@@ -80,6 +80,7 @@ async function carregarProdutosPromocao() {
     if (!success || !Array.isArray(data)) {
       throw new Error(message || "Dados inválidos");
     }
+    console.log("Produtos carregados:", data);
 
     estado.produtos = data.map(sanitizarProduto);
     renderizarProdutos();
@@ -132,26 +133,37 @@ function formatarPrecoBR(valor) {
 }
 
 function criarCardProduto(produto) {
+  console.log(produto);
   const card = document.createElement("div");
   card.className = "col-12 col-sm-6 col-md-4 col-lg-3 mb-4";
 
   // Lógica corrigida para preços com cores adequadas
   let precoFormatado;
   if (produto.promocao && produto.preco_promocional > 0) {
-    // Produto em promoção: preço original riscado em cinza escuro, preço promocional em verde
     precoFormatado = `<span style="text-decoration: line-through; font-size: 0.9rem; color: #555;">${formatarPrecoBR(produto.preco)}</span>
        <span class="fs-5 ms-2" style="color: #28a745; font-weight: bold;">${formatarPrecoBR(produto.preco_promocional)}</span>`;
   } else {
-    // Produto sem promoção: preço normal em cinza escuro
     precoFormatado = `<span class="fs-5" style="color: #333;">${formatarPrecoBR(produto.preco)}</span>`;
   }
+
+  // Corrigindo a verificação de estoque (estava usando atribuição = em vez de comparação == ou ===)
+  const estoqueBadge = produto.estoque <= 0 
+    ? '<span class="badge bg-secondary mt-2">Fora de estoque</span>' 
+    : '';
+
+  // Corrigindo a URL da imagem (removendo o caminho duplicado)
+  const imagemSrc = produto.imagem_1 
+    ? produto.imagem_1 
+    : config.fallbackImage;
+
+  // Garantindo que descrição_curta exista antes de usar substring
+  const descricaoCurta = produto.descricao_curta 
+    ? escapeHtml(produto.descricao_curta.substring(0, 60)) + (produto.descricao_curta.length > 60 ? "..." : "")
+    : "";
+
   card.innerHTML = `
-    <div class="card h-100 cursor point">
-      <img src="${produto.imagem_1 != null
-      ? produto.imagem_1
-      : "https://github.com/KauaNca/green_line_desktop/tree/main/imagens/produtos/" +
-      produto.imagem_1
-    }" 
+    <div class="card h-100 cursor-pointer">
+      <img src="${imagemSrc}" 
            class="card-img-top" 
            alt="${escapeHtml(produto.nome)}"
            loading="lazy"
@@ -163,30 +175,23 @@ function criarCardProduto(produto) {
           <span class="text-warning">${gerarEstrelas(produto.avaliacao)}</span>
           <small class="text-muted">${produto.numAvaliacoes || 0} av.</small>
         </div>
-        <p class="card-text text-muted small">${escapeHtml(
-      produto.descricao_curta.substring(0, 60)
-    )}${produto.descricao_curta.length > 60 ? "..." : ""}</p>
-        <p class="fw-bold mb-0">
-          ${precoFormatado}
-        </p>
-        ${(produto.estoque = 0
-      ? '<span class="badge bg-secondary mt-2">Fora de estoque</span>'
-      : "")}
-        <p class="">
-          ${produto.categoria
-      ? `<span class="badge bg-success mt-2">${produto.categoria}</span>`
-      : ""
-    }
-        </p>
+        <p class="card-text text-muted small">${descricaoCurta}</p>
+        <p class="fw-bold mb-0">${precoFormatado}</p>
+        ${estoqueBadge}
+        ${produto.categoria ? `<span class="badge bg-success mt-2">${produto.categoria}</span>` : ''}
       </div>
     </div>
   `;
-  // Ao clicar no card, salva o produto e redireciona para a página de detalhes
-  card.addEventListener('click', () => {
-    // Salvar produto no sessionStorage para a página de detalhes
+
+  // Evento de clique corrigido (verificando se é um clique no botão de favorito)
+  card.addEventListener('click', (e) => {
+    // Evitar redirecionamento se clicar em elementos interativos dentro do card
+    if (e.target.closest('.btn-favorito, .btn-add-carrinho')) {
+      return;
+    }
+    
     const produtoDetalhe = {
       id_produto: produto.id_produto,
-      produto: produto.nome,
       nome: produto.nome,
       imagem_1: produto.imagem_1,
       imagem_2: produto.imagem_2,
@@ -202,9 +207,11 @@ function criarCardProduto(produto) {
       categoria: produto.categoria,
       marca: produto.marca
     };
+    
     sessionStorage.setItem('produtoSelecionado', JSON.stringify(produtoDetalhe));
     window.location.href = `${caminho}/produto.html?id=${produto.id_produto}`;
   });
+
   return card;
 }
 
@@ -239,24 +246,24 @@ function controlarSecaoComunidade() {
 // ==================== FUNÇÕES AUXILIARES ====================
 
 function sanitizarProduto(produto) {
+  // Processa todos os campos primeiro
+  const estoqueProcessado = Number(produto.estoque) || 0;
   const precoProcessado = typeof produto.preco === 'string' ? parseFloat(produto.preco.replace(',', '.')) : Number(produto.preco) || 0;
   const precoPromocionalProcessado = typeof produto.preco_promocional === 'string' ? parseFloat(produto.preco_promocional.replace(',', '.')) : Number(produto.preco_promocional) || 0;
-  
-  // Garantir que avaliação seja um número válido
   const avaliacaoProcessada = Number(produto.avaliacao) || 0;
-  const numAvaliacoesProcessado = Number(produto.numAvaliacoes) || 0;
+  const numAvaliacoesProcessado = Number(produto.quantidade_avaliacoes) || 0;
 
-  console.log('Sanitizando produto:', produto.nome || produto.produto, 'Avaliação:', avaliacaoProcessada, 'Num avaliações:', numAvaliacoesProcessado);
+  console.log('Sanitizando produto:', produto.nome || produto.produto, 'Avaliação:', avaliacaoProcessada, 'Num avaliações:', numAvaliacoesProcessado, 'Estoque', estoqueProcessado);
 
+  // Retorna o objeto já com todos os valores processados
   return {
-    ...produto,
     id_produto: parseInt(produto.id_produto) || null,
     preco: precoProcessado,
     preco_promocional: precoPromocionalProcessado,
     promocao: Boolean(produto.promocao),
     avaliacao: avaliacaoProcessada,
     numAvaliacoes: numAvaliacoesProcessado,
-    estoque: Number(produto.estoque),
+    estoque: estoqueProcessado, // Agora com certeza será um número
     nome: produto.produto || produto.nome || "Produto sem nome",
     descricao: produto.descricao || "Sem descrição",
     categoria: produto.categoria || "Geral",

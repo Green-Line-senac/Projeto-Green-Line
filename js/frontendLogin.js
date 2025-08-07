@@ -43,8 +43,7 @@ async function handleLogin(e) {
   }
 
   try {
-    // Mostrar loading
-    showLoading(LoadingPresets.login);
+    // Mostrar loading apenas no botão
     showButtonLoading(botaoEntrar, 'Entrar na minha conta', 'spinner-only');
 
     const resposta = await fazerRequisicaoLogin(usuario, senha);
@@ -60,12 +59,9 @@ async function handleLogin(e) {
     await processarRespostaLogin(dados, usuario);
   } catch (erro) {
     console.error("Erro no processo de login:", erro);
-    // Garantir que o loading seja escondido em caso de erro de conexão
-    hideLoading();
     mostrarMensagem("Falha na conexão. Tente novamente.", "danger");
   } finally {
-    // Esconder loading (dupla garantia)
-    hideLoading();
+    // Esconder loading do botão
     hideButtonLoading(botaoEntrar);
     reativarBotao();
   }
@@ -107,9 +103,6 @@ async function fazerRequisicaoLogin(usuario, senha) {
 }
 
 function tratarErroResposta(resposta) {
-  // Garantir que o loading seja escondido imediatamente quando há erro
-  hideLoading();
-  
   if (resposta.status === 401) {
     mostrarMensagem("Credenciais inválidas ou conta não encontrada.", "danger");
   } else if (resposta.status === 403) {
@@ -127,23 +120,18 @@ function tratarErroResposta(resposta) {
 async function processarRespostaLogin(dados, usuario) {
   switch (dados.dadosValidos) {
     case 0:
-      hideLoading(); // Esconder loading em caso de erro
       mostrarMensagem("Conta não encontrada.", "danger");
       break;
     case 1:
-      hideLoading(); // Esconder loading em caso de conta não verificada
       await tratarContaNaoVerificada(dados, usuario);
       break;
     case 2:
-      // Manter loading até o redirecionamento para login bem-sucedido
       await tratarLoginBemSucedido(dados);
       break;
     case 3:
-      hideLoading(); // Esconder loading em caso de credenciais inválidas
       mostrarMensagem("Credenciais inválidas.", "danger");
       break;
     default:
-      hideLoading(); // Esconder loading em caso de erro desconhecido
       mostrarMensagem("Erro desconhecido.", "warning");
   }
 }

@@ -33,6 +33,29 @@ body {
     margin-bottom: 1.5rem; /* Espaço extra abaixo da barra de busca */
 }
 
+/* Estilo da barra de pesquisa */
+.search-enhanced .form-control {
+    border-color: #28a745; /* Cor verde para a borda */
+    border-width: 2px; /* Espessura da borda */
+    transition: all 0.3s ease; /* Transição suave */
+}
+
+.search-enhanced .form-control:focus {
+    border-color: #198754; /* Cor verde mais escura no foco */
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25); /* Sombra verde no foco */
+    outline: none; /* Remove o outline padrão */
+}
+
+.search-enhanced .input-group .form-control {
+    border-right: none; /* Remove a borda direita para conectar com o botão */
+}
+
+.search-enhanced .btn-success {
+    border-color: #28a745; /* Cor da borda do botão igual ao input */
+    border-width: 2px; /* Espessura da borda do botão */
+    border-left: none; /* Remove a borda esquerda para conectar com o input */
+}
+
 /* Espaçamento entre seções */
 .row {
     margin-bottom: 1rem; /* Espaço entre as linhas */
@@ -56,7 +79,7 @@ body {
 .pagination .page-link {
     color: #ffffff; /* Cor do texto */
     background-color: #198754; /* Cor de fundo dos links */
-    border: 35px #198754; /* Borda dos links */
+    border: 1px solid #198754; /* Borda dos links */
 }
 
 .pagination .page-link:hover {
@@ -82,6 +105,7 @@ body {
     justify-content: center;
     gap: 0.25rem;
     flex-wrap: nowrap;
+    background-color: transparent; /* Remove fundo da paginação */
 }
 
 .pagination .page-item .page-link {
@@ -94,22 +118,42 @@ body {
     font-weight: 500;
     transition: all 0.2s ease-in-out;
     border: 1px solid #198754;
+    color: #ffffff;
+    background-color: #198754;
 }
 
+/* Estilos específicos para as setas (primeiro e último item) */
 .pagination .page-item:first-child .page-link,
 .pagination .page-item:last-child .page-link {
     font-size: 1.1rem;
     font-weight: 600;
+    border: 2px solid #198754; /* Borda mais espessa para as setas */
+    background-color: #198754;
+    color: #ffffff;
 }
 
+/* Hover para as setas */
+.pagination .page-item:first-child .page-link:hover,
+.pagination .page-item:last-child .page-link:hover {
+    background-color: #2E8B57;
+    border-color: #2E8B57;
+    transform: scale(1.05); /* Leve aumento no hover */
+}
+
+/* Estado desabilitado para as setas */
 .pagination .page-item.disabled .page-link {
     opacity: 0.5;
     cursor: not-allowed;
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: #ffffff;
 }
 
 .pagination .page-item.disabled .page-link:hover {
-    background-color: transparent;
-    color: #6c757d;
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: #ffffff;
+    transform: none; /* Remove o efeito de escala no hover quando desabilitado */
 }
 
 /* Responsividade para dispositivos móveis */
@@ -253,10 +297,34 @@ body {
 .filter-checkbox {
     width: 1rem;                 /* Largura: 16px */
     height: 1rem;                /* Altura: 16px */
-    accent-color: #16a34a;       /* Cor verde ao marcar (Tailwind green-600) */
-    background-color: #f3f4f6;   /* Fundo claro quando desmarcado */
-    border: 1px solid #d1d5db;   /* Borda cinza clara */
+    accent-color: #198754;       /* Cor verde do tema GreenLine */
+    background-color: #ffffff;   /* Fundo branco quando desmarcado */
+    border: 2px solid #198754;   /* Borda verde do tema */
     border-radius: 0.25rem;      /* Cantos levemente arredondados */
+    cursor: pointer;             /* Cursor de ponteiro */
+    transition: all 0.2s ease;  /* Transição suave */
+}
+
+/* Efeitos de hover e foco nos checkboxes */
+.filter-checkbox:hover {
+    border-color: #28a745;       /* Verde mais claro no hover */
+    background-color: #f8f9fa;   /* Fundo levemente cinza no hover */
+    transform: scale(1.05);      /* Leve aumento no hover */
+}
+
+.filter-checkbox:focus {
+    outline: none;               /* Remove outline padrão */
+    box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.2); /* Sombra verde no foco */
+}
+
+.filter-checkbox:checked {
+    background-color: #198754;   /* Fundo verde quando marcado */
+    border-color: #198754;       /* Borda verde quando marcado */
+}
+
+.filter-checkbox:checked:hover {
+    background-color: #28a745;   /* Verde mais claro quando marcado e hover */
+    border-color: #28a745;
 }
 
 /* Estilo dos titulos */
